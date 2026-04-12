@@ -1,0 +1,11 @@
+@import "tailwindcss";
+@import "@fontsource-variable/geist";
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: 'Geist Variable', sans-serif;
+  overflow-x: hidden;
+}
