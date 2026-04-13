@@ -1,6 +1,12 @@
 @import "tailwindcss";
 @import "@fontsource-variable/geist";
 
+:root {
+  --color-bg-primary: #0f0e0e;
+  --color-text-primary: #ecede6;
+  --color-orange: #f95b1c;
+}
+
 html, body {
   margin: 0;
   padding: 0;

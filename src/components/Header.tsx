@@ -1,10 +1,11 @@
+import React from 'react'
 import { Button } from '@noey-17/yearn-ui'
 
-function DiamondDots({ opacity = '0.22' }) {
-  const dotStyle = {
+function DiamondDots({ opacity = '0.22' }: { opacity?: string }) {
+  const dotStyle: React.CSSProperties = {
     width: '5.33px',
     height: '5.33px',
-    backgroundColor: `rgba(0,0,0,${opacity})`,
+    backgroundColor: `rgba(255,255,255,${opacity})`,
     position: 'absolute',
   }
   return (
@@ -24,24 +25,32 @@ function DropdownArrow() {
 export default function Header() {
   return (
     <div className="flex items-center justify-between">
-      {/* Profile photo + decorative dots */}
-      <div className="flex items-center gap-2">
+      {/* Profile photo + decorative dots + pixel flower */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
         <img
           src="/profile.jpg"
           alt="Noah"
           style={{
-            width: '100px',
-            height: '100px',
-            borderRadius: '24px',
+            width: '150px',
+            height: '150px',
+            borderRadius: '40px',
             objectFit: 'cover',
           }}
         />
-        <div className="flex flex-col items-center justify-between py-1" style={{ height: '100px' }}>
+        <div
+          className="flex flex-col items-center justify-between py-1"
+          style={{ height: '150px' }}
+        >
           <DiamondDots />
           <DiamondDots />
           <DiamondDots />
           <DiamondDots />
         </div>
+        <img
+          src="/pixel-flower.png"
+          alt=""
+          style={{ width: '150px', height: '150px', objectFit: 'contain' }}
+        />
       </div>
 
       {/* Contact button */}
