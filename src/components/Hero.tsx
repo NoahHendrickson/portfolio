@@ -10,9 +10,8 @@ export default function Hero() {
         margin: '0 auto',
       }}
     >
-      I&apos;m a Product designer obsessed with crafting beautiful UX &amp; UI.
-      Figma+Claude+Storybook is my favorite celebrity throuple. Designing in
-      code to boost quality and speed.
+      I&apos;m a Product Designer obsessed with crafting beautiful UX &amp; UI.
+      Figma+Claude+Storybook is my favorite celebrity throuple. 
     </p>
   )
 }

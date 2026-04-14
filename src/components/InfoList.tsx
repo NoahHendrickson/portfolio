@@ -65,10 +65,6 @@ export default function InfoList() {
         <p style={textStyle}>Lead designer</p>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <PlusBullet />
-        <p style={textStyle}>Research + UAT</p>
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         <XBullet />
         <p style={textStyle}>Zero sugar soda addict</p>
       </div>
