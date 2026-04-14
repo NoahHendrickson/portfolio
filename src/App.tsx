@@ -4,10 +4,13 @@ import Hero from './components/Hero'
 import InfoList from './components/InfoList'
 import BottomNav from './components/BottomNav'
 import FlowerRow from './components/FlowerRow'
+import ShaderEffect from './components/ShaderEffect'
+import About from './components/About'
 
 export default function App() {
-  
+
   return (
+    <div data-style="simple" style={{ backgroundColor: 'var(--color-bg-primary)' }}>
     <div style={{
       position: 'relative',
       display: 'flex',
@@ -18,8 +21,10 @@ export default function App() {
       overflow: 'hidden',
       backgroundColor: 'var(--color-bg-primary)',
     }}>
+      <ShaderEffect />
+
       {/* Decorative background flower row */}
-  
+
       <div style={{
         position: 'absolute',
         top: '45%',
@@ -56,14 +61,11 @@ export default function App() {
       </div>
 
       {/* Bio text */}
-      <div style={{ position: 'relative', width: 'min(1100px, calc(100vw - 80px))', zIndex: 1 }}>
+      <div style={{ position: 'relative', width: "100%", padding: "80px" , zIndex: 1, background: "#171717" }}>
         <Hero />
-      </div>
-
-      {/* Info list */}
-      <div style={{ position: 'absolute', top: '70%', left: '4%', zIndex: 1 }}>
         <InfoList />
       </div>
+
 
       {/* Bottom nav */}
       <div style={{
@@ -73,7 +75,11 @@ export default function App() {
       }}>
         <BottomNav />
       </div>
-      
+
+    </div>
+
+    <About />
+
     </div>
   )
 }

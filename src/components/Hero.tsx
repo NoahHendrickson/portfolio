@@ -3,11 +3,11 @@ export default function Hero() {
     <p
       style={{
         maxWidth: '1100px',
-        fontSize: '48px',
+        fontSize: 'clamp(24px, 4vw, 48px)',
         fontWeight: 500,
         color: 'var(--color-text-primary)',
         lineHeight: 1.5,
-        margin: 0,
+        margin: '0 auto',
       }}
     >
       I&apos;m a Product designer obsessed with crafting beautiful UX &amp; UI.

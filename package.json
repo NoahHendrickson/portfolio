@@ -12,9 +12,11 @@
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.2.8",
-    "@noey-17/yearn-ui": "^0.7.0",
+    "@noey-17/yearn-ui": "^0.7.1",
+    "@untitledui/icons": "^0.0.22",
     "react": "^19.2.4",
-    "react-dom": "^19.2.4"
+    "react-dom": "^19.2.4",
+    "shaders": "^2.5.93"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",

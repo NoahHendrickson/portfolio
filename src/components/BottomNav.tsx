@@ -40,11 +40,13 @@ export default function BottomNav() {
       {/* Scroll down button */}
       <button
         aria-label="Scroll down"
+        onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
         style={{
           width: '55px',
           height: '55px',
           borderRadius: '9999px',
-          backgroundColor: 'rgba(15,14,14,0.8)',
+          backgroundColor: '#ffffff',
+          color: '#171717',
           border: 'none',
           cursor: 'pointer',
           display: 'flex',
@@ -53,13 +55,9 @@ export default function BottomNav() {
           flexShrink: 0,
         }}
       >
-        <img
-          src="/icons/arrow-forward.svg"
-          alt=""
-          width={24}
-          height={24}
-          style={{ transform: 'rotate(90deg)', filter: 'invert(1)' }}
-        />
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#171717" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: 'rotate(90deg)' }}>
+          <path d="M5 12h14M13 6l6 6-6 6" />
+        </svg>
       </button>
     </div>
   )

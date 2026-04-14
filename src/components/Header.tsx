@@ -1,6 +1,14 @@
 import React from 'react'
 import { Button } from '@noey-17/yearn-ui'
 
+function FilledCaretDown() {
+  return (
+    <svg width="12" height="8" viewBox="0 0 12 8" fill="currentColor" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" aria-hidden="true">
+      <path d="M0.5 0.5h11L6 7.5z" />
+    </svg>
+  )
+}
+
 function DiamondDots({ opacity = '0.22' }: { opacity?: string }) {
   const dotStyle: React.CSSProperties = {
     width: '5.33px',
@@ -18,13 +26,9 @@ function DiamondDots({ opacity = '0.22' }: { opacity?: string }) {
   )
 }
 
-function DropdownArrow() {
-  return <img src="/icons/arrow-drop-down.svg" alt="" width={24} height={24} />
-}
-
 export default function Header() {
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex items-start justify-between">
       {/* Profile photo + decorative dots + pixel flower */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
         <img
@@ -54,7 +58,7 @@ export default function Header() {
       </div>
 
       {/* Contact button */}
-      <Button variant="primary" size="lg" trailingIcon={<DropdownArrow />}>
+      <Button variant="secondary" size="lg" trailingIcon={<FilledCaretDown />} className="!bg-white !text-black !border-white hover:!bg-white/90">
         Contact
       </Button>
     </div>
