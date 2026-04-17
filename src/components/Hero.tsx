@@ -3,7 +3,7 @@ export default function Hero() {
     <p
       style={{
         maxWidth: '1100px',
-        fontSize: 'clamp(24px, 4vw, 48px)',
+        fontSize: 'clamp(28px, 4.8vw, 60px)',
         fontWeight: 500,
         color: 'var(--color-text-primary)',
         lineHeight: 1.5,

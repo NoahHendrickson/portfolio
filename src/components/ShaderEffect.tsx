@@ -99,7 +99,8 @@ export default function ShaderEffect() {
         colorD="#234a2a"
         speed={1} />
       <Dither
-        colorMode="source" />
+        colorMode="source"
+        pixelSize={3} />
     </Shader>
   )
 }

@@ -61,9 +61,25 @@ export default function App() {
       </div>
 
       {/* Bio text */}
-      <div style={{ position: 'relative', width: "100%", padding: "80px" , zIndex: 1, background: "#171717" }}>
+      <div style={{ position: 'relative', width: "100%", padding: "80px" , zIndex: 1 }}>
         <Hero />
         <InfoList />
+        <p
+          style={{
+            maxWidth: '1100px',
+            margin: '32px auto 0',
+            fontSize: 'clamp(16px, 1.4vw, 20px)',
+            fontWeight: 400,
+            lineHeight: 1.6,
+            color: 'var(--color-text-primary)',
+            opacity: 0.8,
+          }}
+        >
+          I lead Product Design for Invisible&apos;s AI training marketplace. I owned
+          a complete redesign of the Meridial Marketplace experience with an
+          emphasis on key flows like platform onboarding, applying to projects,
+          communication systems and project specific onboarding.
+        </p>
       </div>
 
 
