@@ -75,10 +75,9 @@ export default function App() {
             opacity: 0.8,
           }}
         >
-          I lead Product Design for Invisible&apos;s AI training marketplace. I owned
-          a complete redesign of the Meridial Marketplace experience with an
-          emphasis on key flows like platform onboarding, applying to projects,
-          communication systems and project specific onboarding.
+          I am leading Product Design for Invisible&apos;s AI training marketplace.
+          I owned a complete redesign of the Meridial Marketplace experience from
+          signup to thriving user.
         </p>
       </div>
 
