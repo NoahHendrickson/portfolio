@@ -66,7 +66,7 @@ export default function App() {
         <InfoList />
         <p
           style={{
-            maxWidth: '1100px',
+            maxWidth: '1200px',
             margin: '32px auto 0',
             fontSize: 'clamp(16px, 1.4vw, 20px)',
             fontWeight: 400,
