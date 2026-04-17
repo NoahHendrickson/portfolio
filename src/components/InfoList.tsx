@@ -50,7 +50,7 @@ const linkStyle: React.CSSProperties = {
 
 export default function InfoList() {
   return (
-    <div style={{ display: 'flex', flexDirection: 'row', gap: '24px', flexWrap: 'wrap', maxWidth: '1100px', margin: '16px auto 0' }}>
+    <div style={{ display: 'flex', flexDirection: 'row', gap: '24px', flexWrap: 'wrap', maxWidth: '1200px', margin: '16px auto 0' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
       
         <p style={textStyle}>
