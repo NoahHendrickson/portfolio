@@ -4,7 +4,6 @@ import { Copy03 } from '@untitledui/icons/Copy03'
 import { Share03 } from '@untitledui/icons/Share03'
 
 const EMAIL = 'noahjames017@gmail.com'
-const PHONE = '330-715-9786'
 const LINKEDIN_URL = 'https://www.linkedin.com/in/noah-hendrickson-808959192/'
 
 function FilledCaretDown() {
@@ -62,7 +61,7 @@ export default function Header() {
     if (!copiedVisible) return
     const onMove = (e: MouseEvent) => setCursorPos({ x: e.clientX, y: e.clientY })
     window.addEventListener('mousemove', onMove)
-    const timeout = setTimeout(() => setCopiedNonce(0), 1750)
+    const timeout = setTimeout(() => setCopiedNonce(0), 1000)
     return () => {
       window.removeEventListener('mousemove', onMove)
       clearTimeout(timeout)
@@ -175,15 +174,6 @@ export default function Header() {
             >
               <Copy03 width={16} height={16} />
               <span>{EMAIL}</span>
-            </button>
-            <button
-              type="button"
-              role="menuitem"
-              style={itemStyle}
-              onClick={(e) => copyToClipboard(PHONE, e)}
-            >
-              <Copy03 width={16} height={16} />
-              <span>{PHONE}</span>
             </button>
             <div
               style={{
