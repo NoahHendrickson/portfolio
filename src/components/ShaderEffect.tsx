@@ -100,7 +100,7 @@ export default function ShaderEffect() {
         speed={1} />
       <Dither
         colorMode="source"
-        pixelSize={3} />
+        pixelSize={5} />
     </Shader>
   )
 }
