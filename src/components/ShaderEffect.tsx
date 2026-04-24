@@ -77,7 +77,7 @@ import {
   Plasma,
 } from 'shaders/react'
 
-const OVERLAY_OPACITY = 0.6
+const OVERLAY_OPACITY = 1.0
 
 export default function ShaderEffect() {
   return (
