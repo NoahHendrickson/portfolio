@@ -3,13 +3,12 @@ export default function Hero() {
     <p
       style={{
         maxWidth: '1200px',
-        fontSize: 'clamp(14px, 3.3vw, 50px)',
+        fontSize: 'clamp(20px, 5vw, 56px)',
         fontWeight: 600,
-        color: 'var(--color-text-primary)',
+        color: 'var(--color-orange)',
         lineHeight: 1.5,
         margin: '0 auto',
         textWrap: 'balance',
-        textShadow: '0 2px 8px rgba(0, 0, 0, 0.4)',
       }}
     >
       I&apos;m a Product Designer obsessed with crafting

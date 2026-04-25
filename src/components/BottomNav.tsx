@@ -45,8 +45,8 @@ export default function BottomNav() {
           width: '55px',
           height: '55px',
           borderRadius: '9999px',
-          backgroundColor: '#ffffff',
-          color: '#171717',
+          backgroundColor: '#171717',
+          color: '#ffffff',
           border: 'none',
           cursor: 'pointer',
           display: 'flex',
@@ -55,7 +55,7 @@ export default function BottomNav() {
           flexShrink: 0,
         }}
       >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#171717" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: 'rotate(90deg)' }}>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: 'rotate(90deg)' }}>
           <path d="M5 12h14M13 6l6 6-6 6" />
         </svg>
       </button>

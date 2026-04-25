@@ -3,36 +3,22 @@ import Header from './components/Header'
 import Hero from './components/Hero'
 import InfoList from './components/InfoList'
 import BottomNav from './components/BottomNav'
-import FlowerRow from './components/FlowerRow'
 import ShaderEffect from './components/ShaderEffect'
-import ShaderEffect2 from './components/ShaderEffect2'
 import About from './components/About'
+
+const CREAM_BG = '#f5efe0'
 
 export default function App() {
 
   return (
-    <div data-style="simple" style={{ backgroundColor: 'var(--color-bg-primary)' }}>
+    <div data-style="simple" style={{ backgroundColor: CREAM_BG }}>
     <div style={{
       position: 'relative',
       display: 'flex',
       height: '100vh',
       overflow: 'hidden',
-      backgroundColor: 'var(--color-bg-primary)',
+      backgroundColor: CREAM_BG,
     }}>
-      <ShaderEffect />
-
-      {/* Decorative background flower row */}
-      <div style={{
-        position: 'absolute',
-        top: '45%',
-        left: '25%',
-        transform: 'translate(-50%, -50%)',
-        zIndex: 0,
-        pointerEvents: 'none',
-      }}>
-        <FlowerRow />
-      </div>
-
       {/* Left side — content */}
       <div style={{
         position: 'relative',
@@ -42,7 +28,7 @@ export default function App() {
         width: '60%',
         height: '100%',
         zIndex: 1,
-        backgroundColor: '#171717',
+        backgroundColor: CREAM_BG,
       }}>
         {/* Header */}
         <div style={{ padding: '40px 40px 0' }}>
@@ -60,8 +46,8 @@ export default function App() {
               fontSize: 'clamp(16px, 1.4vw, 20px)',
               fontWeight: 400,
               lineHeight: 1.6,
-              color: 'var(--color-text-primary)',
-              opacity: 0.8,
+              color: 'var(--color-bg-primary)',
+              opacity: 0.75,
             }}
           >
             I am leading Product Design for Invisible&apos;s AI training marketplace.
@@ -76,9 +62,9 @@ export default function App() {
         </div>
       </div>
 
-      {/* Right side — shader only */}
-      <div style={{ position: 'relative', width: '40%', height: '100%' }}>
-        <ShaderEffect2 />
+      {/* Right side — shader */}
+      <div style={{ position: 'relative', width: '40%', height: '100%', overflow: 'hidden' }}>
+        <ShaderEffect />
       </div>
 
     </div>

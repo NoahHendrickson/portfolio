@@ -14,11 +14,11 @@ function FilledCaretDown() {
   )
 }
 
-function DiamondDots({ opacity = '0.22' }: { opacity?: string }) {
+function DiamondDots({ opacity = '0.35' }: { opacity?: string }) {
   const dotStyle: React.CSSProperties = {
     width: '5.33px',
     height: '5.33px',
-    backgroundColor: `rgba(255,255,255,${opacity})`,
+    backgroundColor: `rgba(15,14,14,${opacity})`,
     position: 'absolute',
   }
   return (
@@ -140,7 +140,7 @@ export default function Header() {
               <FilledCaretDown />
             </span>
           }
-          className="!bg-white !text-black !border-white hover:!bg-white/90"
+          className="!bg-[#f95b1c] !text-white !border-[#f95b1c] hover:!bg-[#f95b1c]/90"
           onClick={() => setIsOpen(o => !o)}
           aria-haspopup="menu"
           aria-expanded={isOpen}
