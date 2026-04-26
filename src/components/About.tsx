@@ -24,7 +24,7 @@ const companies: Company[] = [
     href: '#/work/invisible',
     roles: [
       {
-        name: 'Marketplace team',
+        name: 'Meridial Marketplace',
         paragraphs: [
           'I held the bigger picture: shaping product vision, setting the bar for design quality, and building the ops that kept the team moving. That meant bringing in tools like Microsoft Clarity and Mixpanel to ground decisions in real user behavior, and folding AI into my workflow to move faster without losing craft.',
           'A few of the problems I worked on here. Our marketplace onboarding flow was disjointed, delayed, and confusing — experts dropped off, and the business couldn’t scale delivery. I was responsible for the redesign of our sign-up and onboarding, resulting in a 60% reduction in time to be “ready to work.”',
