@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import '@noey-17/yearn-ui/style.css'
 import Header from './components/Header'
 import Hero from './components/Hero'
@@ -5,10 +6,30 @@ import InfoList from './components/InfoList'
 import BottomNav from './components/BottomNav'
 import ShaderEffect from './components/ShaderEffect'
 import About from './components/About'
+import WorkPage from './components/WorkPage'
 
 const CREAM_BG = '#f5efe0'
+const TEXT_DARK = '#0f0e0e'
+
+function getRoute() {
+  return window.location.hash.replace(/^#/, '') || '/'
+}
 
 export default function App() {
+  const [route, setRoute] = useState(getRoute)
+
+  useEffect(() => {
+    const onHashChange = () => setRoute(getRoute())
+    window.addEventListener('hashchange', onHashChange)
+    return () => window.removeEventListener('hashchange', onHashChange)
+  }, [])
+
+  if (route === '/work/marketplace') {
+    return <WorkPage title="Marketplace team" />
+  }
+  if (route === '/work/annotations') {
+    return <WorkPage title="Annotations team" />
+  }
 
   return (
     <div data-style="simple" style={{ backgroundColor: CREAM_BG }}>
@@ -36,23 +57,32 @@ export default function App() {
         </div>
 
         {/* Bio text */}
-        <div style={{ padding: '80px' }}>
+        <div style={{ padding: '0 80px' }}>
           <Hero />
-          <InfoList />
           <p
             style={{
               maxWidth: '1200px',
-              margin: '32px auto 0',
-              fontSize: 'clamp(16px, 1.4vw, 20px)',
-              fontWeight: 400,
-              lineHeight: 1.6,
-              color: 'var(--color-bg-primary)',
-              opacity: 0.75,
+              margin: '40px 0 0',
+              fontSize: '24px',
+              fontWeight: 500,
+              lineHeight: 1.5,
+              color: TEXT_DARK,
             }}
           >
-            I am leading Product Design for Invisible&apos;s AI training marketplace.
-            I owned a complete redesign of the Meridial Marketplace experience from
-            signup to thriving user.
+            Hi, I&rsquo;m Noah
+          </p>
+          <p
+            style={{
+              maxWidth: '1200px',
+              margin: '8px 0 0',
+              fontSize: '24px',
+              fontWeight: 500,
+              lineHeight: 1.5,
+              color: TEXT_DARK,
+            }}
+          >
+            Right now I am the Lead Product Designer for Invisible&rsquo;s
+            Talent Marketplace focused on AI training gig work.
           </p>
         </div>
 
@@ -62,9 +92,10 @@ export default function App() {
         </div>
       </div>
 
-      {/* Right side — shader */}
+      {/* Right side — shader with floating info chips overlaid */}
       <div style={{ position: 'relative', width: '40%', height: '100%', overflow: 'hidden' }}>
         <ShaderEffect />
+        <InfoList />
       </div>
 
     </div>

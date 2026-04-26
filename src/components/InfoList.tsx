@@ -1,73 +1,56 @@
 import React from 'react'
 
-const bulletWrap: React.CSSProperties = {
-  width: '23px',
-  height: '23px',
-  display: 'flex',
+const chipStyle: React.CSSProperties = {
+  position: 'absolute',
+  left: 0,
+  display: 'inline-flex',
   alignItems: 'center',
-  justifyContent: 'center',
-  flexShrink: 0,
-}
-
-function XBullet() {
-  return (
-    <div style={bulletWrap}>
-    <svg width="23" height="23" viewBox="0 0 23 23" fill="none" style={{ flexShrink: 0 }}>
-      <rect x="7.54273" y="3.76953" width="5.33361" height="5.33361" transform="rotate(45 7.54273 3.76953)" fill="black" fillOpacity="0.35" />
-      <rect x="15.0818" y="3.76953" width="5.33361" height="5.33361" transform="rotate(45 15.0818 3.76953)" fill="black" fillOpacity="0.35" />
-      <rect x="15.0818" y="11.3121" width="5.33361" height="5.33361" transform="rotate(45 15.0818 11.3121)" fill="black" fillOpacity="0.35" />
-      <rect x="7.54273" y="11.3121" width="5.33361" height="5.33361" transform="rotate(45 7.54273 11.3121)" fill="black" fillOpacity="0.35" />
-    </svg>
-    </div>
-  )
-}
-
-function PlusBullet() {
-  return (
-    <div style={bulletWrap}>
-    <svg width="23" height="16" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0 }}>
-      <rect x="10.6612" y="6.99259e-07" width="5.33332" height="5.33312" transform="rotate(90 10.6612 6.99259e-07)" fill="black" fillOpacity="0.35" />
-      <rect x="15.9972" y="5.3335" width="5.33332" height="5.33312" transform="rotate(90 15.9972 5.3335)" fill="black" fillOpacity="0.35" />
-      <rect x="10.6652" y="10.6665" width="5.33332" height="5.33312" transform="rotate(90 10.6652 10.6665)" fill="black" fillOpacity="0.35" />
-      <rect x="5.33312" y="5.3335" width="5.33332" height="5.33312" transform="rotate(90 5.33312 5.3335)" fill="black" fillOpacity="0.35" />
-    </svg>
-    </div>
-  )
-}
-
-const textStyle: React.CSSProperties = {
-  margin: 0,
-  fontSize: '20px',
+  padding: '8px 14px',
+  borderRadius: 0,
+  backgroundColor: '#f5efe0',
+  color: 'rgba(15, 14, 14, 0.9)',
+  fontSize: '18px',
   fontWeight: 500,
-  color: 'rgba(15, 14, 14, 0.8)',
+  lineHeight: 1.3,
   whiteSpace: 'nowrap',
+  pointerEvents: 'auto',
 }
 
 const linkStyle: React.CSSProperties = {
-  color: 'rgba(15, 14, 14, 0.8)',
+  color: 'rgba(15, 14, 14, 0.9)',
   textDecoration: 'underline',
+  marginLeft: '4px',
 }
 
 export default function InfoList() {
   return (
-    <div style={{ display: 'flex', flexDirection: 'row', gap: '24px', flexWrap: 'wrap', maxWidth: '1200px', margin: '16px auto 0' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-      
-        <p style={textStyle}>
-          Currently @{' '}
-          <a href="https://invisibletech.ai/" target="_blank" rel="noreferrer" style={linkStyle}>
-            Invisible ↗
-          </a>
-        </p>
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-      <XBullet />
-        <p style={textStyle}>Lead designer</p>
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <XBullet />
-        <p style={textStyle}>Zero sugar soda addict</p>
-      </div>
+    <div
+      style={{
+        position: 'absolute',
+        inset: 0,
+        pointerEvents: 'none',
+        zIndex: 2,
+      }}
+    >
+      <span style={{ ...chipStyle, top: '38%' }}>
+        Currently @
+        <a
+          href="https://invisibletech.ai/"
+          target="_blank"
+          rel="noreferrer"
+          style={linkStyle}
+        >
+          Invisible ↗
+        </a>
+      </span>
+
+      <span style={{ ...chipStyle, top: '55%' }}>
+        4yrs of experience
+      </span>
+
+      <span style={{ ...chipStyle, top: '70%' }}>
+        Zero sugar soda addict
+      </span>
     </div>
   )
 }

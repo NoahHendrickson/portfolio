@@ -16,17 +16,17 @@ function FilledCaretDown() {
 
 function DiamondDots({ opacity = '0.35' }: { opacity?: string }) {
   const dotStyle: React.CSSProperties = {
-    width: '5.33px',
-    height: '5.33px',
+    width: '4px',
+    height: '4px',
     backgroundColor: `rgba(15,14,14,${opacity})`,
     position: 'absolute',
   }
   return (
-    <div style={{ position: 'relative', width: '16px', height: '16px', transform: 'rotate(45deg)' }}>
-      <div style={{ ...dotStyle, top: '5.33px', left: '0' }} />
-      <div style={{ ...dotStyle, top: '0', left: '5.33px' }} />
-      <div style={{ ...dotStyle, top: '5.33px', left: '10.67px' }} />
-      <div style={{ ...dotStyle, top: '10.67px', left: '5.33px' }} />
+    <div style={{ position: 'relative', width: '12px', height: '12px', transform: 'rotate(45deg)' }}>
+      <div style={{ ...dotStyle, top: '4px', left: '0' }} />
+      <div style={{ ...dotStyle, top: '0', left: '4px' }} />
+      <div style={{ ...dotStyle, top: '4px', left: '8px' }} />
+      <div style={{ ...dotStyle, top: '8px', left: '4px' }} />
     </div>
   )
 }
@@ -97,20 +97,20 @@ export default function Header() {
   return (
     <div className="flex items-start justify-between">
       {/* Profile photo + decorative dots + pixel flower */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
         <img
           src="/profile.jpg"
           alt="Noah"
           style={{
-            width: '150px',
-            height: '150px',
-            borderRadius: '40px',
+            width: '80px',
+            height: '80px',
+            borderRadius: '20px',
             objectFit: 'cover',
           }}
         />
         <div
           className="flex flex-col items-center justify-between py-1"
-          style={{ height: '150px' }}
+          style={{ height: '80px' }}
         >
           <DiamondDots />
           <DiamondDots />
@@ -120,7 +120,7 @@ export default function Header() {
         <img
           src="/pixel-flower.png"
           alt=""
-          style={{ width: '150px', height: '150px', objectFit: 'contain' }}
+          style={{ width: '80px', height: '80px', objectFit: 'contain' }}
         />
       </div>
 
@@ -128,7 +128,7 @@ export default function Header() {
       <div ref={menuRef} style={{ position: 'relative' }}>
         <Button
           variant="secondary"
-          size="lg"
+          size="md"
           trailingIcon={
             <span
               style={{

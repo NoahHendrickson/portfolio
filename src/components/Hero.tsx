@@ -1,21 +1,21 @@
 export default function Hero() {
   return (
-    <p
+    <h1
       style={{
         maxWidth: '1200px',
-        fontSize: 'clamp(20px, 5vw, 56px)',
+        fontSize: 'clamp(40px, 6vw, 80px)',
         fontWeight: 600,
-        color: 'var(--color-orange)',
-        lineHeight: 1.5,
-        margin: '0 auto',
+        color: 'var(--color-bg-primary)',
+        lineHeight: 1.05,
+        letterSpacing: '-0.02em',
+        margin: 0,
         textWrap: 'balance',
       }}
     >
-      I&apos;m a Product Designer obsessed with crafting
+      Product Designer{' '}
+      <span style={{ fontWeight: 400 }}>x</span>
       <br />
-      beautiful UX &amp; UI. Figma+Claude+Storybook
-      <br />
-      is my favorite celebrity throuple.
-    </p>
+      <span style={{ opacity: 0.7 }}>Design Engineer</span>
+    </h1>
   )
 }
