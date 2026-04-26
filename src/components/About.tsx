@@ -26,14 +26,8 @@ const companies: Company[] = [
       {
         name: 'Marketplace team',
         paragraphs: [
-          'The problem this team was solving was the inefficient, manual and unscalable processes our delivery team used to deliver on Ai training projects for our clients. We needed to enable growth and scale in the fast pace and constant evolution environment of AI training.',
-          <>
-            I was responsible for clear and efficient designs for{' '}
-            <strong style={{ fontWeight: 600 }}>sign up</strong> to{' '}
-            <strong style={{ fontWeight: 600 }}>verified for work</strong>{' '}
-            which resulted in a 60% reduction in time to get verified for work.
-          </>,
-          'I needed to coordinate and work with cross functional teams to ensure our delivery team, legal team, compliance team and marketing team were in sync.',
+          'I held the bigger picture: shaping product vision, setting the bar for design quality, and building the ops that kept the team moving. That meant bringing in tools like Microsoft Clarity and Mixpanel to ground decisions in real user behavior, and folding AI into my workflow to move faster without losing craft.',
+          'A few of the problems I worked on here. Our marketplace onboarding flow was disjointed, delayed, and confusing — experts dropped off, and the business couldn’t scale delivery. I was responsible for the redesign of our sign-up and onboarding, resulting in a 60% reduction in time to be “ready to work.”',
         ],
       },
       {
