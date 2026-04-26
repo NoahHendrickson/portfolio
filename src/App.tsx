@@ -24,11 +24,8 @@ export default function App() {
     return () => window.removeEventListener('hashchange', onHashChange)
   }, [])
 
-  if (route === '/work/marketplace') {
-    return <WorkPage title="Marketplace team" />
-  }
-  if (route === '/work/annotations') {
-    return <WorkPage title="Annotations team" />
+  if (route === '/work/invisible') {
+    return <WorkPage title="Invisible" />
   }
 
   return (
