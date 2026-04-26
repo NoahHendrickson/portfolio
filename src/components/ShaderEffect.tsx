@@ -18,7 +18,7 @@ export default function ShaderEffect() {
         colorC="#2cb058"
         colorD="#234a2a"
       />
-      <Dither colorMode="source" />
+      <Dither colorMode="source" pixelSize={5} />
     </Shader>
   )
 }
