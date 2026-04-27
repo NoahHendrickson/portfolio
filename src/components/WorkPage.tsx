@@ -33,6 +33,7 @@ type Project = {
 
 type Props = {
   title: string
+  description?: string
   projects?: Project[]
 }
 
@@ -64,7 +65,7 @@ const DEFAULT_PROJECTS: Project[] = [
   { title: 'Project 2' },
 ]
 
-export default function WorkPage({ title, projects = DEFAULT_PROJECTS }: Props) {
+export default function WorkPage({ title, description, projects = DEFAULT_PROJECTS }: Props) {
   const [unlocked, setUnlocked] = useState(
     () => sessionStorage.getItem(UNLOCK_KEY) === 'true',
   )
@@ -125,6 +126,21 @@ export default function WorkPage({ title, projects = DEFAULT_PROJECTS }: Props) 
           >
             {title}
           </h1>
+
+          {description && (
+            <p
+              style={{
+                margin: 0,
+                maxWidth: '720px',
+                fontSize: '18px',
+                fontWeight: 400,
+                lineHeight: 1.6,
+                color: TEXT_DARK,
+              }}
+            >
+              {description}
+            </p>
+          )}
 
           <div
             style={{

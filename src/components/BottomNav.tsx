@@ -1,11 +1,15 @@
-import { useState } from 'react'
 import { ArrowDown } from '@untitledui/icons/ArrowDown'
 
-const TABS = ['about me', 'work']
+export type Tab = 'about me' | 'work'
 
-export default function BottomNav() {
-  const [activeTab, setActiveTab] = useState('about me')
+const TABS: Tab[] = ['about me', 'work']
 
+type Props = {
+  activeTab: Tab
+  onTabChange: (tab: Tab) => void
+}
+
+export default function BottomNav({ activeTab, onTabChange }: Props) {
   return (
     <div style={{ display: 'flex', alignItems: 'flex-end', gap: '16px' }}>
       {/* Orange pill tab switcher */}
@@ -20,7 +24,7 @@ export default function BottomNav() {
         {TABS.map(tab => (
           <button
             key={tab}
-            onClick={() => setActiveTab(tab)}
+            onClick={() => onTabChange(tab)}
             style={{
               padding: '6px 14px',
               borderRadius: '1000px',

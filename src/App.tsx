@@ -3,7 +3,7 @@ import '@noey-17/yearn-ui/style.css'
 import Header from './components/Header'
 import Hero from './components/Hero'
 import InfoList from './components/InfoList'
-import BottomNav from './components/BottomNav'
+import BottomNav, { type Tab } from './components/BottomNav'
 import ShaderEffect from './components/ShaderEffect'
 import About from './components/About'
 import WorkPage from './components/WorkPage'
@@ -17,6 +17,7 @@ function getRoute() {
 
 export default function App() {
   const [route, setRoute] = useState(getRoute)
+  const [activeTab, setActiveTab] = useState<Tab>('about me')
 
   useEffect(() => {
     const onHashChange = () => setRoute(getRoute())
@@ -25,7 +26,7 @@ export default function App() {
   }, [])
 
   if (route === '/work/invisible') {
-    return <WorkPage title="Invisible" />
+    return <WorkPage title="Invisible" description="As the Lead Product Designer for Meridial, I held the bigger picture: shaping product vision, setting the bar for design quality, and building the ops that kept the team moving. That meant bringing in tools like Microsoft Clarity and Mixpanel to ground decisions in real user behavior, and folding AI into my workflow to move faster without losing craft. A few of the problems I worked on here: Our marketplace onboarding flow was disjointed, delayed, and confusing — experts dropped off, and the business couldn't scale delivery. I was responsible for the redesign of our sign-up and onboarding, resulting in a 60% reduction in time to be &quot;ready to work.&quot;" />
   }
 
   return (
@@ -85,7 +86,7 @@ export default function App() {
 
         {/* Bottom nav */}
         <div style={{ paddingBottom: '40px', display: 'flex', justifyContent: 'center' }}>
-          <BottomNav />
+          <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
         </div>
       </div>
 
@@ -97,7 +98,7 @@ export default function App() {
 
     </div>
 
-    <About />
+    <About activeTab={activeTab} />
 
     </div>
   )
