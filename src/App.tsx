@@ -7,6 +7,7 @@ import BottomNav, { type Tab } from './components/BottomNav'
 import ShaderEffect from './components/ShaderEffect'
 import About from './components/About'
 import WorkPage from './components/WorkPage'
+import { useIsMobile } from './hooks/useIsMobile'
 
 const CREAM_BG = '#f5efe0'
 const TEXT_DARK = '#0f0e0e'
@@ -18,6 +19,7 @@ function getRoute() {
 export default function App() {
   const [route, setRoute] = useState(getRoute)
   const [activeTab, setActiveTab] = useState<Tab>('about me')
+  const isMobile = useIsMobile()
 
   useEffect(() => {
     const onHashChange = () => setRoute(getRoute())
@@ -34,8 +36,10 @@ export default function App() {
     <div style={{
       position: 'relative',
       display: 'flex',
-      height: '100vh',
-      overflow: 'hidden',
+      flexDirection: isMobile ? 'column' : 'row',
+      height: isMobile ? 'auto' : '100vh',
+      minHeight: isMobile ? '100vh' : undefined,
+      overflow: isMobile ? 'visible' : 'hidden',
       backgroundColor: CREAM_BG,
     }}>
       {/* Left side — content */}
@@ -43,25 +47,39 @@ export default function App() {
         position: 'relative',
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'space-between',
-        width: '60%',
-        height: '100%',
+        justifyContent: isMobile ? 'flex-start' : 'space-between',
+        width: isMobile ? '100%' : '60%',
+        height: isMobile ? 'auto' : '100%',
         zIndex: 1,
         backgroundColor: CREAM_BG,
       }}>
         {/* Header */}
-        <div style={{ padding: '40px 40px 0' }}>
+        <div style={{ padding: isMobile ? '24px 20px 0' : '40px 40px 0' }}>
           <Header />
         </div>
 
+        {/* Mobile-only shader banner */}
+        {isMobile && (
+          <div style={{
+            position: 'relative',
+            width: '100%',
+            height: '200px',
+            overflow: 'hidden',
+            marginTop: '24px',
+          }}>
+            <ShaderEffect />
+            <InfoList />
+          </div>
+        )}
+
         {/* Bio text */}
-        <div style={{ padding: '0 80px' }}>
+        <div style={{ padding: isMobile ? '24px 20px 0' : '0 80px' }}>
           <Hero />
           <p
             style={{
               maxWidth: '1200px',
-              margin: '40px 0 0',
-              fontSize: '24px',
+              margin: isMobile ? '24px 0 0' : '40px 0 0',
+              fontSize: isMobile ? '16px' : '24px',
               fontWeight: 500,
               lineHeight: 1.5,
               color: TEXT_DARK,
@@ -73,7 +91,7 @@ export default function App() {
             style={{
               maxWidth: '1200px',
               margin: '8px 0 0',
-              fontSize: '24px',
+              fontSize: isMobile ? '16px' : '24px',
               fontWeight: 500,
               lineHeight: 1.5,
               color: TEXT_DARK,
@@ -85,16 +103,23 @@ export default function App() {
         </div>
 
         {/* Bottom nav */}
-        <div style={{ paddingBottom: '40px', display: 'flex', justifyContent: 'center' }}>
+        <div style={{
+          paddingTop: isMobile ? '32px' : 0,
+          paddingBottom: isMobile ? '24px' : '40px',
+          display: 'flex',
+          justifyContent: 'center',
+        }}>
           <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
         </div>
       </div>
 
-      {/* Right side — shader with floating info chips overlaid */}
-      <div style={{ position: 'relative', width: '40%', height: '100%', overflow: 'hidden' }}>
-        <ShaderEffect />
-        <InfoList />
-      </div>
+      {/* Right side — shader with floating info chips overlaid (desktop only) */}
+      {!isMobile && (
+        <div style={{ position: 'relative', width: '40%', height: '100%', overflow: 'hidden' }}>
+          <ShaderEffect />
+          <InfoList />
+        </div>
+      )}
 
     </div>
 

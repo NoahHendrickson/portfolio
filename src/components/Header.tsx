@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { Button } from '@noey-17/yearn-ui'
 import { Copy03 } from '@untitledui/icons/Copy03'
 import { Share03 } from '@untitledui/icons/Share03'
+import { useIsMobile } from '../hooks/useIsMobile'
 
 const EMAIL = 'noahjames017@gmail.com'
 const LINKEDIN_URL = 'https://www.linkedin.com/in/noah-hendrickson-808959192/'
@@ -32,8 +33,10 @@ function DiamondDots({ opacity = '0.35' }: { opacity?: string }) {
 }
 
 export default function Header() {
+  const isMobile = useIsMobile()
   const [isOpen, setIsOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
+  const profileSize = isMobile ? 56 : 80
 
   const [copiedNonce, setCopiedNonce] = useState(0)
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 })
@@ -97,30 +100,32 @@ export default function Header() {
   return (
     <div className="flex items-start justify-between">
       {/* Profile photo + decorative dots + pixel flower */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '12px' : '16px' }}>
         <img
           src="/profile.jpg"
           alt="Noah"
           style={{
-            width: '80px',
-            height: '80px',
-            borderRadius: '20px',
+            width: `${profileSize}px`,
+            height: `${profileSize}px`,
+            borderRadius: isMobile ? '14px' : '20px',
             objectFit: 'cover',
           }}
         />
-        <div
-          className="flex flex-col items-center justify-between py-1"
-          style={{ height: '80px' }}
-        >
-          <DiamondDots />
-          <DiamondDots />
-          <DiamondDots />
-          <DiamondDots />
-        </div>
+        {!isMobile && (
+          <div
+            className="flex flex-col items-center justify-between py-1"
+            style={{ height: '80px' }}
+          >
+            <DiamondDots />
+            <DiamondDots />
+            <DiamondDots />
+            <DiamondDots />
+          </div>
+        )}
         <img
           src="/pixel-flower.png"
           alt=""
-          style={{ width: '80px', height: '80px', objectFit: 'contain' }}
+          style={{ width: `${profileSize}px`, height: `${profileSize}px`, objectFit: 'contain' }}
         />
       </div>
 
@@ -155,6 +160,7 @@ export default function Header() {
               top: 'calc(100% + 8px)',
               right: 0,
               minWidth: '280px',
+              maxWidth: isMobile ? 'calc(100vw - 40px)' : undefined,
               backgroundColor: '#1d1f1e',
               border: '1px solid rgba(255,255,255,0.16)',
               borderRadius: '24px',

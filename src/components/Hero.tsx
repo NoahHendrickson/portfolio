@@ -3,7 +3,7 @@ export default function Hero() {
     <h1
       style={{
         maxWidth: '1200px',
-        fontSize: 'clamp(40px, 6vw, 80px)',
+        fontSize: 'clamp(28px, 8vw, 80px)',
         fontWeight: 600,
         color: 'var(--color-bg-primary)',
         lineHeight: 1.05,

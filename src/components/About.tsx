@@ -1,5 +1,6 @@
 import { ArrowNarrowRight } from '@untitledui/icons/ArrowNarrowRight'
 import type { Tab } from './BottomNav'
+import { useIsMobile } from '../hooks/useIsMobile'
 
 const CREAM_BG = '#f5efe0'
 const TEXT_DARK = '#0f0e0e'
@@ -68,6 +69,7 @@ const companies: Company[] = [
 ]
 
 export default function About({ activeTab }: { activeTab: Tab }) {
+  const isMobile = useIsMobile()
   const visibleCompanies =
     activeTab === 'about me'
       ? companies.filter((c) => c.name === 'About me')
@@ -78,19 +80,19 @@ export default function About({ activeTab }: { activeTab: Tab }) {
       id="about"
       style={{
         background: CREAM_BG,
-        padding: '120px 160px',
+        padding: isMobile ? '60px 20px' : '120px 160px',
         display: 'flex',
         flexDirection: 'column',
-        gap: '80px',
+        gap: isMobile ? '48px' : '80px',
         color: TEXT_DARK,
       }}
     >
       {visibleCompanies.map((company) => (
         <div
           key={company.name}
-          style={{ display: 'flex', flexDirection: 'column', gap: '48px' }}
+          style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '32px' : '48px' }}
         >
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '40px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: isMobile ? '16px' : '40px', flexWrap: 'wrap' }}>
             <h2
               style={{
                 margin: 0,
@@ -106,7 +108,7 @@ export default function About({ activeTab }: { activeTab: Tab }) {
                 href={company.href ?? '#'}
                 style={{
                   color: ORANGE,
-                  fontSize: '20px',
+                  fontSize: isMobile ? '18px' : '20px',
                   fontWeight: 500,
                   textDecoration: 'none',
                   display: 'inline-flex',
@@ -115,7 +117,7 @@ export default function About({ activeTab }: { activeTab: Tab }) {
                 }}
               >
                 {company.link}
-                <ArrowNarrowRight width={20} height={20} />
+                <ArrowNarrowRight width={isMobile ? 18 : 20} height={isMobile ? 18 : 20} />
               </a>
             )}
           </div>
@@ -126,12 +128,12 @@ export default function About({ activeTab }: { activeTab: Tab }) {
               style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
             >
               {(role.name || role.note) && (
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '40px' }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: isMobile ? '16px' : '40px', flexWrap: 'wrap' }}>
                   {role.name && (
                     <h3
                       style={{
                         margin: 0,
-                        fontSize: '20px',
+                        fontSize: isMobile ? '18px' : '20px',
                         fontWeight: 600,
                         lineHeight: 1.2,
                       }}
@@ -143,7 +145,7 @@ export default function About({ activeTab }: { activeTab: Tab }) {
                     <span
                       style={{
                         color: ORANGE,
-                        fontSize: '20px',
+                        fontSize: isMobile ? '16px' : '20px',
                         fontWeight: 500,
                       }}
                     >
@@ -159,7 +161,7 @@ export default function About({ activeTab }: { activeTab: Tab }) {
                   style={{
                     margin: 0,
                     maxWidth: '720px',
-                    fontSize: '18px',
+                    fontSize: isMobile ? '16px' : '18px',
                     fontWeight: 400,
                     lineHeight: 1.5,
                     color: TEXT_DARK,
