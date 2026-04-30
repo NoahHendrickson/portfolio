@@ -96,7 +96,7 @@ export default function About({ activeTab }: { activeTab: Tab }) {
       id="about"
       style={{
         background: CREAM_BG,
-        padding: isMobile ? '60px 20px' : '120px 160px',
+        padding: isMobile ? '0 20px 60px' : '120px 160px',
         display: 'flex',
         flexDirection: 'column',
         gap: isMobile ? '48px' : '80px',

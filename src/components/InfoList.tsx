@@ -2,9 +2,8 @@ import React from 'react'
 import { useIsMobile } from '../hooks/useIsMobile'
 
 const baseChipStyle: React.CSSProperties = {
-  position: 'absolute',
-  left: 0,
   display: 'inline-flex',
+  alignSelf: 'flex-start',
   alignItems: 'center',
   borderRadius: 0,
   backgroundColor: '#f5efe0',
@@ -28,7 +27,6 @@ export default function InfoList() {
     padding: isMobile ? '6px 12px' : '8px 14px',
     fontSize: isMobile ? '15px' : '18px',
   }
-  const tops = isMobile ? ['20%', '50%', '80%'] : ['38%', '55%', '70%']
 
   return (
     <div
@@ -37,9 +35,15 @@ export default function InfoList() {
         inset: 0,
         pointerEvents: 'none',
         zIndex: 2,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-evenly',
+        alignItems: 'flex-start',
+        paddingTop: isMobile ? '8px' : '20%',
+        paddingBottom: isMobile ? '8px' : '20%',
       }}
     >
-      <span style={{ ...chipStyle, top: tops[0] }}>
+      <span style={chipStyle}>
         Currently @
         <a
           href="https://invisibletech.ai/"
@@ -51,11 +55,11 @@ export default function InfoList() {
         </a>
       </span>
 
-      <span style={{ ...chipStyle, top: tops[1] }}>
+      <span style={chipStyle}>
         4yrs of experience
       </span>
 
-      <span style={{ ...chipStyle, top: tops[2] }}>
+      <span style={chipStyle}>
         Zero sugar soda addict
       </span>
     </div>

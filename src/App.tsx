@@ -58,20 +58,6 @@ export default function App() {
           <Header />
         </div>
 
-        {/* Mobile-only shader banner */}
-        {isMobile && (
-          <div style={{
-            position: 'relative',
-            width: '100%',
-            height: '200px',
-            overflow: 'hidden',
-            marginTop: '24px',
-          }}>
-            <ShaderEffect />
-            <InfoList />
-          </div>
-        )}
-
         {/* Bio text */}
         <div style={{ padding: isMobile ? '24px 20px 0' : '0 80px' }}>
           <Hero />
@@ -101,6 +87,20 @@ export default function App() {
             Talent Marketplace focused on AI training gig work.
           </p>
         </div>
+
+        {/* Mobile-only shader banner */}
+        {isMobile && (
+          <div style={{
+            position: 'relative',
+            width: '100%',
+            height: '200px',
+            overflow: 'hidden',
+            marginTop: '24px',
+          }}>
+            <ShaderEffect />
+            <InfoList />
+          </div>
+        )}
 
         {/* Bottom nav */}
         <div style={{
