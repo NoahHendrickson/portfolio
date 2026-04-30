@@ -66,14 +66,30 @@ const companies: Company[] = [
       },
     ],
   },
+  {
+    name: 'Yapping',
+    roles: [
+      {
+        name: '',
+        paragraphs: [
+          'The line between designer and front-end developer is dissolving — and I think that’s a good thing. The tools are there, the momentum is real, and I think it’s one of the most exciting shifts the industry has seen in a while.',
+          'I don’t see Figma or other design tool staples becoming obsolete, and there is definitely a place for newer ones like pencil.dev and paper. Design tools are still the best for rapid ideation, exploration, and pixel-perfect mocks can still live there. The amount of real estate they occupy will be much less, a designer’s source of truth will be the code. Designers can now take those mocks and prototype directly in the product with Claude Code. Designer’s have always fought a weird battle of Figma designs being the source of truth and the ideals we push toward but now we can just make them happen. When Claude is in your codebase, using the components you’ve crafted and the design mocks you gave it, you significantly reduce the amount of AI slop generated. I’m sure sometimes I’ll need to manually remove purple.',
+          'The practical upside is real. Designing in the code environment means catching edge cases, weird behaviors, and dead ends while you’re designing — not during QA. And instead of handing off a static artifact, devs inherit working code. They’re starting at 60–80%, not zero.',
+          'I don’t think this is about designers replacing engineers. Complex problems still need engineers. But the smaller stuff — micro-interactions, polish, component-level details — designers can own that now.',
+        ],
+      },
+    ],
+  },
 ]
+
+const ABOUT_ME_SECTIONS = new Set(['About me', 'Yapping'])
 
 export default function About({ activeTab }: { activeTab: Tab }) {
   const isMobile = useIsMobile()
   const visibleCompanies =
     activeTab === 'about me'
-      ? companies.filter((c) => c.name === 'About me')
-      : companies.filter((c) => c.name !== 'About me')
+      ? companies.filter((c) => ABOUT_ME_SECTIONS.has(c.name))
+      : companies.filter((c) => !ABOUT_ME_SECTIONS.has(c.name))
 
   return (
     <section

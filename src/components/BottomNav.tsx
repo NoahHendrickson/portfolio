@@ -1,8 +1,10 @@
+import { useRef } from 'react'
 import { ArrowDown } from '@untitledui/icons/ArrowDown'
 
 export type Tab = 'about me' | 'work'
 
 const TABS: Tab[] = ['about me', 'work']
+const SCROLL_TOP_OFFSET = 24
 
 type Props = {
   activeTab: Tab
@@ -10,8 +12,27 @@ type Props = {
 }
 
 export default function BottomNav({ activeTab, onTabChange }: Props) {
+  const wrapperRef = useRef<HTMLDivElement>(null)
+
+  const scrollNavToTop = () => {
+    const el = wrapperRef.current
+    if (!el) return
+    const top = el.getBoundingClientRect().top + window.scrollY - SCROLL_TOP_OFFSET
+    window.scrollTo({ top, behavior: 'smooth' })
+  }
+
+  const handleTabClick = (tab: Tab) => {
+    if (tab !== activeTab && wrapperRef.current) {
+      const navTop = wrapperRef.current.getBoundingClientRect().top
+      if (navTop > SCROLL_TOP_OFFSET + 1) {
+        scrollNavToTop()
+      }
+    }
+    onTabChange(tab)
+  }
+
   return (
-    <div style={{ display: 'flex', alignItems: 'flex-end', gap: '16px' }}>
+    <div ref={wrapperRef} style={{ display: 'flex', alignItems: 'flex-end', gap: '16px' }}>
       {/* Orange pill tab switcher */}
       <div style={{
         backgroundColor: 'var(--color-orange)',
@@ -24,7 +45,7 @@ export default function BottomNav({ activeTab, onTabChange }: Props) {
         {TABS.map(tab => (
           <button
             key={tab}
-            onClick={() => onTabChange(tab)}
+            onClick={() => handleTabClick(tab)}
             style={{
               padding: '6px 14px',
               borderRadius: '1000px',
@@ -45,7 +66,7 @@ export default function BottomNav({ activeTab, onTabChange }: Props) {
       {/* Scroll down button */}
       <button
         aria-label="Scroll down"
-        onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+        onClick={scrollNavToTop}
         style={{
           width: '44px',
           height: '44px',

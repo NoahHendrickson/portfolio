@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Button } from '@noey-17/yearn-ui'
 import { Copy03 } from '@untitledui/icons/Copy03'
-import { Share03 } from '@untitledui/icons/Share03'
+import { LinkedinLogo, GithubLogo } from '@phosphor-icons/react'
 import { useIsMobile } from '../hooks/useIsMobile'
 
 const EMAIL = 'noahjames017@gmail.com'
 const LINKEDIN_URL = 'https://www.linkedin.com/in/noah-hendrickson-808959192/'
+const GITHUB_URL = 'https://github.com/NoahHendrickson'
 
 function FilledCaretDown() {
   return (
@@ -196,8 +197,19 @@ export default function Header() {
               style={itemStyle}
               onClick={() => setIsOpen(false)}
             >
-              <Share03 width={16} height={16} />
+              <LinkedinLogo size={16} weight="duotone" />
               <span>LinkedIn</span>
+            </a>
+            <a
+              href={GITHUB_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              role="menuitem"
+              style={itemStyle}
+              onClick={() => setIsOpen(false)}
+            >
+              <GithubLogo size={16} weight="duotone" />
+              <span>GitHub</span>
             </a>
           </div>
         )}
