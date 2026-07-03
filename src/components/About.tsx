@@ -72,10 +72,10 @@ const companies: Company[] = [
       {
         name: '',
         paragraphs: [
-          'The line between designer and front-end developer is dissolving — and I think that’s a good thing. The tools are there, the momentum is real, and I think it’s one of the most exciting shifts the industry has seen in a while.',
-          'I don’t see Figma or other design tool staples becoming obsolete, and there is definitely a place for newer ones like pencil.dev and paper. Design tools are still the best for rapid ideation, exploration, and pixel-perfect mocks can still live there. The amount of real estate they occupy will be much less, a designer’s source of truth will be the code. Designers can now take those mocks and prototype directly in the product with Claude Code. Designer’s have always fought a weird battle of Figma designs being the source of truth and the ideals we push toward but now we can just make them happen. When Claude is in your codebase, using the components you’ve crafted and the design mocks you gave it, you significantly reduce the amount of AI slop generated. I’m sure sometimes I’ll need to manually remove purple.',
-          'The practical upside is real. Designing in the code environment means catching edge cases, weird behaviors, and dead ends while you’re designing — not during QA. And instead of handing off a static artifact, devs inherit working code. They’re starting at 60–80%, not zero.',
-          'I don’t think this is about designers replacing engineers. Complex problems still need engineers. But the smaller stuff — micro-interactions, polish, component-level details — designers can own that now.',
+          'Lately I’ve been having a lot of fun bouncing between AI tools and seeing how far I can push things. I’ll sketch in Figma, poke around in pencil.dev or paper, then hop into Claude Code and build the thing. The line between designer and front-end dev is getting blurry, and I’m having a great time living in the blur.',
+          'Figma isn’t going anywhere. It’s still where I think fast and get things pixel perfect. But a mock doesn’t have to sit there as a picture of the thing anymore. I can hand it to Claude, point it at the components I’ve already built, and watch it show up in the actual product. It also spits out way less slop when it’s working with your own pieces. Sometimes I still have to go in and delete the purple myself.',
+          'Building in the real product also means I catch the weird stuff while I’m designing, like edge cases and awkward states, instead of hearing about it in QA. Devs get working code instead of a static handoff, so they’re not starting from zero.',
+          'I don’t think this is designers replacing engineers. The genuinely hard problems still need engineers. But the small stuff like micro-interactions, polish, and little component details? I can just do that now.',
         ],
       },
     ],
