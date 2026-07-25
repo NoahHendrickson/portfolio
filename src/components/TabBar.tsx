@@ -1,12 +1,15 @@
+import { color, type } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
 
-const ORANGE = 'var(--color-orange)'
+const ORANGE = color.accent.default
 
 export type Tab = 'me' | 'work'
 
+// The second tab is labelled "Design" as of the July 2026 redesign; the route
+// behind it is still `#/work`, so existing links keep resolving.
 const TABS: { id: Tab; label: string; href: string }[] = [
   { id: 'me', label: 'Me', href: '#/' },
-  { id: 'work', label: 'Work', href: '#/work' },
+  { id: 'work', label: 'Design', href: '#/work' },
 ]
 
 export default function TabBar({ active }: { active: Tab }) {
@@ -26,10 +29,11 @@ export default function TabBar({ active }: { active: Tab }) {
               alignItems: 'center',
               justifyContent: 'center',
               padding: isMobile ? '8px 12px' : '8px 16px',
-              fontSize: '16px',
+              fontSize: type['label-l'].fontSize,
               fontWeight: isActive ? 500 : 400,
               lineHeight: 1.3,
-              color: isActive ? '#000000' : 'rgba(0,0,0,0.65)',
+              letterSpacing: 0,
+              color: isActive ? color.text.primary : color.text.secondary,
               textDecoration: 'none',
               borderBottom: `2px solid ${isActive ? ORANGE : 'transparent'}`,
               whiteSpace: 'nowrap',

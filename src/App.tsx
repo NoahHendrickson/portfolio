@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from 'react'
 import '@noey-17/yearn-ui/style.css'
 import Header from './components/Header'
 import Hero from './components/Hero'
-import WorkBento from './components/WorkBento'
+import WorkList from './components/WorkList'
 import ShaderPanel from './components/ShaderPanel'
-import About from './components/About'
+import Experience from './components/Experience'
+import LlmWall from './components/LlmWall'
 import WorkPage from './components/WorkPage'
 import ProjectLanding from './components/ProjectLanding'
 import ProjectStory from './components/ProjectStory'
@@ -12,22 +13,19 @@ import { projects } from './data/projects'
 import { useIsMobile } from './hooks/useIsMobile'
 import { ForgeDesignMode } from 'forge-mode/design-mode'
 
-const CREAM_BG = 'var(--color-bg-cream)'
+const BG = 'var(--color-bg-primary)'
 
-/** Percentage of the viewport the content column takes; on Work it slides over the shader. */
-const CONTENT_PCT = { me: 58.3, work: 84.7 }
-
-const CONTENT_WIDTH = {
-  me: `${CONTENT_PCT.me}%`,
-  work: `${CONTENT_PCT.work}%`,
-}
+/** Percentage of the viewport the content column takes; on Design it slides over the shader. */
+const CONTENT_PCT = { me: 58.3, work: 87.3 }
 
 /**
- * The shader column is pinned to the right at the width it has on the Me tab and
- * never resizes — widening the content column just covers more of it, so the
- * gradient slides under the cream panel instead of getting squished.
+ * The shader column starts where the Me tab's content column ends and runs to the
+ * right edge. Anchoring both sides rather than setting a width keeps it flush with
+ * the column whether or not the page has a scrollbar; widening the column on Design
+ * just covers more of it, so the gradient slides under the panel instead of
+ * getting squished.
  */
-const SHADER_WIDTH = `calc(100% - ${CONTENT_WIDTH.me})`
+const SHADER_LEFT = `${CONTENT_PCT.me}vw`
 
 /**
  * The tab bar is centred in the content column, so widening the column would drag
@@ -97,83 +95,76 @@ export default function App() {
   }
 
   const tab = route === '/work' ? 'work' : 'me'
+  const pageInset = isMobile ? '0 20px' : '0 80px'
 
   return (
-    <div data-style="simple" style={{ backgroundColor: CREAM_BG }}>
-      <div style={{
-        position: 'relative',
-        display: 'flex',
-        // Sized against the viewport rather than the content box: the Me tab has a
-        // page scrollbar (About sits below the fold) and Work doesn't, and a 100%
-        // basis would shrink by the scrollbar's width on Me, nudging every
-        // percentage inside — the tab bar included. `vw` includes the scrollbar, so
-        // the split geometry is identical on both tabs. `overflow-x: hidden` on the
-        // body keeps the overhang from adding a horizontal scrollbar.
-        width: isMobile ? '100%' : '100vw',
-        flexDirection: isMobile ? 'column' : 'row',
-        height: isMobile ? 'auto' : '100vh',
-        minHeight: isMobile ? '100vh' : undefined,
-        overflow: isMobile ? 'visible' : 'hidden',
-        backgroundColor: CREAM_BG,
-      }}>
-        {/* Left side — chrome + tab content */}
-        <div ref={splitRef} className={isMobile ? undefined : 'split-column'} style={{
+    <div data-style="simple" style={{ position: 'relative', minHeight: '100vh', background: BG }}>
+      {/*
+        The shader is one viewport tall in the top-right corner and the page
+        scrolls past it, rather than the content column scrolling inside a fixed
+        100vh split — that is the shape of the July 2026 file, where the canvas
+        stops at the fold and dark shell runs the rest of the way down.
+      */}
+      {!isMobile && (
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: SHADER_LEFT,
+          right: 0,
+          height: '100vh',
+          overflow: 'hidden',
+          zIndex: 0,
+        }}>
+          <ShaderPanel showHeadline={tab === 'me'} />
+        </div>
+      )}
+
+      <div
+        ref={splitRef}
+        className={isMobile ? undefined : 'split-column'}
+        style={{
           position: 'relative',
+          zIndex: 1,
           display: 'flex',
           flexDirection: 'column',
-          width: isMobile ? '100%' : CONTENT_WIDTH[tab],
-          height: isMobile ? 'auto' : '100%',
-          zIndex: 1,
-          backgroundColor: CREAM_BG,
-        }}>
-          <Header active={tab} tabShift={isMobile ? undefined : TAB_SHIFT[tab]} />
+          gap: '24px',
+          // Sized in `vw` rather than `%` so the split geometry doesn't shift by the
+          // width of the page scrollbar. `overflow-x: hidden` on the body keeps the
+          // shader's overhang from adding a horizontal scrollbar.
+          width: isMobile ? '100%' : `${CONTENT_PCT[tab]}vw`,
+          minHeight: isMobile ? undefined : '100vh',
+          paddingBottom: isMobile ? '0' : '40px',
+          boxSizing: 'border-box',
+          background: BG,
+        }}
+      >
+        <Header
+          active={tab}
+          tabShift={isMobile ? undefined : TAB_SHIFT[tab]}
+          showProfile={tab === 'me'}
+        />
 
-          <div style={{
-            flex: 1,
-            minHeight: 0,
-            padding: isMobile
-              ? '8px 20px 0'
-              : tab === 'work'
-                ? '0 24px 24px'
-                : '0 clamp(32px, 5.3vw, 80px)',
-            overflowY: isMobile ? 'visible' : 'auto',
-          }}>
-            {tab === 'work' ? <WorkBento /> : <Hero />}
+        {tab === 'work' ? (
+          <div style={{ padding: pageInset }}>
+            <WorkList />
           </div>
-
-          {/* Mobile-only shader banner */}
-          {isMobile && (
-            <div style={{
-              position: 'relative',
-              width: '100%',
-              height: '200px',
-              overflow: 'hidden',
-              marginTop: '32px',
-            }}>
-              <ShaderPanel />
+        ) : (
+          <>
+            <div style={{ padding: pageInset }}>
+              <Hero />
             </div>
-          )}
+            <Experience />
+            <LlmWall />
+          </>
+        )}
 
-          {!isMobile && <div style={{ height: '40px', flexShrink: 0 }} />}
-        </div>
-
-        {/* Right side — shader (desktop only), fixed width beneath the content column */}
-        {!isMobile && (
-          <div style={{
-            position: 'absolute',
-            top: 0,
-            right: 0,
-            width: SHADER_WIDTH,
-            height: '100%',
-            overflow: 'hidden',
-            zIndex: 0,
-          }}>
-            <ShaderPanel showHeadline={tab === 'me'} />
+        {/* Mobile-only shader banner, in place of the pinned column */}
+        {isMobile && (
+          <div style={{ position: 'relative', width: '100%', height: '200px', overflow: 'hidden' }}>
+            <ShaderPanel />
           </div>
         )}
       </div>
-
-      {tab === 'me' && <About />}
 
       <ForgeDesignMode />
     </div>

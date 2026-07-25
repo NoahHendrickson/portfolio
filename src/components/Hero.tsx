@@ -1,18 +1,31 @@
+import { color } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
 
-const TEXT_DARK = 'var(--color-ink)'
-const TEXT_MUTED = 'var(--color-ink-secondary)'
+const TEXT = color.text.primary
+const MUTED = color.text.muted
 
+/**
+ * The Me tab's opening block. The display sizes here sit off the shared type
+ * ramp — the Figma frame sets them directly — so they stay literal, with a
+ * clamp so they scale down with the column below 1512px.
+ */
 export default function Hero() {
   const isMobile = useIsMobile()
 
-  // Figma sizes hold at 1512px wide; below that everything scales down with the column.
   const body: React.CSSProperties = {
     margin: 0,
     maxWidth: '721px',
     fontSize: isMobile ? '17px' : 'clamp(16px, 1.6vw, 24px)',
     fontWeight: 400,
     lineHeight: 1.35,
+    letterSpacing: '-0.2px',
+  }
+
+  const subtitle: React.CSSProperties = {
+    margin: 0,
+    fontSize: isMobile ? '19px' : 'clamp(18px, 1.6vw, 24px)',
+    fontWeight: 600,
+    lineHeight: 1.3,
     letterSpacing: '-0.2px',
   }
 
@@ -25,48 +38,26 @@ export default function Hero() {
           fontWeight: 600,
           lineHeight: 1.1,
           letterSpacing: '-1.6px',
-          color: TEXT_DARK,
+          color: TEXT,
         }}
       >
         Hi, I&rsquo;m Noah
       </h1>
 
       <div style={{ display: 'flex', flexDirection: 'column' }}>
-        <p
-          style={{
-            margin: 0,
-            fontSize: isMobile ? '19px' : 'clamp(18px, 1.6vw, 24px)',
-            fontWeight: 600,
-            lineHeight: 1.3,
-            letterSpacing: '-0.2px',
-            color: TEXT_DARK,
-          }}
-        >
-          Product Designer &amp;
-        </p>
-        <p
-          style={{
-            margin: 0,
-            fontSize: isMobile ? '19px' : 'clamp(18px, 1.6vw, 24px)',
-            fontWeight: 600,
-            lineHeight: 1.3,
-            letterSpacing: '-0.2px',
-            color: TEXT_MUTED,
-          }}
-        >
-          Design Engineer x Builder x Diva
-        </p>
+        <p style={{ ...subtitle, color: TEXT }}>Product Designer &amp;</p>
+        <p style={{ ...subtitle, color: MUTED }}>Design Engineer x Builder x Diva</p>
       </div>
 
-      <p style={{ ...body, color: TEXT_DARK }}>
-        I am a Product Designer who adapts quickly to push and improve my craft. I
+      <p style={{ ...body, color: TEXT }}>
+        I&rsquo;m a Product Designer who adapts quickly to push and improve my craft. I
         have 5 years of experience creating products that care about the user,
         making impact with strategic flows and micro UX/UI. I bring a chill
         resilience to adversity, and can lift the room in high pressure situations.
       </p>
 
-      <p style={{ ...body, color: TEXT_MUTED }}>
-        I&rsquo;m looking for environments that prioritize shipping quality products
+      <p style={{ ...body, color: MUTED }}>
+        I&rsquo;m looking for environments that prioritize shipping high-quality products
         and features often, and aren&rsquo;t afraid to see a designer in the codebase.
       </p>
     </div>

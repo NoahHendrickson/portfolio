@@ -77,7 +77,7 @@ html, body {
   }
 }
 
-/* Content column that widens on the Work tab (App.tsx) */
+/* Content column that widens on the Design tab (App.tsx) */
 .split-column {
   transition: width 400ms cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -93,18 +93,4 @@ html, body {
 
 .split-column[data-resizing] .tab-shift {
   transition: none;
-}
-
-/* Work bento cards (WorkBento.tsx) */
-.bento-card .bento-arrow {
-  transition: transform 200ms ease;
-}
-
-.bento-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 24px 48px -16px rgba(15, 14, 14, 0.18);
-}
-
-.bento-card:hover .bento-arrow {
-  transform: translate(3px, -3px);
 }

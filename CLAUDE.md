@@ -22,22 +22,26 @@ Routes:
 
 | Route | Renders |
 |---|---|
-| `#/` | Me tab — `Hero` plus `About` below the fold |
-| `#/work` | Work tab — `WorkBento`, the project grid |
+| `#/` | Me tab — `Hero`, then `Experience` and `LlmWall` below the fold |
+| `#/work` | Design tab — `WorkList`, the filtered project list |
 | `#/work/<slug>` | `ProjectStory` if `projects[slug].landing` is set, otherwise `ProjectLanding` (`src/data/projects.ts`) |
 | `#/work/invisible` | `WorkPage` (the password-gated case study; checked before the slug lookup) |
 
-Layout in `App.tsx` is a two-column split whose ratio is driven by the tab: the cream content column is 58.3% on Me and 84.7% on Work (`CONTENT_WIDTH`), animating between them, and the right column hosts `ShaderPanel` — `ShaderEffect` (a WebGL animated gradient via the `shaders` package — `FlowingGradient` + `Dither`) with the headline overlaid. Both column widths and the bento's ratios (673.84:514.49 columns, 343:294.2 rows) come from the July 2026 Figma file.
+The two tabs come from the **"R2 Dark" section** of the July 2026 Figma file (`5mDT1eQf2KBcET9dh6kPXd`, node `49:10903`), which turned the whole shell dark and replaced the Work bento with a list. The project pages below `#/work/<slug>` were **not** part of that section and are still on the older cream design.
 
-`Header` is the shared chrome on every page: the `TabBar` (Me / Work, orange underline on the active tab) with `ContactMenu` pinned right, and the profile row below. Pages that already pad themselves pass `barInset="0" contentInset="0"`; `showProfile={false}` drops the profile row.
+`App.tsx` is one normally-scrolling dark page, not a fixed 100vh split. `ShaderPanel` — `ShaderEffect` (a WebGL animated gradient via the `shaders` package — `FlowingGradient` + `Dither`) with the headline overlaid — is absolutely positioned one viewport tall in the top-right corner and the page scrolls past it. The content column is 58.3vw on Me and 87.3vw on Design (`CONTENT_PCT`), animating between them; the shader is anchored at `left: 58.3vw; right: 0`, so widening the column slides it under the panel rather than squishing it. Both widths come from the Figma frames (881 and 1320 of 1512).
+
+`Header` is the shared chrome on every page: the `TabBar` (Me / Design, orange underline on the active tab) with `ContactMenu` pinned right, and the profile row below. Pages that already pad themselves pass `barInset="0" contentInset="0"`; `showProfile={false}` drops the profile row, which is what the Design tab does. The **second tab is labelled "Design" but still routes to `#/work`**, so existing links keep resolving.
+
+One deliberate divergence from the file: the Figma frames centre the tab bar in the content column on both tabs, which would slide it right by 14.5vw when the column widens. `TAB_SHIFT` in `App.tsx` cancels that out so the tabs hold still through the transition.
 
 Project pages come in two layouts. `ProjectLanding.tsx` is the generic one — stats row, `label`-railed sections, stack and status grids. `ProjectStory.tsx` is the screenshot-led one from the July 2026 Figma file: a title block beside the app, story sections whose media is a Chrome-framed screenshot (`BrowserFrame`, with `/work/browser-bar.png` as the chrome and the shot top-pinned and clipped to the frame's aspect), a wrapped wall of chat screenshots, and a closing orange card. A project opts into it by setting `landing` in `projects.ts`; the two feature screenshots overlap on a 1073×509 grid whose offsets are percentages, so the composition scales.
 
 `WorkPage.tsx` (`#/work/invisible`) is gated by a hardcoded password (`WORK_PASSWORD` constant) persisted in `sessionStorage` under `work-pages-unlocked`. This is a soft client-side gate — anything served to `/work/*` assets is still public, so don't put truly private material in `public/work/`.
 
-Project copy lives in `src/data/projects.ts`, not in components — `WorkBento`, `ProjectLanding` and `ProjectStory` all read from it, so adding a project is a data-only change plus one bento slot. The bento runs its own shorter copy and card screenshot off each project's `bento` field, separate from the landing page's `eyebrow` / `tagline`.
+Project copy lives in `src/data/projects.ts`, not in components — `ProjectLanding` and `ProjectStory` read from it, so adding a project page is a data-only change.
 
-`WorkBento` cards come in three variants keyed to their slot: `wide` (text beside a screenshot that bleeds off the card's right edge), `compact` (screenshot over eyebrow + title, no tagline), and `tall`. Mobile drops the grid and renders every card as `compact`.
+`WorkList.tsx` is the Design tab: a filter rail beside a divided list of rows. Unlike the pages above it, **its rows are declared in the file itself** (`forFun`, `career`, and the `FILTERS` array), pulling titles and taglines off `projects.ts` where they exist — the rows carry per-row copy, logos, links and screenshots that have no home in the `Project` type. Each row is a logo + title, one line of copy, a `View showcase` button when the project's page is designed, and an `IconButton` per external link. A row can put a screenshot in a fixed 260px column beside the copy (`frame: 'chrome'` adds `/work/browser-bar.png` above it, as `ProjectStory` does). The rail sits in a `max-content` grid column with an 80px gutter, matching the file's 80 / 194 / 1240 columns; mobile drops the grid, wraps the rail into a row, and hides the screenshots.
 
 ## Styling conventions
 
@@ -49,7 +53,7 @@ Project copy lives in `src/data/projects.ts`, not in components — `WorkBento`,
   - `src/design-system/tokens.ts` exports the same tokens as typed objects for inline styles, plus the `type` ramp.
 - Reach for a token rather than a raw px value for radii and gaps. The known exceptions are the 9px inner radius in `ProjectStory`'s `BrowserFrame` (an optical inset against its 8px outer frame), `borderRadius: '50%'` for true circles, and page-level gutters, which are layout rather than component spacing.
 - Font is `Geist Variable` from `@fontsource-variable/geist`, set globally on `body`. The ramp lives in `tokens.ts` as `type['display-xl' | 'heading-l' | 'body-l' | 'label-m' | 'eyebrow' | ...]`.
-- UI primitives come from the local-author package `@noey-17/yearn-ui` (e.g. `Button`); its stylesheet is imported once in `App.tsx` via `import '@noey-17/yearn-ui/style.css'`. Icons come from `@untitledui/icons` with per-icon imports (`@untitledui/icons/ArrowDown`).
+- Buttons come from `src/design-system/` (`Button`, `IconButton`) and icons from `@phosphor-icons/react`. `@noey-17/yearn-ui`'s stylesheet is still imported in `App.tsx`, but nothing renders its components any more; the cream project pages still import `@untitledui/icons` per-icon (`@untitledui/icons/ArrowDown`).
 
 ## Design system
 
@@ -57,9 +61,9 @@ Project copy lives in `src/data/projects.ts`, not in components — `WorkBento`,
 
 `IconButton` is a **separate component**, not a variant of `Button` — folding it in would have doubled the set to 54 variants and allowed the invalid icon-only-plus-label combination. It is circular (width locked to the control height), takes a required `label` prop that renders as `aria-label`, and shares `Button`'s palette through `buttonStyles.ts`, so the two cannot drift. Figma mirrors this with a separate `Icon Button` component set.
 
-`Button.tsx` is the system's button and is what Storybook documents. It is sized by **fixed height** (`--control-xs/sm/md/lg` = 28/32/36/40) rather than vertical padding, so a row of buttons lines up regardless of label or icon; only the horizontal padding varies by size. Each size pairs a label style and an icon size in `SIZES` / `ICON_SIZE` — `xs` drops to a 12px label and a 14px icon so the icon stays in proportion. The live `ContactMenu` still uses `@noey-17/yearn-ui`'s `Button` — the two have not been reconciled, so don't assume changing one changes the other.
+`Button.tsx` is the system's button and is what Storybook documents. It is sized by **fixed height** (`--control-xs/sm/md/lg` = 28/32/36/40) rather than vertical padding, so a row of buttons lines up regardless of label or icon; only the horizontal padding varies by size. Each size pairs a label style and an icon size in `SIZES` / `ICON_SIZE` — `xs` drops to a 12px label and a 14px icon so the icon stays in proportion. `ContactMenu` and every control in `WorkList` use it; `@noey-17/yearn-ui`'s `Button` is no longer used anywhere, though the package's stylesheet is still imported in `App.tsx`.
 
-Icons are Phosphor at **duotone** weight. The weight is set once via `IconContext` in `src/main.tsx` (and in `.storybook/preview.tsx`) from `ICON_DEFAULTS` in `design-system/icons.ts` — don't pass `weight` at call sites. Each duotone icon is a 20%-opacity tint path behind a solid main path; the Figma `Icon / *` components mirror this with `Tint` and `Main` layers. A few app components still use `@untitledui/icons` (`ArrowDown`, `ArrowUpRight`, `Copy03`, …), which are not part of the system and are unaffected by the Phosphor context.
+Icons are Phosphor at **duotone** weight. The weight is set once via `IconContext` in `src/main.tsx` (and in `.storybook/preview.tsx`) from `ICON_DEFAULTS` in `design-system/icons.ts` — don't pass `weight` at call sites. Each duotone icon is a 20%-opacity tint path behind a solid main path; the Figma `Icon / *` components mirror this with `Tint` and `Main` layers. The cream project pages still use `@untitledui/icons` (`ArrowDown`, `ArrowNarrowLeft`, …), which are not part of the system and are unaffected by the Phosphor context.
 
 Storybook config is in `.storybook/`. `main.ts` strips the `figma-capture-dev-only` Vite plugin, which is for the app's `/send-to-figma` flow and has no business in Storybook.
 

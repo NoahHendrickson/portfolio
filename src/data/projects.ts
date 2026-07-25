@@ -32,8 +32,8 @@ export type Section = {
 }
 
 /**
- * Card copy for the Work bento (`WorkBento.tsx`). The bento runs tighter, more casual
- * copy than the landing page, so it does not reuse `eyebrow` / `tagline`.
+ * Shorter, more casual copy than the landing page's `eyebrow` / `tagline`. Written
+ * for the Work bento; `WorkList.tsx` now reads the taglines for its rows.
  */
 export type BentoCopy = {
   /** Muted line above the title, e.g. `Destiny 2 - 3rd party tool`. */

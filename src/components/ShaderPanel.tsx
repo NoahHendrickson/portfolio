@@ -17,7 +17,9 @@ export default function ShaderPanel({ showHeadline = true }: { showHeadline?: bo
           opacity: showHeadline ? 1 : 0,
           transition: 'opacity 250ms ease',
           position: 'absolute',
-          left: isMobile ? '20px' : '56px',
+          // Inset from the left of the panel rather than a fixed offset, so the
+          // headline holds its place in the gradient as the column resizes.
+          left: isMobile ? '20px' : '31%',
           top: isMobile ? 'auto' : '38%',
           bottom: isMobile ? '20px' : 'auto',
           margin: 0,
@@ -26,7 +28,8 @@ export default function ShaderPanel({ showHeadline = true }: { showHeadline?: bo
           fontWeight: 600,
           lineHeight: isMobile ? 1.15 : 1.05,
           letterSpacing: isMobile ? '-0.5px' : '-1.6px',
-          color: '#ffffff',
+          // Dark on the light end of the gradient, per the July 2026 file.
+          color: 'var(--color-text-inverse)',
           zIndex: 2,
           pointerEvents: 'none',
         }}

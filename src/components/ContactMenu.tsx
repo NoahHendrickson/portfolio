@@ -1,19 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Button } from '@noey-17/yearn-ui'
-import { Copy03 } from '@untitledui/icons/Copy03'
-import { LinkedinLogo, GithubLogo } from '@phosphor-icons/react'
+import { CaretDown, Copy, LinkedinLogo, GithubLogo } from '@phosphor-icons/react'
+import Button from '../design-system/Button'
 
 const EMAIL = 'noahjames017@gmail.com'
 const LINKEDIN_URL = 'https://www.linkedin.com/in/noah-hendrickson-808959192/'
 const GITHUB_URL = 'https://github.com/NoahHendrickson'
-
-function FilledCaretDown() {
-  return (
-    <svg width="12" height="8" viewBox="0 0 12 8" fill="currentColor" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" aria-hidden="true">
-      <path d="M0.5 0.5h11L6 7.5z" />
-    </svg>
-  )
-}
 
 export default function ContactMenu() {
   const [isOpen, setIsOpen] = useState(false)
@@ -81,20 +72,17 @@ export default function ContactMenu() {
   return (
     <div ref={menuRef} style={{ position: 'relative' }}>
       <Button
-        variant="secondary"
-        size="md"
+        variant="primary"
+        size="sm"
         trailingIcon={
-          <span
+          <CaretDown
+            size={16}
             style={{
-              display: 'inline-flex',
               transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
               transition: 'transform 150ms ease',
             }}
-          >
-            <FilledCaretDown />
-          </span>
+          />
         }
-        className="!bg-[var(--color-orange)] !text-white !border-[var(--color-orange)] hover:!bg-[var(--color-orange-hover)]"
         onClick={() => setIsOpen(o => !o)}
         aria-haspopup="menu"
         aria-expanded={isOpen}
@@ -127,7 +115,7 @@ export default function ContactMenu() {
             style={itemStyle}
             onClick={(e) => copyToClipboard(EMAIL, e)}
           >
-            <Copy03 width={16} height={16} />
+            <Copy size={16} />
             <span>{EMAIL}</span>
           </button>
           <div

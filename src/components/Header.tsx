@@ -59,12 +59,13 @@ export default function Header({
   )
 }
 
-function DiamondDots({ opacity = '0.35' }: { opacity?: string }) {
+/** Four dots in a diamond, sitting between the two profile images. */
+function DiamondDots() {
   const dotStyle: React.CSSProperties = {
+    position: 'absolute',
     width: '4px',
     height: '4px',
-    backgroundColor: `rgba(15,14,14,${opacity})`,
-    position: 'absolute',
+    backgroundColor: 'rgba(236,237,230,0.16)',
   }
   return (
     <div style={{ position: 'relative', width: '12px', height: '12px', transform: 'rotate(45deg)' }}>
@@ -88,18 +89,19 @@ export function ProfileRow() {
         style={{
           width: `${profileSize}px`,
           height: `${profileSize}px`,
-          borderRadius: isMobile ? 'var(--radius-lg)' : 'var(--radius-xl)',
+          borderRadius: isMobile ? 'var(--radius-lg)' : '20px',
           objectFit: 'cover',
         }}
       />
       {!isMobile && (
         <div
-          className="flex flex-col items-center justify-between py-1"
-          style={{ height: '80px' }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: `${profileSize}px`,
+          }}
         >
-          <DiamondDots />
-          <DiamondDots />
-          <DiamondDots />
           <DiamondDots />
         </div>
       )}
