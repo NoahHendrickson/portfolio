@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "the-forge": {
+      "command": "node",
+      "args": [
+        "/Users/noey/Developer/portfolio/node_modules/forge-mode/dist/mcp.js"
+      ]
+    }
+  }
+}

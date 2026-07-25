@@ -23,3 +23,35 @@ html, body {
     overflow-y: auto;
   }
 }
+
+/* Content column that widens on the Work tab (App.tsx) */
+.split-column {
+  transition: width 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.split-column[data-resizing] {
+  transition: none;
+}
+
+/* Holds the tab bar still while the column width animates (Header.tsx) */
+.tab-shift {
+  transition: transform 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.split-column[data-resizing] .tab-shift {
+  transition: none;
+}
+
+/* Work bento cards (WorkBento.tsx) */
+.bento-card .bento-arrow {
+  transition: transform 200ms ease;
+}
+
+.bento-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 24px 48px -16px rgba(15, 14, 14, 0.18);
+}
+
+.bento-card:hover .bento-arrow {
+  transform: translate(3px, -3px);
+}

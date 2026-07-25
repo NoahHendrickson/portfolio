@@ -14,12 +14,6 @@ const baseChipStyle: React.CSSProperties = {
   pointerEvents: 'auto',
 }
 
-const linkStyle: React.CSSProperties = {
-  color: 'rgba(15, 14, 14, 0.9)',
-  textDecoration: 'underline',
-  marginLeft: '4px',
-}
-
 export default function InfoList() {
   const isMobile = useIsMobile()
   const chipStyle: React.CSSProperties = {
@@ -43,18 +37,6 @@ export default function InfoList() {
         paddingBottom: isMobile ? '8px' : '20%',
       }}
     >
-      <span style={chipStyle}>
-        Currently @
-        <a
-          href="https://invisibletech.ai/"
-          target="_blank"
-          rel="noreferrer"
-          style={linkStyle}
-        >
-          Invisible ↗
-        </a>
-      </span>
-
       <span style={chipStyle}>
         4yrs of experience
       </span>

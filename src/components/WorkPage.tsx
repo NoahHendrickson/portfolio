@@ -91,15 +91,15 @@ export default function WorkPage({ title, description, projects = DEFAULT_PROJEC
         minHeight: '100vh',
         background: CREAM_BG,
         color: TEXT_DARK,
-        padding: isMobile ? '24px 20px 60px' : '40px 80px 120px',
+        padding: isMobile ? '0 20px 60px' : '0 80px 120px',
         display: 'flex',
         flexDirection: 'column',
         gap: isMobile ? '24px' : '40px',
       }}
     >
-      <Header />
+      <Header active="work" barInset="0" contentInset="0" />
       <a
-        href="#/"
+        href="#/work"
         style={{
           color: ORANGE,
           fontSize: '16px',

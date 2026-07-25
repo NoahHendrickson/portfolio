@@ -1,5 +1,4 @@
 import { ArrowNarrowRight } from '@untitledui/icons/ArrowNarrowRight'
-import type { Tab } from './BottomNav'
 import { useIsMobile } from '../hooks/useIsMobile'
 
 const CREAM_BG = '#f5efe0'
@@ -82,14 +81,8 @@ const companies: Company[] = [
   },
 ]
 
-const ABOUT_ME_SECTIONS = new Set(['About me', 'Yapping'])
-
-export default function About({ activeTab }: { activeTab: Tab }) {
+export default function About() {
   const isMobile = useIsMobile()
-  const visibleCompanies =
-    activeTab === 'about me'
-      ? companies.filter((c) => ABOUT_ME_SECTIONS.has(c.name))
-      : companies.filter((c) => !ABOUT_ME_SECTIONS.has(c.name))
 
   return (
     <section
@@ -103,7 +96,7 @@ export default function About({ activeTab }: { activeTab: Tab }) {
         color: TEXT_DARK,
       }}
     >
-      {visibleCompanies.map((company) => (
+      {companies.map((company) => (
         <div
           key={company.name}
           style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '32px' : '48px' }}

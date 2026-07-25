@@ -16,9 +16,26 @@ There is no test runner configured.
 
 Single-page React 19 + Vite 8 portfolio. There is **no router library** — `src/App.tsx` reads `window.location.hash`, listens for `hashchange`, and switches the rendered tree. Internal links use hrefs like `#/work/invisible`. When adding a new route, extend the conditional in `App.tsx` and link to `#/your-route`.
 
-Layout in `App.tsx` is a 60/40 split: left column (cream background) holds `Header` / `Hero` / `BottomNav` and content, right column hosts `ShaderEffect` (a WebGL animated gradient via the `shaders` package — `FlowingGradient` + `Dither`) with `InfoList` chips absolutely positioned over it. `About` is rendered below the viewport split for scroll.
+Routes:
 
-`WorkPage.tsx` (the `#/work/...` route) is gated by a hardcoded password (`WORK_PASSWORD` constant) persisted in `sessionStorage` under `work-pages-unlocked`. This is a soft client-side gate — anything served to `/work/*` assets is still public, so don't put truly private material in `public/work/`.
+| Route | Renders |
+|---|---|
+| `#/` | Me tab — `Hero` plus `About` below the fold |
+| `#/work` | Work tab — `WorkBento`, the project grid |
+| `#/work/<slug>` | `ProjectStory` if `projects[slug].landing` is set, otherwise `ProjectLanding` (`src/data/projects.ts`) |
+| `#/work/invisible` | `WorkPage` (the password-gated case study; checked before the slug lookup) |
+
+Layout in `App.tsx` is a two-column split whose ratio is driven by the tab: the cream content column is 58.3% on Me and 84.7% on Work (`CONTENT_WIDTH`), animating between them, and the right column hosts `ShaderPanel` — `ShaderEffect` (a WebGL animated gradient via the `shaders` package — `FlowingGradient` + `Dither`) with the headline overlaid. Both column widths and the bento's ratios (673.84:514.49 columns, 343:294.2 rows) come from the July 2026 Figma file.
+
+`Header` is the shared chrome on every page: the `TabBar` (Me / Work, orange underline on the active tab) with `ContactMenu` pinned right, and the profile row below. Pages that already pad themselves pass `barInset="0" contentInset="0"`; `showProfile={false}` drops the profile row.
+
+Project pages come in two layouts. `ProjectLanding.tsx` is the generic one — stats row, `label`-railed sections, stack and status grids. `ProjectStory.tsx` is the screenshot-led one from the July 2026 Figma file: a title block beside the app, story sections whose media is a Chrome-framed screenshot (`BrowserFrame`, with `/work/browser-bar.png` as the chrome and the shot top-pinned and clipped to the frame's aspect), a wrapped wall of chat screenshots, and a closing orange card. A project opts into it by setting `landing` in `projects.ts`; the two feature screenshots overlap on a 1073×509 grid whose offsets are percentages, so the composition scales.
+
+`WorkPage.tsx` (`#/work/invisible`) is gated by a hardcoded password (`WORK_PASSWORD` constant) persisted in `sessionStorage` under `work-pages-unlocked`. This is a soft client-side gate — anything served to `/work/*` assets is still public, so don't put truly private material in `public/work/`.
+
+Project copy lives in `src/data/projects.ts`, not in components — `WorkBento`, `ProjectLanding` and `ProjectStory` all read from it, so adding a project is a data-only change plus one bento slot. The bento runs its own shorter copy and card screenshot off each project's `bento` field, separate from the landing page's `eyebrow` / `tagline`.
+
+`WorkBento` cards come in three variants keyed to their slot: `wide` (text beside a screenshot that bleeds off the card's right edge), `compact` (screenshot over eyebrow + title, no tagline), and `tall`. Mobile drops the grid and renders every card as `compact`.
 
 ## Styling conventions
 
