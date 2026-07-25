@@ -63,6 +63,11 @@ function BentoCard({ slug, variant }: { slug: Slug; variant: Variant }) {
   const project = projects[slug]
   const { cover, tagline, note } = project.bento
 
+  // Projects whose page isn't designed yet show the card but go nowhere. An anchor
+  // with no href isn't focusable or clickable, and dropping the hover lift and the
+  // arrow keeps the card from promising a destination it doesn't have.
+  const linked = project.pageReady === true
+
   const padding = variant === 'compact' ? 24 : 32
   const image = (
     <img
@@ -84,8 +89,8 @@ function BentoCard({ slug, variant }: { slug: Slug; variant: Variant }) {
 
   return (
     <a
-      href={`#/work/${project.slug}`}
-      className="bento-card"
+      href={linked ? `#/work/${project.slug}` : undefined}
+      className={linked ? 'bento-card' : undefined}
       style={{
         position: 'relative',
         display: 'flex',
@@ -186,9 +191,11 @@ function BentoCard({ slug, variant }: { slug: Slug; variant: Variant }) {
             >
               {project.title}
             </h3>
-            <span className="bento-arrow" style={{ display: 'inline-flex', color: ORANGE }}>
-              <ArrowUpRight width={24} height={24} />
-            </span>
+            {linked && (
+              <span className="bento-arrow" style={{ display: 'inline-flex', color: ORANGE }}>
+                <ArrowUpRight width={24} height={24} />
+              </span>
+            )}
           </div>
         </div>
 

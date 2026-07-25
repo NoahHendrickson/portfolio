@@ -130,6 +130,12 @@ export type Project = {
   eyebrow: string[]
   tagline: string
   bento: BentoCopy
+  /**
+   * Whether the project page is designed enough to link to. Cards in the bento are
+   * inert until this is set, so a project can go up on the Work grid before its
+   * page exists. The `#/work/<slug>` route still renders either way.
+   */
+  pageReady?: boolean
   landing?: Landing
   summary: string
   accent: string
@@ -158,6 +164,7 @@ export const projects: Record<string, Project> = {
         'Experimental Figma-style design mode for your own app, in your own browser that hands its edits to whatever AI coding agent you already use.',
       note: '*UI is largely unfinished',
     },
+    pageReady: true,
     landing: {
       eyebrow: 'Design tool | Experimental case study',
       hero: {
@@ -290,6 +297,7 @@ export const projects: Record<string, Project> = {
       eyebrow: 'Destiny 2 - 3rd party tool',
       cover: '/work/stat-builder/hero.png',
     },
+    pageReady: true,
     landing: {
       eyebrow: 'Destiny 2 3rd party tool',
       hero: {
