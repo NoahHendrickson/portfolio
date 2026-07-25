@@ -1,17 +1,28 @@
-import { ArrowNarrowLeft } from '@untitledui/icons/ArrowNarrowLeft'
+import { ArrowLeft, ArrowSquareOut } from '@phosphor-icons/react'
 import Header from './Header'
+import { VARIANTS } from '../design-system/buttonStyles'
+import { control, radius, space, type } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
 import type { Feature, FeedbackShot, LandingShot, Project, Split } from '../data/projects'
 
-const CREAM_BG = 'var(--color-bg-cream)'
-const TEXT_DARK = 'var(--color-ink)'
+const PAGE_BG = 'var(--color-bg-primary)'
+const TEXT = 'var(--color-text-primary)'
 const ORANGE = 'var(--color-orange)'
-const BUTTON_LIGHT = 'var(--color-bg-inverse)'
-const MUTED = 'var(--color-ink-muted)'
-const BODY_TEXT = 'var(--color-ink-secondary)'
+/** The outro card is orange in both themes, so its pill stays light-on-orange. */
+const PILL_BG = 'var(--color-bg-inverse)'
+const PILL_TEXT = 'var(--color-text-inverse)'
+const MUTED = 'var(--color-text-muted)'
+const BODY_TEXT = 'var(--color-text-secondary)'
+const BORDER = 'var(--color-border-subtle)'
+/** Screenshot chrome, not theme surface — these are the browser frame's own colours. */
 const FRAME_BORDER = '#373737'
 const FRAME_BG = '#202124'
-const WALL_BG = '#ffffff'
+/**
+ * The feedback wall was a white panel holding dark chat screenshots. On the dark
+ * shell that inverts: the wall is a raised surface and each card takes a hairline
+ * so it still separates from it, whatever fill the shot asks for.
+ */
+const WALL_BG = 'var(--color-bg-raised)'
 const CARD_BG = '#1a191e'
 const OVERLAY_BORDER = '#3358c1'
 
@@ -55,8 +66,8 @@ export default function ProjectStory({ project }: { project: Project }) {
     <div
       style={{
         minHeight: '100vh',
-        background: CREAM_BG,
-        color: TEXT_DARK,
+        background: PAGE_BG,
+        color: TEXT,
         padding: isMobile ? '0 20px 60px' : '0 80px 120px',
         display: 'flex',
         flexDirection: 'column',
@@ -65,20 +76,33 @@ export default function ProjectStory({ project }: { project: Project }) {
     >
       <Header active="work" barInset="0" contentInset="0" showProfile={false} />
 
+      {/*
+        Styled as the design system's ghost pill so it reads the same as the
+        Design tab's controls, but kept an anchor — `Button` renders a <button>,
+        and nesting one inside a link is invalid. The palette is pulled from
+        `buttonStyles` rather than restated, so the two can't drift.
+      */}
       <a
         href="#/work"
         style={{
-          color: ORANGE,
-          fontSize: '16px',
-          fontWeight: 500,
-          textDecoration: 'none',
           display: 'inline-flex',
           alignItems: 'center',
-          gap: 'var(--space-sm)',
+          gap: space.sm,
+          height: control.sm,
+          boxSizing: 'border-box',
+          padding: `0 ${space.lg}`,
           width: 'fit-content',
+          borderRadius: radius.full,
+          border: `1px solid ${VARIANTS.ghost.default.borderColor}`,
+          background: VARIANTS.ghost.default.background,
+          color: VARIANTS.ghost.default.color,
+          fontSize: type['label-m'].fontSize,
+          fontWeight: type['label-m'].fontWeight,
+          lineHeight: type['label-m'].lineHeight,
+          textDecoration: 'none',
         }}
       >
-        <ArrowNarrowLeft width={16} height={16} />
+        <ArrowLeft size={16} />
         Back
       </a>
 
@@ -142,6 +166,7 @@ export default function ProjectStory({ project }: { project: Project }) {
             <div
               style={{
                 background: WALL_BG,
+                border: `1px solid ${BORDER}`,
                 borderRadius: 'var(--radius-2xl)',
                 padding: isMobile ? '16px' : '24px',
                 display: 'flex',
@@ -171,7 +196,9 @@ export default function ProjectStory({ project }: { project: Project }) {
           alignItems: isMobile ? 'flex-start' : 'center',
           justifyContent: 'space-between',
           gap: isMobile ? '28px' : '40px',
-          boxShadow: '0px 32px 64px -12px rgba(0,0,0,0.14), 0px 5px 5px -2.5px rgba(0,0,0,0.04)',
+          // Deeper than the cream page's shadow — a 14%-black drop is invisible
+          // against #171615.
+          boxShadow: '0px 32px 64px -12px rgba(0,0,0,0.5), 0px 5px 5px -2.5px rgba(0,0,0,0.3)',
         }}
       >
         <h2
@@ -329,8 +356,8 @@ function Pill({ href, children }: { href?: string; children: React.ReactNode }) 
     display: 'inline-flex',
     alignItems: 'center',
     gap: isMobile ? '10px' : '16px',
-    background: BUTTON_LIGHT,
-    color: TEXT_DARK,
+    background: PILL_BG,
+    color: PILL_TEXT,
     padding: isMobile ? '10px 18px' : '12px 24px',
     borderRadius: 'var(--radius-full)',
     fontSize: isMobile ? '16px' : '20px',
@@ -358,6 +385,7 @@ function FeedbackCard({ shot }: { shot: FeedbackShot }) {
         width: isMobile ? '100%' : `${shot.width}px`,
         maxWidth: '100%',
         background: shot.bg ?? CARD_BG,
+        border: `1px solid ${BORDER}`,
         borderRadius: 'var(--radius-xl)',
         padding: `${shot.pad ?? 16}px`,
       }}
@@ -376,22 +404,5 @@ function FeedbackCard({ shot }: { shot: FeedbackShot }) {
         />
       </div>
     </div>
-  )
-}
-
-/** ArrowSquareOut, exported from the Figma file — duotone, so it isn't in @untitledui/icons. */
-function ArrowSquareOut({ size = 24 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        opacity="0.2"
-        d="M17.25 7.5V19.5C17.25 19.6989 17.171 19.8897 17.0303 20.0303C16.8897 20.171 16.6989 20.25 16.5 20.25H4.5C4.30109 20.25 4.11032 20.171 3.96967 20.0303C3.82902 19.8897 3.75 19.6989 3.75 19.5V7.5C3.75 7.30109 3.82902 7.11032 3.96967 6.96967C4.11032 6.82902 4.30109 6.75 4.5 6.75H16.5C16.6989 6.75 16.8897 6.82902 17.0303 6.96967C17.171 7.11032 17.25 7.30109 17.25 7.5Z"
-        fill="currentColor"
-      />
-      <path
-        d="M21 9.75C21 9.94891 20.921 10.1397 20.7803 10.2803C20.6397 10.421 20.4489 10.5 20.25 10.5C20.0511 10.5 19.8603 10.421 19.7197 10.2803C19.579 10.1397 19.5 9.94891 19.5 9.75V5.56125L13.2816 11.7806C13.1408 11.9214 12.95 12.0004 12.7509 12.0004C12.5519 12.0004 12.361 11.9214 12.2203 11.7806C12.0796 11.6399 12.0005 11.449 12.0005 11.25C12.0005 11.051 12.0796 10.8601 12.2203 10.7194L18.4387 4.5H14.25C14.0511 4.5 13.8603 4.42098 13.7197 4.28033C13.579 4.13968 13.5 3.94891 13.5 3.75C13.5 3.55109 13.579 3.36032 13.7197 3.21967C13.8603 3.07902 14.0511 3 14.25 3H20.25C20.4489 3 20.6397 3.07902 20.7803 3.21967C20.921 3.36032 21 3.55109 21 3.75V9.75ZM17.25 12C17.0511 12 16.8603 12.079 16.7197 12.2197C16.579 12.3603 16.5 12.5511 16.5 12.75V19.5H4.5V7.5H11.25C11.4489 7.5 11.6397 7.42098 11.7803 7.28033C11.921 7.13968 12 6.94891 12 6.75C12 6.55109 11.921 6.36032 11.7803 6.21967C11.6397 6.07902 11.4489 6 11.25 6H4.5C4.10218 6 3.72064 6.15804 3.43934 6.43934C3.15804 6.72064 3 7.10218 3 7.5V19.5C3 19.8978 3.15804 20.2794 3.43934 20.5607C3.72064 20.842 4.10218 21 4.5 21H16.5C16.8978 21 17.2794 20.842 17.5607 20.5607C17.842 20.2794 18 19.8978 18 19.5V12.75C18 12.5511 17.921 12.3603 17.7803 12.2197C17.6397 12.079 17.4489 12 17.25 12Z"
-        fill="currentColor"
-      />
-    </svg>
   )
 }
