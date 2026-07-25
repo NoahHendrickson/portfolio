@@ -3,12 +3,12 @@ import { ArrowNarrowLeft } from '@untitledui/icons/ArrowNarrowLeft'
 import Header from './Header'
 import { useIsMobile } from '../hooks/useIsMobile'
 
-const CREAM_BG = '#f5efe0'
-const TEXT_DARK = '#0f0e0e'
+const CREAM_BG = 'var(--color-bg-cream)'
+const TEXT_DARK = 'var(--color-ink)'
 const ORANGE = 'var(--color-orange)'
 const CARD_BG = '#313131'
 const LIGHT_CARD_BG = '#e5e5e5'
-const BUTTON_LIGHT = '#ecede6'
+const BUTTON_LIGHT = 'var(--color-bg-inverse)'
 
 const WORK_PASSWORD = 'noah2026'
 const UNLOCK_KEY = 'work-pages-unlocked'
@@ -107,7 +107,7 @@ export default function WorkPage({ title, description, projects = DEFAULT_PROJEC
           textDecoration: 'none',
           display: 'inline-flex',
           alignItems: 'center',
-          gap: '8px',
+          gap: 'var(--space-sm)',
           width: 'fit-content',
         }}
       >
@@ -164,7 +164,7 @@ export default function WorkPage({ title, description, projects = DEFAULT_PROJEC
             margin: 'auto',
             display: 'flex',
             flexDirection: 'column',
-            gap: '16px',
+            gap: 'var(--space-lg)',
             maxWidth: '360px',
             width: '100%',
           }}
@@ -188,7 +188,7 @@ export default function WorkPage({ title, description, projects = DEFAULT_PROJEC
               padding: '12px 16px',
               fontSize: '16px',
               border: `1px solid ${error ? ORANGE : 'rgba(0,0,0,0.2)'}`,
-              borderRadius: '8px',
+              borderRadius: 'var(--radius-md)',
               background: 'transparent',
               color: TEXT_DARK,
               outline: 'none',
@@ -208,7 +208,7 @@ export default function WorkPage({ title, description, projects = DEFAULT_PROJEC
               background: TEXT_DARK,
               color: CREAM_BG,
               border: 'none',
-              borderRadius: '8px',
+              borderRadius: 'var(--radius-md)',
               cursor: 'pointer',
             }}
           >
@@ -234,11 +234,11 @@ function PlainRow({ project }: { project: Project }) {
     <div
       style={
         isMobile
-          ? { display: 'flex', flexDirection: 'column', gap: '24px' }
+          ? { display: 'flex', flexDirection: 'column', gap: 'var(--space-xl)' }
           : {
               display: 'grid',
               gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.5fr)',
-              gap: '60px',
+              gap: 'var(--space-4xl)',
               alignItems: 'center',
             }
       }
@@ -267,7 +267,7 @@ function AccentedRow({ project }: { project: Project }) {
     <div
       style={{
         background: project.accent,
-        borderRadius: isMobile ? '32px' : '56px',
+        borderRadius: isMobile ? 'var(--radius-3xl)' : 'var(--radius-4xl)',
         display: 'flex',
         flexDirection: isMobile ? 'column' : 'row',
         alignItems: 'stretch',
@@ -283,7 +283,7 @@ function AccentedRow({ project }: { project: Project }) {
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
-          gap: '20px',
+          gap: 'var(--space-xl)',
           padding: isMobile ? '24px 20px 0' : '20px 20px 20px 40px',
         }}
       >
@@ -306,7 +306,7 @@ function AccentedRow({ project }: { project: Project }) {
               background: BUTTON_LIGHT,
               color: TEXT_DARK,
               padding: isMobile ? '8px 14px' : '8px 16px',
-              borderRadius: '1000px',
+              borderRadius: 'var(--radius-full)',
               fontSize: isMobile ? '16px' : '20px',
               fontWeight: 500,
               textDecoration: 'none',

@@ -4,13 +4,13 @@ import Header from './Header'
 import { useIsMobile } from '../hooks/useIsMobile'
 import type { Project, Section, Shot } from '../data/projects'
 
-const CREAM_BG = '#f5efe0'
-const TEXT_DARK = '#0f0e0e'
+const CREAM_BG = 'var(--color-bg-cream)'
+const TEXT_DARK = 'var(--color-ink)'
 const ORANGE = 'var(--color-orange)'
 const LIGHT_CARD_BG = '#e5e5e5'
-const BUTTON_LIGHT = '#ecede6'
-const MUTED = 'rgba(15,14,14,0.35)'
-const HAIRLINE = 'rgba(15,14,14,0.12)'
+const BUTTON_LIGHT = 'var(--color-bg-inverse)'
+const MUTED = 'var(--color-ink-muted)'
+const HAIRLINE = 'var(--color-border-ink)'
 
 const STATUS_COPY: Record<'shipped' | 'building' | 'next', string> = {
   shipped: 'shipped',
@@ -44,7 +44,7 @@ export default function ProjectLanding({ project }: { project: Project }) {
           textDecoration: 'none',
           display: 'inline-flex',
           alignItems: 'center',
-          gap: '8px',
+          gap: 'var(--space-sm)',
           width: 'fit-content',
         }}
       >
@@ -54,14 +54,14 @@ export default function ProjectLanding({ project }: { project: Project }) {
 
       {/* Hero */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '20px' : '28px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)', flexWrap: 'wrap' }}>
           {project.eyebrow.map((item, idx) => (
             <span
               key={item}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '10px',
+                gap: 'var(--space-md)',
                 fontSize: isMobile ? '14px' : '16px',
                 fontWeight: 500,
                 color: MUTED,
@@ -115,7 +115,7 @@ export default function ProjectLanding({ project }: { project: Project }) {
             fontSize: isMobile ? '16px' : '18px',
             fontWeight: 400,
             lineHeight: 1.6,
-            color: 'rgba(15,14,14,0.72)',
+            color: 'var(--color-ink-secondary)',
           }}
         >
           {project.summary}
@@ -135,7 +135,7 @@ export default function ProjectLanding({ project }: { project: Project }) {
                 textDecoration: 'none',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '8px',
+                gap: 'var(--space-sm)',
               }}
             >
               {link.label}
@@ -166,7 +166,7 @@ export default function ProjectLanding({ project }: { project: Project }) {
               flex: 1,
               display: 'flex',
               flexDirection: 'column',
-              gap: '6px',
+              gap: 'var(--space-sm)',
               paddingLeft: !isMobile && idx > 0 ? '40px' : 0,
               borderLeft: !isMobile && idx > 0 ? `1px solid ${HAIRLINE}` : 'none',
             }}
@@ -207,28 +207,28 @@ export default function ProjectLanding({ project }: { project: Project }) {
       <div
         style={
           isMobile
-            ? { display: 'flex', flexDirection: 'column', gap: '48px', marginTop: '16px' }
+            ? { display: 'flex', flexDirection: 'column', gap: 'var(--space-3xl)', marginTop: '16px' }
             : {
                 display: 'grid',
                 gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
-                gap: '80px',
+                gap: 'var(--space-5xl)',
                 marginTop: '32px',
               }
         }
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xl)' }}>
           <RailLabel>built with</RailLabel>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-sm)' }}>
             {project.stack.map((item) => (
               <span
                 key={item}
                 style={{
                   padding: '8px 14px',
-                  borderRadius: '1000px',
+                  borderRadius: 'var(--radius-full)',
                   border: `1px solid ${HAIRLINE}`,
                   fontSize: isMobile ? '15px' : '16px',
                   fontWeight: 500,
-                  color: 'rgba(15,14,14,0.8)',
+                  color: 'var(--color-ink-secondary)',
                   whiteSpace: 'nowrap',
                 }}
               >
@@ -238,7 +238,7 @@ export default function ProjectLanding({ project }: { project: Project }) {
           </div>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xl)' }}>
           <RailLabel>where it&rsquo;s at</RailLabel>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             {project.status.map((item) => (
@@ -248,7 +248,7 @@ export default function ProjectLanding({ project }: { project: Project }) {
                   display: 'flex',
                   alignItems: 'baseline',
                   justifyContent: 'space-between',
-                  gap: '20px',
+                  gap: 'var(--space-xl)',
                   padding: '14px 0',
                   borderBottom: `1px solid ${HAIRLINE}`,
                 }}
@@ -284,7 +284,7 @@ export default function ProjectLanding({ project }: { project: Project }) {
         style={{
           marginTop: isMobile ? '32px' : '56px',
           background: project.accent,
-          borderRadius: isMobile ? '32px' : '56px',
+          borderRadius: isMobile ? 'var(--radius-3xl)' : 'var(--radius-4xl)',
           padding: isMobile ? '32px 24px' : '56px 60px',
           display: 'flex',
           flexDirection: isMobile ? 'column' : 'row',
@@ -318,7 +318,7 @@ export default function ProjectLanding({ project }: { project: Project }) {
             background: BUTTON_LIGHT,
             color: TEXT_DARK,
             padding: isMobile ? '10px 18px' : '12px 24px',
-            borderRadius: '1000px',
+            borderRadius: 'var(--radius-full)',
             fontSize: isMobile ? '16px' : '20px',
             fontWeight: 500,
             textDecoration: 'none',
@@ -338,7 +338,7 @@ export default function ProjectLanding({ project }: { project: Project }) {
           textDecoration: 'none',
           display: 'inline-flex',
           alignItems: 'center',
-          gap: '8px',
+          gap: 'var(--space-sm)',
           width: 'fit-content',
         }}
       >
@@ -372,11 +372,11 @@ function SectionBlock({ section, accent }: { section: Section; accent: string })
     <div
       style={
         isMobile
-          ? { display: 'flex', flexDirection: 'column', gap: '16px' }
+          ? { display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }
           : {
               display: 'grid',
               gridTemplateColumns: '160px minmax(0, 1fr)',
-              gap: '60px',
+              gap: 'var(--space-4xl)',
               alignItems: 'start',
             }
       }
@@ -423,7 +423,7 @@ function SectionBlock({ section, accent }: { section: Section; accent: string })
               listStyle: 'none',
               display: 'flex',
               flexDirection: 'column',
-              gap: '12px',
+              gap: 'var(--space-md)',
               maxWidth: '720px',
             }}
           >
@@ -433,7 +433,7 @@ function SectionBlock({ section, accent }: { section: Section; accent: string })
                 style={{
                   display: 'flex',
                   alignItems: 'flex-start',
-                  gap: '12px',
+                  gap: 'var(--space-md)',
                   fontSize: isMobile ? '16px' : '18px',
                   lineHeight: 1.5,
                 }}
@@ -487,7 +487,7 @@ function ShotCard({
   const surface = hero ? accent : LIGHT_CARD_BG
 
   return (
-    <figure style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+    <figure style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
       <div
         style={{
           background: surface,
@@ -513,7 +513,7 @@ function ShotCard({
               width: '100%',
               height: '100%',
               objectFit: hero ? 'contain' : 'cover',
-              borderRadius: hero ? (isMobile ? '12px' : '20px') : 0,
+              borderRadius: hero ? (isMobile ? 'var(--radius-lg)' : 'var(--radius-xl)') : 0,
               display: 'block',
               filter: hero
                 ? 'drop-shadow(0 22px 27px rgba(0,0,0,0.14)) drop-shadow(0 9px 9px rgba(0,0,0,0.05))'
@@ -526,7 +526,7 @@ function ShotCard({
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: '10px',
+              gap: 'var(--space-md)',
               padding: '24px',
               textAlign: 'center',
               maxWidth: '90%',
@@ -538,7 +538,7 @@ function ShotCard({
                 fontWeight: 500,
                 letterSpacing: '0.08em',
                 textTransform: 'uppercase',
-                color: hero ? 'rgba(255,255,255,0.6)' : MUTED,
+                color: hero ? 'var(--color-text-secondary)' : MUTED,
               }}
             >
               screenshot
@@ -548,7 +548,7 @@ function ShotCard({
                 fontSize: hero ? (isMobile ? '18px' : '24px') : isMobile ? '15px' : '17px',
                 fontWeight: 500,
                 lineHeight: 1.35,
-                color: hero ? '#ffffff' : 'rgba(15,14,14,0.55)',
+                color: hero ? '#ffffff' : 'var(--color-ink-muted)',
                 textWrap: 'balance',
               }}
             >

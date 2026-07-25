@@ -1,7 +1,7 @@
 import { useIsMobile } from '../hooks/useIsMobile'
 
-const TEXT_DARK = '#0f0e0e'
-const TEXT_MUTED = 'rgba(15,14,14,0.65)'
+const TEXT_DARK = 'var(--color-ink)'
+const TEXT_MUTED = 'var(--color-ink-secondary)'
 
 export default function Hero() {
   const isMobile = useIsMobile()

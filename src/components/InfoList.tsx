@@ -6,7 +6,7 @@ const baseChipStyle: React.CSSProperties = {
   alignSelf: 'flex-start',
   alignItems: 'center',
   borderRadius: 0,
-  backgroundColor: '#f5efe0',
+  backgroundColor: 'var(--color-bg-cream)',
   color: 'rgba(15, 14, 14, 0.9)',
   fontWeight: 500,
   lineHeight: 1.3,

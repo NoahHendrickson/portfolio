@@ -88,7 +88,7 @@ export function ProfileRow() {
         style={{
           width: `${profileSize}px`,
           height: `${profileSize}px`,
-          borderRadius: isMobile ? '14px' : '20px',
+          borderRadius: isMobile ? 'var(--radius-lg)' : 'var(--radius-xl)',
           objectFit: 'cover',
         }}
       />

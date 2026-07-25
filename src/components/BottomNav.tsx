@@ -32,15 +32,15 @@ export default function BottomNav({ activeTab, onTabChange }: Props) {
   }
 
   return (
-    <div ref={wrapperRef} style={{ display: 'flex', alignItems: 'flex-end', gap: '16px' }}>
+    <div ref={wrapperRef} style={{ display: 'flex', alignItems: 'flex-end', gap: 'var(--space-lg)' }}>
       {/* Orange pill tab switcher */}
       <div style={{
         backgroundColor: 'var(--color-orange)',
         display: 'flex',
         alignItems: 'center',
-        gap: '4px',
+        gap: 'var(--space-xs)',
         padding: '4px',
-        borderRadius: '100px',
+        borderRadius: 'var(--radius-full)',
       }}>
         {TABS.map(tab => (
           <button
@@ -48,7 +48,7 @@ export default function BottomNav({ activeTab, onTabChange }: Props) {
             onClick={() => handleTabClick(tab)}
             style={{
               padding: '6px 14px',
-              borderRadius: '1000px',
+              borderRadius: 'var(--radius-full)',
               border: 'none',
               cursor: 'pointer',
               fontSize: '15px',
@@ -70,7 +70,7 @@ export default function BottomNav({ activeTab, onTabChange }: Props) {
         style={{
           width: '44px',
           height: '44px',
-          borderRadius: '9999px',
+          borderRadius: 'var(--radius-full)',
           backgroundColor: '#171717',
           color: '#ffffff',
           border: 'none',

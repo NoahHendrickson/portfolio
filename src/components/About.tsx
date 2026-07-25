@@ -1,8 +1,8 @@
 import { ArrowNarrowRight } from '@untitledui/icons/ArrowNarrowRight'
 import { useIsMobile } from '../hooks/useIsMobile'
 
-const CREAM_BG = '#f5efe0'
-const TEXT_DARK = '#0f0e0e'
+const CREAM_BG = 'var(--color-bg-cream)'
+const TEXT_DARK = 'var(--color-ink)'
 const ORANGE = 'var(--color-orange)'
 
 type Role = {
@@ -122,7 +122,7 @@ export default function About() {
                   textDecoration: 'none',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '8px',
+                  gap: 'var(--space-sm)',
                 }}
               >
                 {company.link}
@@ -134,7 +134,7 @@ export default function About() {
           {company.roles.map((role) => (
             <div
               key={role.name}
-              style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
+              style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xl)' }}
             >
               {(role.name || role.note) && (
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: isMobile ? '16px' : '40px', flexWrap: 'wrap' }}>

@@ -12,7 +12,7 @@ import { projects } from './data/projects'
 import { useIsMobile } from './hooks/useIsMobile'
 import { ForgeDesignMode } from 'forge-mode/design-mode'
 
-const CREAM_BG = '#f5efe0'
+const CREAM_BG = 'var(--color-bg-cream)'
 
 /** Percentage of the viewport the content column takes; on Work it slides over the shader. */
 const CONTENT_PCT = { me: 58.3, work: 84.7 }

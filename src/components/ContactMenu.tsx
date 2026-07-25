@@ -55,13 +55,13 @@ export default function ContactMenu() {
   const itemStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
+    gap: 'var(--space-sm)',
     padding: '8px 6px 8px 10px',
-    borderRadius: '6px',
+    borderRadius: 'var(--radius-sm)',
     width: '100%',
     background: 'none',
     border: 'none',
-    color: '#d4d4d4',
+    color: 'var(--color-text-secondary)',
     fontSize: '16px',
     fontWeight: 400,
     lineHeight: '24px',
@@ -94,7 +94,7 @@ export default function ContactMenu() {
             <FilledCaretDown />
           </span>
         }
-        className="!bg-[#f95b1c] !text-white !border-[#f95b1c] hover:!bg-[#f95b1c]/90"
+        className="!bg-[var(--color-orange)] !text-white !border-[var(--color-orange)] hover:!bg-[var(--color-orange-hover)]"
         onClick={() => setIsOpen(o => !o)}
         aria-haspopup="menu"
         aria-expanded={isOpen}
@@ -110,13 +110,13 @@ export default function ContactMenu() {
             right: 0,
             minWidth: '280px',
             maxWidth: 'calc(100vw - 40px)',
-            backgroundColor: '#1d1f1e',
-            border: '1px solid rgba(255,255,255,0.16)',
-            borderRadius: '24px',
+            backgroundColor: 'var(--color-bg-raised)',
+            border: '1px solid var(--color-border-default)',
+            borderRadius: 'var(--radius-2xl)',
             padding: '8px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '8px',
+            gap: 'var(--space-sm)',
             boxShadow: '0 20px 24px -4px rgba(0,0,0,0.4), 0 8px 8px -4px rgba(0,0,0,0.3)',
             zIndex: 10,
           }}
@@ -133,7 +133,7 @@ export default function ContactMenu() {
           <div
             style={{
               height: '1px',
-              backgroundColor: 'rgba(255,255,255,0.08)',
+              backgroundColor: 'var(--color-border-subtle)',
               margin: '4px 0',
             }}
           />
@@ -172,13 +172,13 @@ export default function ContactMenu() {
               left: cursorPos.x,
               transform: 'translate(-50%, -50%)',
               padding: '4px 10px',
-              borderRadius: '9999px',
-              backgroundColor: '#1d1f1e',
-              color: '#ecede6',
+              borderRadius: 'var(--radius-full)',
+              backgroundColor: 'var(--color-bg-raised)',
+              color: 'var(--color-bg-inverse)',
               fontSize: '12px',
               fontWeight: 500,
               lineHeight: 1.4,
-              border: '1px solid rgba(255,255,255,0.16)',
+              border: '1px solid var(--color-border-default)',
               boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
               pointerEvents: 'none',
               zIndex: 1000,

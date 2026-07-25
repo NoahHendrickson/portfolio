@@ -3,12 +3,12 @@ import Header from './Header'
 import { useIsMobile } from '../hooks/useIsMobile'
 import type { Feature, FeedbackShot, LandingShot, Project, Split } from '../data/projects'
 
-const CREAM_BG = '#f5efe0'
-const TEXT_DARK = '#0f0e0e'
+const CREAM_BG = 'var(--color-bg-cream)'
+const TEXT_DARK = 'var(--color-ink)'
 const ORANGE = 'var(--color-orange)'
-const BUTTON_LIGHT = '#ecede6'
-const MUTED = 'rgba(15,14,14,0.35)'
-const BODY_TEXT = 'rgba(15,14,14,0.72)'
+const BUTTON_LIGHT = 'var(--color-bg-inverse)'
+const MUTED = 'var(--color-ink-muted)'
+const BODY_TEXT = 'var(--color-ink-secondary)'
 const FRAME_BORDER = '#373737'
 const FRAME_BG = '#202124'
 const WALL_BG = '#ffffff'
@@ -60,7 +60,7 @@ export default function ProjectStory({ project }: { project: Project }) {
         padding: isMobile ? '0 20px 60px' : '0 80px 120px',
         display: 'flex',
         flexDirection: 'column',
-        gap: '40px',
+        gap: 'var(--space-3xl)',
       }}
     >
       <Header active="work" barInset="0" contentInset="0" showProfile={false} />
@@ -74,7 +74,7 @@ export default function ProjectStory({ project }: { project: Project }) {
           textDecoration: 'none',
           display: 'inline-flex',
           alignItems: 'center',
-          gap: '8px',
+          gap: 'var(--space-sm)',
           width: 'fit-content',
         }}
       >
@@ -87,11 +87,11 @@ export default function ProjectStory({ project }: { project: Project }) {
         <div
           style={
             isMobile
-              ? { display: 'flex', flexDirection: 'column', gap: '28px' }
+              ? { display: 'flex', flexDirection: 'column', gap: 'var(--space-2xl)' }
               : splitStyle(landing.hero.split, landing.hero.alignEnd)
           }
         >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
             <p
               style={{
                 margin: 0,
@@ -116,7 +116,7 @@ export default function ProjectStory({ project }: { project: Project }) {
               {project.title}
             </h1>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xl)' }}>
               {heroBody.map((paragraph) => (
                 <p
                   key={paragraph}
@@ -136,13 +136,13 @@ export default function ProjectStory({ project }: { project: Project }) {
         ))}
 
         {landing.feedback && (
-          <section style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+          <section style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2xl)' }}>
             <SectionCopy heading={landing.feedback.heading} body={landing.feedback.body} />
 
             <div
               style={{
                 background: WALL_BG,
-                borderRadius: '24px',
+                borderRadius: 'var(--radius-2xl)',
                 padding: isMobile ? '16px' : '24px',
                 display: 'flex',
                 flexWrap: 'wrap',
@@ -164,7 +164,7 @@ export default function ProjectStory({ project }: { project: Project }) {
         style={{
           marginTop: isMobile ? '16px' : '56px',
           background: ORANGE,
-          borderRadius: isMobile ? '32px' : '56px',
+          borderRadius: isMobile ? 'var(--radius-3xl)' : 'var(--radius-4xl)',
           padding: isMobile ? '32px 24px' : '56px 60px',
           display: 'flex',
           flexDirection: isMobile ? 'column' : 'row',
@@ -189,7 +189,7 @@ export default function ProjectStory({ project }: { project: Project }) {
           {landing.outro.heading}
         </h2>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', flexWrap: 'wrap' }}>
           {landing.outro.command && <Pill>{landing.outro.command}</Pill>}
 
           {landing.outro.links?.map((link) => (
@@ -211,7 +211,7 @@ function FeatureBlock({ feature }: { feature: Feature }) {
   const overlayStyle: React.CSSProperties = {
     display: 'block',
     border: `1px solid ${OVERLAY_BORDER}`,
-    borderRadius: '8px',
+    borderRadius: 'var(--radius-md)',
     boxShadow: '0px 8px 12px 6px rgba(0,0,0,0.15), 0px 4px 4px 0px rgba(0,0,0,0.3)',
   }
 
@@ -252,7 +252,7 @@ function FeatureBlock({ feature }: { feature: Feature }) {
     <section
       style={
         isMobile
-          ? { display: 'flex', flexDirection: 'column', gap: '32px' }
+          ? { display: 'flex', flexDirection: 'column', gap: 'var(--space-2xl)' }
           : splitStyle(feature.split)
       }
     >
@@ -266,7 +266,7 @@ function SectionCopy({ heading, body }: { heading: string; body: string }) {
   const isMobile = useIsMobile()
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
       <h2
         style={{
           margin: 0,
@@ -332,7 +332,7 @@ function Pill({ href, children }: { href?: string; children: React.ReactNode }) 
     background: BUTTON_LIGHT,
     color: TEXT_DARK,
     padding: isMobile ? '10px 18px' : '12px 24px',
-    borderRadius: '1000px',
+    borderRadius: 'var(--radius-full)',
     fontSize: isMobile ? '16px' : '20px',
     fontWeight: 500,
     lineHeight: 1.5,
@@ -358,11 +358,11 @@ function FeedbackCard({ shot }: { shot: FeedbackShot }) {
         width: isMobile ? '100%' : `${shot.width}px`,
         maxWidth: '100%',
         background: shot.bg ?? CARD_BG,
-        borderRadius: '16px',
+        borderRadius: 'var(--radius-xl)',
         padding: `${shot.pad ?? 16}px`,
       }}
     >
-      <div style={{ width: '100%', aspectRatio: shot.aspect, borderRadius: '8px', overflow: 'hidden' }}>
+      <div style={{ width: '100%', aspectRatio: shot.aspect, borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
         <img
           src={shot.src}
           alt={shot.alt}

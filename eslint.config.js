@@ -6,7 +6,7 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default tseslint.config(
-  defineConfig([globalIgnores(['dist'])]),
+  defineConfig([globalIgnores(['dist', 'storybook-static'])]),
   {
     extends: [
       js.configs.recommended,

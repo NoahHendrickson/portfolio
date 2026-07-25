@@ -3,9 +3,9 @@ import { projects } from '../data/projects'
 import { useIsMobile } from '../hooks/useIsMobile'
 
 const CARD_BG = '#dadada'
-const TEXT_DARK = '#0f0e0e'
-const TEXT_MUTED = 'rgba(15,14,14,0.65)'
-const TEXT_FAINT = 'rgba(15,14,14,0.4)'
+const TEXT_DARK = 'var(--color-ink)'
+const TEXT_MUTED = 'var(--color-ink-secondary)'
+const TEXT_FAINT = 'var(--color-ink-muted)'
 const ORANGE = 'var(--color-orange)'
 
 /** Which slot a card fills — drives padding, image placement and title size. */
@@ -27,7 +27,7 @@ export default function WorkBento() {
   // the compact image-over-text layout.
   if (isMobile) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
         {[WIDE, TALL, ...COMPACT].map((slug) => (
           <BentoCard key={slug} slug={slug} variant="compact" />
         ))}
@@ -40,14 +40,14 @@ export default function WorkBento() {
       style={{
         display: 'grid',
         gridTemplateColumns: '673.84fr 514.49fr',
-        gap: '24px',
+        gap: 'var(--space-xl)',
         height: '100%',
         minHeight: '460px',
       }}
     >
-      <div style={{ display: 'grid', gridTemplateRows: '343fr 294.2fr', gap: '24px', minHeight: 0 }}>
+      <div style={{ display: 'grid', gridTemplateRows: '343fr 294.2fr', gap: 'var(--space-xl)', minHeight: 0 }}>
         <BentoCard slug={WIDE} variant="wide" />
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '24px', minHeight: 0 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 'var(--space-xl)', minHeight: 0 }}>
           {COMPACT.map((slug) => (
             <BentoCard key={slug} slug={slug} variant="compact" />
           ))}
@@ -98,11 +98,11 @@ function BentoCard({ slug, variant }: { slug: Slug; variant: Variant }) {
         flexDirection: variant === 'wide' ? 'row' : 'column',
         alignItems: variant === 'wide' ? 'stretch' : undefined,
         justifyContent: variant === 'tall' ? 'space-between' : variant === 'compact' ? 'flex-end' : undefined,
-        gap: '16px',
+        gap: 'var(--space-lg)',
         height: isMobile ? undefined : '100%',
         minHeight: isMobile ? undefined : '150px',
         padding: isMobile ? '20px' : `${padding}px`,
-        borderRadius: isMobile ? '24px' : '32px',
+        borderRadius: isMobile ? 'var(--radius-2xl)' : 'var(--radius-3xl)',
         background: CARD_BG,
         overflow: 'hidden',
         textDecoration: 'none',
@@ -120,7 +120,7 @@ function BentoCard({ slug, variant }: { slug: Slug; variant: Variant }) {
             order: 2,
             minWidth: 0,
             marginRight: `-${padding}px`,
-            borderRadius: '8px 0 0 8px',
+            borderRadius: 'var(--radius-md) 0 0 var(--radius-md)',
             overflow: 'hidden',
           }}
         >
@@ -136,7 +136,7 @@ function BentoCard({ slug, variant }: { slug: Slug; variant: Variant }) {
             // 482.5 × 387 — the screenshot's size in Figma once clipped to the card edge.
             aspectRatio: '482.5 / 387',
             minHeight: 0,
-            borderRadius: '8px 0 0 8px',
+            borderRadius: 'var(--radius-md) 0 0 var(--radius-md)',
             overflow: 'hidden',
           }}
         >
@@ -150,7 +150,7 @@ function BentoCard({ slug, variant }: { slug: Slug; variant: Variant }) {
             flex: isMobile ? undefined : 1,
             minHeight: isMobile ? undefined : 0,
             width: '100%',
-            borderRadius: '12px',
+            borderRadius: 'var(--radius-lg)',
             overflow: 'hidden',
           }}
         >
@@ -162,7 +162,7 @@ function BentoCard({ slug, variant }: { slug: Slug; variant: Variant }) {
         style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: '10px',
+          gap: 'var(--space-md)',
           width: variant === 'wide' ? '243px' : undefined,
           flexShrink: 0,
         }}
@@ -179,7 +179,7 @@ function BentoCard({ slug, variant }: { slug: Slug; variant: Variant }) {
             {project.bento.eyebrow}
           </span>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
             <h3
               style={{
                 margin: 0,
@@ -200,7 +200,7 @@ function BentoCard({ slug, variant }: { slug: Slug; variant: Variant }) {
         </div>
 
         {tagline && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
             <p
               style={{
                 margin: 0,
