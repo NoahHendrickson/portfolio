@@ -3,19 +3,24 @@ import { ArrowSquareOut } from '@phosphor-icons/react'
 import { VARIANTS } from '../../design-system/buttonStyles'
 import { control, radius, space, type } from '../../design-system/tokens'
 import { useIsMobile } from '../../hooks/useIsMobile'
-import type { Feature, LandingShot } from '../../data/projects'
+import type { Feature, FeedbackShot, Landing, LandingShot } from '../../data/projects'
 import {
   APP_HREF,
   BODY_TEXT,
   BORDER,
+  CARD_BG,
   COMPOSITION,
   FRAME_BG,
   FRAME_BORDER,
   MUTED,
+  ORANGE,
   OVERLAY_BORDER,
+  PILL_BG,
+  PILL_TEXT,
   QUOTES,
   REPO_HREF,
   TEXT,
+  WALL_BG,
   pct,
 } from './styles'
 
@@ -289,5 +294,184 @@ export function Eyebrow({ children }: { children: React.ReactNode }) {
     >
       {children}
     </p>
+  )
+}
+
+/** Matches `ProjectStory` section copy — heading + body from `projects.ts`. */
+export function SectionCopy({
+  heading,
+  body,
+  align = 'left',
+}: {
+  heading: string
+  body: string
+  align?: 'left' | 'center'
+}) {
+  const isMobile = useIsMobile()
+  const centered = align === 'center' && !isMobile
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 'var(--space-lg)',
+        alignItems: centered ? 'center' : undefined,
+        textAlign: centered ? 'center' : undefined,
+      }}
+    >
+      <h2
+        style={{
+          margin: 0,
+          maxWidth: '800px',
+          fontSize: isMobile ? '24px' : 'clamp(26px, 2.6vw, 34px)',
+          fontWeight: 500,
+          lineHeight: 1.2,
+          letterSpacing: '-0.01em',
+        }}
+      >
+        {heading}
+      </h2>
+      <p
+        style={{
+          margin: 0,
+          maxWidth: '720px',
+          fontSize: isMobile ? '16px' : '18px',
+          lineHeight: 1.4,
+          color: BODY_TEXT,
+        }}
+      >
+        {body}
+      </p>
+    </div>
+  )
+}
+
+/** Original Discord screenshot wall from `landing.feedback`. */
+export function FeedbackWall({ feedback }: { feedback: NonNullable<Landing['feedback']> }) {
+  const isMobile = useIsMobile()
+
+  return (
+    <div
+      style={{
+        background: WALL_BG,
+        border: `1px solid ${BORDER}`,
+        borderRadius: 'var(--radius-2xl)',
+        padding: isMobile ? '16px' : '24px',
+        display: 'flex',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: isMobile ? '16px' : '24px',
+      }}
+    >
+      {feedback.shots.map((shot) => (
+        <FeedbackCard key={shot.src} shot={shot} />
+      ))}
+    </div>
+  )
+}
+
+function FeedbackCard({ shot }: { shot: FeedbackShot }) {
+  const isMobile = useIsMobile()
+
+  return (
+    <div
+      style={{
+        width: isMobile ? '100%' : `${shot.width}px`,
+        maxWidth: '100%',
+        background: shot.bg ?? CARD_BG,
+        border: `1px solid ${BORDER}`,
+        borderRadius: 'var(--radius-xl)',
+        padding: `${shot.pad ?? 16}px`,
+      }}
+    >
+      <div style={{ width: '100%', aspectRatio: shot.aspect, borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
+        <img
+          src={shot.src}
+          alt={shot.alt}
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            objectPosition: shot.position,
+            display: 'block',
+          }}
+        />
+      </div>
+    </div>
+  )
+}
+
+/** Original orange closing card from `landing.outro`. */
+export function OutroCard({ outro }: { outro: Landing['outro'] }) {
+  const isMobile = useIsMobile()
+
+  return (
+    <div
+      style={{
+        background: ORANGE,
+        borderRadius: isMobile ? 'var(--radius-3xl)' : 'var(--radius-4xl)',
+        padding: isMobile ? '32px 24px' : '56px 60px',
+        display: 'flex',
+        flexDirection: isMobile ? 'column' : 'row',
+        alignItems: isMobile ? 'flex-start' : 'center',
+        justifyContent: 'space-between',
+        gap: isMobile ? '28px' : '40px',
+        boxShadow: '0px 32px 64px -12px rgba(0,0,0,0.5), 0px 5px 5px -2.5px rgba(0,0,0,0.3)',
+      }}
+    >
+      <h2
+        style={{
+          margin: 0,
+          maxWidth: '640px',
+          fontSize: isMobile ? '26px' : 'clamp(30px, 3vw, 40px)',
+          fontWeight: 500,
+          lineHeight: 1.15,
+          letterSpacing: '-0.01em',
+          color: '#ffffff',
+          textWrap: 'balance',
+        }}
+      >
+        {outro.heading}
+      </h2>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', flexWrap: 'wrap' }}>
+        {outro.command && <OutroPill>{outro.command}</OutroPill>}
+        {outro.links?.map((link) => (
+          <OutroPill key={link.href} href={link.href}>
+            {link.label}
+            <ArrowSquareOut size={isMobile ? 20 : 24} />
+          </OutroPill>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function OutroPill({ href, children }: { href?: string; children: React.ReactNode }) {
+  const isMobile = useIsMobile()
+
+  const style: React.CSSProperties = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: isMobile ? '10px' : '16px',
+    background: PILL_BG,
+    color: PILL_TEXT,
+    padding: isMobile ? '10px 18px' : '12px 24px',
+    borderRadius: 'var(--radius-full)',
+    fontSize: isMobile ? '16px' : '20px',
+    fontWeight: 500,
+    lineHeight: 1.5,
+    textDecoration: 'none',
+    whiteSpace: 'nowrap',
+  }
+
+  if (!href) return <span style={style}>{children}</span>
+
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer" style={style}>
+      {children}
+    </a>
   )
 }

@@ -7,6 +7,12 @@ export const TEXT = 'var(--color-text-primary)'
 export const MUTED = 'var(--color-text-muted)'
 export const BODY_TEXT = 'var(--color-text-secondary)'
 export const BORDER = 'var(--color-border-subtle)'
+export const ORANGE = 'var(--color-orange)'
+/** The outro card is orange, so its pill stays light-on-orange. */
+export const PILL_BG = 'var(--color-bg-inverse)'
+export const PILL_TEXT = 'var(--color-text-inverse)'
+export const WALL_BG = 'var(--color-bg-raised)'
+export const CARD_BG = '#1a191e'
 
 /** Screenshot chrome — the browser frame's own colours, not theme surfaces. */
 export const FRAME_BORDER = '#373737'
