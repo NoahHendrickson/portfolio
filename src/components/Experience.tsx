@@ -24,17 +24,17 @@ const entries: Entry[] = [
     link: { label: 'View some of my work', href: '#/work/invisible' },
     paragraphs: [
       'I started my time at Invisible as an Associate Product Designer and had the opportunity to work on many surfaces and products with very different users. I grew to owning the design for one of our core platforms, Meridial.',
-      'As the Lead Product Designer for Meridial, I held the bigger picture: shaping product vision, setting the bar for design quality, and building the ops that kept the team moving. That meant bringing in tools like Microsoft Clarity and Mixpanel to ground decisions in real user behavior, and folding AI into my workflow to move faster without losing craft.',
-      'Our marketplace onboarding flow was disjointed, delayed, and confusing — experts dropped off, and the business couldn’t scale delivery. I was responsible for the redesign of our sign-up and onboarding, resulting in a 60% reduction in time to be “ready to work.”',
-      'I also provided design support for the 0-1 launch of Invisible’s Annotations platform, creating reusable custom components built for AI training tasks. I led design direction through high-fidelity mockups and custom interface designs tailored to specific client requirements.',
-    ],
-  },
-  {
-    rail: ['about', 'me'],
-    paragraphs: [
-      'I have 4 years of experience taking complex journeys, problems, and systems and turning them into efficient products and features. I’m a Senior Product Designer who treats design as a technical craft — I care about the conceptual models underneath a product as much as the surface, which means I dive deep into new domains until I actually understand the system I’m building.',
-      'I’m a collaborator first. I stay composed under pressure, keep the energy steady on tight deadlines, and believe the best work comes from ego-free crits and teams focused on building the right thing — not winning the argument.',
-      'I’ve always been a builder. My first tool was Legos — obsessed with inventing my own creations, turning imagination into something real and tactile. That same impulse drives my work today.',
+      <>
+        I led Product Design for Meridial, Invisible’s talent marketplace for AI training
+        projects. I owned end-to-end user flows, research, wireframes, high fidelity specs
+        and collaborated with Product managers and Engineers for A/B testing. I was
+        responsible for a mobile redesign of our profile completion flow that increased
+        conversion by <strong>50%</strong> for mobile users. I conducted a deep dive into
+        our user journey to identify key fall off points that resulted in focused designs
+        that improved conversion by 4x for one step, and doubled the conversion of the
+        full funnel.
+      </>,
+      'Provided design support for the 0-1 launch of Invisible’s Annotations platform, creating reusable custom components built for AI training tasks. I led design direction through high-fidelity mockups and custom interface designs tailored to specific client requirements.',
     ],
   },
   {
