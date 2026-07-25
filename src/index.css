@@ -94,3 +94,15 @@ html, body {
 .split-column[data-resizing] .tab-shift {
   transition: none;
 }
+
+/* Soft enter for D2 Stat Builder showcase variants (and media inside them). */
+@keyframes sb-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
