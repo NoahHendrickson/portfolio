@@ -35,7 +35,21 @@ The two tabs come from the **"R2 Dark" section** of the July 2026 Figma file (`5
 
 One deliberate divergence from the file: the Figma frames centre the tab bar in the content column on both tabs, which would slide it right by 14.5vw when the column widens. `TAB_SHIFT` in `App.tsx` cancels that out so the tabs hold still through the transition.
 
-Project pages come in two layouts. `ProjectLanding.tsx` is the generic one — stats row, `label`-railed sections, stack and status grids — and is still on the cream theme. `ProjectStory.tsx` is the screenshot-led one from the July 2026 Figma file, re-themed dark: a title block beside the app, story sections whose media is a Chrome-framed screenshot (`BrowserFrame`, with `/work/browser-bar.png` as the chrome and the shot top-pinned and clipped to the frame's aspect), a wrapped wall of chat screenshots, and a closing orange card. A project opts into it by setting `landing` in `projects.ts`; the two feature screenshots overlap on a 1073×509 grid whose offsets are percentages, so the composition scales. Going dark inverted the feedback wall — it was a white panel behind dark chat screenshots and is now `--color-bg-raised` with a hairline on both the wall and each card, so the cards still separate whatever fill a shot asks for. `FRAME_BORDER` / `FRAME_BG` / `OVERLAY_BORDER` stayed put: they are the screenshots' own chrome, not theme surfaces.
+Project pages come in two layouts. `ProjectLanding.tsx` is the generic one — stats row, `label`-railed sections, stack and status grids — and is still on the cream theme. `ProjectStory.tsx` is the screenshot-led one, dark, and a project opts into it by setting `landing` in `projects.ts`.
+
+`ProjectStory` is only a shell — page chrome, the back link, and a variant switcher. **Three layouts** render the same data three ways, and all three are live behind that switcher:
+
+| Layout | Shape |
+|---|---|
+| `StorySplit` | Asymmetric. Narrow title column beside the app at the Figma file's split; features repeat it. What the page shipped with, plus the stat band. |
+| `StoryCentered` | Launch page. Everything centred, the app head-on under the title with a radial wash of `project.accent` behind it, features as centred copy over a full-width shot. |
+| `StoryGallery` | Media first. The hero runs edge to edge and **uncropped** (`ShotFrame`'s `uncropped` prop skips the aspect box), a two-column masthead sits under it, and feature shots bleed off the right edge. |
+
+Everything the three share is in `storyParts.tsx` (components: `ShotFrame`, `FeatureMedia`, `SectionCopy`, `StatBand`, `FeedbackWall`, `OutroCard`, `Pill`, `LinkRow`) and `storyStyles.ts` (colors and geometry — split out because a file that exports both components and constants breaks Fast Refresh). Screenshot media is Chrome-framed via `/work/browser-bar.png`, top-pinned and clipped to the shot's aspect; the two overlapping feature screenshots sit on a 797px composition whose offsets are percentages, so the overlap survives being scaled.
+
+Going dark inverted the feedback wall — it was a white panel behind dark chat screenshots and is now `--color-bg-raised` with a hairline on both the wall and each card, so the cards still separate whatever fill a shot asks for. `FRAME_BORDER` / `FRAME_BG` / `OVERLAY_BORDER` stayed put: they are the screenshots' own chrome, not theme surfaces. `StatBand` renders each project's `stats`, which previously only `ProjectLanding` used.
+
+**The variant switcher is temporary.** It is the pills beside Back, persisted in `sessionStorage` under `story-variant` so switching between the two project pages keeps comparing the same layout. Once a layout is chosen, delete `VariantTabs`, the storage key, and the two unused `Story*.tsx` files.
 
 `WorkPage.tsx` (`#/work/invisible`) is gated by a hardcoded password (`WORK_PASSWORD` constant) persisted in `sessionStorage` under `work-pages-unlocked`. This is a soft client-side gate — anything served to `/work/*` assets is still public, so don't put truly private material in `public/work/`.
 
