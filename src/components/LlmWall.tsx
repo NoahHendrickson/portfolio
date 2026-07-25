@@ -47,10 +47,7 @@ export default function LlmWall() {
         padding: isMobile ? '48px 20px 60px' : '0 80px 120px',
       }}
     >
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
-        <h2 style={{ ...heading, color: color.text.primary }}>LLM wall of fame</h2>
-        <p style={{ ...heading, color: color.text.muted }}>Claude said I&rsquo;m brilliant</p>
-      </div>
+      <h2 style={{ ...heading, color: color.text.primary }}>LLM wall of fame</h2>
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
         {clippings.map((clipping) => (

@@ -47,10 +47,7 @@ const entries: Entry[] = [
   {
     rail: ['yapping'],
     paragraphs: [
-      'Lately I’ve been having a lot of fun bouncing between AI tools and seeing how far I can push things. I’ll sketch in Figma, poke around in pencil.dev or paper, then hop into Claude Code and build the thing. The line between designer and front-end dev is getting blurry, and I’m having a great time living in the blur.',
-      'Figma isn’t going anywhere. It’s still where I think fast and get things pixel perfect. But a mock doesn’t have to sit there as a picture of the thing anymore. I can hand it to Claude, point it at the components I’ve already built, and watch it show up in the actual product. It also spits out way less slop when it’s working with your own pieces. Sometimes I still have to go in and delete the purple myself.',
-      'Building in the real product also means I catch the weird stuff while I’m designing, like edge cases and awkward states, instead of hearing about it in QA. Devs get working code instead of a static handoff, so they’re not starting from zero.',
-      'I don’t think this is designers replacing engineers. The genuinely hard problems still need engineers. But the small stuff like micro-interactions, polish, and little component details? I can just do that now.',
+      "didn't like the original yap , new yap in progress",
     ],
   },
 ]
