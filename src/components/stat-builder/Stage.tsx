@@ -4,8 +4,9 @@ import { BrandMark, CtaRow, Eyebrow, FeatureMedia, QuoteStrip, ShotFrame, SoftCl
 import { BODY_TEXT, BORDER, MUTED, useGutter } from './styles'
 
 /**
- * Media-first product page. The app fills the first viewport; brand and copy
- * sit under it as a tight masthead. Feature media bleeds off the right edge.
+ * Media-first product page. A one-line brand masthead sits above a full-bleed
+ * product shot so the name still reads as the hero, then the rest of the page
+ * stays sparse — stats, one feature bleeding off the edge, two quotes.
  */
 export default function Stage({ project }: { project: Project }) {
   const isMobile = useIsMobile()
@@ -15,6 +16,47 @@ export default function Stage({ project }: { project: Project }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '48px' : '72px' }}>
+      <div style={{ padding: `0 ${gutter}`, display: 'flex', flexDirection: 'column', gap: isMobile ? '20px' : '28px' }}>
+        <header
+          style={{
+            display: 'grid',
+            gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 1fr) auto',
+            gap: isMobile ? '16px' : '32px',
+            alignItems: 'end',
+          }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <BrandMark size={20} />
+              <Eyebrow>{landing.eyebrow}</Eyebrow>
+            </div>
+            <h1
+              style={{
+                margin: 0,
+                fontSize: isMobile ? '36px' : 'clamp(40px, 4.2vw, 56px)',
+                fontWeight: 600,
+                lineHeight: 1.05,
+                letterSpacing: '-0.032em',
+              }}
+            >
+              {project.title}
+            </h1>
+            <p
+              style={{
+                margin: 0,
+                maxWidth: '420px',
+                fontSize: '15px',
+                lineHeight: 1.45,
+                color: BODY_TEXT,
+              }}
+            >
+              {project.tagline}
+            </p>
+          </div>
+          <CtaRow size="sm" />
+        </header>
+      </div>
+
       <ShotFrame
         shot={landing.hero.shot}
         uncropped
@@ -34,46 +76,6 @@ export default function Stage({ project }: { project: Project }) {
           padding: `0 ${gutter}`,
         }}
       >
-        <header
-          style={{
-            display: 'grid',
-            gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 5fr) minmax(0, 6fr)',
-            gap: isMobile ? '20px' : '56px',
-            alignItems: 'end',
-          }}
-        >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <BrandMark size={22} />
-              <Eyebrow>{landing.eyebrow}</Eyebrow>
-            </div>
-            <h1
-              style={{
-                margin: 0,
-                fontSize: isMobile ? '38px' : 'clamp(44px, 4.8vw, 64px)',
-                fontWeight: 600,
-                lineHeight: 1.05,
-                letterSpacing: '-0.032em',
-              }}
-            >
-              {project.title}
-            </h1>
-            <CtaRow size="sm" />
-          </div>
-
-          <p
-            style={{
-              margin: 0,
-              fontSize: isMobile ? '16px' : '18px',
-              lineHeight: 1.5,
-              color: BODY_TEXT,
-              maxWidth: '420px',
-            }}
-          >
-            {project.tagline}
-          </p>
-        </header>
-
         <div
           style={{
             display: 'flex',

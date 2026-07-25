@@ -45,11 +45,19 @@ export default function Sequence({ project }: { project: Project }) {
             letterSpacing: '-0.034em',
           }}
         >
-          Armor optimizer for the vault you already have.
+          {project.title}
         </h1>
 
-        <p style={{ margin: 0, fontSize: isMobile ? '16px' : '18px', lineHeight: 1.5, color: BODY_TEXT }}>
-          {project.tagline}
+        <p
+          style={{
+            margin: 0,
+            fontSize: isMobile ? '17px' : '19px',
+            lineHeight: 1.45,
+            color: BODY_TEXT,
+            maxWidth: '480px',
+          }}
+        >
+          Armor optimizer for the vault you already have. {project.tagline}
         </p>
 
         <CtaRow />
