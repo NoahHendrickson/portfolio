@@ -61,24 +61,45 @@ export type LandingShot = {
   /** Aspect ratio of the image box — the window below the browser bar, when there is one. */
   aspect: string
   frame?: 'chrome' | 'border' | 'plain'
+  /**
+   * Image width as a multiple of the box, for the shots the file zooms into
+   * rather than fits. Pinned top-left, so the extra runs off the right edge.
+   */
+  zoom?: number
+}
+
+/** Panel overlapping the bottom-right of a browser frame — geometry in `ProjectStory.tsx`. */
+export type ShotOverlay = { src: string; alt: string; aspect: string }
+
+/** A screenshot with its caption underneath — one column of a side-by-side pair. */
+export type StoryColumn = {
+  /** Column width in px at the file's 1272px content width. */
+  width: number
+  shot: LandingShot
+  overlay?: ShotOverlay
+  /** One paragraph, or several stacked with the file's 16px gap. */
+  caption: string | string[]
+  /** Caption block narrower than its column, where the file has it so. */
+  captionWidth?: number
 }
 
 /**
- * A two-column row, as the copy and shot widths measured at the Figma file's
- * 1328px content width. The gap is whatever is left over, so the row keeps its
- * proportions at any window size.
+ * A row between the hero and the closing card, centered as a group in the
+ * content column. All widths and gaps are px at the file's 1272px content
+ * width; the row scales proportionally below it.
  */
-export type Split = { copy: number; shot: number }
-
-/** A copy-beside-screenshot block on a landing page. */
-export type Feature = {
-  heading: string
-  body: string
-  split: Split
-  shot: LandingShot
-  /** Panel overlapping the bottom-right of `shot` — geometry in `ProjectStory.tsx`. */
-  overlay?: { src: string; alt: string; aspect: string }
-}
+export type StorySection =
+  /** Screenshots side by side, captions underneath — D2 Stat Builder, The Forge. */
+  | { kind: 'columns'; gap: number; columns: StoryColumn[] }
+  /** One screenshot beside its caption, vertically centered — Phanttom. */
+  | {
+      kind: 'row'
+      gap: number
+      shot: LandingShot
+      shotWidth: number
+      caption: string | string[]
+      captionWidth: number
+    }
 
 /** One chat screenshot in the community-feedback wall. */
 export type FeedbackShot = {
@@ -88,7 +109,7 @@ export type FeedbackShot = {
   width: number
   /** Aspect ratio of the image inside the card. */
   aspect: string
-  /** Card padding in px. Defaults to 16. */
+  /** Card padding in px. Defaults to 6. */
   pad?: number
   /** Card background. Defaults to `#1a191e`. */
   bg?: string
@@ -104,23 +125,26 @@ export type FeedbackShot = {
 export type Landing = {
   /** Single muted line above the title — not the `eyebrow` array the generic page uses. */
   eyebrow: string
+  /** Centered 688px title block; every page runs it full width. */
   hero: {
-    split: Split
-    shot: LandingShot
-    /** Paragraphs beside the shot. Defaults to `[project.summary]`. */
+    /** Paragraphs under the title. Defaults to `[project.summary]`. */
     body?: string[]
-    /** Bottom-align the shot with the copy block instead of top-aligning it. */
-    alignEnd?: boolean
+    /** App shot below the copy block — Phanttom's window capture. */
+    shot?: LandingShot
+    /** Its width in px at the 1272px content width. */
+    shotWidth?: number
   }
-  /** The blocks between the hero and the closing card. */
-  features: Feature[]
+  /** The rows between the hero and the closing card. */
+  sections: StorySection[]
   feedback?: { heading: string; body: string; shots: FeedbackShot[] }
-  /** Closing orange card — replaces `cta` on a landing page. */
-  outro: {
+  /** Closing orange card — replaces `cta` on a landing page. Omit to skip it. */
+  outro?: {
     heading: string
     links?: { label: string; href: string }[]
     /** A static pill instead of links — the install command on The Forge. */
     command?: string
+    /** The file's 40px heading (The Forge) instead of Heading/L. */
+    large?: boolean
   }
 }
 
@@ -166,38 +190,46 @@ export const projects: Record<string, Project> = {
     },
     pageReady: true,
     landing: {
-      eyebrow: 'Design tool | Experimental case study',
+      eyebrow: 'AI Design Tool',
       hero: {
-        // 468 : 700 with a 160px gap, bottom-aligned so the shot ends level with the copy.
-        split: { copy: 468, shot: 700 },
-        alignEnd: true,
         body: [
           'Experimental Figma-style design mode for your own app, in your own browser that hands its edits to whatever AI coding agent you already use.',
           'Basically I wanted Cursor’s design mode in Claude. This is a bit of a case study to test a slightly different workflow for a design tool, where as a designer you get the precision of figma like inputs and then the coding agent you prefer applies those changes. So the code becomes the canvas.',
-          'I opted for a package that can be installed in your project and is meant to be very easy for coding agents to understand and setup. I may test out a mac app that you load a repo into. This is very much a learning project.',
         ],
-        shot: {
-          src: '/work/forge/design-mode.png',
-          alt: 'Design mode running over a live app — layer tree on the left, three cards on the canvas, properties panel on the right',
-          aspect: '700 / 366',
-          frame: 'border',
-        },
       },
-      features: [
+      sections: [
         {
-          heading: 'Canvas mode',
-          body: 'I really wanted the feel of Figma in the code. The ability to pan around and zoom on the page is so engrained in a designers brain.',
-          split: { copy: 572, shot: 700 },
-          shot: {
-            src: '/work/forge/canvas-mode.png',
-            alt: 'The same app zoomed out on an infinite canvas at 44%, layer tree and properties panel still docked either side',
-            aspect: '700 / 478',
-          },
+          kind: 'columns',
+          gap: 80,
+          columns: [
+            {
+              width: 483,
+              shot: {
+                src: '/work/forge/design-mode.png',
+                alt: 'Design mode running over a live app — layer tree on the left, three cards on the canvas, properties panel on the right',
+                aspect: '700 / 413',
+              },
+              caption:
+                'I opted for a package that can be installed in your project and is meant to be very easy for coding agents to understand and setup.',
+              captionWidth: 409,
+            },
+            {
+              width: 425,
+              shot: {
+                src: '/work/forge/canvas-mode.png',
+                alt: 'The same app zoomed out on an infinite canvas at 44%, layer tree and properties panel still docked either side',
+                aspect: '2974 / 2032',
+              },
+              caption:
+                'I really wanted the feel of Figma in the code. The ability to pan around and zoom on the page is so engrained in a designers brain.',
+            },
+          ],
         },
       ],
       outro: {
         heading: 'Try it in your own project with',
         command: 'npx forge-mode init',
+        large: true,
       },
     },
     summary:
@@ -301,32 +333,54 @@ export const projects: Record<string, Project> = {
     landing: {
       eyebrow: 'Destiny 2 3rd party tool',
       hero: {
-        // 491 : 797 with a 40px gap.
-        split: { copy: 491, shot: 797 },
-        shot: {
-          src: '/work/stat-builder/builder.png',
-          alt: 'The builder — armor summary, class tabs, six stat sliders, major mods and set bonuses on the left, ranked builds on the right',
-          aspect: '797 / 394',
-          frame: 'chrome',
-        },
+        // No shot — the file runs the title block the full width and opens the
+        // app in the first feature instead.
+        body: [
+          'I built a 3rd party tool for the video game Destiny 2. I’m a hardcore player and wanted a tool to help me create builds with certain stats and bonuses.',
+          'A Destiny 2 armor optimizer for Armor 3.0. Sign in with Bungie, set targets for the six stats, add the constraints for your build: exotic, set bonuses, fragments, mods, and the optimizer searches your own vault and returns the exact pieces to equip.',
+        ],
       },
-      features: [
+      sections: [
         {
-          heading: 'Table view',
-          body: 'Armor 3.0 changed how I ‘looked’ for armor. On top of wanting a fast armor optimizer, I wanted a really easy way to search and filter my armor across the parameters that mattered. Intentionally designed for large screens based on the user base. Users can add custom sorting, pin filter values they use often to make their armor search easy.',
-          // The shot column is the 797px composition — a 700px frame with the sort panel hanging off it.
-          split: { copy: 499, shot: 797 },
-          shot: {
-            src: '/work/stat-builder/table.png',
-            alt: 'The armor table, filtered by class, archetype, tertiary stat and set bonus',
-            aspect: '700 / 388',
-            frame: 'chrome',
-          },
-          overlay: {
-            src: '/work/stat-builder/sort-panel.png',
-            alt: 'Sort by Tuned — a custom stat order dragged into place',
-            aspect: '258 / 303',
-          },
+          kind: 'columns',
+          gap: 120,
+          columns: [
+            {
+              width: 404,
+              shot: {
+                src: '/work/stat-builder/builder.png',
+                alt: 'The builder — armor summary, class tabs, six stat sliders, major mods and set bonuses on the left, ranked builds on the right',
+                // The file clips a 404 × 254 frame out of the capture. Our
+                // browser bar is a shade shorter than Figma's, so the window
+                // takes the difference back and the frame lands on its height.
+                aspect: '404 / 231.5',
+                frame: 'chrome',
+              },
+              caption:
+                'I originally built this to solve my own problems. I wanted a stable and fast way to make builds and filter through my armor.',
+            },
+            {
+              width: 409,
+              // The column holds the composition — a browser frame with the sort
+              // panel hanging off its bottom-right; geometry in `ProjectStory.tsx`.
+              shot: {
+                src: '/work/stat-builder/table-full.png',
+                alt: 'The armor table, filtered by class, archetype, tertiary stat and set bonus',
+                aspect: '408.9 / 230',
+                frame: 'chrome',
+                // 450px of screenshot inside a 409px frame — the file crops in
+                // on the left of the table rather than fitting the whole width.
+                zoom: 1.102,
+              },
+              overlay: {
+                src: '/work/stat-builder/sort-panel.png',
+                alt: 'Sort by Tuned — a custom stat order dragged into place',
+                aspect: '626 / 736',
+              },
+              caption:
+                'Armor 3.0 changed how stats and bonuses worked for armor. I wanted a really easy way to search and filter my armor across the parameters that mattered. Intentionally designed for large screens based on the user base. Quick filters alongside custom sorts help users find what they want.',
+            },
+          ],
         },
       ],
       feedback: {
@@ -336,45 +390,46 @@ export const projects: Record<string, Project> = {
           {
             src: '/work/stat-builder/feedback-table-page.jpg',
             alt: '“omg the table page is so good, thank you — this is a dope site, good job, ill add it to #helpful-links”',
-            width: 303,
+            width: 121,
             aspect: '606 / 259',
+            pad: 6,
             bg: '#201f24',
           },
           {
             src: '/work/stat-builder/feedback-helpful-links.jpg',
             alt: 'The app linked in the server’s helpful-links channel — “check available builds and excellent armor filtering”',
-            width: 603,
+            width: 241,
             aspect: '554 / 146',
-            pad: 8,
+            pad: 3,
             position: '72% 50%',
           },
           {
             src: '/work/stat-builder/feedback-works-great.jpg',
             alt: '“oh wow! that is absolutely amazing, it seems to work great — thank you so much for implementing”',
-            width: 405.5,
+            width: 162,
             aspect: '352 / 97',
+            pad: 6,
             position: 'left top',
           },
           {
             src: '/work/stat-builder/feedback-best-one.jpg',
             alt: '“Hey dude, I really love your app, its so good and quick — easily the best one out there”',
-            width: 498,
+            width: 199,
             aspect: '996 / 251',
+            pad: 6,
           },
           {
             src: '/work/stat-builder/feedback-owned-only.jpg',
             alt: '“ok one thing i love is that it only shows things i have, it doesnt give me an insanely long list of stuff i cant use”',
-            width: 362,
+            width: 145,
             aspect: '1016 / 881',
+            pad: 6,
           },
         ],
       },
       outro: {
-        heading: 'If you happen to be a hard-core Destiny 2 fan, check it out!',
-        links: [
-          { label: 'D2 Stat Builder', href: 'https://d2-stat-builder-dusky.vercel.app/' },
-          { label: 'See the repo', href: 'https://github.com/NoahHendrickson/d2-stat-builder' },
-        ],
+        heading: 'If you happen to be a hardcore Destiny 2 fan, check it out.',
+        links: [{ label: 'D2 Stat Builder', href: 'https://d2-stat-builder-dusky.vercel.app/' }],
       },
     },
     summary:
@@ -550,6 +605,57 @@ export const projects: Record<string, Project> = {
       cover: '/work/phanttom/hero.png',
       tagline:
         'My fork of ghostty because i wanted vertical tabs with additional information, and it sounded like fun.',
+    },
+    pageReady: true,
+    landing: {
+      eyebrow: 'Forked ghostty project',
+      hero: {
+        body: [
+          'This is a fork of Ghostty, a popular terminal emulator. I wanted to design my own terminal for a few reasons: I really like vertical tabs and more importantly I really wanted to see more information at a glance when using the terminal.',
+        ],
+        // The app window sits under the copy block, a shade wider than it.
+        shot: {
+          src: '/work/phanttom/app.png',
+          alt: 'Phanttom — vertical sidebar with agent tabs beside a terminal session',
+          aspect: '718 / 487',
+        },
+        shotWidth: 718,
+      },
+      sections: [
+        {
+          kind: 'row',
+          gap: 56,
+          shotWidth: 262,
+          shot: {
+            src: '/work/phanttom/sidebar.png',
+            alt: 'Phanttom sidebar — project groups, tab names, branches and agent status',
+            aspect: '262 / 356',
+          },
+          caption: [
+            'As a designer git, branches, worktrees, checkouts is a lot to juggle and think about. I wanted to have more information across the threads i was working on without needing to click into each one.',
+            'I also wanted to take advantage of the world we live today: you can build (fork in this case) and design your own tools to solve the problems you have.',
+          ],
+          captionWidth: 401,
+        },
+        {
+          kind: 'row',
+          gap: 56,
+          shotWidth: 263,
+          shot: {
+            src: '/work/phanttom/folder-picker.png',
+            alt: 'Folder picker popover for opening a project without cd-ing',
+            aspect: '263 / 210',
+          },
+          caption: 'I’ll just never feel comfortable cd-ing into folders, I need a UI for that :p',
+          captionWidth: 397,
+        },
+      ],
+      // The file's card reuses the D2 Stat Builder pill label — clearly a
+      // copy-paste slip, so the link carries its real destination.
+      outro: {
+        heading: 'Download from github',
+        links: [{ label: 'GitHub', href: 'https://github.com/NoahHendrickson/phanttom' }],
+      },
     },
     summary:
       'A fork of Ghostty with tabs moved into a vertical sidebar, a real appearance settings GUI, and first-class support for AI coding agents: tabs that name themselves from your first prompt, working / done / attention status per session, and a pixel-rain indicator that shows a session is alive. Phantom with two t’s, in the spirit of Ghostty’s.',

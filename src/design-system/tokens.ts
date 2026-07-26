@@ -11,6 +11,7 @@ export const color = {
     raised: 'var(--color-bg-raised)',
     inverse: 'var(--color-bg-inverse)',
     cream: 'var(--color-bg-cream)',
+    tint: 'var(--color-bg-tint)',
   },
   text: {
     primary: 'var(--color-text-primary)',

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import '@noey-17/yearn-ui/style.css'
 import Header from './components/Header'
 import Hero from './components/Hero'
@@ -15,14 +15,14 @@ import { ForgeDesignMode } from 'forge-mode/design-mode'
 
 const BG = 'var(--color-bg-primary)'
 
-/** Percentage of the viewport the content column takes; on Design it slides over the shader. */
+/** Percentage of the viewport the content column takes; on Design it covers more of the shader. */
 const CONTENT_PCT = { me: 58.3, work: 87.3 }
 
 /**
  * The shader column starts where the Me tab's content column ends and runs to the
  * right edge. Anchoring both sides rather than setting a width keeps it flush with
  * the column whether or not the page has a scrollbar; widening the column on Design
- * just covers more of it, so the gradient slides under the panel instead of
+ * just covers more of it, so the gradient sits under the panel instead of
  * getting squished.
  */
 const SHADER_LEFT = `${CONTENT_PCT.me}vw`
@@ -30,8 +30,7 @@ const SHADER_LEFT = `${CONTENT_PCT.me}vw`
 /**
  * The tab bar is centred in the content column, so widening the column would drag
  * it right by half the width change. Shift it back by exactly that much to hold it
- * still. Both the width and this offset ease on the same curve, so the two cancel
- * out for the whole animation, not just at the ends.
+ * still when the column snaps wider on Design.
  */
 const TAB_SHIFT = {
   me: '0px',
@@ -44,7 +43,6 @@ function getRoute() {
 
 export default function App() {
   const [route, setRoute] = useState(getRoute)
-  const splitRef = useRef<HTMLDivElement>(null)
   const isMobile = useIsMobile()
 
   useEffect(() => {
@@ -54,24 +52,6 @@ export default function App() {
     }
     window.addEventListener('hashchange', onHashChange)
     return () => window.removeEventListener('hashchange', onHashChange)
-  }, [])
-
-  // The column width is a percentage, so the tab-switch transition would also ease
-  // on every window resize. Mark the column while resizing; CSS drops the easing.
-  useEffect(() => {
-    let timeout: ReturnType<typeof setTimeout>
-    const onResize = () => {
-      const el = splitRef.current
-      if (!el) return
-      el.dataset.resizing = 'true'
-      clearTimeout(timeout)
-      timeout = setTimeout(() => delete el.dataset.resizing, 200)
-    }
-    window.addEventListener('resize', onResize)
-    return () => {
-      window.removeEventListener('resize', onResize)
-      clearTimeout(timeout)
-    }
   }, [])
 
   if (route === '/work/invisible') {
@@ -120,8 +100,6 @@ export default function App() {
       )}
 
       <div
-        ref={splitRef}
-        className={isMobile ? undefined : 'split-column'}
         style={{
           position: 'relative',
           zIndex: 1,
@@ -138,20 +116,43 @@ export default function App() {
           background: BG,
         }}
       >
-        <Header
-          active={tab}
-          tabShift={isMobile ? undefined : TAB_SHIFT[tab]}
-          showProfile={tab === 'me'}
-        />
-
         {tab === 'work' ? (
-          <div style={{ padding: pageInset }}>
-            <WorkList />
-          </div>
+          <>
+            <Header
+              active={tab}
+              tabShift={isMobile ? undefined : TAB_SHIFT[tab]}
+              showProfile={false}
+            />
+            <div key="work" style={{ padding: pageInset }}>
+              <WorkList />
+            </div>
+          </>
         ) : (
           <>
-            <div style={{ padding: pageInset }}>
-              <Hero />
+            {/*
+              Header + hero fill the first screen so “most recently” starts
+              below the fold on land. flex:1 on the hero absorbs whatever
+              space the header doesn’t use inside this 100svh shell.
+            */}
+            <div
+              key="me"
+              className="tab-content-in"
+              style={{
+                minHeight: '100svh',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '24px',
+                boxSizing: 'border-box',
+              }}
+            >
+              <Header
+                active={tab}
+                tabShift={isMobile ? undefined : TAB_SHIFT[tab]}
+                showProfile
+              />
+              <div style={{ padding: pageInset, boxSizing: 'border-box', flex: '1 0 auto' }}>
+                <Hero />
+              </div>
             </div>
             <Experience />
             <LlmWall />

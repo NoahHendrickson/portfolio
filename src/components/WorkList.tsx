@@ -52,6 +52,7 @@ const forFun: Row[] = [
     title: projects.phanttom.title,
     logo: { src: '/work/logos/phanttom.png', width: 12, height: 17 },
     body: 'My fork of ghostty because i wanted vertical tabs with additional information, and it sounded like fun.',
+    showcase: '#/work/phanttom',
     links: [{ kind: 'repo', href: 'https://github.com/NoahHendrickson/phanttom' }],
     media: {
       src: '/work/phanttom/hero.png',
@@ -130,11 +131,15 @@ export default function WorkList() {
   const list = (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       {active.rows.length === 0 ? (
-        <p style={{ margin: 0, fontSize: type['body-s'].fontSize, color: color.text.muted }}>
+        <p
+          key={`${activeId}-empty`}
+          className="tab-content-in"
+          style={{ margin: 0, fontSize: type['body-s'].fontSize, color: color.text.muted }}
+        >
           Nothing here yet — still digging through the archive.
         </p>
       ) : (
-        active.rows.map((row) => <ProjectRow key={row.id} row={row} />)
+        active.rows.map((row, i) => <ProjectRow key={row.id} row={row} index={i} />)
       )}
     </div>
   )
@@ -157,7 +162,9 @@ export default function WorkList() {
   )
 }
 
-function ProjectRow({ row }: { row: Row }) {
+const ROW_STAGGER_MS = 60
+
+function ProjectRow({ row, index }: { row: Row; index: number }) {
   const isMobile = useIsMobile()
 
   const copy = (
@@ -219,6 +226,7 @@ function ProjectRow({ row }: { row: Row }) {
 
   return (
     <div
+      className="tab-content-in"
       style={{
         display: 'grid',
         // Copy takes the row; a screenshot, when there is one, sits in a fixed
@@ -228,6 +236,8 @@ function ProjectRow({ row }: { row: Row }) {
         alignItems: 'center',
         paddingBottom: '16px',
         borderBottom: `1px solid ${color.border.subtle}`,
+        // Cascades each row after the previous when the Design tab (or filter) mounts.
+        animationDelay: `${index * ROW_STAGGER_MS}ms`,
       }}
     >
       {copy}

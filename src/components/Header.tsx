@@ -10,7 +10,7 @@ type Props = {
   contentInset?: string
   /**
    * Horizontal offset for the tab bar, cancelling out a change in the column width
-   * so the tabs stay put while the column animates. See `TAB_SHIFT` in App.tsx.
+   * so the tabs stay put when the column snaps wider on Design. See `TAB_SHIFT` in App.tsx.
    */
   tabShift?: string
   /** Pass `false` on pages whose design is just the tab bar. */

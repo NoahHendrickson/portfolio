@@ -10,6 +10,9 @@
   --color-bg-raised: #1d1f1e;
   --color-bg-inverse: #ecede6;
   --color-bg-cream: #f5efe0;
+  /* A translucent lift off whatever is behind it, so it stacks — a band on the
+     shell, and the feedback wall sitting on that band. */
+  --color-bg-tint: rgba(255, 255, 255, 0.08);
 
   /* Text */
   --color-text-primary: #ecede6;
@@ -77,20 +80,18 @@ html, body {
   }
 }
 
-/* Content column that widens on the Design tab (App.tsx) */
-.split-column {
-  transition: width 400ms cubic-bezier(0.4, 0, 0.2, 1);
+/* Tab body entrance — fades and slides down when Me / Design content mounts */
+@keyframes tab-content-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.split-column[data-resizing] {
-  transition: none;
-}
-
-/* Holds the tab bar still while the column width animates (Header.tsx) */
-.tab-shift {
-  transition: transform 400ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.split-column[data-resizing] .tab-shift {
-  transition: none;
+.tab-content-in {
+  animation: tab-content-in 300ms cubic-bezier(0.4, 0, 0.2, 1) both;
 }
