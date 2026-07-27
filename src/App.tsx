@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import '@noey-17/yearn-ui/style.css'
 import Header from './components/Header'
+import Footer from './components/Footer'
 import Hero from './components/Hero'
 import WorkList from './components/WorkList'
 import ShaderPanel from './components/ShaderPanel'
@@ -111,7 +112,6 @@ export default function App() {
           // shader's overhang from adding a horizontal scrollbar.
           width: isMobile ? '100%' : `${CONTENT_PCT[tab]}vw`,
           minHeight: isMobile ? undefined : '100vh',
-          paddingBottom: isMobile ? '0' : '40px',
           boxSizing: 'border-box',
           background: BG,
         }}
@@ -165,6 +165,15 @@ export default function App() {
             <ShaderPanel />
           </div>
         )}
+      </div>
+
+      {/*
+        Outside the content column — the footer is a full-width band in the file,
+        so it can't sit inside the Me tab's 58.3vw column. `position: relative`
+        keeps it above the shader's absolutely-positioned panel.
+      */}
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        <Footer />
       </div>
 
       <ForgeDesignMode />

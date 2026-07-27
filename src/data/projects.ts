@@ -68,15 +68,24 @@ export type LandingShot = {
   zoom?: number
 }
 
-/** Panel overlapping the bottom-right of a browser frame — geometry in `ProjectStory.tsx`. */
-export type ShotOverlay = { src: string; alt: string; aspect: string }
+/**
+ * A panel laid over a screenshot. Its box is px inside the `shot` section's
+ * `width` × `height`, so it keeps its overlap as the composition scales.
+ */
+export type ShotOverlay = {
+  src: string
+  alt: string
+  aspect: string
+  left: number
+  top: number
+  width: number
+}
 
 /** A screenshot with its caption underneath — one column of a side-by-side pair. */
 export type StoryColumn = {
   /** Column width in px at the file's 1272px content width. */
   width: number
   shot: LandingShot
-  overlay?: ShotOverlay
   /** One paragraph, or several stacked with the file's 16px gap. */
   caption: string | string[]
   /** Caption block narrower than its column, where the file has it so. */
@@ -89,7 +98,7 @@ export type StoryColumn = {
  * width; the row scales proportionally below it.
  */
 export type StorySection =
-  /** Screenshots side by side, captions underneath — D2 Stat Builder, The Forge. */
+  /** Screenshots side by side, captions underneath — The Forge. */
   | { kind: 'columns'; gap: number; columns: StoryColumn[] }
   /** One screenshot beside its caption, vertically centered — Phanttom. */
   | {
@@ -100,12 +109,31 @@ export type StorySection =
       caption: string | string[]
       captionWidth: number
     }
+  /** A centered 688px heading + body block, standing between shots — D2 Stat Builder. */
+  | { kind: 'copy'; heading: string; body: string | string[] }
+  /**
+   * One screenshot on its own, optionally with a panel laid over it. The box is
+   * the whole composition's footprint at the file's 1512 frame; the frame and
+   * the overlay are placed inside it as shares, so the group scales as one.
+   */
+  | {
+      kind: 'shot'
+      width: number
+      height: number
+      /** The browser frame's box inside that footprint. */
+      frame: { left: number; top: number; width: number }
+      shot: LandingShot
+      overlay?: ShotOverlay
+    }
 
 /** One chat screenshot in the community-feedback wall. */
 export type FeedbackShot = {
   src: string
   alt: string
-  /** Card width in px at the design's content width; the wall wraps below that. */
+  /**
+   * Card width in px at the design's content width, rendered as an `fr` share
+   * of the wall — the row always fills the column and the cards scale together.
+   */
   width: number
   /** Aspect ratio of the image inside the card. */
   aspect: string
@@ -123,8 +151,19 @@ export type FeedbackShot = {
  * that page instead of the generic `ProjectLanding`.
  */
 export type Landing = {
-  /** Single muted line above the title — not the `eyebrow` array the generic page uses. */
-  eyebrow: string
+  /**
+   * The muted line above the title. Several entries render as one row split by
+   * hairlines, which is how the D2 frame carries "Vibe coded / Figma+Cursor+Claude".
+   */
+  eyebrow: string | string[]
+  /**
+   * Row rhythm. `banded` (the default, and the Phanttom and Forge frames) makes
+   * every row its own 80px-padded band, so consecutive rows sit 184px apart with
+   * the page's own 24px gap between them. `continuous` is the D2 frame, where
+   * the whole body is a single 80px-padded block with 80px between rows and the
+   * bands below it butted straight up against it.
+   */
+  flow?: 'banded' | 'continuous'
   /** Centered 688px title block; every page runs it full width. */
   hero: {
     /** Paragraphs under the title. Defaults to `[project.summary]`. */
@@ -136,7 +175,7 @@ export type Landing = {
   }
   /** The rows between the hero and the closing card. */
   sections: StorySection[]
-  feedback?: { heading: string; body: string; shots: FeedbackShot[] }
+  feedback?: { heading: string; body?: string; shots: FeedbackShot[] }
   /** Closing orange card — replaces `cta` on a landing page. Omit to skip it. */
   outro?: {
     heading: string
@@ -331,66 +370,65 @@ export const projects: Record<string, Project> = {
     },
     pageReady: true,
     landing: {
-      eyebrow: 'Destiny 2 3rd party tool',
+      eyebrow: ['Vibe coded', 'Figma+Cursor+Claude'],
+      // The July frame runs the body as one 80px-padded block rather than a
+      // stack of bands, and butts the feedback wall straight onto the bottom.
+      flow: 'continuous',
       hero: {
-        // No shot — the file runs the title block the full width and opens the
-        // app in the first feature instead.
         body: [
-          'I built a 3rd party tool for the video game Destiny 2. I’m a hardcore player and wanted a tool to help me create builds with certain stats and bonuses.',
-          'A Destiny 2 armor optimizer for Armor 3.0. Sign in with Bungie, set targets for the six stats, add the constraints for your build: exotic, set bonuses, fragments, mods, and the optimizer searches your own vault and returns the exact pieces to equip.',
+          'This is a tool for my favorite video game of all time, Destiny 2. It’s made for power users and nerds like myself. For those unfamiliar with Destiny 2, this allows you to set preferences and then finds the armor pieces you should equip to achieve that build.',
+          'There are other sites that do this, but I wanted to focus mine on the particular needs of hard core players and a change in the armor system that allowed me to speed up the search for builds once a user enters their parameters.',
         ],
+        shot: {
+          src: '/work/stat-builder/builder.png',
+          alt: 'The builder — armor summary, class tabs, six stat sliders, major mods and set bonuses on the left, ranked builds on the right',
+          // The file clips a 1078 × 678 frame out of the capture. Our browser
+          // bar renders taller than Figma's at this width, so the window gives
+          // the difference back and the frame lands on its designed height.
+          aspect: '1078 / 618',
+          frame: 'chrome',
+        },
+        shotWidth: 1078,
       },
       sections: [
         {
-          kind: 'columns',
-          gap: 120,
-          columns: [
-            {
-              width: 404,
-              shot: {
-                src: '/work/stat-builder/builder.png',
-                alt: 'The builder — armor summary, class tabs, six stat sliders, major mods and set bonuses on the left, ranked builds on the right',
-                // The file clips a 404 × 254 frame out of the capture. Our
-                // browser bar is a shade shorter than Figma's, so the window
-                // takes the difference back and the frame lands on its height.
-                aspect: '404 / 231.5',
-                frame: 'chrome',
-              },
-              caption:
-                'I originally built this to solve my own problems. I wanted a stable and fast way to make builds and filter through my armor.',
-            },
-            {
-              width: 409,
-              // The column holds the composition — a browser frame with the sort
-              // panel hanging off its bottom-right; geometry in `ProjectStory.tsx`.
-              shot: {
-                src: '/work/stat-builder/table-full.png',
-                alt: 'The armor table, filtered by class, archetype, tertiary stat and set bonus',
-                aspect: '408.9 / 230',
-                frame: 'chrome',
-                // 450px of screenshot inside a 409px frame — the file crops in
-                // on the left of the table rather than fitting the whole width.
-                zoom: 1.102,
-              },
-              overlay: {
-                src: '/work/stat-builder/sort-panel.png',
-                alt: 'Sort by Tuned — a custom stat order dragged into place',
-                aspect: '626 / 736',
-              },
-              caption:
-                'Armor 3.0 changed how stats and bonuses worked for armor. I wanted a really easy way to search and filter my armor across the parameters that mattered. Intentionally designed for large screens based on the user base. Quick filters alongside custom sorts help users find what they want.',
-            },
-          ],
+          kind: 'copy',
+          heading: 'I wanted to make finding my armor easier',
+          body: 'The armor system was changed, affecting stats and bonuses you could get. I wanted a really easy way to search and filter my armor across the things that mattered. I designed a custom sorting functionality to mirror the mental model I have for armor.',
+        },
+        {
+          // The one overlapping composition in the file — the sort panel laid
+          // over the bottom-right of the table frame.
+          kind: 'shot',
+          width: 1064,
+          height: 580,
+          frame: { left: 35, top: 24, width: 879.75 },
+          shot: {
+            src: '/work/stat-builder/table-full.png',
+            alt: 'The armor table, filtered by class, archetype, tertiary stat and set bonus',
+            aspect: '879.75 / 497',
+            frame: 'chrome',
+            // 1202px of screenshot inside an 880px frame — the file crops in on
+            // the left of the table rather than fitting the whole width.
+            zoom: 1.366,
+          },
+          overlay: {
+            src: '/work/stat-builder/sort-panel.png',
+            alt: 'Sort by Tuned — a custom stat order dragged into place',
+            aspect: '626 / 736',
+            left: 780,
+            top: 130,
+            width: 250,
+          },
         },
       ],
       feedback: {
         heading: 'Community feedback',
-        body: 'I started making this for myself and shared in a community discord. Seeing the positive feedback is great, but even better has been getting requests for additional features and users finding bugs.',
         shots: [
           {
             src: '/work/stat-builder/feedback-table-page.jpg',
             alt: '“omg the table page is so good, thank you — this is a dope site, good job, ill add it to #helpful-links”',
-            width: 121,
+            width: 171,
             aspect: '606 / 259',
             pad: 6,
             bg: '#201f24',
@@ -398,7 +436,7 @@ export const projects: Record<string, Project> = {
           {
             src: '/work/stat-builder/feedback-helpful-links.jpg',
             alt: 'The app linked in the server’s helpful-links channel — “check available builds and excellent armor filtering”',
-            width: 241,
+            width: 342,
             aspect: '554 / 146',
             pad: 3,
             position: '72% 50%',
@@ -406,7 +444,7 @@ export const projects: Record<string, Project> = {
           {
             src: '/work/stat-builder/feedback-works-great.jpg',
             alt: '“oh wow! that is absolutely amazing, it seems to work great — thank you so much for implementing”',
-            width: 162,
+            width: 230,
             aspect: '352 / 97',
             pad: 6,
             position: 'left top',
@@ -414,23 +452,20 @@ export const projects: Record<string, Project> = {
           {
             src: '/work/stat-builder/feedback-best-one.jpg',
             alt: '“Hey dude, I really love your app, its so good and quick — easily the best one out there”',
-            width: 199,
+            width: 283,
             aspect: '996 / 251',
             pad: 6,
           },
           {
             src: '/work/stat-builder/feedback-owned-only.jpg',
             alt: '“ok one thing i love is that it only shows things i have, it doesnt give me an insanely long list of stuff i cant use”',
-            width: 145,
+            width: 205,
             aspect: '1016 / 881',
             pad: 6,
           },
         ],
       },
-      outro: {
-        heading: 'If you happen to be a hardcore Destiny 2 fan, check it out.',
-        links: [{ label: 'D2 Stat Builder', href: 'https://d2-stat-builder-dusky.vercel.app/' }],
-      },
+      // The July frame drops the closing orange card and ends on the footer.
     },
     summary:
       'A Destiny 2 armor optimizer for Armor 3.0. Sign in with Bungie, set targets for the six stats, add the constraints for your build: exotic, set bonuses, fragments, mods, and the optimizer searches your own vault and returns the exact pieces to equip.',
@@ -617,9 +652,9 @@ export const projects: Record<string, Project> = {
         shot: {
           src: '/work/phanttom/app.png',
           alt: 'Phanttom — vertical sidebar with agent tabs beside a terminal session',
-          aspect: '718 / 487',
+          aspect: '1078 / 731',
         },
-        shotWidth: 718,
+        shotWidth: 1078,
       },
       sections: [
         {

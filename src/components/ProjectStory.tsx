@@ -1,13 +1,14 @@
+import { Fragment } from 'react'
 import { ArrowLeft } from '@phosphor-icons/react'
 import Header from './Header'
+import Footer from './Footer'
 import { VARIANTS } from '../design-system/buttonStyles'
-import { control, radius, space, type } from '../design-system/tokens'
+import { color, control, radius, space, type } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
 import type {
   FeedbackShot,
   LandingShot,
   Project,
-  ShotOverlay,
   StoryColumn,
   StorySection,
 } from '../data/projects'
@@ -35,24 +36,14 @@ const OVERLAY_BORDER = '#3358c1'
 const GUTTER = 120
 /** The content width inside those gutters, which every row width is measured against. */
 const CONTENT_WIDTH = 1512 - GUTTER * 2
+/** The centered copy column — the title block and the `copy` rows both run on it. */
+const COPY_WIDTH = 688
+/** Gap between the feedback wall's cards, 9.588 in the file. */
+const WALL_GAP = 10
 
 const pct = (px: number, of: number) => `${(px / of) * 100}%`
 
-/**
- * The one overlapping composition in the file: a 409px browser frame with the
- * 175px sort panel hanging off its bottom-right, 471px wide overall — wider
- * than the column it sits in, so the panel overhangs into the trailing gutter.
- * Everything is a share of that box, so the overlap survives being scaled down.
- */
-const COMPOSITION = {
-  /** The group against its 409px column — the overhang past 100% is the panel. */
-  column: pct(471.1, 409),
-  width: 471.1,
-  base: 408.9,
-  overlayLeft: 296,
-  overlayTop: 37.9,
-  height: 252.8,
-}
+const toParagraphs = (text: string | string[]) => (Array.isArray(text) ? text : [text])
 
 /**
  * Screenshot-led project landing (`#/work/<slug>` for any project with a
@@ -74,6 +65,12 @@ export default function ProjectStory({ project }: { project: Project }) {
   const gutter = isMobile ? '20px' : `${GUTTER}px`
   const rowPad = isMobile ? '40px' : '80px'
   const heroBody = landing.hero.body ?? [project.summary]
+  const eyebrow = toParagraphs(landing.eyebrow)
+  const continuous = landing.flow === 'continuous'
+
+  const rows = landing.sections.map((section, i) => (
+    <SectionContent key={sectionKey(section, i)} section={section} />
+  ))
 
   return (
     <div
@@ -81,49 +78,22 @@ export default function ProjectStory({ project }: { project: Project }) {
         minHeight: '100vh',
         background: PAGE_BG,
         color: TEXT,
-        paddingBottom: isMobile ? '60px' : '76px',
         display: 'flex',
         flexDirection: 'column',
-        gap: space.xl,
+        gap: continuous ? '0' : space.xl,
       }}
     >
       <Header active="work" showProfile={false} />
 
       {/*
-        Not in the file's frames, kept deliberately. Styled as the design
-        system's ghost pill so it reads the same as the Design tab's controls,
-        but kept an anchor — `Button` renders a <button>, and nesting one inside
-        a link is invalid. The palette is pulled from `buttonStyles` rather than
-        restated, so the two can't drift.
+        Hero — a centered title block with the Back pill in the margin beside it,
+        and the app window under it when the project has one. On a `continuous`
+        page the rest of the rows run in this same block on the file's 80px gap;
+        a `banded` page gives each of them its own padded band below.
       */}
-      <a
-        href="#/work"
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: space.sm,
-          height: control.sm,
-          boxSizing: 'border-box',
-          padding: `0 ${space.lg}`,
-          marginLeft: gutter,
-          width: 'fit-content',
-          borderRadius: radius.full,
-          border: `1px solid ${VARIANTS.ghost.default.borderColor}`,
-          background: VARIANTS.ghost.default.background,
-          color: VARIANTS.ghost.default.color,
-          fontSize: type['label-m'].fontSize,
-          fontWeight: type['label-m'].fontWeight,
-          lineHeight: type['label-m'].lineHeight,
-          textDecoration: 'none',
-        }}
-      >
-        <ArrowLeft size={16} />
-        Back
-      </a>
-
-      {/* Hero — a centered title block, the app window under it when the project has one */}
       <section
         style={{
+          position: 'relative',
           padding: `${rowPad} ${gutter}`,
           display: 'flex',
           flexDirection: 'column',
@@ -131,10 +101,28 @@ export default function ProjectStory({ project }: { project: Project }) {
           gap: isMobile ? space['2xl'] : space['5xl'],
         }}
       >
-        <div style={{ width: '100%', maxWidth: '688px', display: 'flex', flexDirection: 'column', gap: space.lg }}>
-          <p style={{ margin: 0, fontSize: '16px', fontWeight: 500, lineHeight: '24px', color: MUTED }}>
-            {landing.eyebrow}
-          </p>
+        <BackPill inset={isMobile ? undefined : rowPad} />
+
+        <div
+          style={{
+            width: '100%',
+            maxWidth: `${COPY_WIDTH}px`,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: space.lg,
+          }}
+        >
+          {/* Several entries read as one row split by hairlines. */}
+          <div style={{ display: 'flex', alignItems: 'stretch', gap: space.lg }}>
+            {eyebrow.map((label, i) => (
+              <Fragment key={label}>
+                {i > 0 && <div style={{ width: '1px', background: color.border.subtle }} />}
+                <p style={{ margin: 0, fontSize: '16px', fontWeight: 500, lineHeight: '24px', color: MUTED }}>
+                  {label}
+                </p>
+              </Fragment>
+            ))}
+          </div>
 
           <h1
             style={{
@@ -166,16 +154,19 @@ export default function ProjectStory({ project }: { project: Project }) {
             style={{ width: '100%', maxWidth: `${landing.hero.shotWidth ?? 718}px` }}
           />
         )}
+
+        {continuous && rows}
       </section>
 
-      {landing.sections.map((section) => (
-        <StoryRow
-          key={section.kind === 'columns' ? section.columns[0].shot.src : section.shot.src}
-          section={section}
-          gutter={gutter}
-          rowPad={rowPad}
-        />
-      ))}
+      {!continuous &&
+        landing.sections.map((section, i) => (
+          <section
+            key={sectionKey(section, i)}
+            style={{ padding: `${rowPad} ${gutter}`, display: 'flex', justifyContent: 'center' }}
+          >
+            {rows[i]}
+          </section>
+        ))}
 
       {landing.feedback && (
         <section
@@ -184,41 +175,26 @@ export default function ProjectStory({ project }: { project: Project }) {
             padding: `${rowPad} ${gutter}`,
             display: 'flex',
             flexDirection: 'column',
-            alignItems: 'center',
             gap: '40px',
           }}
         >
-          <div style={{ width: '100%', maxWidth: '800px', display: 'flex', flexDirection: 'column', gap: space.lg }}>
-            <h2
-              style={{
-                margin: 0,
-                ...type['heading-l'],
-                fontSize: isMobile ? '24px' : type['heading-l'].fontSize,
-              }}
-            >
-              {landing.feedback.heading}
-            </h2>
+          <h2
+            style={{
+              margin: 0,
+              ...type['heading-l'],
+              fontSize: isMobile ? '24px' : type['heading-l'].fontSize,
+            }}
+          >
+            {landing.feedback.heading}
+          </h2>
+
+          {landing.feedback.body && (
             <p style={{ margin: 0, maxWidth: '720px', fontSize: isMobile ? '16px' : '18px', lineHeight: 'normal' }}>
               {landing.feedback.body}
             </p>
-          </div>
+          )}
 
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: space.sm,
-              width: isMobile ? '100%' : 'max-content',
-              maxWidth: '100%',
-              boxSizing: 'border-box',
-            }}
-          >
-            {landing.feedback.shots.map((shot) => (
-              <FeedbackCard key={shot.src} shot={shot} />
-            ))}
-          </div>
+          <FeedbackWall shots={landing.feedback.shots} />
         </section>
       )}
 
@@ -266,69 +242,148 @@ export default function ProjectStory({ project }: { project: Project }) {
           </div>
         </section>
       )}
+
+      <Footer />
     </div>
   )
 }
 
+/** Rows are keyed off their first screenshot; `copy` rows have none, so index it. */
+function sectionKey(section: StorySection, i: number) {
+  if (section.kind === 'copy') return `${i}-${section.heading}`
+  if (section.kind === 'columns') return section.columns[0].shot.src
+  return section.shot.src
+}
+
 /**
- * One centered screenshot row. `columns` puts shots side by side with their
- * captions underneath; `row` seats a single shot beside its caption. Widths
- * are px at the file's 1272px content width, rendered as shares of it so the
- * whole group scales together.
+ * The body of one story row, centered in the content column without a band
+ * around it — the page decides whether it gets one. `columns` puts shots side
+ * by side with their captions underneath, `row` seats a single shot beside its
+ * caption, `copy` is a heading and body on the 688px column, and `shot` stands
+ * one screenshot on its own. Widths are px at the file's 1272px content width,
+ * rendered as shares of it so each group scales together.
  */
-function StoryRow({ section, gutter, rowPad }: { section: StorySection; gutter: string; rowPad: string }) {
+function SectionContent({ section }: { section: StorySection }) {
   const isMobile = useIsMobile()
+
+  if (section.kind === 'copy') {
+    return (
+      <div
+        style={{
+          width: '100%',
+          maxWidth: `${COPY_WIDTH}px`,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: space.lg,
+        }}
+      >
+        <h2
+          style={{
+            margin: 0,
+            ...type['heading-l'],
+            fontSize: isMobile ? '24px' : type['heading-l'].fontSize,
+          }}
+        >
+          {section.heading}
+        </h2>
+        {toParagraphs(section.body).map((paragraph) => (
+          <p
+            key={paragraph}
+            style={{ margin: 0, fontSize: isMobile ? '16px' : '18px', lineHeight: 'normal' }}
+          >
+            {paragraph}
+          </p>
+        ))}
+      </div>
+    )
+  }
+
+  if (section.kind === 'shot') return <Composition section={section} />
 
   const total =
     section.kind === 'columns'
       ? section.columns.reduce((sum, c) => sum + c.width, 0) + section.gap * (section.columns.length - 1)
       : section.shotWidth + section.gap + section.captionWidth
 
-  const row =
-    section.kind === 'columns' ? (
-      section.columns.map((column) => <ShotColumn key={column.shot.src} column={column} />)
-    ) : (
-      <>
-        <ShotFrame shot={section.shot} />
-        <Caption text={section.caption} large />
-      </>
-    )
-
   return (
-    <section style={{ padding: `${rowPad} ${gutter}`, display: 'flex', justifyContent: 'center' }}>
-      <div
-        style={
-          isMobile
-            ? { display: 'flex', flexDirection: 'column', gap: space['2xl'], width: '100%' }
-            : {
-                display: 'grid',
-                gridTemplateColumns:
-                  section.kind === 'columns'
-                    ? section.columns.map((c) => `${c.width}fr`).join(' ')
-                    : `${section.shotWidth}fr ${section.captionWidth}fr`,
-                columnGap: pct(section.gap, total),
-                width: pct(total, CONTENT_WIDTH),
-                alignItems: section.kind === 'columns' ? 'start' : 'center',
-              }
-        }
-      >
-        {row}
-      </div>
-    </section>
+    <div
+      style={
+        isMobile
+          ? { display: 'flex', flexDirection: 'column', gap: space['2xl'], width: '100%' }
+          : {
+              display: 'grid',
+              gridTemplateColumns:
+                section.kind === 'columns'
+                  ? section.columns.map((c) => `${c.width}fr`).join(' ')
+                  : `${section.shotWidth}fr ${section.captionWidth}fr`,
+              columnGap: pct(section.gap, total),
+              width: pct(total, CONTENT_WIDTH),
+              alignItems: section.kind === 'columns' ? 'start' : 'center',
+            }
+      }
+    >
+      {section.kind === 'columns' ? (
+        section.columns.map((column) => <ShotColumn key={column.shot.src} column={column} />)
+      ) : (
+        <>
+          <ShotFrame shot={section.shot} />
+          <Caption text={section.caption} large />
+        </>
+      )}
+    </div>
   )
 }
 
-/** A screenshot — or the sort-panel composition — with its caption underneath. */
+/** A screenshot with its caption underneath. */
 function ShotColumn({ column }: { column: StoryColumn }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: space['2xl'] }}>
-      {column.overlay ? (
-        <OverlaidShot shot={column.shot} overlay={column.overlay} />
-      ) : (
-        <ShotFrame shot={column.shot} />
-      )}
+      <ShotFrame shot={column.shot} />
       <Caption text={column.caption} maxWidth={column.captionWidth} />
     </div>
+  )
+}
+
+/**
+ * Not in the file's frames, kept deliberately. Styled as the design system's
+ * ghost pill so it reads the same as the Design tab's controls, but kept an
+ * anchor — `Button` renders a <button>, and nesting one inside a link is
+ * invalid. The palette is pulled from `buttonStyles` rather than restated, so
+ * the two can't drift.
+ *
+ * With an `inset` it floats in the margin beside the centered title block,
+ * where the D2 frame puts it; without one it just stacks above.
+ */
+function BackPill({ inset }: { inset?: string }) {
+  return (
+    <a
+      href="#/work"
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: space.sm,
+        height: control.sm,
+        boxSizing: 'border-box',
+        padding: `0 ${space.lg}`,
+        borderRadius: radius.full,
+        border: `1px solid ${VARIANTS.ghost.default.borderColor}`,
+        background: VARIANTS.ghost.default.background,
+        color: VARIANTS.ghost.default.color,
+        fontSize: type['label-m'].fontSize,
+        fontWeight: type['label-m'].fontWeight,
+        lineHeight: type['label-m'].lineHeight,
+        textDecoration: 'none',
+        whiteSpace: 'nowrap',
+        ...(inset
+          ? // Hung off the copy column's left edge rather than the page's, so it
+            // keeps its 70px gap from the title however wide the window gets.
+            { position: 'absolute', top: inset, right: `calc(50% + ${COPY_WIDTH / 2 + 70}px)` }
+          : { alignSelf: 'flex-start' }),
+      }}
+    >
+      <ArrowLeft size={16} />
+      Back
+    </a>
   )
 }
 
@@ -360,56 +415,70 @@ function Caption({ text, maxWidth, large }: { text: string | string[]; maxWidth?
   )
 }
 
-/** The browser frame with the sort panel hanging off its bottom-right corner. */
-function OverlaidShot({ shot, overlay }: { shot: LandingShot; overlay: ShotOverlay }) {
-  const isMobile = useIsMobile()
+const OVERLAY_STYLE: React.CSSProperties = {
+  display: 'block',
+  border: `1px solid ${OVERLAY_BORDER}`,
+  borderRadius: radius.sm,
+  boxShadow: '0px 6px 9px 5px rgba(0,0,0,0.15), 0px 3px 3px 0px rgba(0,0,0,0.3)',
+}
 
-  const overlayStyle: React.CSSProperties = {
-    display: 'block',
-    border: `1px solid ${OVERLAY_BORDER}`,
-    borderRadius: radius.sm,
-    boxShadow: '0px 6px 9px 5px rgba(0,0,0,0.15), 0px 3px 3px 0px rgba(0,0,0,0.3)',
-  }
+/**
+ * A screenshot standing on its own, with a panel laid over it when the file has
+ * one. The box carries the whole composition's footprint and everything inside
+ * it is a share of that box, so the overlap survives being scaled down.
+ */
+function Composition({ section }: { section: Extract<StorySection, { kind: 'shot' }> }) {
+  const isMobile = useIsMobile()
+  const { width, height, frame, shot, overlay } = section
 
   if (isMobile) {
-    // Too narrow to hang the panel off the side, so it tucks under the corner.
+    // Too narrow to lay the panel over the frame, so it tucks under the corner.
     return (
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
         <ShotFrame shot={shot} />
-        <img
-          src={overlay.src}
-          alt={overlay.alt}
-          style={{ ...overlayStyle, width: '70%', marginTop: '-40px', marginLeft: 'auto' }}
-        />
+        {overlay && (
+          <img
+            src={overlay.src}
+            alt={overlay.alt}
+            style={{ ...OVERLAY_STYLE, width: '55%', marginTop: '-40px', marginLeft: 'auto' }}
+          />
+        )}
       </div>
     )
   }
 
-  // The panel hangs past the frame, so the box reserves the whole group's
-  // footprint — otherwise the caption stacks against the frame alone and the
-  // overlay's percentage offsets resolve against the wrong height.
   return (
     <div
       style={{
         position: 'relative',
-        width: COMPOSITION.column,
-        aspectRatio: `${COMPOSITION.width} / ${COMPOSITION.height}`,
+        width: pct(width, CONTENT_WIDTH),
+        aspectRatio: `${width} / ${height}`,
       }}
     >
-      <ShotFrame shot={shot} style={{ width: pct(COMPOSITION.base, COMPOSITION.width) }} />
-      <img
-        src={overlay.src}
-        alt={overlay.alt}
+      <ShotFrame
+        shot={shot}
         style={{
-          ...overlayStyle,
           position: 'absolute',
-          left: pct(COMPOSITION.overlayLeft, COMPOSITION.width),
-          top: pct(COMPOSITION.overlayTop, COMPOSITION.height),
-          width: pct(COMPOSITION.width - COMPOSITION.overlayLeft, COMPOSITION.width),
-          aspectRatio: overlay.aspect,
-          objectFit: 'cover',
+          left: pct(frame.left, width),
+          top: pct(frame.top, height),
+          width: pct(frame.width, width),
         }}
       />
+      {overlay && (
+        <img
+          src={overlay.src}
+          alt={overlay.alt}
+          style={{
+            ...OVERLAY_STYLE,
+            position: 'absolute',
+            left: pct(overlay.left, width),
+            top: pct(overlay.top, height),
+            width: pct(overlay.width, width),
+            aspectRatio: overlay.aspect,
+            objectFit: 'cover',
+          }}
+        />
+      )}
     </div>
   )
 }
@@ -493,15 +562,43 @@ function Pill({ href, children }: { href?: string; children: React.ReactNode }) 
   )
 }
 
-function FeedbackCard({ shot }: { shot: FeedbackShot }) {
+/**
+ * The wall of chat screenshots. The file lays them out as one row filling the
+ * content column, so the cards are `fr` shares of their designed widths and
+ * scale together rather than wrapping.
+ */
+function FeedbackWall({ shots }: { shots: FeedbackShot[] }) {
   const isMobile = useIsMobile()
+  const total = shots.reduce((sum, s) => sum + s.width, 0) + WALL_GAP * (shots.length - 1)
+
+  return (
+    <div
+      style={
+        isMobile
+          ? { display: 'flex', flexDirection: 'column', gap: space.sm }
+          : {
+              display: 'grid',
+              gridTemplateColumns: shots.map((s) => `${s.width}fr`).join(' '),
+              columnGap: pct(WALL_GAP, total),
+              alignItems: 'center',
+              width: '100%',
+            }
+      }
+    >
+      {shots.map((shot) => (
+        <FeedbackCard key={shot.src} shot={shot} />
+      ))}
+    </div>
+  )
+}
+
+function FeedbackCard({ shot }: { shot: FeedbackShot }) {
   const pad = shot.pad ?? 6
 
   return (
     <div
       style={{
-        width: isMobile ? '100%' : `${shot.width}px`,
-        maxWidth: '100%',
+        width: '100%',
         boxSizing: 'border-box',
         background: shot.bg ?? CARD_BG,
         borderRadius: radius.sm,
