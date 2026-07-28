@@ -1,14 +1,17 @@
 import { useState } from 'react'
-import { ArrowNarrowLeft } from '@untitledui/icons/ArrowNarrowLeft'
+import { ArrowLeft } from '@phosphor-icons/react'
 import Header from './Header'
+import Button from '../design-system/Button'
+import { VARIANTS } from '../design-system/buttonStyles'
+import { color, control, radius, space, type } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
 
-const CREAM_BG = 'var(--color-bg-cream)'
-const TEXT_DARK = 'var(--color-ink)'
-const ORANGE = 'var(--color-orange)'
-const CARD_BG = '#313131'
+const PAGE_BG = color.bg.primary
+const TEXT = color.text.primary
+const BODY = color.text.secondary
+const ORANGE = color.accent.default
+const CARD_BG = color.bg.raised
 const LIGHT_CARD_BG = '#e5e5e5'
-const BUTTON_LIGHT = 'var(--color-bg-inverse)'
 
 const WORK_PASSWORD = 'noah2026'
 const UNLOCK_KEY = 'work-pages-unlocked'
@@ -89,133 +92,146 @@ export default function WorkPage({ title, description, projects = DEFAULT_PROJEC
     <div
       style={{
         minHeight: '100vh',
-        background: CREAM_BG,
-        color: TEXT_DARK,
-        padding: isMobile ? '0 20px 60px' : '0 80px 120px',
+        background: PAGE_BG,
+        color: TEXT,
         display: 'flex',
         flexDirection: 'column',
-        gap: isMobile ? '24px' : '40px',
+        gap: isMobile ? space.xl : space['2xl'],
+        paddingBottom: isMobile ? '60px' : '120px',
       }}
     >
-      <Header active="work" barInset="0" contentInset="0" />
-      <a
-        href="#/work"
+      <Header active="work" showProfile={false} />
+
+      <div
         style={{
-          color: ORANGE,
-          fontSize: '16px',
-          fontWeight: 500,
-          textDecoration: 'none',
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 'var(--space-sm)',
-          width: 'fit-content',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: isMobile ? space.xl : space['2xl'],
+          padding: isMobile ? `0 20px` : `0 80px`,
+          flex: unlocked ? undefined : 1,
         }}
       >
-        <ArrowNarrowLeft width={16} height={16} />
-        Back
-      </a>
-
-      {unlocked ? (
-        <>
-          <h1
-            style={{
-              margin: isMobile ? '24px 0 0' : '40px 0 0',
-              fontSize: 'clamp(28px, 8vw, 80px)',
-              fontWeight: 600,
-              lineHeight: 1.05,
-              letterSpacing: '-0.02em',
-            }}
-          >
-            {title}
-          </h1>
-
-          {description && (
-            <p
-              style={{
-                margin: 0,
-                maxWidth: '720px',
-                fontSize: isMobile ? '16px' : '18px',
-                fontWeight: 400,
-                lineHeight: 1.6,
-                color: TEXT_DARK,
-              }}
-            >
-              {description}
-            </p>
-          )}
-
-          <div
-            style={{
-              marginTop: isMobile ? '24px' : '40px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: isMobile ? '48px' : '80px',
-            }}
-          >
-            {projects.map((project) => (
-              <ProjectRow key={project.title} project={project} />
-            ))}
-          </div>
-        </>
-      ) : (
-        <form
-          onSubmit={handleSubmit}
+        <a
+          href="#/work"
           style={{
-            margin: 'auto',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 'var(--space-lg)',
-            maxWidth: '360px',
-            width: '100%',
+            alignSelf: 'flex-start',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: space.sm,
+            height: control.sm,
+            boxSizing: 'border-box',
+            padding: `0 ${space.lg}`,
+            borderRadius: radius.full,
+            border: `1px solid ${VARIANTS.ghost.default.borderColor}`,
+            background: VARIANTS.ghost.default.background,
+            color: VARIANTS.ghost.default.color,
+            fontSize: type['label-m'].fontSize,
+            fontWeight: type['label-m'].fontWeight,
+            lineHeight: type['label-m'].lineHeight,
+            textDecoration: 'none',
+            whiteSpace: 'nowrap',
           }}
         >
-          <label
-            htmlFor="work-password"
-            style={{ fontSize: '20px', fontWeight: 500 }}
-          >
-            Enter password to view work
-          </label>
-          <input
-            id="work-password"
-            type="password"
-            value={input}
-            onChange={(e) => {
-              setInput(e.target.value)
-              setError(false)
-            }}
-            autoFocus
+          <ArrowLeft size={16} />
+          Back
+        </a>
+
+        {unlocked ? (
+          <>
+            <h1
+              style={{
+                margin: 0,
+                fontSize: 'clamp(28px, 8vw, 80px)',
+                fontWeight: 600,
+                lineHeight: 1.05,
+                letterSpacing: '-0.02em',
+                color: TEXT,
+              }}
+            >
+              {title}
+            </h1>
+
+            {description && (
+              <p
+                style={{
+                  margin: 0,
+                  maxWidth: '720px',
+                  fontSize: isMobile ? '16px' : '18px',
+                  fontWeight: 400,
+                  lineHeight: 1.6,
+                  color: BODY,
+                }}
+              >
+                {description}
+              </p>
+            )}
+
+            <div
+              style={{
+                marginTop: isMobile ? space.xl : space['2xl'],
+                display: 'flex',
+                flexDirection: 'column',
+                gap: isMobile ? space['3xl'] : space['5xl'],
+              }}
+            >
+              {projects.map((project) => (
+                <ProjectRow key={project.title} project={project} />
+              ))}
+            </div>
+          </>
+        ) : (
+          <form
+            onSubmit={handleSubmit}
             style={{
-              padding: '12px 16px',
-              fontSize: '16px',
-              border: `1px solid ${error ? ORANGE : 'rgba(0,0,0,0.2)'}`,
-              borderRadius: 'var(--radius-md)',
-              background: 'transparent',
-              color: TEXT_DARK,
-              outline: 'none',
-            }}
-          />
-          {error && (
-            <span style={{ color: ORANGE, fontSize: '14px' }}>
-              Incorrect password
-            </span>
-          )}
-          <button
-            type="submit"
-            style={{
-              padding: '12px 16px',
-              fontSize: '16px',
-              fontWeight: 500,
-              background: TEXT_DARK,
-              color: CREAM_BG,
-              border: 'none',
-              borderRadius: 'var(--radius-md)',
-              cursor: 'pointer',
+              margin: 'auto',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: space.lg,
+              maxWidth: '360px',
+              width: '100%',
             }}
           >
-            Unlock
-          </button>
-        </form>
-      )}
+            <label
+              htmlFor="work-password"
+              style={{
+                fontSize: type['heading-m'].fontSize,
+                fontWeight: type['heading-m'].fontWeight,
+                color: TEXT,
+              }}
+            >
+              Enter password to view work
+            </label>
+            <input
+              id="work-password"
+              type="password"
+              value={input}
+              onChange={(e) => {
+                setInput(e.target.value)
+                setError(false)
+              }}
+              autoFocus
+              style={{
+                padding: `${space.md} ${space.lg}`,
+                fontSize: type['body-m'].fontSize,
+                fontFamily: 'inherit',
+                border: `1px solid ${error ? ORANGE : color.border.default}`,
+                borderRadius: radius.md,
+                background: color.bg.raised,
+                color: TEXT,
+                outline: 'none',
+              }}
+            />
+            {error && (
+              <span style={{ color: ORANGE, fontSize: type['body-s'].fontSize }}>
+                Incorrect password
+              </span>
+            )}
+            <Button type="submit" variant="secondary" size="lg" style={{ width: '100%' }}>
+              Unlock
+            </Button>
+          </form>
+        )}
+      </div>
     </div>
   )
 }
@@ -234,11 +250,11 @@ function PlainRow({ project }: { project: Project }) {
     <div
       style={
         isMobile
-          ? { display: 'flex', flexDirection: 'column', gap: 'var(--space-xl)' }
+          ? { display: 'flex', flexDirection: 'column', gap: space.xl }
           : {
               display: 'grid',
               gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.5fr)',
-              gap: 'var(--space-4xl)',
+              gap: space['4xl'],
               alignItems: 'center',
             }
       }
@@ -249,13 +265,13 @@ function PlainRow({ project }: { project: Project }) {
           fontSize: isMobile ? '24px' : '30px',
           fontWeight: 500,
           lineHeight: 1.2,
-          color: TEXT_DARK,
+          color: TEXT,
           maxWidth: '510px',
         }}
       >
         {project.title}
       </h2>
-      <CardSurface project={project} cardBg={cardBg} radius={isMobile ? '32px' : '56px'} />
+      <CardSurface project={project} cardBg={cardBg} radius={isMobile ? radius['3xl'] : radius['4xl']} />
     </div>
   )
 }
@@ -267,7 +283,7 @@ function AccentedRow({ project }: { project: Project }) {
     <div
       style={{
         background: project.accent,
-        borderRadius: isMobile ? 'var(--radius-3xl)' : 'var(--radius-4xl)',
+        borderRadius: isMobile ? radius['3xl'] : radius['4xl'],
         display: 'flex',
         flexDirection: isMobile ? 'column' : 'row',
         alignItems: 'stretch',
@@ -283,7 +299,7 @@ function AccentedRow({ project }: { project: Project }) {
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
-          gap: 'var(--space-xl)',
+          gap: space.xl,
           padding: isMobile ? '24px 20px 0' : '20px 20px 20px 40px',
         }}
       >
@@ -293,7 +309,7 @@ function AccentedRow({ project }: { project: Project }) {
             fontSize: 'clamp(24px, 2.4vw, 30px)',
             fontWeight: 500,
             lineHeight: 1.2,
-            color: '#ffffff',
+            color: color.accent.onAccent,
           }}
         >
           {project.title}
@@ -303,10 +319,10 @@ function AccentedRow({ project }: { project: Project }) {
             href={project.cta.href}
             style={{
               alignSelf: 'flex-start',
-              background: BUTTON_LIGHT,
-              color: TEXT_DARK,
+              background: color.bg.inverse,
+              color: color.text.inverse,
               padding: isMobile ? '8px 14px' : '8px 16px',
-              borderRadius: 'var(--radius-full)',
+              borderRadius: radius.full,
               fontSize: isMobile ? '16px' : '20px',
               fontWeight: 500,
               textDecoration: 'none',
@@ -327,7 +343,7 @@ function AccentedRow({ project }: { project: Project }) {
 function CardSurface({
   project,
   cardBg,
-  radius,
+  radius: cardRadius,
 }: {
   project: Project
   cardBg: string
@@ -344,7 +360,7 @@ function CardSurface({
     <div
       style={{
         background: cardBg,
-        borderRadius: radius,
+        borderRadius: cardRadius,
         aspectRatio: isMobile ? 'auto' : '793 / 456',
         minHeight: isMobile ? '200px' : undefined,
         width: '100%',
@@ -393,7 +409,7 @@ function CardSurface({
       ) : (
         <span
           style={{
-            color: isLight ? '#888' : '#ffffff',
+            color: isLight ? color.ink.muted : color.text.muted,
             fontSize: '30px',
             fontWeight: 500,
           }}

@@ -1,10 +1,8 @@
-import { ArrowUpRight } from '@phosphor-icons/react'
 import { color, type } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
 
 const TEXT = color.text.primary
 const MUTED = color.text.muted
-const ORANGE = color.accent.default
 
 /**
  * One block of the résumé. `rail` is the muted left-hand label, broken into the
@@ -13,7 +11,6 @@ const ORANGE = color.accent.default
 type Entry = {
   rail: string[]
   caption?: string
-  link?: { label: string; href: string }
   paragraphs: React.ReactNode[]
 }
 
@@ -21,7 +18,6 @@ const entries: Entry[] = [
   {
     rail: ['most', 'recently'],
     caption: 'Invisible Technologies | Senior Product Designer | Aug 2022 - July 2026',
-    link: { label: 'View some of my work', href: '#/work/invisible' },
     paragraphs: [
       'I started my time at Invisible as an Associate Product Designer and had the opportunity to work on many surfaces and products with very different users. I grew to owning the design for one of our core platforms, Meridial.',
       <>
@@ -133,25 +129,6 @@ export default function Experience() {
                 </p>
               ))}
             </div>
-
-            {entry.link && (
-              <a
-                href={entry.link.href}
-                style={{
-                  alignSelf: 'flex-start',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 'var(--space-sm)',
-                  color: ORANGE,
-                  fontSize: type['label-m'].fontSize,
-                  fontWeight: 500,
-                  textDecoration: 'none',
-                }}
-              >
-                {entry.link.label}
-                <ArrowUpRight size={16} />
-              </a>
-            )}
           </div>
         </div>
       ))}
