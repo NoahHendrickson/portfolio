@@ -46,7 +46,7 @@ export default function Hero() {
 
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         <p style={{ ...subtitle, color: TEXT }}>Product Designer &amp;</p>
-        <p style={{ ...subtitle, color: MUTED }}>Design Engineer x Builder x Diva</p>
+        <p style={{ ...subtitle, color: MUTED }}>Design Engineer x Builder</p>
       </div>
 
       <p style={{ ...body, color: TEXT }}>
