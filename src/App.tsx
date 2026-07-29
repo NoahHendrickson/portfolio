@@ -96,7 +96,7 @@ export default function App() {
           overflow: 'hidden',
           zIndex: 0,
         }}>
-          <ShaderPanel showHeadline={tab === 'me'} />
+          <ShaderPanel />
         </div>
       )}
 

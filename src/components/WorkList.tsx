@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowSquareOut, GithubLogo } from '@phosphor-icons/react'
+import { ArrowSquareOut, ArrowUpRight, GithubLogo } from '@phosphor-icons/react'
 import Button from '../design-system/Button'
 import IconButton from '../design-system/IconButton'
 import { color, type } from '../design-system/tokens'
@@ -19,12 +19,12 @@ type Row = {
   title: string
   /** Logo beside the title. Sized to fit a 16px box, so wordless marks stay legible. */
   logo?: { src: string; width: number; height: number }
+  /** Tight line under the title (role + dates). Sits closer than `body`. */
+  subhead?: string
   body: string
-  /** `#/...` route for the "View showcase" button. Omitted while the page is undesigned. */
+  /** `#/...` route for the "View" button. Omitted while the page is undesigned. */
   showcase?: string
   links: Link[]
-  /** Screenshot beside the copy. `chrome` puts the browser bar above it. */
-  media?: { src: string; alt: string; aspect: string; frame?: 'chrome' | 'plain' }
 }
 
 type Filter = { id: string; label: string; rows: Row[] }
@@ -34,18 +34,12 @@ const forFun: Row[] = [
     id: 'stat-builder',
     title: projects['stat-builder'].title,
     logo: { src: '/work/logos/stat-builder.png', width: 16, height: 16 },
-    body: 'A Destiny 2 armor optimizer for Armor 3.0. Sign in with Bungie, set targets for the six stats, add the constraints for your build: exotic, set bonuses, fragments, mods, and the optimizer searches your own vault and returns the exact pieces to equip.',
+    body: 'Vibe coded tool for players of Destiny 2 the video game.',
     showcase: '#/work/stat-builder',
     links: [
       { kind: 'site', href: 'https://d2-stat-builder-dusky.vercel.app/' },
       { kind: 'repo', href: 'https://github.com/NoahHendrickson/d2-stat-builder' },
     ],
-    media: {
-      src: '/work/stat-builder/table.png',
-      alt: 'The D2 Stat Builder results table',
-      aspect: '259.5 / 177.4',
-      frame: 'chrome',
-    },
   },
   {
     id: 'phanttom',
@@ -54,11 +48,6 @@ const forFun: Row[] = [
     body: 'My fork of ghostty because i wanted vertical tabs with additional information, and it sounded like fun.',
     showcase: '#/work/phanttom',
     links: [{ kind: 'repo', href: 'https://github.com/NoahHendrickson/phanttom' }],
-    media: {
-      src: '/work/phanttom/hero.png',
-      alt: 'Phanttom’s vertical tab sidebar',
-      aspect: '263 / 185',
-    },
   },
   {
     id: 'forge',
@@ -84,8 +73,8 @@ const career: Row[] = [
   {
     id: 'invisible',
     title: 'Invisible Technologies',
-    body: 'Senior Product Designer, Aug 2022 – July 2026. Lead design on Meridial, Invisible’s talent marketplace for AI training work, plus the 0-1 launch of the Annotations platform.',
-    showcase: '#/work/invisible',
+    subhead: 'Senior Product Designer, Aug 2022 – July 2026.',
+    body: "Currently updating my portfolio, but if you're interested please reach out :)",
     links: [],
   },
 ]
@@ -165,30 +154,61 @@ export default function WorkList() {
 const ROW_STAGGER_MS = 60
 
 function ProjectRow({ row, index }: { row: Row; index: number }) {
-  const isMobile = useIsMobile()
-
-  const copy = (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {row.logo && (
-            <img
-              src={row.logo.src}
-              alt=""
-              style={{ width: `${row.logo.width}px`, height: `${row.logo.height}px`, display: 'block' }}
-            />
+  return (
+    <div
+      className="tab-content-in"
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '16px',
+        paddingBottom: '16px',
+        borderBottom: `1px solid ${color.border.subtle}`,
+        // Cascades each row after the previous when the Design tab (or filter) mounts.
+        animationDelay: `${index * ROW_STAGGER_MS}ms`,
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: row.subhead ? '12px' : '4px',
+        }}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {row.logo && (
+              <img
+                src={row.logo.src}
+                alt=""
+                style={{ width: `${row.logo.width}px`, height: `${row.logo.height}px`, display: 'block' }}
+              />
+            )}
+            <span
+              style={{
+                fontSize: type['body-l'].fontSize,
+                fontWeight: 400,
+                lineHeight: 1.6,
+                letterSpacing: '-0.16px',
+                color: color.text.primary,
+              }}
+            >
+              {row.title}
+            </span>
+          </div>
+          {row.subhead && (
+            <p
+              style={{
+                margin: 0,
+                maxWidth: '721px',
+                fontSize: type['body-s'].fontSize,
+                fontWeight: 400,
+                lineHeight: 1.5,
+                color: color.text.primary,
+              }}
+            >
+              {row.subhead}
+            </p>
           )}
-          <span
-            style={{
-              fontSize: type['body-l'].fontSize,
-              fontWeight: 400,
-              lineHeight: 1.6,
-              letterSpacing: '-0.16px',
-              color: color.text.primary,
-            }}
-          >
-            {row.title}
-          </span>
         </div>
         <p
           style={{
@@ -204,58 +224,30 @@ function ProjectRow({ row, index }: { row: Row; index: number }) {
         </p>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        {row.showcase && (
-          <Button size="xs" variant="ghost" onClick={() => { window.location.hash = row.showcase! }}>
-            View showcase
-          </Button>
-        )}
-        {row.links.map((link) => (
-          <IconButton
-            key={link.href}
-            size="xs"
-            variant="ghost"
-            label={link.kind === 'site' ? `${row.title} — live site` : `${row.title} — source on GitHub`}
-            icon={link.kind === 'site' ? <ArrowSquareOut size={14} /> : <GithubLogo size={14} />}
-            onClick={() => window.open(link.href, '_blank', 'noopener,noreferrer')}
-          />
-        ))}
-      </div>
-    </div>
-  )
-
-  return (
-    <div
-      className="tab-content-in"
-      style={{
-        display: 'grid',
-        // Copy takes the row; a screenshot, when there is one, sits in a fixed
-        // 260px column beside it — the width it has in the Figma file.
-        gridTemplateColumns: !isMobile && row.media ? 'minmax(0, 1fr) 260px' : 'minmax(0, 1fr)',
-        gap: '32px',
-        alignItems: 'center',
-        paddingBottom: '16px',
-        borderBottom: `1px solid ${color.border.subtle}`,
-        // Cascades each row after the previous when the Design tab (or filter) mounts.
-        animationDelay: `${index * ROW_STAGGER_MS}ms`,
-      }}
-    >
-      {copy}
-      {row.media && !isMobile && <Screenshot media={row.media} />}
-    </div>
-  )
-}
-
-function Screenshot({ media }: { media: NonNullable<Row['media']> }) {
-  return (
-    <div style={{ borderRadius: '6px', overflow: 'hidden', border: `1px solid ${color.border.subtle}` }}>
-      {media.frame === 'chrome' && (
-        <img src="/work/browser-bar.png" alt="" style={{ width: '100%', height: 'auto', display: 'block' }} />
+      {(row.showcase || row.links.length > 0) && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {row.showcase && (
+            <Button
+              size="xs"
+              variant="ghost"
+              trailingIcon={<ArrowUpRight />}
+              onClick={() => { window.location.hash = row.showcase! }}
+            >
+              View
+            </Button>
+          )}
+          {row.links.map((link) => (
+            <IconButton
+              key={link.href}
+              size="xs"
+              variant="ghost"
+              label={link.kind === 'site' ? `${row.title} — live site` : `${row.title} — source on GitHub`}
+              icon={link.kind === 'site' ? <ArrowSquareOut size={14} /> : <GithubLogo size={14} />}
+              onClick={() => window.open(link.href, '_blank', 'noopener,noreferrer')}
+            />
+          ))}
+        </div>
       )}
-      {/* Top-pinned and clipped, so a full-page capture shows its first screenful. */}
-      <div style={{ width: '100%', aspectRatio: media.aspect, overflow: 'hidden' }}>
-        <img src={media.src} alt={media.alt} style={{ width: '100%', height: 'auto', display: 'block' }} />
-      </div>
     </div>
   )
 }

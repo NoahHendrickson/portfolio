@@ -50,10 +50,10 @@ export default function Hero() {
       </div>
 
       <p style={{ ...body, color: TEXT }}>
-        I&rsquo;m a Product Designer who adapts quickly to push and improve my craft. I
-        have 5 years of experience creating products that care about the user,
-        making impact with strategic flows and micro UX/UI. I bring a chill
-        resilience to adversity, and can lift the room in high pressure situations.
+        I have 5 years of experience taking business problems and ambitious ideas
+        and turning them into caring products. I adapt fast and am eager to immerse
+        myself in new domains and ways of working. I care about the craft, and about bringing
+        the people around me up with it.
       </p>
 
       <p style={{ ...body, color: MUTED }}>

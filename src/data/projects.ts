@@ -100,7 +100,7 @@ export type StoryColumn = {
 export type StorySection =
   /** Screenshots side by side, captions underneath — The Forge. */
   | { kind: 'columns'; gap: number; columns: StoryColumn[] }
-  /** One screenshot beside its caption, vertically centered — Phanttom. */
+  /** One screenshot beside its caption, vertically centered. */
   | {
       kind: 'row'
       gap: number
@@ -108,6 +108,20 @@ export type StorySection =
       shotWidth: number
       caption: string | string[]
       captionWidth: number
+    }
+  /**
+   * Muted heading + body on the left, tinted media panel on the right —
+   * Phanttom's "the idea" / "the process" rows. Widths are px at the row's
+   * designed total (copy + gap + panel); the row scales as `fr` shares.
+   */
+  | {
+      kind: 'feature'
+      gap: number
+      heading: string
+      body: string | string[]
+      copyWidth: number
+      panelWidth: number
+      shot: LandingShot
     }
   /** A centered 688px heading + body block, standing between shots — D2 Stat Builder. */
   | { kind: 'copy'; heading: string; body: string | string[] }
@@ -157,18 +171,24 @@ export type Landing = {
    */
   eyebrow: string | string[]
   /**
-   * Row rhythm. `banded` (the default, and the Phanttom and Forge frames) makes
-   * every row its own 80px-padded band, so consecutive rows sit 184px apart with
-   * the page's own 24px gap between them. `continuous` is the D2 frame, where
-   * the whole body is a single 80px-padded block with 80px between rows and the
-   * bands below it butted straight up against it.
+   * Row rhythm. `banded` (the default, and The Forge) makes every row its own
+   * 80px-padded band, so consecutive rows sit 184px apart with the page's own
+   * 24px gap between them. `continuous` is D2 and Phanttom: one 80px-padded
+   * block with the bands below it butted straight up against it.
    */
   flow?: 'banded' | 'continuous'
-  /** Centered 688px title block; every page runs it full width. */
+  /**
+   * Gap between the title block and each row inside a `continuous` page.
+   * Defaults to 80 (D2); Phanttom's frame runs 120.
+   */
+  gap?: number
+  /** Centered title block; every page runs it full width. */
   hero: {
     /** Paragraphs under the title. Defaults to `[project.summary]`. */
     body?: string[]
-    /** App shot below the copy block — Phanttom's window capture. */
+    /** Outbound pills under the title — GitHub / live site, etc. */
+    links?: { label: string; href: string }[]
+    /** App shot below the copy block. */
     shot?: LandingShot
     /** Its width in px at the 1272px content width. */
     shotWidth?: number
@@ -229,20 +249,20 @@ export const projects: Record<string, Project> = {
     },
     pageReady: true,
     landing: {
-      eyebrow: 'AI Design Tool',
+      eyebrow: ['Vibe coded', 'Figma+Cursor+Claude'],
       hero: {
         body: [
           'Experimental Figma-style design mode for your own app, in your own browser that hands its edits to whatever AI coding agent you already use.',
-          'Basically I wanted Cursor’s design mode in Claude. This is a bit of a case study to test a slightly different workflow for a design tool, where as a designer you get the precision of figma like inputs and then the coding agent you prefer applies those changes. So the code becomes the canvas.',
+          'Basically I wanted Cursor’s design mode in Claude but even more designer oriented. I wanted to test out a workflow that gives designers the precision of figma and then the coding agent you prefer applies those changes.',
         ],
       },
       sections: [
         {
           kind: 'columns',
-          gap: 80,
+          gap: 0,
           columns: [
             {
-              width: 483,
+              width: 1000,
               shot: {
                 src: '/work/forge/design-mode.png',
                 alt: 'Design mode running over a live app — layer tree on the left, three cards on the canvas, properties panel on the right',
@@ -250,17 +270,22 @@ export const projects: Record<string, Project> = {
               },
               caption:
                 'I opted for a package that can be installed in your project and is meant to be very easy for coding agents to understand and setup.',
-              captionWidth: 409,
             },
+          ],
+        },
+        {
+          kind: 'columns',
+          gap: 0,
+          columns: [
             {
-              width: 425,
+              width: 1000,
               shot: {
                 src: '/work/forge/canvas-mode.png',
                 alt: 'The same app zoomed out on an infinite canvas at 44%, layer tree and properties panel still docked either side',
                 aspect: '2974 / 2032',
               },
               caption:
-                'I really wanted the feel of Figma in the code. The ability to pan around and zoom on the page is so engrained in a designers brain.',
+                'I really wanted the feel of Figma in the code. The ability to pan around and zoom on the page is so engrained in a designers brain. So I added a canvas mode that lets you do that.',
             },
           ],
         },
@@ -268,7 +293,6 @@ export const projects: Record<string, Project> = {
       outro: {
         heading: 'Try it in your own project with',
         command: 'npx forge-mode init',
-        large: true,
       },
     },
     summary:
@@ -379,14 +403,15 @@ export const projects: Record<string, Project> = {
           'This is a tool for my favorite video game of all time, Destiny 2. It’s made for power users and nerds like myself. For those unfamiliar with Destiny 2, this allows you to set preferences and then finds the armor pieces you should equip to achieve that build.',
           'There are other sites that do this, but I wanted to focus mine on the particular needs of hard core players and a change in the armor system that allowed me to speed up the search for builds once a user enters their parameters.',
         ],
+        links: [
+          { label: 'GitHub', href: 'https://github.com/NoahHendrickson/d2-stat-builder' },
+          { label: 'Website', href: 'https://d2-stat-builder-dusky.vercel.app/' },
+        ],
         shot: {
+          // Frame 443 — browser chrome baked into the export (node 93:5358).
           src: '/work/stat-builder/builder.png',
           alt: 'The builder — armor summary, class tabs, six stat sliders, major mods and set bonuses on the left, ranked builds on the right',
-          // The file clips a 1078 × 678 frame out of the capture. Our browser
-          // bar renders taller than Figma's at this width, so the window gives
-          // the difference back and the frame lands on its designed height.
-          aspect: '1078 / 618',
-          frame: 'chrome',
+          aspect: '2233 / 1592',
         },
         shotWidth: 1078,
       },
@@ -394,7 +419,7 @@ export const projects: Record<string, Project> = {
         {
           kind: 'copy',
           heading: 'I wanted to make finding my armor easier',
-          body: 'The armor system was changed, affecting stats and bonuses you could get. I wanted a really easy way to search and filter my armor across the things that mattered. I designed a custom sorting functionality to mirror the mental model I have for armor.',
+          body: 'The armor system was changed, affecting stats and bonuses you could get. I wanted a really easy way to search and filter my armor across the things that mattered. I built a custom sorting feature that allows users to chain sorts together to mirror the mental model we use to rank armor.',
         },
         {
           // The one overlapping composition in the file — the sort panel laid
@@ -548,8 +573,7 @@ export const projects: Record<string, Project> = {
     slug: 'armory',
     title: 'Moonfang Armory',
     eyebrow: ['Side project', '2026', 'Destiny 2'],
-    tagline:
-      'Search Destiny 2 weapons by the perks they can roll — and by the rolls sitting in your vault right now.',
+    tagline: 'Vibe coded tool for players of Destiny 2 the video game.',
     bento: {
       eyebrow: 'Destiny 2 - 3rd party tool',
       cover: '/work/armory/hero.png',
@@ -643,54 +667,45 @@ export const projects: Record<string, Project> = {
     },
     pageReady: true,
     landing: {
-      eyebrow: 'Forked ghostty project',
+      // Frame 97:8539 — continuous 120px rhythm, feature rows with tinted panels.
+      eyebrow: ['Vibe coded', 'Figma+Cursor+Claude'],
+      flow: 'continuous',
+      gap: 120,
       hero: {
         body: [
           'This is a fork of Ghostty, a popular terminal emulator. I wanted to design my own terminal for a few reasons: I really like vertical tabs and more importantly I really wanted to see more information at a glance when using the terminal.',
         ],
-        // The app window sits under the copy block, a shade wider than it.
-        shot: {
-          src: '/work/phanttom/app.png',
-          alt: 'Phanttom — vertical sidebar with agent tabs beside a terminal session',
-          aspect: '1078 / 731',
-        },
-        shotWidth: 1078,
       },
       sections: [
         {
-          kind: 'row',
-          gap: 56,
-          shotWidth: 262,
+          kind: 'feature',
+          gap: 80,
+          heading: 'the idea',
+          body: "In basically every agentic coding tool I've used or seen, a thread is always afforded as a single that is the first message of the session. When it comes to multi-tasking I was finding this a bit annoying. I wasn't always sure what branch I was on, what branch was checked out, or if I was in a worktree. I would need to click into a thread to actually get info. So I explored adding more information to the thread tabs themselves.",
+          copyWidth: 573,
+          panelWidth: 572,
           shot: {
-            src: '/work/phanttom/sidebar.png',
-            alt: 'Phanttom sidebar — project groups, tab names, branches and agent status',
-            aspect: '262 / 356',
+            src: '/work/phanttom/idea-panel.png',
+            alt: 'Phanttom session — vertical sidebar of agent tabs beside a Claude Code terminal',
+            aspect: '572 / 430',
+            frame: 'plain',
           },
-          caption: [
-            'As a designer git, branches, worktrees, checkouts is a lot to juggle and think about. I wanted to have more information across the threads i was working on without needing to click into each one.',
-            'I also wanted to take advantage of the world we live today: you can build (fork in this case) and design your own tools to solve the problems you have.',
-          ],
-          captionWidth: 401,
         },
         {
-          kind: 'row',
-          gap: 56,
-          shotWidth: 263,
+          kind: 'feature',
+          gap: 80,
+          heading: 'the process',
+          body: 'I dove right into claude and talked through how we could fork ghostty with the main goal of adding vertical tabs with more information. Once something was up and running that I could interact with I then went into figma and got precise with the design of the tabs and the information to show.',
+          copyWidth: 387.5,
+          panelWidth: 757.5,
           shot: {
-            src: '/work/phanttom/folder-picker.png',
-            alt: 'Folder picker popover for opening a project without cd-ing',
-            aspect: '263 / 210',
+            src: '/work/phanttom/process-panel.png',
+            alt: 'Tab design explorations beside a Phanttom sidebar of session tabs',
+            aspect: '757.5 / 421.667',
+            frame: 'plain',
           },
-          caption: 'I’ll just never feel comfortable cd-ing into folders, I need a UI for that :p',
-          captionWidth: 397,
         },
       ],
-      // The file's card reuses the D2 Stat Builder pill label — clearly a
-      // copy-paste slip, so the link carries its real destination.
-      outro: {
-        heading: 'Download from github',
-        links: [{ label: 'GitHub', href: 'https://github.com/NoahHendrickson/phanttom' }],
-      },
     },
     summary:
       'A fork of Ghostty with tabs moved into a vertical sidebar, a real appearance settings GUI, and first-class support for AI coding agents: tabs that name themselves from your first prompt, working / done / attention status per session, and a pixel-rain indicator that shows a session is alive. Phantom with two t’s, in the spirit of Ghostty’s.',

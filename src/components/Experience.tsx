@@ -3,6 +3,8 @@ import { useIsMobile } from '../hooks/useIsMobile'
 
 const TEXT = color.text.primary
 const MUTED = color.text.muted
+const SECONDARY = color.text.secondary
+const ORANGE = color.accent.default
 
 /**
  * One block of the résumé. `rail` is the muted left-hand label, broken into the
@@ -12,6 +14,8 @@ type Entry = {
   rail: string[]
   caption?: string
   paragraphs: React.ReactNode[]
+  /** Impact lines under the copy — setup in white, result in orange. */
+  quickHits?: { setup: string; result: string }[]
 }
 
 const entries: Entry[] = [
@@ -22,15 +26,29 @@ const entries: Entry[] = [
       'I started my time at Invisible as an Associate Product Designer and had the opportunity to work on many surfaces and products with very different users. I grew to owning the design for one of our core platforms, Meridial.',
       <>
         I led Product Design for Meridial, Invisible’s talent marketplace for AI training
-        projects. I owned end-to-end user flows, research, wireframes, high fidelity specs
-        and collaborated with Product managers and Engineers for A/B testing. I was
-        responsible for a mobile redesign of our profile completion flow that increased
-        conversion by <strong>50%</strong> for mobile users. I conducted a deep dive into
-        our user journey to identify key fall off points that resulted in focused designs
-        that improved conversion by 4x for one step, and doubled the conversion of the
-        full funnel.
+        projects. I was responsible for end-to-end user flows, research, wireframes, high
+        fidelity specs and collaborated closely with multiple Product Managers and
+        Engineers. This product cut across many functions and it was necessary for me to
+        partner with our Legal, Compliance, Hiring & Recruiting and Operations teams. I
+        immerse myself in the user journey to validate assumptions and ideas with proven
+        results.
       </>,
-      'Provided design support for the 0-1 launch of Invisible’s Annotations platform, creating reusable custom components built for AI training tasks. I led design direction through high-fidelity mockups and custom interface designs tailored to specific client requirements.',
+      'I provided design support for the 0-1 launch of Invisible’s Annotations platform, creating reusable custom components built for AI training tasks. I led design direction through high-fidelity mockups and custom interface designs tailored to specific client requirements.',
+    ],
+    quickHits: [
+      {
+        setup:
+          'Users were stuck in our initial assessment stage for days, bottlenecking the businesses ability to scale. I designed our in app assessment flow to address this bottleneck',
+        result: '72 hrs → Less than 24hrs to complete assessments',
+      },
+      {
+        setup: 'Led the research and redesign of our onboarding funnel',
+        result: 'Doubled the overall conversion rate',
+      },
+      {
+        setup: 'Redesigned the mobile experience for onboarding',
+        result: '50% increase in profile completion on mobile',
+      },
     ],
   },
   {
@@ -38,12 +56,6 @@ const entries: Entry[] = [
     caption: 'Amazon Logistics | Area Manager, Delivery Station | Not a design role',
     paragraphs: [
       'While this wasn’t a design role, my time at Amazon was incredibly formative to the person I am today, such that I cannot leave it out.',
-    ],
-  },
-  {
-    rail: ['yapping'],
-    paragraphs: [
-      "didn't like the original yap , new yap in progress",
     ],
   },
 ]
@@ -128,6 +140,38 @@ export default function Experience() {
                   {paragraph}
                 </p>
               ))}
+
+              {entry.quickHits && entry.quickHits.length > 0 && (
+                <>
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: type['body-l'].fontSize,
+                      fontWeight: 400,
+                      lineHeight: 1.6,
+                      letterSpacing: '-0.16px',
+                      color: SECONDARY,
+                    }}
+                  >
+                    Quick hits
+                  </p>
+                  {entry.quickHits.map((hit) => (
+                    <div
+                      key={hit.result}
+                      style={{
+                        maxWidth: '495px',
+                        fontSize: type['body-l'].fontSize,
+                        fontWeight: 500,
+                        lineHeight: 1.4,
+                        letterSpacing: '-0.16px',
+                      }}
+                    >
+                      <p style={{ margin: 0, color: TEXT }}>{hit.setup}</p>
+                      <p style={{ margin: 0, color: ORANGE }}>{hit.result}</p>
+                    </div>
+                  ))}
+                </>
+              )}
             </div>
           </div>
         </div>

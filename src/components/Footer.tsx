@@ -29,6 +29,7 @@ const BACK_TO = [
 /**
  * Moonfang Armory has no story page yet — `#/work/armory` still falls through to
  * the cream `ProjectLanding` — so it points at the live site until it gets one.
+ * The current story page is omitted from the list so you don't jump to yourself.
  */
 const JUMP_TO: { label: string; href: string; logo: Logo }[] = [
   {
@@ -42,6 +43,11 @@ const JUMP_TO: { label: string; href: string; logo: Logo }[] = [
     logo: { src: '/work/logos/forge.svg', width: 13.333, height: 16 },
   },
   {
+    label: 'D2 Stat Builder',
+    href: '#/work/stat-builder',
+    logo: { src: '/work/logos/stat-builder.png', width: 16, height: 16 },
+  },
+  {
     label: 'Moonfang Armory',
     href: 'https://noeyarmory.vercel.app/',
     logo: { src: '/work/logos/armory.png', width: 16, height: 16 },
@@ -50,6 +56,15 @@ const JUMP_TO: { label: string; href: string; logo: Logo }[] = [
 
 export default function Footer() {
   const isMobile = useIsMobile()
+  const [hash, setHash] = useState(() => window.location.hash)
+
+  useEffect(() => {
+    const onHashChange = () => setHash(window.location.hash)
+    window.addEventListener('hashchange', onHashChange)
+    return () => window.removeEventListener('hashchange', onHashChange)
+  }, [])
+
+  const jumpTo = JUMP_TO.filter((link) => link.href !== hash)
 
   return (
     <footer
@@ -71,7 +86,7 @@ export default function Footer() {
       </Column>
 
       <Column heading="Jump to" width={153}>
-        {JUMP_TO.map((link) => (
+        {jumpTo.map((link) => (
           <FooterLink
             key={link.href}
             href={link.href}
