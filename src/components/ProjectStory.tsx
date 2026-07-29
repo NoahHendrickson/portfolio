@@ -67,10 +67,66 @@ export default function ProjectStory({ project }: { project: Project }) {
   const eyebrow = toParagraphs(landing.eyebrow)
   const continuous = landing.flow === 'continuous'
   const continuousGap = isMobile ? space['2xl'] : `${landing.gap ?? 80}px`
+  const flush = landing.align === 'start'
 
   const rows = landing.sections.map((section, i) => (
     <SectionContent key={sectionKey(section, i)} section={section} />
   ))
+
+  const titleBlock = (
+    <div
+      style={{
+        width: '100%',
+        maxWidth: `${COPY_WIDTH}px`,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: space.lg,
+      }}
+    >
+      {/* Several entries read as one row split by hairlines. */}
+      <div style={{ display: 'flex', alignItems: 'stretch', gap: space.lg }}>
+        {eyebrow.map((label, i) => (
+          <Fragment key={label}>
+            {i > 0 && <div style={{ width: '1px', background: color.border.subtle }} />}
+            <p style={{ margin: 0, fontSize: '16px', fontWeight: 500, lineHeight: '24px', color: MUTED }}>
+              {label}
+            </p>
+          </Fragment>
+        ))}
+      </div>
+
+      <h1
+        style={{
+          margin: 0,
+          fontSize: isMobile ? '34px' : 'clamp(40px, 4vw, 56px)',
+          fontWeight: 600,
+          lineHeight: 'normal',
+          letterSpacing: '-0.029em',
+        }}
+      >
+        {project.title}
+      </h1>
+
+      {landing.hero.links && landing.hero.links.length > 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: space.sm }}>
+          {landing.hero.links.map((link) => (
+            <OutLink key={link.href} href={link.href} label={link.label} />
+          ))}
+        </div>
+      )}
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: space.lg }}>
+        {heroBody.map((paragraph) => (
+          <p
+            key={paragraph}
+            style={{ margin: 0, fontSize: '16px', fontWeight: 400, lineHeight: 'normal', color: BODY_TEXT }}
+          >
+            {paragraph}
+          </p>
+        ))}
+      </div>
+    </div>
+  )
 
   return (
     <div
@@ -86,10 +142,10 @@ export default function ProjectStory({ project }: { project: Project }) {
       <Header active="work" showProfile={false} />
 
       {/*
-        Hero — a centered title block with the Back pill in the margin beside it,
-        and the app window under it when the project has one. On a `continuous`
-        page the rest of the rows run in this same block; a `banded` page gives
-        each of them its own padded band below.
+        Hero — title block with Back either floated beside it (centered pages) or
+        stacked above the eyebrows (flush / Phanttom). On a `continuous` page the
+        rest of the rows run in this same block; a `banded` page gives each of
+        them its own padded band below.
       */}
       <section
         style={{
@@ -97,64 +153,29 @@ export default function ProjectStory({ project }: { project: Project }) {
           padding: `${rowPad} ${gutter}`,
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center',
+          alignItems: flush ? 'flex-start' : 'center',
           gap: continuous ? continuousGap : isMobile ? space['2xl'] : space['5xl'],
         }}
       >
-        <BackPill inset={isMobile ? undefined : rowPad} />
-
-        <div
-          style={{
-            width: '100%',
-            maxWidth: `${COPY_WIDTH}px`,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: space.lg,
-          }}
-        >
-          {/* Several entries read as one row split by hairlines. */}
-          <div style={{ display: 'flex', alignItems: 'stretch', gap: space.lg }}>
-            {eyebrow.map((label, i) => (
-              <Fragment key={label}>
-                {i > 0 && <div style={{ width: '1px', background: color.border.subtle }} />}
-                <p style={{ margin: 0, fontSize: '16px', fontWeight: 500, lineHeight: '24px', color: MUTED }}>
-                  {label}
-                </p>
-              </Fragment>
-            ))}
-          </div>
-
-          <h1
+        {flush ? (
+          <div
             style={{
-              margin: 0,
-              fontSize: isMobile ? '34px' : 'clamp(40px, 4vw, 56px)',
-              fontWeight: 600,
-              lineHeight: 'normal',
-              letterSpacing: '-0.029em',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-start',
+              gap: space['2xl'],
+              width: '100%',
             }}
           >
-            {project.title}
-          </h1>
-
-          {landing.hero.links && landing.hero.links.length > 0 && (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: space.sm }}>
-              {landing.hero.links.map((link) => (
-                <OutLink key={link.href} href={link.href} label={link.label} />
-              ))}
-            </div>
-          )}
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: space.lg }}>
-            {heroBody.map((paragraph) => (
-              <p
-                key={paragraph}
-                style={{ margin: 0, fontSize: '16px', fontWeight: 400, lineHeight: 'normal', color: BODY_TEXT }}
-              >
-                {paragraph}
-              </p>
-            ))}
+            <BackPill />
+            {titleBlock}
           </div>
-        </div>
+        ) : (
+          <>
+            <BackPill inset={isMobile ? undefined : rowPad} />
+            {titleBlock}
+          </>
+        )}
 
         {landing.hero.shot && (
           <ShotFrame

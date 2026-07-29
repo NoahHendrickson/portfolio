@@ -182,7 +182,13 @@ export type Landing = {
    * Defaults to 80 (D2); Phanttom's frame runs 120.
    */
   gap?: number
-  /** Centered title block; every page runs it full width. */
+  /**
+   * Title + row alignment. `center` (the default) centres the title block and
+   * floats Back beside it. `start` stacks Back above the eyebrows and left-aligns
+   * the title with the rows — Phanttom.
+   */
+  align?: 'center' | 'start'
+  /** Title block; every page runs it full width of its column. */
   hero: {
     /** Paragraphs under the title. Defaults to `[project.summary]`. */
     body?: string[]
@@ -671,6 +677,7 @@ export const projects: Record<string, Project> = {
       eyebrow: ['Vibe coded', 'Figma+Cursor+Claude'],
       flow: 'continuous',
       gap: 120,
+      align: 'start',
       hero: {
         body: [
           'This is a fork of Ghostty, a popular terminal emulator. I wanted to design my own terminal for a few reasons: I really like vertical tabs and more importantly I really wanted to see more information at a glance when using the terminal.',
