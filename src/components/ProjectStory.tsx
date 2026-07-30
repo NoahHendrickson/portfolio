@@ -64,7 +64,7 @@ export default function ProjectStory({ project }: { project: Project }) {
   const gutter = isMobile ? '20px' : `${GUTTER}px`
   const rowPad = isMobile ? '40px' : '80px'
   const heroBody = landing.hero.body ?? [project.summary]
-  const eyebrow = toParagraphs(landing.eyebrow)
+  const eyebrow = Array.isArray(landing.eyebrow) ? landing.eyebrow : [landing.eyebrow]
   const continuous = landing.flow === 'continuous'
   const continuousGap = isMobile ? space['2xl'] : `${landing.gap ?? 80}px`
   const flush = landing.align === 'start'
@@ -85,14 +85,40 @@ export default function ProjectStory({ project }: { project: Project }) {
     >
       {/* Several entries read as one row split by hairlines. */}
       <div style={{ display: 'flex', alignItems: 'stretch', gap: space.lg }}>
-        {eyebrow.map((label, i) => (
-          <Fragment key={label}>
-            {i > 0 && <div style={{ width: '1px', background: color.border.subtle }} />}
-            <p style={{ margin: 0, fontSize: '16px', fontWeight: 500, lineHeight: '24px', color: MUTED }}>
-              {label}
-            </p>
-          </Fragment>
-        ))}
+        {eyebrow.map((entry, i) => {
+          const label = typeof entry === 'string' ? entry : entry.label
+          const href = typeof entry === 'string' ? undefined : entry.href
+          return (
+            <Fragment key={label}>
+              {i > 0 && <div style={{ width: '1px', background: color.border.subtle }} />}
+              {href ? (
+                <a
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: space.xs,
+                    margin: 0,
+                    fontSize: '16px',
+                    fontWeight: 500,
+                    lineHeight: '24px',
+                    color: MUTED,
+                    textDecoration: 'none',
+                  }}
+                >
+                  {label}
+                  <ArrowSquareOut size={16} />
+                </a>
+              ) : (
+                <p style={{ margin: 0, fontSize: '16px', fontWeight: 500, lineHeight: '24px', color: MUTED }}>
+                  {label}
+                </p>
+              )}
+            </Fragment>
+          )
+        })}
       </div>
 
       <h1
@@ -377,11 +403,39 @@ function SectionContent({ section }: { section: StorySection }) {
             </p>
           ))}
         </div>
-        <img
-          src={section.shot.src}
-          alt={section.shot.alt}
-          style={{ width: '100%', height: 'auto', display: 'block' }}
-        />
+        {section.panel ? (
+          /*
+            CSS panel chrome for raw screenshots (D2). Phanttom and Forge bake the
+            tinted frame into the PNG, so they skip this and render the shot alone.
+          */
+          <div
+            style={{
+              width: '100%',
+              aspectRatio: section.shot.aspect.replace(/\s/g, ''),
+              background: section.panel.background ?? TINT,
+              overflow: 'hidden',
+              borderRadius: radius.xl,
+            }}
+          >
+            <img
+              src={section.shot.src}
+              alt={section.shot.alt}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center',
+                display: 'block',
+              }}
+            />
+          </div>
+        ) : (
+          <img
+            src={section.shot.src}
+            alt={section.shot.alt}
+            style={{ width: '100%', height: 'auto', display: 'block' }}
+          />
+        )}
       </div>
     )
   }

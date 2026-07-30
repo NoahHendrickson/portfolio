@@ -111,8 +111,10 @@ export type StorySection =
     }
   /**
    * Muted heading + body on the left, tinted media panel on the right —
-   * Phanttom's "the idea" / "the process" rows. Widths are px at the row's
-   * designed total (copy + gap + panel); the row scales as `fr` shares.
+   * Phanttom / Forge / D2 "the idea" / "the process" rows. Widths are px at
+   * the row's designed total (copy + gap + panel); the row scales as `fr` shares.
+   * Omit `panel` when the PNG already bakes the tinted chrome (Phanttom, Forge);
+   * set it for raw screenshots that need a CSS frame (D2).
    */
   | {
       kind: 'feature'
@@ -122,6 +124,8 @@ export type StorySection =
       copyWidth: number
       panelWidth: number
       shot: LandingShot
+      /** CSS chrome around a raw screenshot — background defaults to `--color-bg-tint`. */
+      panel?: { background?: string }
     }
   /** A centered 688px heading + body block, standing between shots — D2 Stat Builder. */
   | { kind: 'copy'; heading: string; body: string | string[] }
@@ -167,13 +171,14 @@ export type FeedbackShot = {
 export type Landing = {
   /**
    * The muted line above the title. Several entries render as one row split by
-   * hairlines, which is how the D2 frame carries "Vibe coded / Figma+Cursor+Claude".
+   * hairlines ("Vibe coded / Figma+Cursor+Claude"). An entry can be a link —
+   * The Forge's "Github" with an outbound icon.
    */
-  eyebrow: string | string[]
+  eyebrow: string | Array<string | { label: string; href: string }>
   /**
-   * Row rhythm. `banded` (the default, and The Forge) makes every row its own
-   * 80px-padded band, so consecutive rows sit 184px apart with the page's own
-   * 24px gap between them. `continuous` is D2 and Phanttom: one 80px-padded
+   * Row rhythm. `banded` (the default) makes every row its own 80px-padded
+   * band, so consecutive rows sit 184px apart with the page's own 24px gap
+   * between them. `continuous` is Forge, D2 and Phanttom: one 80px-padded
    * block with the bands below it butted straight up against it.
    */
   flow?: 'banded' | 'continuous'
@@ -255,45 +260,47 @@ export const projects: Record<string, Project> = {
     },
     pageReady: true,
     landing: {
-      eyebrow: ['Vibe coded', 'Figma+Cursor+Claude'],
+      // Frame 102:2048 — continuous / left-aligned shell, orange-tinted panels.
+      eyebrow: [
+        'Vibe coded',
+        { label: 'Github', href: 'https://github.com/NoahHendrickson/the-forge' },
+      ],
+      flow: 'continuous',
+      gap: 120,
+      align: 'start',
       hero: {
         body: [
           'Experimental Figma-style design mode for your own app, in your own browser that hands its edits to whatever AI coding agent you already use.',
-          'Basically I wanted Cursor’s design mode in Claude but even more designer oriented. I wanted to test out a workflow that gives designers the precision of figma and then the coding agent you prefer applies those changes.',
         ],
       },
       sections: [
         {
-          kind: 'columns',
-          gap: 0,
-          columns: [
-            {
-              width: 1000,
-              shot: {
-                src: '/work/forge/design-mode.png',
-                alt: 'Design mode running over a live app — layer tree on the left, three cards on the canvas, properties panel on the right',
-                aspect: '700 / 413',
-              },
-              caption:
-                'I opted for a package that can be installed in your project and is meant to be very easy for coding agents to understand and setup.',
-            },
-          ],
+          kind: 'feature',
+          gap: 80,
+          heading: 'the idea',
+          body: "Basically I wanted Cursor's design mode in Claude. It's not always possible to get the level of precision you want with just prompting and pointing at elements. My workflow consists of a lot of back and forth between different AI coding tools and Figma. While I actually think this workflow is a great way of working, I wanted to try something new. I wanted to make changes like I do in figma and have whatever coding agent i prefer, apply them.",
+          copyWidth: 573,
+          panelWidth: 572,
+          shot: {
+            src: '/work/forge/idea-panel.png',
+            alt: 'Design mode properties panel over a live app — Layout, Size, Padding and Fill on a selected card',
+            aspect: '572 / 430',
+            frame: 'plain',
+          },
         },
         {
-          kind: 'columns',
-          gap: 0,
-          columns: [
-            {
-              width: 1000,
-              shot: {
-                src: '/work/forge/canvas-mode.png',
-                alt: 'The same app zoomed out on an infinite canvas at 44%, layer tree and properties panel still docked either side',
-                aspect: '2974 / 2032',
-              },
-              caption:
-                'I really wanted the feel of Figma in the code. The ability to pan around and zoom on the page is so engrained in a designers brain. So I added a canvas mode that lets you do that.',
-            },
-          ],
+          kind: 'feature',
+          gap: 80,
+          heading: 'the process',
+          body: 'This project has been mostly done without and figma designs yet. I spent a good chunk of time going back and forth with claude to ground out the idea and feature I wanted. I first wanted to prove out the functionality before taking a pass at polishing the UX/UI of it.',
+          copyWidth: 387.5,
+          panelWidth: 757.5,
+          shot: {
+            src: '/work/forge/process-panel.png',
+            alt: 'The Forge running at localhost over an infinite canvas of Master and Discipline cards',
+            aspect: '757.5 / 421.667',
+            frame: 'plain',
+          },
         },
       ],
       outro: {
