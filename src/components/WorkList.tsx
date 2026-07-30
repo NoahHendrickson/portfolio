@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { ArrowSquareOut, ArrowUpRight, GithubLogo } from '@phosphor-icons/react'
+import { useState, type CSSProperties } from 'react'
+import { ArrowSquareOut, GithubLogo } from '@phosphor-icons/react'
 import Button from '../design-system/Button'
 import IconButton from '../design-system/IconButton'
 import { color, type } from '../design-system/tokens'
@@ -8,8 +8,8 @@ import { useIsMobile } from '../hooks/useIsMobile'
 
 /**
  * The Design tab. A filter rail on the left, a divided list of entries on the
- * right — each one a logo, a line of copy, and the links that go with it. This
- * replaced the bento grid in the July 2026 redesign.
+ * right — each one a logo, title and muted blurb on one line, then the links.
+ * List rows match Figma node `104:2934` (July 2026 file).
  */
 
 type Link = { kind: 'site' | 'repo'; href: string }
@@ -34,7 +34,7 @@ const forFun: Row[] = [
     id: 'stat-builder',
     title: projects['stat-builder'].title,
     logo: { src: '/work/logos/stat-builder.png', width: 16, height: 16 },
-    body: 'Vibe coded tool for players of Destiny 2 the video game.',
+    body: 'A Destiny 2 armor optimizer for Armor 3.0.',
     showcase: '#/work/stat-builder',
     links: [
       { kind: 'site', href: 'https://d2-stat-builder-dusky.vercel.app/' },
@@ -53,6 +53,7 @@ const forFun: Row[] = [
     id: 'forge',
     title: projects.forge.title,
     logo: { src: '/work/logos/forge.svg', width: 13.333, height: 16 },
+    // Figma still has a pasted Invisible résumé line here — keep the real Forge blurb.
     body: projects.forge.bento.tagline ?? projects.forge.tagline,
     showcase: '#/work/forge',
     links: [{ kind: 'repo', href: 'https://github.com/NoahHendrickson/the-forge' }],
@@ -61,7 +62,7 @@ const forFun: Row[] = [
     id: 'armory',
     title: projects.armory.title,
     logo: { src: '/work/logos/armory.png', width: 16, height: 16 },
-    body: projects.armory.bento.tagline ?? projects.armory.tagline,
+    body: 'Command palette style filter and search for Destiny 2 the video game weapons.',
     links: [
       { kind: 'site', href: 'https://noeyarmory.vercel.app/' },
       { kind: 'repo', href: 'https://github.com/NoahHendrickson/noeyarmory' },
@@ -128,7 +129,9 @@ export default function WorkList() {
           Nothing here yet — still digging through the archive.
         </p>
       ) : (
-        active.rows.map((row, i) => <ProjectRow key={row.id} row={row} index={i} />)
+        active.rows.map((row, i) => (
+          <ProjectRow key={row.id} row={row} index={i} isMobile={isMobile} />
+        ))
       )}
     </div>
   )
@@ -153,7 +156,39 @@ export default function WorkList() {
 
 const ROW_STAGGER_MS = 60
 
-function ProjectRow({ row, index }: { row: Row; index: number }) {
+const titleStyle: CSSProperties = {
+  fontSize: type['body-l'].fontSize,
+  fontWeight: 400,
+  lineHeight: 1.6,
+  letterSpacing: '-0.16px',
+  color: color.text.primary,
+  whiteSpace: 'nowrap',
+}
+
+function ProjectRow({
+  row,
+  index,
+  isMobile,
+}: {
+  row: Row
+  index: number
+  isMobile: boolean
+}) {
+  const bodyStyle: CSSProperties = {
+    margin: 0,
+    minWidth: 0,
+    flex: '1 1 0',
+    fontSize: type['body-l'].fontSize,
+    fontWeight: 400,
+    lineHeight: 1.6,
+    letterSpacing: '-0.16px',
+    color: color.text.muted,
+    // Desktop matches the file's single-line row; mobile lets the blurb wrap.
+    ...(isMobile
+      ? {}
+      : { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }),
+  }
+
   return (
     <div
       className="tab-content-in"
@@ -167,61 +202,45 @@ function ProjectRow({ row, index }: { row: Row; index: number }) {
         animationDelay: `${index * ROW_STAGGER_MS}ms`,
       }}
     >
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: row.subhead ? '12px' : '4px',
-        }}
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            {row.logo && (
-              <img
-                src={row.logo.src}
-                alt=""
-                style={{ width: `${row.logo.width}px`, height: `${row.logo.height}px`, display: 'block' }}
-              />
-            )}
-            <span
-              style={{
-                fontSize: type['body-l'].fontSize,
-                fontWeight: 400,
-                lineHeight: 1.6,
-                letterSpacing: '-0.16px',
-                color: color.text.primary,
-              }}
-            >
-              {row.title}
-            </span>
-          </div>
-          {row.subhead && (
-            <p
-              style={{
-                margin: 0,
-                maxWidth: '721px',
-                fontSize: type['body-s'].fontSize,
-                fontWeight: 400,
-                lineHeight: 1.5,
-                color: color.text.primary,
-              }}
-            >
-              {row.subhead}
-            </p>
-          )}
-        </div>
-        <p
+      <div style={{ display: 'flex', flexDirection: 'column', gap: row.subhead ? '4px' : 0, minWidth: 0 }}>
+        <div
           style={{
-            margin: 0,
-            maxWidth: '721px',
-            fontSize: type['body-s'].fontSize,
-            fontWeight: 400,
-            lineHeight: 1.5,
-            color: color.text.primary,
+            display: 'flex',
+            alignItems: isMobile ? 'flex-start' : 'center',
+            gap: '8px',
+            minWidth: 0,
+            flexWrap: isMobile ? 'wrap' : undefined,
           }}
         >
-          {row.body}
-        </p>
+          {row.logo && (
+            <img
+              src={row.logo.src}
+              alt=""
+              style={{
+                width: `${row.logo.width}px`,
+                height: `${row.logo.height}px`,
+                display: 'block',
+                flexShrink: 0,
+                marginTop: isMobile ? '4px' : undefined,
+              }}
+            />
+          )}
+          <span style={titleStyle}>{row.title}</span>
+          <p style={bodyStyle}>{row.body}</p>
+        </div>
+        {row.subhead && (
+          <p
+            style={{
+              margin: 0,
+              fontSize: type['body-s'].fontSize,
+              fontWeight: 400,
+              lineHeight: 1.5,
+              color: color.text.primary,
+            }}
+          >
+            {row.subhead}
+          </p>
+        )}
       </div>
 
       {(row.showcase || row.links.length > 0) && (
@@ -230,7 +249,6 @@ function ProjectRow({ row, index }: { row: Row; index: number }) {
             <Button
               size="xs"
               variant="ghost"
-              trailingIcon={<ArrowUpRight />}
               onClick={() => { window.location.hash = row.showcase! }}
             >
               View

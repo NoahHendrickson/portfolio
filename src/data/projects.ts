@@ -586,7 +586,7 @@ export const projects: Record<string, Project> = {
     slug: 'armory',
     title: 'Moonfang Armory',
     eyebrow: ['Side project', '2026', 'Destiny 2'],
-    tagline: 'Vibe coded tool for players of Destiny 2 the video game.',
+    tagline: 'Command palette style filter and search for Destiny 2 the video game weapons.',
     bento: {
       eyebrow: 'Destiny 2 - 3rd party tool',
       cover: '/work/armory/hero.png',

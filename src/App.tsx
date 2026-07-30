@@ -116,44 +116,42 @@ export default function App() {
           background: BG,
         }}
       >
-        {tab === 'work' ? (
-          <>
-            <Header
-              active={tab}
-              tabShift={isMobile ? undefined : TAB_SHIFT[tab]}
-              showProfile={false}
-            />
+        {/*
+          Header stays mounted across Me ↔ Design so the tabs don’t remount and
+          re-run the content entrance. Only the page body below animates in.
+          On Me, this shell is 100svh so the hero fills the fold; Experience
+          starts below.
+        */}
+        <div
+          style={{
+            minHeight: tab === 'me' ? '100svh' : undefined,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '24px',
+            boxSizing: 'border-box',
+          }}
+        >
+          <Header
+            active={tab}
+            tabShift={isMobile ? undefined : TAB_SHIFT[tab]}
+            showProfile={tab === 'me'}
+          />
+          {tab === 'work' ? (
             <div key="work" style={{ padding: pageInset }}>
               <WorkList />
             </div>
-          </>
-        ) : (
-          <>
-            {/*
-              Header + hero fill the first screen so “most recently” starts
-              below the fold on land. flex:1 on the hero absorbs whatever
-              space the header doesn’t use inside this 100svh shell.
-            */}
+          ) : (
             <div
               key="me"
               className="tab-content-in"
-              style={{
-                minHeight: '100svh',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '24px',
-                boxSizing: 'border-box',
-              }}
+              style={{ padding: pageInset, boxSizing: 'border-box', flex: '1 0 auto' }}
             >
-              <Header
-                active={tab}
-                tabShift={isMobile ? undefined : TAB_SHIFT[tab]}
-                showProfile
-              />
-              <div style={{ padding: pageInset, boxSizing: 'border-box', flex: '1 0 auto' }}>
-                <Hero />
-              </div>
+              <Hero />
             </div>
+          )}
+        </div>
+        {tab === 'me' && (
+          <>
             <Experience />
             <LlmWall />
           </>
