@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type CSSProperties } from 'react'
 import { ArrowLeft } from '@phosphor-icons/react'
 import Header from './Header'
 import Button from '../design-system/Button'
@@ -10,66 +10,47 @@ const PAGE_BG = color.bg.primary
 const TEXT = color.text.primary
 const BODY = color.text.secondary
 const ORANGE = color.accent.default
-const CARD_BG = color.bg.raised
-const LIGHT_CARD_BG = '#e5e5e5'
 
 const WORK_PASSWORD = 'noah2026'
 const UNLOCK_KEY = 'work-pages-unlocked'
 
-type ProjectImage = {
-  src: string
-  alt?: string
-  left: string
-  top: string
-  width: string
-  shadow?: 'sm' | 'lg' | 'none'
-}
-
 type Project = {
   title: string
-  image?: string
-  imageAlt?: string
-  images?: ProjectImage[]
-  accent?: string
-  cardBg?: string
-  cta?: { label: string; href: string }
+  body: string
+  /** When set, shows a ghost View button like the Design tab list. */
+  href?: string
 }
 
 type Props = {
   title: string
+  /** Role line under the page title. */
+  subtitle?: string
   description?: string
   projects?: Project[]
 }
 
 const DEFAULT_PROJECTS: Project[] = [
   {
-    title: 'Streamlining a Fragmented Marketplace Onboarding',
-    accent: ORANGE,
-    cardBg: LIGHT_CARD_BG,
-    cta: { label: 'Check it out', href: '#' },
-    images: [
-      {
-        src: '/work/signup.png',
-        alt: 'Marketplace skills selection',
-        left: '26px',
-        top: '120px',
-        width: '55%',
-        shadow: 'sm',
-      },
-      {
-        src: '/work/ONB%20steps.png',
-        alt: 'Marketplace onboarding dashboard',
-        left: '296px',
-        top: '54px',
-        width: '68%',
-        shadow: 'none',
-      },
-    ],
+    title: 'Revitalizing Meridial’s onboarding flow',
+    body: 'A deep research and user behavior focused project that meaningfully improved user experience and business outcomes',
+    href: '#/work/invisible/onboarding',
   },
-  { title: 'Project 2' },
+  {
+    title: 'Project 2',
+    body: 'Coming soon.',
+  },
 ]
 
-export default function WorkPage({ title, description, projects = DEFAULT_PROJECTS }: Props) {
+const titleStyle: CSSProperties = {
+  fontSize: type['body-l'].fontSize,
+  fontWeight: 400,
+  lineHeight: 1.6,
+  letterSpacing: '-0.16px',
+  color: color.text.primary,
+  whiteSpace: 'nowrap',
+}
+
+export default function WorkPage({ title, subtitle, description, projects = DEFAULT_PROJECTS }: Props) {
   const isMobile = useIsMobile()
   const [unlocked, setUnlocked] = useState(
     () => sessionStorage.getItem(UNLOCK_KEY) === 'true',
@@ -138,18 +119,40 @@ export default function WorkPage({ title, description, projects = DEFAULT_PROJEC
 
         {unlocked ? (
           <>
-            <h1
+            <div
               style={{
-                margin: 0,
-                fontSize: 'clamp(28px, 8vw, 80px)',
-                fontWeight: 600,
-                lineHeight: 1.05,
-                letterSpacing: '-0.02em',
-                color: TEXT,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: space.md,
               }}
             >
-              {title}
-            </h1>
+              <h1
+                style={{
+                  margin: 0,
+                  fontSize: 'clamp(28px, 8vw, 80px)',
+                  fontWeight: 600,
+                  lineHeight: 1.05,
+                  letterSpacing: '-0.02em',
+                  color: TEXT,
+                }}
+              >
+                {title}
+              </h1>
+              {subtitle && (
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: isMobile ? '16px' : '20px',
+                    fontWeight: 500,
+                    lineHeight: 1.3,
+                    letterSpacing: '-0.01em',
+                    color: BODY,
+                  }}
+                >
+                  {subtitle}
+                </p>
+              )}
+            </div>
 
             {description && (
               <p
@@ -171,11 +174,11 @@ export default function WorkPage({ title, description, projects = DEFAULT_PROJEC
                 marginTop: isMobile ? space.xl : space['2xl'],
                 display: 'flex',
                 flexDirection: 'column',
-                gap: isMobile ? space['3xl'] : space['5xl'],
+                gap: '24px',
               }}
             >
               {projects.map((project) => (
-                <ProjectRow key={project.title} project={project} />
+                <ProjectRow key={project.title} project={project} isMobile={isMobile} />
               ))}
             </div>
           </>
@@ -236,186 +239,59 @@ export default function WorkPage({ title, description, projects = DEFAULT_PROJEC
   )
 }
 
-function ProjectRow({ project }: { project: Project }) {
-  if (project.accent) {
-    return <AccentedRow project={project} />
+/** Same divided-row rhythm as the Design tab's For fun list. */
+function ProjectRow({ project, isMobile }: { project: Project; isMobile: boolean }) {
+  const bodyStyle: CSSProperties = {
+    margin: 0,
+    minWidth: 0,
+    flex: '1 1 0',
+    fontSize: type['body-l'].fontSize,
+    fontWeight: 400,
+    lineHeight: 1.6,
+    letterSpacing: '-0.16px',
+    color: color.text.muted,
+    ...(isMobile
+      ? {}
+      : { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }),
   }
-  return <PlainRow project={project} />
-}
 
-function PlainRow({ project }: { project: Project }) {
-  const isMobile = useIsMobile()
-  const cardBg = project.cardBg ?? CARD_BG
-  return (
-    <div
-      style={
-        isMobile
-          ? { display: 'flex', flexDirection: 'column', gap: space.xl }
-          : {
-              display: 'grid',
-              gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.5fr)',
-              gap: space['4xl'],
-              alignItems: 'center',
-            }
-      }
-    >
-      <h2
-        style={{
-          margin: 0,
-          fontSize: isMobile ? '24px' : '30px',
-          fontWeight: 500,
-          lineHeight: 1.2,
-          color: TEXT,
-          maxWidth: '510px',
-        }}
-      >
-        {project.title}
-      </h2>
-      <CardSurface project={project} cardBg={cardBg} radius={isMobile ? radius['3xl'] : radius['4xl']} />
-    </div>
-  )
-}
-
-function AccentedRow({ project }: { project: Project }) {
-  const isMobile = useIsMobile()
-  const cardBg = project.cardBg ?? CARD_BG
   return (
     <div
       style={{
-        background: project.accent,
-        borderRadius: isMobile ? radius['3xl'] : radius['4xl'],
         display: 'flex',
-        flexDirection: isMobile ? 'column' : 'row',
-        alignItems: 'stretch',
-        width: '100%',
-        gap: isMobile ? '20px' : '40px',
-        boxShadow:
-          '0px 32px 64px -12px rgba(0,0,0,0.14), 0px 5px 5px -2.5px rgba(0,0,0,0.04)',
+        flexDirection: 'column',
+        gap: '16px',
+        paddingBottom: '16px',
+        borderBottom: `1px solid ${color.border.subtle}`,
       }}
     >
       <div
         style={{
-          flex: isMobile ? undefined : '1 1 0',
           display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          gap: space.xl,
-          padding: isMobile ? '24px 20px 0' : '20px 20px 20px 40px',
+          alignItems: isMobile ? 'flex-start' : 'center',
+          gap: '8px',
+          minWidth: 0,
+          flexWrap: isMobile ? 'wrap' : undefined,
         }}
       >
-        <h2
-          style={{
-            margin: 0,
-            fontSize: 'clamp(24px, 2.4vw, 30px)',
-            fontWeight: 500,
-            lineHeight: 1.2,
-            color: color.accent.onAccent,
-          }}
-        >
-          {project.title}
-        </h2>
-        {project.cta && (
-          <a
-            href={project.cta.href}
-            style={{
-              alignSelf: 'flex-start',
-              background: color.bg.inverse,
-              color: color.text.inverse,
-              padding: isMobile ? '8px 14px' : '8px 16px',
-              borderRadius: radius.full,
-              fontSize: isMobile ? '16px' : '20px',
-              fontWeight: 500,
-              textDecoration: 'none',
-              whiteSpace: 'nowrap',
+        <span style={titleStyle}>{project.title}</span>
+        <p style={bodyStyle}>{project.body}</p>
+      </div>
+
+      {project.href != null && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Button
+            size="xs"
+            variant="ghost"
+            onClick={() => {
+              if (project.href && project.href.startsWith('#/')) {
+                window.location.hash = project.href
+              }
             }}
           >
-            {project.cta.label}
-          </a>
-        )}
-      </div>
-      <div style={isMobile ? { width: '100%', padding: '0 12px 12px' } : { flex: '0 0 60%' }}>
-        <CardSurface project={project} cardBg={cardBg} radius={isMobile ? '20px' : '40px'} />
-      </div>
-    </div>
-  )
-}
-
-function CardSurface({
-  project,
-  cardBg,
-  radius: cardRadius,
-}: {
-  project: Project
-  cardBg: string
-  radius: string
-}) {
-  const isMobile = useIsMobile()
-  const isLight = cardBg === LIGHT_CARD_BG
-  const hasLayered = project.images && project.images.length > 0
-  const primaryImage = hasLayered
-    ? project.images!.reduce((a, b) => (parseFloat(b.width) > parseFloat(a.width) ? b : a))
-    : null
-
-  return (
-    <div
-      style={{
-        background: cardBg,
-        borderRadius: cardRadius,
-        aspectRatio: isMobile ? 'auto' : '793 / 456',
-        minHeight: isMobile ? '200px' : undefined,
-        width: '100%',
-        overflow: 'hidden',
-        position: 'relative',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: isMobile && hasLayered ? '20px' : 0,
-      }}
-    >
-      {hasLayered ? (
-        isMobile ? (
-          <img
-            src={primaryImage!.src}
-            alt={primaryImage!.alt ?? ''}
-            style={{ width: '100%', height: 'auto', display: 'block' }}
-          />
-        ) : (
-          project.images!.map((img, idx) => (
-            <img
-              key={idx}
-              src={img.src}
-              alt={img.alt ?? ''}
-              style={{
-                position: 'absolute',
-                left: img.left,
-                top: img.top,
-                width: img.width,
-                filter:
-                  img.shadow === 'lg'
-                    ? 'drop-shadow(0 22px 27px rgba(0,0,0,0.08)) drop-shadow(0 9px 9px rgba(0,0,0,0.03)) drop-shadow(0 3px 3px rgba(0,0,0,0.04))'
-                    : img.shadow === 'sm'
-                      ? 'drop-shadow(0 11px 13px rgba(0,0,0,0.08)) drop-shadow(0 4px 4px rgba(0,0,0,0.03)) drop-shadow(0 1.6px 1.6px rgba(0,0,0,0.04))'
-                      : 'none',
-              }}
-            />
-          ))
-        )
-      ) : project.image ? (
-        <img
-          src={project.image}
-          alt={project.imageAlt ?? ''}
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-        />
-      ) : (
-        <span
-          style={{
-            color: isLight ? color.ink.muted : color.text.muted,
-            fontSize: '30px',
-            fontWeight: 500,
-          }}
-        >
-          placeholder
-        </span>
+            View
+          </Button>
+        </div>
       )}
     </div>
   )

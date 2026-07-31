@@ -5,6 +5,7 @@ import Footer from './Footer'
 import { resolvePalette, VARIANTS } from '../design-system/buttonStyles'
 import { color, control, radius, space, type } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
+import { useMediaQuery } from '../hooks/useMediaQuery'
 import type {
   FeedbackShot,
   LandingShot,
@@ -58,6 +59,9 @@ const toParagraphs = (text: string | string[]) => (Array.isArray(text) ? text : 
  */
 export default function ProjectStory({ project }: { project: Project }) {
   const isMobile = useIsMobile()
+  // The floated Back pill's left edge sits at 50vw − 522px, so anything under
+  // ~1090px pushes it off-screen; below that it stacks above the title instead.
+  const backFits = useMediaQuery('(min-width: 1100px)')
   const landing = project.landing
   if (!landing) return null
 
@@ -198,7 +202,7 @@ export default function ProjectStory({ project }: { project: Project }) {
           </div>
         ) : (
           <>
-            <BackPill inset={isMobile ? undefined : rowPad} />
+            <BackPill inset={backFits ? rowPad : undefined} />
             {titleBlock}
           </>
         )}
@@ -354,7 +358,7 @@ function SectionContent({ section }: { section: StorySection }) {
         {toParagraphs(section.body).map((paragraph) => (
           <p
             key={paragraph}
-            style={{ margin: 0, fontSize: isMobile ? '16px' : '18px', lineHeight: 'normal' }}
+            style={{ margin: 0, fontSize: '16px', fontWeight: 400, lineHeight: 'normal', color: BODY_TEXT }}
           >
             {paragraph}
           </p>

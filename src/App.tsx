@@ -8,6 +8,7 @@ import ShaderPanel from './components/ShaderPanel'
 import Experience from './components/Experience'
 import LlmWall from './components/LlmWall'
 import WorkPage from './components/WorkPage'
+import InvisibleOnboarding from './components/InvisibleOnboarding'
 import ProjectLanding from './components/ProjectLanding'
 import ProjectStory from './components/ProjectStory'
 import { projects } from './data/projects'
@@ -55,8 +56,12 @@ export default function App() {
     return () => window.removeEventListener('hashchange', onHashChange)
   }, [])
 
+  if (route === '/work/invisible/onboarding') {
+    return <><ForgeDesignMode /><InvisibleOnboarding /></>
+  }
+
   if (route === '/work/invisible') {
-    return <><ForgeDesignMode /><WorkPage title="Invisible" description="As the Lead Product Designer for Meridial, I held the bigger picture: shaping product vision, setting the bar for design quality, and building the ops that kept the team moving. That meant bringing in tools like Microsoft Clarity and Mixpanel to ground decisions in real user behavior, and folding AI into my workflow to move faster without losing craft. A few of the problems I worked on here: Our marketplace onboarding flow was disjointed, delayed, and confusing — experts dropped off, and the business couldn't scale delivery. I was responsible for the redesign of our sign-up and onboarding, resulting in a 60% reduction in time to be &quot;ready to work.&quot;" /></>
+    return <><ForgeDesignMode /><WorkPage title="Invisible" subtitle="Senior Product Designer" description="As the Lead Product Designer for Meridial, I held the bigger picture: shaping product vision, setting the bar for design quality, and building the ops that kept the team moving. That meant bringing in tools like Microsoft Clarity and Mixpanel to ground decisions in real user behavior, and folding AI into my workflow to move faster without losing craft. A few of the problems I worked on here: Our marketplace onboarding flow was disjointed, delayed, and confusing. Experts dropped off, and the business couldn't scale delivery." /></>
   }
 
   // `getRoute()` has already stripped the leading '#', so routes look like '/work/forge'.
@@ -155,13 +160,6 @@ export default function App() {
             <Experience />
             <LlmWall />
           </>
-        )}
-
-        {/* Mobile-only shader banner, in place of the pinned column */}
-        {isMobile && (
-          <div style={{ position: 'relative', width: '100%', height: '200px', overflow: 'hidden' }}>
-            <ShaderPanel />
-          </div>
         )}
       </div>
 

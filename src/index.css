@@ -74,7 +74,8 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-@media (max-width: 768px) {
+/* Matches MOBILE_BREAKPOINT_PX in src/hooks/useIsMobile.ts. */
+@media (max-width: 900px) {
   html, body {
     overflow-y: auto;
   }

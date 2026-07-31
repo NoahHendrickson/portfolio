@@ -51,13 +51,6 @@ const entries: Entry[] = [
       },
     ],
   },
-  {
-    rail: ['before', 'that'],
-    caption: 'Amazon Logistics | Area Manager, Delivery Station | Not a design role',
-    paragraphs: [
-      'While this wasn’t a design role, my time at Amazon was incredibly formative to the person I am today, such that I cannot leave it out.',
-    ],
-  },
 ]
 
 /**

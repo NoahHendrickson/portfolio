@@ -1,22 +1,13 @@
-import { useSyncExternalStore } from 'react'
+import { useMediaQuery } from './useMediaQuery'
 
-export const MOBILE_BREAKPOINT_PX = 768
+/**
+ * 900 rather than 768 so portrait iPads (810–834) get the single-column layout —
+ * the desktop shader split leaves only a ~330px text column at those widths.
+ * Landscape tablets (1024+) keep the desktop split.
+ */
+export const MOBILE_BREAKPOINT_PX = 900
 export const MOBILE_QUERY = `(max-width: ${MOBILE_BREAKPOINT_PX}px)`
 
-function subscribe(callback: () => void) {
-  const mql = window.matchMedia(MOBILE_QUERY)
-  mql.addEventListener('change', callback)
-  return () => mql.removeEventListener('change', callback)
-}
-
-function getSnapshot() {
-  return window.matchMedia(MOBILE_QUERY).matches
-}
-
-function getServerSnapshot() {
-  return false
-}
-
 export function useIsMobile(): boolean {
-  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
+  return useMediaQuery(MOBILE_QUERY)
 }

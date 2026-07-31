@@ -21,7 +21,7 @@ type Row = {
   logo?: { src: string; width: number; height: number }
   /** Tight line under the title (role + dates). Sits closer than `body`. */
   subhead?: string
-  body: string
+  body?: string
   /** `#/...` route for the "View" button. Omitted while the page is undesigned. */
   showcase?: string
   links: Link[]
@@ -53,8 +53,7 @@ const forFun: Row[] = [
     id: 'forge',
     title: projects.forge.title,
     logo: { src: '/work/logos/forge.svg', width: 13.333, height: 16 },
-    // Figma still has a pasted Invisible résumé line here — keep the real Forge blurb.
-    body: projects.forge.bento.tagline ?? projects.forge.tagline,
+    body: 'Experimental Figma-style design mode for your own app and coding agent',
     showcase: '#/work/forge',
     links: [{ kind: 'repo', href: 'https://github.com/NoahHendrickson/the-forge' }],
   },
@@ -73,15 +72,15 @@ const forFun: Row[] = [
 const career: Row[] = [
   {
     id: 'invisible',
-    title: 'Invisible Technologies',
-    subhead: 'Senior Product Designer, Aug 2022 – July 2026.',
-    body: "Currently updating my portfolio, but if you're interested please reach out :)",
+    title: 'Senior Product Designer - Invisible Technologies',
+    subhead: 'Aug 2022 – July 2026.',
+    showcase: '#/work/invisible',
     links: [],
   },
 ]
 
 const FILTERS: Filter[] = [
-  { id: 'fun', label: 'For fun projects', rows: forFun },
+  { id: 'fun', label: 'Personal projects', rows: forFun },
   { id: 'career', label: 'Career', rows: career },
   { id: 'graphic', label: 'Graphic Design', rows: [] },
 ]
@@ -226,7 +225,7 @@ function ProjectRow({
             />
           )}
           <span style={titleStyle}>{row.title}</span>
-          <p style={bodyStyle}>{row.body}</p>
+          {row.body && <p style={bodyStyle}>{row.body}</p>}
         </div>
         {row.subhead && (
           <p
@@ -235,7 +234,7 @@ function ProjectRow({
               fontSize: type['body-s'].fontSize,
               fontWeight: 400,
               lineHeight: 1.5,
-              color: color.text.primary,
+              color: color.text.muted,
             }}
           >
             {row.subhead}

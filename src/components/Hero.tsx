@@ -58,7 +58,7 @@ export default function Hero() {
 
       <p style={{ ...body, color: MUTED }}>
         I&rsquo;m looking for environments that prioritize shipping high-quality products
-        and features often, and aren&rsquo;t afraid to see a designer in the codebase.
+        and features, and aren&rsquo;t afraid to see a designer in the codebase.
       </p>
     </div>
   )

@@ -54,7 +54,7 @@ const JUMP_TO: { label: string; href: string; logo: Logo }[] = [
   },
 ]
 
-export default function Footer() {
+export default function Footer({ includeStatBuilder = true }: { includeStatBuilder?: boolean } = {}) {
   const isMobile = useIsMobile()
   const [hash, setHash] = useState(() => window.location.hash)
 
@@ -64,7 +64,9 @@ export default function Footer() {
     return () => window.removeEventListener('hashchange', onHashChange)
   }, [])
 
-  const jumpTo = JUMP_TO.filter((link) => link.href !== hash)
+  const jumpTo = JUMP_TO.filter(
+    (link) => link.href !== hash && (includeStatBuilder || link.href !== '#/work/stat-builder'),
+  )
 
   return (
     <footer
