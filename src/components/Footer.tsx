@@ -5,8 +5,9 @@ import { useIsMobile } from '../hooks/useIsMobile'
 
 /**
  * The shared page footer, from the July 2026 file (`5mDT1eQf2KBcET9dh6kPXd`,
- * node `58:2190`). Three columns on an 80px pad with a 120px gutter between
- * them: the two tabs, the project pages, and the two ways to reach me.
+ * node `58:2190`). Up to three columns on an 80px pad with a 120px gutter
+ * between them: the two tabs (omitted on Me), the project pages, and the two
+ * ways to reach me.
  *
  * It closes every page — the two tabs in `App.tsx` and the story pages — so it
  * sits outside the Me tab's narrow content column and runs the full width.
@@ -68,6 +69,9 @@ export default function Footer({ includeStatBuilder = true }: { includeStatBuild
     (link) => link.href !== hash && (includeStatBuilder || link.href !== '#/work/stat-builder'),
   )
 
+  // On Me there is nowhere to "go back" — hide the tab column entirely.
+  const isMe = hash === '' || hash === '#' || hash === '#/'
+
   return (
     <footer
       style={{
@@ -81,11 +85,13 @@ export default function Footer({ includeStatBuilder = true }: { includeStatBuild
         alignItems: 'flex-start',
       }}
     >
-      <Column heading="Back to" width={153}>
-        {BACK_TO.map((link) => (
-          <FooterLink key={link.href} href={link.href} label={link.label} />
-        ))}
-      </Column>
+      {!isMe && (
+        <Column heading="Back to" width={153}>
+          {BACK_TO.map((link) => (
+            <FooterLink key={link.href} href={link.href} label={link.label} />
+          ))}
+        </Column>
+      )}
 
       <Column heading="Jump to" width={153}>
         {jumpTo.map((link) => (
