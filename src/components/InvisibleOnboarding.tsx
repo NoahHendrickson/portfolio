@@ -276,9 +276,9 @@ function Hero({ isMobile }: { isMobile: boolean }) {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: space.lg }}>
         <p style={{ ...bodyStyle, color: color.text.primary }}>
-          The team for this initiative was 1.5 Designers, 1 Product Manager and 5 Engineers. The
-          business relied on Meridial to onboard users scale our AI training business and meet the
-          requirements set by our clients. I was the Design Lead for this team and worked closely
+          The team for this project was 1.5 Designers, 1 Product Manager and 5 Engineers. The
+          business relied on Meridial to onboard users to scale our AI training business and meet the
+          demand of our clients. I was the Design Lead for this team and worked closely
           with our Product Manager and many other teams such as Legal, Compliance, Hiring and
           Operations to ensure the Product didn’t have any blind spots.
         </p>
