@@ -11,6 +11,7 @@ import WorkPage from './components/WorkPage'
 import InvisibleOnboarding from './components/InvisibleOnboarding'
 import ProjectLanding from './components/ProjectLanding'
 import ProjectStory from './components/ProjectStory'
+import StatBuilderShowcase from './components/StatBuilderShowcase'
 import { projects } from './data/projects'
 import { useIsMobile } from './hooks/useIsMobile'
 import { ForgeDesignMode } from 'forge-mode/design-mode'
@@ -70,12 +71,22 @@ export default function App() {
     : undefined
 
   if (project) {
-    // Projects with a `landing` get the screenshot-led page; the rest fall back
-    // to the generic stats/stack/status layout.
+    // Stat Builder is temporarily on a four-variant showcase sandbox; other
+    // projects with a `landing` use ProjectStory; the rest fall back to the
+    // generic stats/stack/status layout.
+    const page =
+      project.slug === 'stat-builder' ? (
+        <StatBuilderShowcase project={project} />
+      ) : project.landing ? (
+        <ProjectStory project={project} />
+      ) : (
+        <ProjectLanding project={project} />
+      )
+
     return (
       <>
         <ForgeDesignMode />
-        {project.landing ? <ProjectStory project={project} /> : <ProjectLanding project={project} />}
+        {page}
       </>
     )
   }
