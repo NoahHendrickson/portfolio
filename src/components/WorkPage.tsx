@@ -42,10 +42,10 @@ const DEFAULT_PROJECTS: Project[] = [
 ]
 
 const titleStyle: CSSProperties = {
-  fontSize: type['body-l'].fontSize,
-  fontWeight: 400,
-  lineHeight: 1.6,
-  letterSpacing: '-0.16px',
+  fontSize: type['heading-m'].fontSize,
+  fontWeight: type['heading-m'].fontWeight,
+  lineHeight: type['heading-m'].lineHeight,
+  letterSpacing: type['heading-m'].letterSpacing,
   color: color.text.primary,
   whiteSpace: 'nowrap',
 }

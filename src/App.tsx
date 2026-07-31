@@ -61,7 +61,7 @@ export default function App() {
   }
 
   if (route === '/work/invisible') {
-    return <><ForgeDesignMode /><WorkPage title="Invisible" subtitle="Senior Product Designer" description="As the Lead Product Designer for Meridial, I held the bigger picture: shaping product vision, setting the bar for design quality, and building the ops that kept the team moving. That meant bringing in tools like Microsoft Clarity and Mixpanel to ground decisions in real user behavior, and folding AI into my workflow to move faster without losing craft. A few of the problems I worked on here: Our marketplace onboarding flow was disjointed, delayed, and confusing. Experts dropped off, and the business couldn't scale delivery." /></>
+    return <><ForgeDesignMode /><WorkPage title="Invisible" subtitle="Senior Product Designer" description="As the Lead Product Designer for Meridial, I held the bigger picture: shaping product vision, setting the bar for design quality, and building the ops that kept the team moving. That meant bringing in tools like Microsoft Clarity and Mixpanel to ground decisions in real user behavior, and folding AI into my workflow to move faster without losing craft." /></>
   }
 
   // `getRoute()` has already stripped the leading '#', so routes look like '/work/forge'.
