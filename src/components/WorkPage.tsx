@@ -47,7 +47,6 @@ const titleStyle: CSSProperties = {
   lineHeight: type['heading-m'].lineHeight,
   letterSpacing: type['heading-m'].letterSpacing,
   color: color.text.primary,
-  whiteSpace: 'nowrap',
 }
 
 export default function WorkPage({ title, subtitle, description, projects = DEFAULT_PROJECTS }: Props) {
@@ -79,6 +78,7 @@ export default function WorkPage({ title, subtitle, description, projects = DEFA
         flexDirection: 'column',
         gap: isMobile ? space.xl : space['2xl'],
         paddingBottom: isMobile ? '60px' : '120px',
+        overflowX: 'clip',
       }}
     >
       <Header active="work" showProfile={false} />
@@ -90,6 +90,9 @@ export default function WorkPage({ title, subtitle, description, projects = DEFA
           gap: isMobile ? space.xl : space['2xl'],
           padding: isMobile ? `0 20px` : `0 80px`,
           flex: unlocked ? undefined : 1,
+          minWidth: 0,
+          boxSizing: 'border-box',
+          width: '100%',
         }}
       >
         <a
@@ -244,7 +247,6 @@ function ProjectRow({ project, isMobile }: { project: Project; isMobile: boolean
   const bodyStyle: CSSProperties = {
     margin: 0,
     minWidth: 0,
-    flex: '1 1 0',
     fontSize: type['body-l'].fontSize,
     fontWeight: 400,
     lineHeight: 1.6,
@@ -252,7 +254,12 @@ function ProjectRow({ project, isMobile }: { project: Project; isMobile: boolean
     color: color.text.muted,
     ...(isMobile
       ? {}
-      : { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }),
+      : {
+          flex: '1 1 0',
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+        }),
   }
 
   return (
@@ -263,18 +270,23 @@ function ProjectRow({ project, isMobile }: { project: Project; isMobile: boolean
         gap: '16px',
         paddingBottom: '16px',
         borderBottom: `1px solid ${color.border.subtle}`,
+        minWidth: 0,
       }}
     >
       <div
         style={{
           display: 'flex',
-          alignItems: isMobile ? 'flex-start' : 'center',
+          // Long project titles (e.g. onboarding) can't sit beside the blurb on a
+          // phone — stack them so neither column forces horizontal overflow.
+          flexDirection: isMobile ? 'column' : 'row',
+          alignItems: isMobile ? 'stretch' : 'center',
           gap: '8px',
           minWidth: 0,
-          flexWrap: isMobile ? 'wrap' : undefined,
         }}
       >
-        <span style={titleStyle}>{project.title}</span>
+        <span style={{ ...titleStyle, whiteSpace: isMobile ? 'normal' : 'nowrap' }}>
+          {project.title}
+        </span>
         <p style={bodyStyle}>{project.body}</p>
       </div>
 
