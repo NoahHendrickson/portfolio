@@ -199,12 +199,11 @@ export default function InvisibleOnboarding() {
             heading="what’s next?"
             body={
               <p style={bodyStyle}>
-                I wanted to carry the momentum of from the experiment and continue to improve our
-                onboarding. I made sure to go through both experiments to document at each step,
-                why I thought one performed better than the other. Our onboarding flow was still
-                littered with legacy requirements and thinking that we could cut out in this new
-                version. I was once again researching to find the next risk areas that needed
-                designs attention.
+                I wanted to carry the momentum from the experiment and continue to improve our
+                onboarding. I made sure to go through both experiments to document why I thought
+                one performed better than the other. Our onboarding flow was still full of legacy
+                requirements that we couldn’t get to in this new version. I was once again
+                researching to find the next risk areas that needed designs attention.
               </p>
             }
           >
