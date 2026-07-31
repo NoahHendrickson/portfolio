@@ -199,12 +199,11 @@ export default function InvisibleOnboarding() {
             heading="what’s next?"
             body={
               <p style={bodyStyle}>
-                I wanted to carry the momentum of from the experiment and continue to improve our
-                onboarding. I made sure to go through both experiments to document at each step,
-                why I thought one performed better than the other. Our onboarding flow was still
-                littered with legacy requirements and thinking that we could cut out in this new
-                version. I was once again researching to find the next risk areas that needed
-                designs attention.
+                I wanted to carry the momentum from the experiment and continue to improve our
+                onboarding. I made sure to go through both experiments to document why I thought
+                one performed better than the other. Our onboarding flow was still full of legacy
+                requirements that we couldn’t get to in this new version. I was once again
+                researching to find the next risk areas that needed designs attention.
               </p>
             }
           >
@@ -276,9 +275,9 @@ function Hero({ isMobile }: { isMobile: boolean }) {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: space.lg }}>
         <p style={{ ...bodyStyle, color: color.text.primary }}>
-          The team for this initiative was 1.5 Designers, 1 Product Manager and 5 Engineers. The
-          business relied on Meridial to onboard users scale our AI training business and meet the
-          requirements set by our clients. I was the Design Lead for this team and worked closely
+          The team for this project was 1.5 Designers, 1 Product Manager and 5 Engineers. The
+          business relied on Meridial to onboard users to scale our AI training business and meet the
+          demand of our clients. I was the Design Lead for this team and worked closely
           with our Product Manager and many other teams such as Legal, Compliance, Hiring and
           Operations to ensure the Product didn’t have any blind spots.
         </p>
