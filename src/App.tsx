@@ -124,12 +124,13 @@ export default function App() {
         {/*
           Header stays mounted across Me ↔ Design so the tabs don’t remount and
           re-run the content entrance. Only the page body below animates in.
-          On Me, this shell is 100svh so the hero fills the fold; Experience
-          starts below.
+          On desktop Me, this shell is 100svh so the hero fills the fold beside
+          the shader; on mobile there’s no shader, so a forced viewport height
+          just leaves a tall empty band under the bio.
         */}
         <div
           style={{
-            minHeight: tab === 'me' ? '100svh' : undefined,
+            minHeight: tab === 'me' && !isMobile ? '100svh' : undefined,
             display: 'flex',
             flexDirection: 'column',
             gap: '24px',
@@ -149,7 +150,13 @@ export default function App() {
             <div
               key="me"
               className="tab-content-in"
-              style={{ padding: pageInset, boxSizing: 'border-box', flex: '1 0 auto' }}
+              style={{
+                padding: pageInset,
+                boxSizing: 'border-box',
+                // Grow to fill the desktop fold; on mobile the shell has no
+                // min-height, so flex-grow would only invent empty space.
+                flex: isMobile ? undefined : '1 0 auto',
+              }}
             >
               <Hero />
             </div>

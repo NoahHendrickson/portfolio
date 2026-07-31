@@ -5,8 +5,10 @@ import { useIsMobile } from '../hooks/useIsMobile'
 
 /**
  * The shared page footer, from the July 2026 file (`5mDT1eQf2KBcET9dh6kPXd`,
- * node `58:2190`). Three columns on an 80px pad with a 120px gutter between
- * them: the two tabs, the project pages, and the two ways to reach me.
+ * node `58:2190`). Up to three columns on an 80px pad with a 120px gutter
+ * between them: the two tabs (omitted on Me), the project pages, and the two
+ * ways to reach me. On mobile the columns stack with tighter gaps so the band
+ * doesn’t read as a long empty scroll.
  *
  * It closes every page — the two tabs in `App.tsx` and the story pages — so it
  * sits outside the Me tab's narrow content column and runs the full width.
@@ -68,26 +70,31 @@ export default function Footer({ includeStatBuilder = true }: { includeStatBuild
     (link) => link.href !== hash && (includeStatBuilder || link.href !== '#/work/stat-builder'),
   )
 
+  // On Me there is nowhere to "go back" — hide the tab column entirely.
+  const isMe = hash === '' || hash === '#' || hash === '#/'
+
   return (
     <footer
       style={{
         boxSizing: 'border-box',
         width: '100%',
         background: color.bg.primary,
-        padding: isMobile ? '48px 20px' : '80px',
+        padding: isMobile ? '40px 20px' : '80px',
         display: 'flex',
         flexWrap: 'wrap',
-        gap: isMobile ? '40px' : '120px',
+        gap: isMobile ? space['2xl'] : '120px',
         alignItems: 'flex-start',
       }}
     >
-      <Column heading="Back to" width={153}>
-        {BACK_TO.map((link) => (
-          <FooterLink key={link.href} href={link.href} label={link.label} />
-        ))}
-      </Column>
+      {!isMe && (
+        <Column heading="Back to" width={153} compact={isMobile}>
+          {BACK_TO.map((link) => (
+            <FooterLink key={link.href} href={link.href} label={link.label} />
+          ))}
+        </Column>
+      )}
 
-      <Column heading="Jump to" width={153}>
+      <Column heading="Jump to" width={153} compact={isMobile}>
         {jumpTo.map((link) => (
           <FooterLink
             key={link.href}
@@ -104,7 +111,7 @@ export default function Footer({ includeStatBuilder = true }: { includeStatBuild
         ))}
       </Column>
 
-      <Column heading="Get in touch">
+      <Column heading="Get in touch" compact={isMobile}>
         <FooterLink
           href={LINKEDIN_URL}
           label="LinkedIn"
@@ -117,10 +124,35 @@ export default function Footer({ includeStatBuilder = true }: { includeStatBuild
 }
 
 /** `width` is the file's column measure — the last column just takes its content. */
-function Column({ heading, width, children }: { heading: string; width?: number; children: React.ReactNode }) {
+function Column({
+  heading,
+  width,
+  compact = false,
+  children,
+}: {
+  heading: string
+  width?: number
+  compact?: boolean
+  children: React.ReactNode
+}) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: space['2xl'], minWidth: width }}>
-      <h2 style={{ margin: 0, ...type['heading-l'], color: color.text.muted }}>{heading}</h2>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: compact ? space.lg : space['2xl'],
+        minWidth: width,
+      }}
+    >
+      <h2
+        style={{
+          margin: 0,
+          ...(compact ? type['heading-m'] : type['heading-l']),
+          color: color.text.muted,
+        }}
+      >
+        {heading}
+      </h2>
       <div style={{ display: 'flex', flexDirection: 'column', gap: space.lg }}>{children}</div>
     </div>
   )

@@ -76,7 +76,10 @@ export default function LlmWall() {
           >
             <div
               style={{
-                width: `${clipping.width}px`,
+                // Fixed design widths; clamp so a 360px clip can’t overflow a
+                // 320–390 phone column (and stretch the layout viewport on iOS).
+                width: `min(${clipping.width}px, 100%)`,
+                maxWidth: '100%',
                 padding: '8px',
                 boxSizing: 'border-box',
                 borderRadius: '4px',
