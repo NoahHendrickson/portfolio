@@ -1,5 +1,6 @@
 import { useIsMobile } from '../../hooks/useIsMobile'
 import type { Project } from '../../data/projects'
+import { formatEyebrow, getFeatures } from './content'
 import { BrandMark, CtaRow, Eyebrow, FeatureMedia, QuoteStrip, ShotFrame, SoftClose } from './parts'
 import { BODY_TEXT, MUTED, useGutter } from './styles'
 
@@ -11,7 +12,9 @@ export default function Launch({ project }: { project: Project }) {
   const isMobile = useIsMobile()
   const gutter = useGutter()
   const landing = project.landing!
-  const feature = landing.features[0]
+  const feature = getFeatures(landing)[0]
+  const heroShot = landing.hero.shot
+  const eyebrow = formatEyebrow(landing.eyebrow)
 
   return (
     <div
@@ -42,7 +45,7 @@ export default function Launch({ project }: { project: Project }) {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <BrandMark size={isMobile ? 24 : 28} />
-            <Eyebrow>{landing.eyebrow}</Eyebrow>
+            <Eyebrow>{eyebrow}</Eyebrow>
           </div>
 
           <h1
@@ -87,11 +90,13 @@ export default function Launch({ project }: { project: Project }) {
               }}
             />
           )}
-          <ShotFrame
-            shot={landing.hero.shot}
-            uncropped
-            style={{ position: 'relative', boxShadow: '0 40px 80px -24px rgba(0,0,0,0.55)' }}
-          />
+          {heroShot && (
+            <ShotFrame
+              shot={heroShot}
+              uncropped
+              style={{ position: 'relative', boxShadow: '0 40px 80px -24px rgba(0,0,0,0.55)' }}
+            />
+          )}
         </div>
       </section>
 

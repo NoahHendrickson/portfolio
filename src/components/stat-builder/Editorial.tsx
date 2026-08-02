@@ -1,5 +1,6 @@
 import { useIsMobile } from '../../hooks/useIsMobile'
 import type { Project } from '../../data/projects'
+import { formatEyebrow, getFeatures } from './content'
 import {
   FeatureMedia,
   FeedbackWall,
@@ -19,6 +20,9 @@ export default function Editorial({ project }: { project: Project }) {
   const gutter = useGutter()
   const landing = project.landing!
   const heroBody = landing.hero.body ?? [project.summary]
+  const features = getFeatures(landing)
+  const heroShot = landing.hero.shot
+  const eyebrow = formatEyebrow(landing.eyebrow)
 
   return (
     <div
@@ -40,7 +44,7 @@ export default function Editorial({ project }: { project: Project }) {
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
           <p style={{ margin: 0, fontSize: '16px', fontWeight: 500, lineHeight: '24px', color: MUTED }}>
-            {landing.eyebrow}
+            {eyebrow}
           </p>
 
           <h1
@@ -74,16 +78,18 @@ export default function Editorial({ project }: { project: Project }) {
           </div>
         </div>
 
-        <ShotFrame
-          shot={landing.hero.shot}
-          style={{
-            boxShadow: '0 32px 64px -20px rgba(0,0,0,0.5)',
-            animation: 'sb-fade-up 700ms cubic-bezier(0.22, 1, 0.36, 1) both',
-          }}
-        />
+        {heroShot && (
+          <ShotFrame
+            shot={heroShot}
+            style={{
+              boxShadow: '0 32px 64px -20px rgba(0,0,0,0.5)',
+              animation: 'sb-fade-up 700ms cubic-bezier(0.22, 1, 0.36, 1) both',
+            }}
+          />
+        )}
       </section>
 
-      {landing.features.map((feature) => (
+      {features.map((feature) => (
         <section
           key={feature.heading}
           style={{
