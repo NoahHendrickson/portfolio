@@ -72,14 +72,16 @@ export default function LlmWall() {
               padding: '4px',
               borderRadius: 'var(--radius-md)',
               background: 'rgba(255,255,255,0.08)',
+              // Clamp on the flex item itself — `min(…, 100%)` on a nested
+              // shrink-to-fit child collapses to 0 (empty 26px squares on prod).
+              width: `min(${clipping.width + 8}px, 100%)`,
+              boxSizing: 'border-box',
+              minWidth: 0,
             }}
           >
             <div
               style={{
-                // Fixed design widths; clamp so a 360px clip can’t overflow a
-                // 320–390 phone column (and stretch the layout viewport on iOS).
-                width: `min(${clipping.width}px, 100%)`,
-                maxWidth: '100%',
+                width: '100%',
                 padding: '8px',
                 boxSizing: 'border-box',
                 borderRadius: '4px',
