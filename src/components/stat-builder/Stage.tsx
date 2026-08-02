@@ -1,5 +1,6 @@
 import { useIsMobile } from '../../hooks/useIsMobile'
 import type { Project } from '../../data/projects'
+import { formatEyebrow, getFeatures } from './content'
 import { BrandMark, CtaRow, Eyebrow, FeatureMedia, QuoteStrip, ShotFrame, SoftClose } from './parts'
 import { BODY_TEXT, BORDER, MUTED, useGutter } from './styles'
 
@@ -12,7 +13,9 @@ export default function Stage({ project }: { project: Project }) {
   const isMobile = useIsMobile()
   const gutter = useGutter()
   const landing = project.landing!
-  const feature = landing.features[0]
+  const feature = getFeatures(landing)[0]
+  const heroShot = landing.hero.shot
+  const eyebrow = formatEyebrow(landing.eyebrow)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '48px' : '72px' }}>
@@ -28,7 +31,7 @@ export default function Stage({ project }: { project: Project }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <BrandMark size={20} />
-              <Eyebrow>{landing.eyebrow}</Eyebrow>
+              <Eyebrow>{eyebrow}</Eyebrow>
             </div>
             <h1
               style={{
@@ -57,16 +60,18 @@ export default function Stage({ project }: { project: Project }) {
         </header>
       </div>
 
-      <ShotFrame
-        shot={landing.hero.shot}
-        uncropped
-        style={{
-          borderRadius: 0,
-          borderLeft: 'none',
-          borderRight: 'none',
-          animation: 'sb-fade-up 700ms cubic-bezier(0.22, 1, 0.36, 1) both',
-        }}
-      />
+      {heroShot && (
+        <ShotFrame
+          shot={heroShot}
+          uncropped
+          style={{
+            borderRadius: 0,
+            borderLeft: 'none',
+            borderRight: 'none',
+            animation: 'sb-fade-up 700ms cubic-bezier(0.22, 1, 0.36, 1) both',
+          }}
+        />
+      )}
 
       <div
         style={{

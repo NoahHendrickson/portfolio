@@ -3,7 +3,8 @@ import { ArrowSquareOut } from '@phosphor-icons/react'
 import { VARIANTS } from '../../design-system/buttonStyles'
 import { control, radius, space, type } from '../../design-system/tokens'
 import { useIsMobile } from '../../hooks/useIsMobile'
-import type { Feature, FeedbackShot, Landing, LandingShot } from '../../data/projects'
+import type { FeedbackShot, Landing, LandingShot } from '../../data/projects'
+import type { Feature } from './content'
 import {
   APP_HREF,
   BODY_TEXT,
@@ -304,7 +305,7 @@ export function SectionCopy({
   align = 'left',
 }: {
   heading: string
-  body: string
+  body?: string
   align?: 'left' | 'center'
 }) {
   const isMobile = useIsMobile()
@@ -332,17 +333,19 @@ export function SectionCopy({
       >
         {heading}
       </h2>
-      <p
-        style={{
-          margin: 0,
-          maxWidth: '720px',
-          fontSize: isMobile ? '16px' : '18px',
-          lineHeight: 1.4,
-          color: BODY_TEXT,
-        }}
-      >
-        {body}
-      </p>
+      {body && (
+        <p
+          style={{
+            margin: 0,
+            maxWidth: '720px',
+            fontSize: isMobile ? '16px' : '18px',
+            lineHeight: 1.4,
+            color: BODY_TEXT,
+          }}
+        >
+          {body}
+        </p>
+      )}
     </div>
   )
 }
@@ -406,6 +409,8 @@ function FeedbackCard({ shot }: { shot: FeedbackShot }) {
 /** Original orange closing card from `landing.outro`. */
 export function OutroCard({ outro }: { outro: Landing['outro'] }) {
   const isMobile = useIsMobile()
+
+  if (!outro) return null
 
   return (
     <div

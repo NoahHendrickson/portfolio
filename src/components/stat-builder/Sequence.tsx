@@ -1,5 +1,6 @@
 import { useIsMobile } from '../../hooks/useIsMobile'
 import type { Project } from '../../data/projects'
+import { formatEyebrow, getFeatures } from './content'
 import { BrandMark, CtaRow, Eyebrow, FeatureMedia, QuoteStrip, ShotFrame, SoftClose } from './parts'
 import { BODY_TEXT, BORDER, MUTED, TEXT, useGutter } from './styles'
 
@@ -11,7 +12,9 @@ export default function Sequence({ project }: { project: Project }) {
   const isMobile = useIsMobile()
   const gutter = useGutter()
   const landing = project.landing!
-  const feature = landing.features[0]
+  const feature = getFeatures(landing)[0]
+  const heroShot = landing.hero.shot
+  const eyebrow = formatEyebrow(landing.eyebrow)
 
   return (
     <div
@@ -33,7 +36,7 @@ export default function Sequence({ project }: { project: Project }) {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <BrandMark size={22} />
-          <Eyebrow>{landing.eyebrow}</Eyebrow>
+          <Eyebrow>{eyebrow}</Eyebrow>
         </div>
 
         <h1
@@ -69,11 +72,13 @@ export default function Sequence({ project }: { project: Project }) {
         body="Six Armor 3.0 stats, class, exotic, set bonuses, fragments, mods. Tell it what you want."
         flip={false}
       >
-        <ShotFrame
-          shot={landing.hero.shot}
-          uncropped
-          style={{ boxShadow: '0 28px 56px -18px rgba(0,0,0,0.5)' }}
-        />
+        {heroShot && (
+          <ShotFrame
+            shot={heroShot}
+            uncropped
+            style={{ boxShadow: '0 28px 56px -18px rgba(0,0,0,0.5)' }}
+          />
+        )}
       </Step>
 
       {feature && (
