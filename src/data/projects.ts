@@ -407,18 +407,19 @@ export const projects: Record<string, Project> = {
     },
     pageReady: true,
     landing: {
-      eyebrow: ['Vibe coded', 'Figma+Cursor+Claude'],
-      // The July frame runs the body as one 80px-padded block rather than a
-      // stack of bands, and butts the feedback wall straight onto the bottom.
+      // Same continuous / left-aligned shell as Phanttom and The Forge.
+      eyebrow: [
+        'Vibe coded',
+        { label: 'GitHub', href: 'https://github.com/NoahHendrickson/d2-stat-builder' },
+        { label: 'Website', href: 'https://d2-stat-builder-dusky.vercel.app/' },
+      ],
       flow: 'continuous',
+      gap: 120,
+      align: 'start',
       hero: {
         body: [
           'This is a tool for my favorite video game of all time, Destiny 2. It’s made for power users and nerds like myself. For those unfamiliar with Destiny 2, this allows you to set preferences and then finds the armor pieces you should equip to achieve that build.',
           'There are other sites that do this, but I wanted to focus mine on the particular needs of hard core players and a change in the armor system that allowed me to speed up the search for builds once a user enters their parameters.',
-        ],
-        links: [
-          { label: 'GitHub', href: 'https://github.com/NoahHendrickson/d2-stat-builder' },
-          { label: 'Website', href: 'https://d2-stat-builder-dusky.vercel.app/' },
         ],
         shot: {
           // Frame 443 — browser chrome baked into the export (node 93:5358).
@@ -430,9 +431,19 @@ export const projects: Record<string, Project> = {
       },
       sections: [
         {
-          kind: 'copy',
+          kind: 'feature',
+          gap: 80,
           heading: 'I wanted to make finding my armor easier',
           body: 'The armor system was changed, affecting stats and bonuses you could get. I wanted a really easy way to search and filter my armor across the things that mattered. I built a custom sorting feature that allows users to chain sorts together to mirror the mental model we use to rank armor.',
+          copyWidth: 573,
+          panelWidth: 572,
+          shot: {
+            src: '/work/stat-builder/table.png',
+            alt: 'The armor table, filtered by class, archetype, tertiary stat and set bonus',
+            aspect: '1600 / 1020',
+          },
+          // Raw screenshot — CSS tinted frame like other D2 panels.
+          panel: {},
         },
         {
           // The one overlapping composition in the file — the sort panel laid
