@@ -5,6 +5,7 @@ import Footer from './components/Footer'
 import Hero from './components/Hero'
 import WorkList from './components/WorkList'
 import ShaderPanel from './components/ShaderPanel'
+import { LEAF_PANEL_HEIGHT_VH, LEAF_TIP_INSET } from './components/LeafPattern'
 import Experience from './components/Experience'
 import LlmWall from './components/LlmWall'
 import WorkPage from './components/WorkPage'
@@ -19,15 +20,6 @@ const BG = 'var(--color-bg-primary)'
 
 /** Percentage of the viewport the content column takes; on Design it covers more of the shader. */
 const CONTENT_PCT = { me: 58.3, work: 87.3 }
-
-/**
- * The shader column starts where the Me tab's content column ends and runs to the
- * right edge. Anchoring both sides rather than setting a width keeps it flush with
- * the column whether or not the page has a scrollbar; widening the column on Design
- * just covers more of it, so the gradient sits under the panel instead of
- * getting squished.
- */
-const SHADER_LEFT = `${CONTENT_PCT.me}vw`
 
 /**
  * The tab bar is centred in the content column, so widening the column would drag
@@ -92,18 +84,18 @@ export default function App() {
   return (
     <div data-style="simple" style={{ position: 'relative', minHeight: '100vh', background: BG }}>
       {/*
-        The shader is one viewport tall in the top-right corner and the page
-        scrolls past it, rather than the content column scrolling inside a fixed
-        100vh split — that is the shape of the July 2026 file, where the canvas
-        stops at the fold and dark shell runs the rest of the way down.
+        Leaf field hangs in the top-right and runs past the fold, thinning out
+        until it's gone — page scrolls over the same dark shell underneath.
       */}
       {!isMobile && (
         <div style={{
           position: 'absolute',
           top: 0,
-          left: SHADER_LEFT,
+          // Track the active content edge so the first leaf column is always
+          // fully visible — jagged silhouette instead of a mid-leaf square cut.
+          left: `calc(${CONTENT_PCT[tab]}vw - ${LEAF_TIP_INSET}px)`,
           right: 0,
-          height: '100vh',
+          height: `${LEAF_PANEL_HEIGHT_VH}vh`,
           overflow: 'hidden',
           zIndex: 0,
         }}>
@@ -124,7 +116,11 @@ export default function App() {
           width: isMobile ? '100%' : `${CONTENT_PCT[tab]}vw`,
           minHeight: isMobile ? undefined : '100vh',
           boxSizing: 'border-box',
-          background: BG,
+          // Stop the fill short of the right edge so leaf tips peek past the
+          // column as a jagged edge (Figma Frame 455), not a square cut.
+          background: isMobile
+            ? BG
+            : `linear-gradient(to right, ${BG} 0%, ${BG} calc(100% - ${LEAF_TIP_INSET}px), transparent calc(100% - ${LEAF_TIP_INSET}px))`,
         }}
       >
         {/*

@@ -1,6 +1,6 @@
-import ShaderEffect from './ShaderEffect'
+import LeafPattern from './LeafPattern'
 
-/** The right-hand shader column — gradient only. */
+/** The right-hand panel — leaf pattern (replacing the shader for preview). */
 export default function ShaderPanel() {
-  return <ShaderEffect />
+  return <LeafPattern />
 }
