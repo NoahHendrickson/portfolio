@@ -15,7 +15,7 @@ type Entry = {
   caption?: string
   paragraphs: React.ReactNode[]
   /** Impact lines under the copy — setup in white, result in orange. */
-  quickHits?: { setup: string; result: string }[]
+  quickHits?: { setup: string; result: string; href?: string }[]
 }
 
 const entries: Entry[] = [
@@ -44,10 +44,14 @@ const entries: Entry[] = [
       {
         setup: 'Led the research and redesign of our onboarding funnel',
         result: 'Doubled the overall conversion rate',
+        // Lands on the showcase when unlocked; InvisibleOnboarding redirects
+        // locked visitors to the password gate on `#/work/invisible`.
+        href: '#/work/invisible/onboarding',
       },
       {
         setup: 'Redesigned the mobile experience for onboarding',
         result: '50% increase in profile completion on mobile',
+        href: '#/work/invisible/onboarding',
       },
     ],
   },
@@ -160,7 +164,22 @@ export default function Experience() {
                       }}
                     >
                       <p style={{ margin: 0, color: TEXT }}>{hit.setup}</p>
-                      <p style={{ margin: 0, color: ORANGE }}>{hit.result}</p>
+                      {hit.href ? (
+                        <a
+                          href={hit.href}
+                          style={{
+                            display: 'block',
+                            margin: 0,
+                            color: ORANGE,
+                            textDecoration: 'underline',
+                            textUnderlineOffset: '3px',
+                          }}
+                        >
+                          {hit.result}
+                        </a>
+                      ) : (
+                        <p style={{ margin: 0, color: ORANGE }}>{hit.result}</p>
+                      )}
                     </div>
                   ))}
                 </>

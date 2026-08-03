@@ -172,9 +172,10 @@ export default function InvisibleOnboarding() {
                   4x increased conversion for our highest friction step.{' '}
                   <span style={{ color: color.text.muted, fontWeight: 400 }}>
                     During the research phase we saw the largest drop off during the initial
-                    assessment we ask users to take. We took the assessment ourselves, met with
+                    assessment that users must complete. We took the assessment ourselves, met with
                     various teams to understand if they used those results in a meaningful way..
-                    they didn’t. The largest impact didn’t actually require designs.
+                    they didn’t. So we completely cut that step out. The largest impact didn’t
+                    actually require designs.
                   </span>
                 </ResultCopy>
                 <ResultCopy>

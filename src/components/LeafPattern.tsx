@@ -30,6 +30,8 @@ const COL_ODD_Y = 56
 
 /** How far leaf tips poke past the content column's right edge. */
 export const LEAF_TIP_INSET = 8
+/** Extra shift of the whole field away from the content edge (px). */
+export const LEAF_SHIFT_X = 100
 
 /**
  * How tall the leaf panel runs past the fold. Dense through the first viewport,
