@@ -16,24 +16,24 @@ There is no test runner configured.
 
 ## Architecture
 
-Single-page React 19 + Vite 8 portfolio. There is **no router library** — `src/App.tsx` reads `window.location.hash`, listens for `hashchange`, and switches the rendered tree. Internal links use hrefs like `#/work/invisible`. When adding a new route, extend the conditional in `App.tsx` and link to `#/your-route`.
+Single-page React 19 + Vite 8 portfolio. There is **no router library** — `src/App.tsx` reads `window.location.pathname`, listens for `popstate` / a custom `routechange` event from `src/navigation.ts`, and switches the rendered tree. Internal links use hrefs like `/work/invisible` via `AppLink` / `navigate`. When adding a new route, extend the conditional in `App.tsx` and link to `/your-route`. Legacy `#/…` bookmarks are rewritten to pathnames on boot.
 
 Routes:
 
 | Route | Renders |
 |---|---|
-| `#/` | Me tab — `Hero`, then `Experience` and `LlmWall` below the fold |
-| `#/work` | Design tab — `WorkList`, the filtered project list |
-| `#/work/<slug>` | `ProjectStory` if `projects[slug].landing` is set, otherwise `ProjectLanding` (`src/data/projects.ts`) |
-| `#/work/invisible` | `WorkPage` (the password-gated case study; checked before the slug lookup) |
+| `/` | Me tab — `Hero`, then `Experience` and `LlmWall` below the fold |
+| `/work` | Design tab — `WorkList`, the filtered project list |
+| `/work/<slug>` | `ProjectStory` if `projects[slug].landing` is set, otherwise `ProjectLanding` (`src/data/projects.ts`) |
+| `/work/invisible` | `WorkPage` (the password-gated case study; checked before the slug lookup) |
 
 The two tabs come from the **"R2 Dark" section** of the July 2026 Figma file (`5mDT1eQf2KBcET9dh6kPXd`, node `49:10903`), which turned the whole shell dark and replaced the Work bento with a list. `ProjectStory` (D2 Stat Builder, Phanttom, The Forge) is dark and has its own frames (section `58:3085`). `ProjectLanding` and `WorkPage` are **still cream** — nothing links to them from `WorkList` today, but they will look wrong the moment something does.
 
 `App.tsx` is one normally-scrolling dark page, not a fixed 100vh split. `ShaderPanel` — `ShaderEffect` (a WebGL animated gradient via the `shaders` package — `FlowingGradient` + `Dither`) with the headline overlaid — is absolutely positioned one viewport tall in the top-right corner and the page scrolls past it. The content column is 58.3vw on Me and 87.3vw on Design (`CONTENT_PCT`), animating between them; the shader is anchored at `left: 58.3vw; right: 0`, so widening the column slides it under the panel rather than squishing it. Both widths come from the Figma frames (881 and 1320 of 1512).
 
-`Header` is the shared chrome on every page: the `TabBar` (Me / Design, orange underline on the active tab) with `ContactMenu` pinned right, and the profile row below. Pages that already pad themselves pass `barInset="0" contentInset="0"`; `showProfile={false}` drops the profile row, which is what the Design tab does. The **second tab is labelled "Design" but still routes to `#/work`**, so existing links keep resolving.
+`Header` is the shared chrome on every page: the `TabBar` (Me / Design, orange underline on the active tab) with `ContactMenu` pinned right, and the profile row below. Pages that already pad themselves pass `barInset="0" contentInset="0"`; `showProfile={false}` drops the profile row, which is what the Design tab does. The **second tab is labelled "Design" but still routes to `/work`**, so existing links keep resolving.
 
-`Footer.tsx` closes every page — the two tabs and every `ProjectStory` — from the July 2026 file (node `58:2190`): three columns on an 80px pad with a 120px gutter, Back to / Jump to / Get in touch. It runs the **full page width**, so `App.tsx` renders it as a sibling of the content column rather than inside it (the Me tab's column is only 58.3vw). The email row copies to the clipboard and confirms with a check rather than navigating, and "Moonfang Armory" points at the live site because `#/work/armory` still falls through to the cream `ProjectLanding`. Two divergences from the file: it seats the first column's links 12px under their heading against the other two columns' 32 — all three run on 32 here — and the Jump-to column is `min-width: 153px` because "Moonfang Armory" overflows the file's 153.
+`Footer.tsx` closes every page — the two tabs and every `ProjectStory` — from the July 2026 file (node `58:2190`): three columns on an 80px pad with a 120px gutter, Back to / Jump to / Get in touch. It runs the **full page width**, so `App.tsx` renders it as a sibling of the content column rather than inside it (the Me tab's column is only 58.3vw). The email row copies to the clipboard and confirms with a check rather than navigating, and "Moonfang Armory" points at the live site because `/work/armory` still falls through to the cream `ProjectLanding`. Two divergences from the file: it seats the first column's links 12px under their heading against the other two columns' 32 — all three run on 32 here — and the Jump-to column is `min-width: 153px` because "Moonfang Armory" overflows the file's 153.
 
 One deliberate divergence from the file: the Figma frames centre the tab bar in the content column on both tabs, which would slide it right by 14.5vw when the column widens. `TAB_SHIFT` in `App.tsx` cancels that out so the tabs hold still through the transition.
 
@@ -45,7 +45,7 @@ The page has no padding of its own, because the feedback band's tint runs edge t
 
 Figma sizes the browser frames by fixed height and clips the capture inside; our `browser-bar.png` renders at a different ratio to Figma's bar, so each shot's `aspect` is `designed total height − our bar at that width` and the frames land on their designed heights. `LandingShot.zoom` is for the shots the file crops into rather than fits (the table runs at 1.366× its frame). `FRAME_BORDER` / `FRAME_BG` / `OVERLAY_BORDER` are the screenshots' own chrome, not theme surfaces, so they stay hexes.
 
-`WorkPage.tsx` (`#/work/invisible`) is gated by a hardcoded password (`WORK_PASSWORD` constant) persisted in `sessionStorage` under `work-pages-unlocked`. This is a soft client-side gate — anything served to `/work/*` assets is still public, so don't put truly private material in `public/work/`.
+`WorkPage.tsx` (`/work/invisible`) is gated by a hardcoded password (`WORK_PASSWORD` constant) persisted in `sessionStorage` under `work-pages-unlocked`. This is a soft client-side gate — anything served to `/work/*` assets is still public, so don't put truly private material in `public/work/`. Path routes need a host SPA fallback — `vercel.json` rewrites unknown paths to `index.html`.
 
 Project copy lives in `src/data/projects.ts`, not in components — `ProjectLanding` and `ProjectStory` read from it, so adding a project page is a data-only change.
 

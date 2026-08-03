@@ -14,6 +14,7 @@ import ProjectLanding from './components/ProjectLanding'
 import ProjectStory from './components/ProjectStory'
 import { projects } from './data/projects'
 import { useIsMobile } from './hooks/useIsMobile'
+import { getRoute, ROUTE_CHANGE_EVENT } from './navigation'
 import { ForgeDesignMode } from 'forge-mode/design-mode'
 
 const BG = 'var(--color-bg-primary)'
@@ -31,21 +32,21 @@ const TAB_SHIFT = {
   work: `-${(CONTENT_PCT.work - CONTENT_PCT.me) / 2}vw`,
 }
 
-function getRoute() {
-  return window.location.hash.replace(/^#/, '') || '/'
-}
-
 export default function App() {
   const [route, setRoute] = useState(getRoute)
   const isMobile = useIsMobile()
 
   useEffect(() => {
-    const onHashChange = () => {
+    const onRouteChange = () => {
       setRoute(getRoute())
       window.scrollTo({ top: 0 })
     }
-    window.addEventListener('hashchange', onHashChange)
-    return () => window.removeEventListener('hashchange', onHashChange)
+    window.addEventListener('popstate', onRouteChange)
+    window.addEventListener(ROUTE_CHANGE_EVENT, onRouteChange)
+    return () => {
+      window.removeEventListener('popstate', onRouteChange)
+      window.removeEventListener(ROUTE_CHANGE_EVENT, onRouteChange)
+    }
   }, [])
 
   if (route === '/work/invisible/onboarding') {
@@ -56,7 +57,7 @@ export default function App() {
     return <><ForgeDesignMode /><WorkPage title="Invisible" subtitle="Senior Product Designer" description="As the Lead Product Designer for Meridial, I held the bigger picture: shaping product vision, setting the bar for design quality, and building the ops that kept the team moving. That meant bringing in tools like Microsoft Clarity and Mixpanel to ground decisions in real user behavior, and folding AI into my workflow to move faster without losing craft." /></>
   }
 
-  // `getRoute()` has already stripped the leading '#', so routes look like '/work/forge'.
+  // Routes are pathnames like '/work/forge'.
   const project = route.startsWith('/work/')
     ? projects[route.slice('/work/'.length)]
     : undefined

@@ -5,6 +5,8 @@ import Footer from './Footer'
 import { VARIANTS } from '../design-system/buttonStyles'
 import { color, control, radius, space, type } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
+import AppLink from '../AppLink'
+import { navigate } from '../navigation'
 
 const UNLOCK_KEY = 'work-pages-unlocked'
 const CONTENT_WIDTH = 1225
@@ -33,7 +35,7 @@ export default function InvisibleOnboarding() {
   const [unlocked] = useState(() => sessionStorage.getItem(UNLOCK_KEY) === 'true')
 
   useEffect(() => {
-    if (!unlocked) window.location.hash = '#/work/invisible'
+    if (!unlocked) navigate('/work/invisible')
   }, [unlocked])
 
   if (!unlocked) return null
@@ -233,8 +235,8 @@ function Hero({ isMobile }: { isMobile: boolean }) {
         gap: space.lg,
       }}
     >
-      <a
-        href="#/work/invisible"
+      <AppLink
+        href="/work/invisible"
         style={{
           alignSelf: 'flex-start',
           display: 'inline-flex',
@@ -257,7 +259,7 @@ function Hero({ isMobile }: { isMobile: boolean }) {
       >
         <ArrowLeft aria-hidden="true" size={16} />
         Back
-      </a>
+      </AppLink>
 
       <h1
         style={{
