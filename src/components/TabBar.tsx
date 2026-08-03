@@ -1,16 +1,17 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import { color, type } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
+import AppLink from '../AppLink'
 
 const ORANGE = color.accent.default
 
 export type Tab = 'me' | 'work'
 
 // The second tab is labelled "Design" as of the July 2026 redesign; the route
-// behind it is still `#/work`, so existing links keep resolving.
+// behind it is still `/work`, so existing links keep resolving.
 const TABS: { id: Tab; label: string; href: string }[] = [
-  { id: 'me', label: 'Me', href: '#/' },
-  { id: 'work', label: 'Design', href: '#/work' },
+  { id: 'me', label: 'Me', href: '/' },
+  { id: 'work', label: 'Design', href: '/work' },
 ]
 
 export default function TabBar({ active }: { active: Tab }) {
@@ -48,7 +49,7 @@ export default function TabBar({ active }: { active: Tab }) {
       {TABS.map((tab) => {
         const isActive = tab.id === active
         return (
-          <a
+          <AppLink
             key={tab.id}
             data-tab={tab.id}
             href={tab.href}
@@ -70,7 +71,7 @@ export default function TabBar({ active }: { active: Tab }) {
             }}
           >
             {tab.label}
-          </a>
+          </AppLink>
         )
       })}
       <span

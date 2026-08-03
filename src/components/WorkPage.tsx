@@ -5,6 +5,8 @@ import Button from '../design-system/Button'
 import { VARIANTS } from '../design-system/buttonStyles'
 import { color, control, radius, space, type } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
+import AppLink from '../AppLink'
+import { navigate } from '../navigation'
 
 const PAGE_BG = color.bg.primary
 const TEXT = color.text.primary
@@ -33,7 +35,7 @@ const DEFAULT_PROJECTS: Project[] = [
   {
     title: 'Revitalizing Meridial’s onboarding flow',
     body: 'A deep research and user behavior focused project that meaningfully improved user experience and business outcomes',
-    href: '#/work/invisible/onboarding',
+    href: '/work/invisible/onboarding',
   },
   {
     title: 'Project 2',
@@ -95,8 +97,8 @@ export default function WorkPage({ title, subtitle, description, projects = DEFA
           width: '100%',
         }}
       >
-        <a
-          href="#/work"
+        <AppLink
+          href="/work"
           style={{
             alignSelf: 'flex-start',
             display: 'inline-flex',
@@ -118,7 +120,7 @@ export default function WorkPage({ title, subtitle, description, projects = DEFA
         >
           <ArrowLeft size={16} />
           Back
-        </a>
+        </AppLink>
 
         {unlocked ? (
           <>
@@ -296,8 +298,8 @@ function ProjectRow({ project, isMobile }: { project: Project; isMobile: boolean
             size="xs"
             variant="ghost"
             onClick={() => {
-              if (project.href && project.href.startsWith('#/')) {
-                window.location.hash = project.href
+              if (project.href?.startsWith('/')) {
+                navigate(project.href)
               }
             }}
           >

@@ -6,6 +6,7 @@ import { resolvePalette, VARIANTS } from '../design-system/buttonStyles'
 import { color, control, radius, space, type } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
 import { useMediaQuery } from '../hooks/useMediaQuery'
+import AppLink from '../AppLink'
 import type {
   FeedbackShot,
   LandingShot,
@@ -47,7 +48,7 @@ const pct = (px: number, of: number) => `${(px / of) * 100}%`
 const toParagraphs = (text: string | string[]) => (Array.isArray(text) ? text : [text])
 
 /**
- * Screenshot-led project landing (`#/work/<slug>` for any project with a
+ * Screenshot-led project landing (`/work/<slug>` for any project with a
  * `landing` in `src/data/projects.ts`). The generic `ProjectLanding` — stats
  * row, section rail, stack and status — still serves everything else.
  *
@@ -545,8 +546,8 @@ function OutLink({ href, label }: { href: string; label: string }) {
  */
 function BackPill({ inset }: { inset?: string }) {
   return (
-    <a
-      href="#/work"
+    <AppLink
+      href="/work"
       style={{
         display: 'inline-flex',
         alignItems: 'center',
@@ -572,7 +573,7 @@ function BackPill({ inset }: { inset?: string }) {
     >
       <ArrowLeft size={16} />
       Back
-    </a>
+    </AppLink>
   )
 }
 

@@ -2,6 +2,7 @@ import { ArrowNarrowLeft } from '@untitledui/icons/ArrowNarrowLeft'
 import { ArrowNarrowRight } from '@untitledui/icons/ArrowNarrowRight'
 import Header from './Header'
 import { useIsMobile } from '../hooks/useIsMobile'
+import AppLink from '../AppLink'
 import type { Project, Section, Shot } from '../data/projects'
 
 const CREAM_BG = 'var(--color-bg-cream)'
@@ -35,8 +36,8 @@ export default function ProjectLanding({ project }: { project: Project }) {
     >
       <Header active="work" barInset="0" contentInset="0" />
 
-      <a
-        href="#/work"
+      <AppLink
+        href="/work"
         style={{
           color: ORANGE,
           fontSize: '16px',
@@ -50,7 +51,7 @@ export default function ProjectLanding({ project }: { project: Project }) {
       >
         <ArrowNarrowLeft width={16} height={16} />
         Back
-      </a>
+      </AppLink>
 
       {/* Hero */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '20px' : '28px' }}>
@@ -329,8 +330,8 @@ export default function ProjectLanding({ project }: { project: Project }) {
         </a>
       </div>
 
-      <a
-        href="#/work"
+      <AppLink
+        href="/work"
         style={{
           color: ORANGE,
           fontSize: '16px',
@@ -344,7 +345,7 @@ export default function ProjectLanding({ project }: { project: Project }) {
       >
         <ArrowNarrowLeft width={16} height={16} />
         Back to all the work
-      </a>
+      </AppLink>
     </div>
   )
 }

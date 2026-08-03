@@ -1,6 +1,6 @@
 /**
  * Content for the project landing pages rendered by `ProjectLanding.tsx`.
- * Routes live in `App.tsx` — keys here match the `#/work/<slug>` hash.
+ * Routes live in `App.tsx` — keys here match the `/work/<slug>` path.
  *
  * Screenshots: drop files into `public/work/<slug>/` and set `src` on a shot.
  * A shot with no `src` renders the placeholder card with its `label` on it.
@@ -227,7 +227,7 @@ export type Project = {
   /**
    * Whether the project page is designed enough to link to. Cards in the bento are
    * inert until this is set, so a project can go up on the Work grid before its
-   * page exists. The `#/work/<slug>` route still renders either way.
+   * page exists. The `/work/<slug>` route still renders either way.
    */
   pageReady?: boolean
   landing?: Landing

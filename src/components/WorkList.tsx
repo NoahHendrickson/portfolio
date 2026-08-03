@@ -5,6 +5,7 @@ import IconButton from '../design-system/IconButton'
 import { color, type } from '../design-system/tokens'
 import { projects } from '../data/projects'
 import { useIsMobile } from '../hooks/useIsMobile'
+import { navigate } from '../navigation'
 
 /**
  * The Design tab. A filter rail on the left, a divided list of entries on the
@@ -22,7 +23,7 @@ type Row = {
   /** Tight line under the title (role + dates). Sits closer than `body`. */
   subhead?: string
   body?: string
-  /** `#/...` route for the "View" button. Omitted while the page is undesigned. */
+  /** `/...` route for the "View" button. Omitted while the page is undesigned. */
   showcase?: string
   links: Link[]
 }
@@ -35,7 +36,7 @@ const forFun: Row[] = [
     title: projects['stat-builder'].title,
     logo: { src: '/work/logos/stat-builder.png', width: 16, height: 16 },
     body: 'A Destiny 2 armor optimizer for Armor 3.0.',
-    showcase: '#/work/stat-builder',
+    showcase: '/work/stat-builder',
     links: [
       { kind: 'site', href: 'https://d2-stat-builder-dusky.vercel.app/' },
       { kind: 'repo', href: 'https://github.com/NoahHendrickson/d2-stat-builder' },
@@ -46,7 +47,7 @@ const forFun: Row[] = [
     title: projects.phanttom.title,
     logo: { src: '/work/logos/phanttom.png', width: 12, height: 17 },
     body: 'My fork of ghostty because i wanted vertical tabs with additional information, and it sounded like fun.',
-    showcase: '#/work/phanttom',
+    showcase: '/work/phanttom',
     links: [{ kind: 'repo', href: 'https://github.com/NoahHendrickson/phanttom' }],
   },
   {
@@ -54,7 +55,7 @@ const forFun: Row[] = [
     title: projects.forge.title,
     logo: { src: '/work/logos/forge.svg', width: 13.333, height: 16 },
     body: 'Experimental Figma-style design mode for your own app and coding agent',
-    showcase: '#/work/forge',
+    showcase: '/work/forge',
     links: [{ kind: 'repo', href: 'https://github.com/NoahHendrickson/the-forge' }],
   },
   {
@@ -74,7 +75,7 @@ const career: Row[] = [
     id: 'invisible',
     title: 'Senior Product Designer - Invisible Technologies',
     subhead: 'Aug 2022 – July 2026.',
-    showcase: '#/work/invisible',
+    showcase: '/work/invisible',
     links: [],
   },
 ]
@@ -248,7 +249,7 @@ function ProjectRow({
             <Button
               size="xs"
               variant="ghost"
-              onClick={() => { window.location.hash = row.showcase! }}
+              onClick={() => { navigate(row.showcase!) }}
             >
               View
             </Button>

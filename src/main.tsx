@@ -5,6 +5,9 @@ import { IconContext } from '@phosphor-icons/react'
 import './index.css'
 import App from './App'
 import { ICON_DEFAULTS } from './design-system/icons'
+import { redirectHashRoute } from './navigation'
+
+redirectHashRoute()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

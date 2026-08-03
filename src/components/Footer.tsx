@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { ArrowSquareOut, Check, Copy } from '@phosphor-icons/react'
 import { color, space, type } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
+import AppLink from '../AppLink'
+import { getRoute, ROUTE_CHANGE_EVENT } from '../navigation'
 
 /**
  * The shared page footer, from the July 2026 file (`5mDT1eQf2KBcET9dh6kPXd`,
@@ -24,29 +26,29 @@ const LINKEDIN_URL = 'https://www.linkedin.com/in/noah-hendrickson-808959192/'
 type Logo = { src: string; width: number; height: number }
 
 const BACK_TO = [
-  { label: 'Me', href: '#/' },
-  { label: 'Design', href: '#/work' },
+  { label: 'Me', href: '/' },
+  { label: 'Design', href: '/work' },
 ]
 
 /**
- * Moonfang Armory has no story page yet — `#/work/armory` still falls through to
+ * Moonfang Armory has no story page yet — `/work/armory` still falls through to
  * the cream `ProjectLanding` — so it points at the live site until it gets one.
  * The current story page is omitted from the list so you don't jump to yourself.
  */
 const JUMP_TO: { label: string; href: string; logo: Logo }[] = [
   {
     label: 'Phanttom',
-    href: '#/work/phanttom',
+    href: '/work/phanttom',
     logo: { src: '/work/logos/phanttom.png', width: 12, height: 17 },
   },
   {
     label: 'The Forge',
-    href: '#/work/forge',
+    href: '/work/forge',
     logo: { src: '/work/logos/forge.svg', width: 13.333, height: 16 },
   },
   {
     label: 'D2 Stat Builder',
-    href: '#/work/stat-builder',
+    href: '/work/stat-builder',
     logo: { src: '/work/logos/stat-builder.png', width: 16, height: 16 },
   },
   {
@@ -58,20 +60,24 @@ const JUMP_TO: { label: string; href: string; logo: Logo }[] = [
 
 export default function Footer({ includeStatBuilder = true }: { includeStatBuilder?: boolean } = {}) {
   const isMobile = useIsMobile()
-  const [hash, setHash] = useState(() => window.location.hash)
+  const [route, setRoute] = useState(getRoute)
 
   useEffect(() => {
-    const onHashChange = () => setHash(window.location.hash)
-    window.addEventListener('hashchange', onHashChange)
-    return () => window.removeEventListener('hashchange', onHashChange)
+    const onRouteChange = () => setRoute(getRoute())
+    window.addEventListener('popstate', onRouteChange)
+    window.addEventListener(ROUTE_CHANGE_EVENT, onRouteChange)
+    return () => {
+      window.removeEventListener('popstate', onRouteChange)
+      window.removeEventListener(ROUTE_CHANGE_EVENT, onRouteChange)
+    }
   }, [])
 
   const jumpTo = JUMP_TO.filter(
-    (link) => link.href !== hash && (includeStatBuilder || link.href !== '#/work/stat-builder'),
+    (link) => link.href !== route && (includeStatBuilder || link.href !== '/work/stat-builder'),
   )
 
   // On Me there is nowhere to "go back" — hide the tab column entirely.
-  const isMe = hash === '' || hash === '#' || hash === '#/'
+  const isMe = route === '/'
 
   return (
     <footer
@@ -196,18 +202,22 @@ function IconSlot({ children }: { children?: React.ReactNode }) {
 }
 
 function FooterLink({ href, label, icon }: { href: string; label: string; icon?: React.ReactNode }) {
-  const external = !href.startsWith('#')
+  const external = href.startsWith('http')
+
+  if (external) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" style={rowStyle}>
+        <IconSlot>{icon}</IconSlot>
+        {label}
+      </a>
+    )
+  }
 
   return (
-    <a
-      href={href}
-      target={external ? '_blank' : undefined}
-      rel={external ? 'noopener noreferrer' : undefined}
-      style={rowStyle}
-    >
+    <AppLink href={href} style={rowStyle}>
       <IconSlot>{icon}</IconSlot>
       {label}
-    </a>
+    </AppLink>
   )
 }
 
