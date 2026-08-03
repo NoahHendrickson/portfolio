@@ -5,7 +5,7 @@ import Footer from './components/Footer'
 import Hero from './components/Hero'
 import WorkList from './components/WorkList'
 import ShaderPanel from './components/ShaderPanel'
-import { LEAF_PANEL_HEIGHT_VH, LEAF_TIP_INSET } from './components/LeafPattern'
+import { LEAF_PANEL_HEIGHT_VH, LEAF_SHIFT_X, LEAF_TIP_INSET } from './components/LeafPattern'
 import Experience from './components/Experience'
 import LlmWall from './components/LlmWall'
 import WorkPage from './components/WorkPage'
@@ -93,7 +93,9 @@ export default function App() {
           top: 0,
           // Track the active content edge so the first leaf column is always
           // fully visible — jagged silhouette instead of a mid-leaf square cut.
-          left: `calc(${CONTENT_PCT[tab]}vw - ${LEAF_TIP_INSET}px)`,
+          // Me keeps the 100px nudge; Design's strip is already tight (~12.7vw),
+          // so the same shift would clip leaves to a smushed half-column.
+          left: `calc(${CONTENT_PCT[tab]}vw - ${LEAF_TIP_INSET}px${tab === 'me' ? ` + ${LEAF_SHIFT_X}px` : ''})`,
           right: 0,
           height: `${LEAF_PANEL_HEIGHT_VH}vh`,
           overflow: 'hidden',
