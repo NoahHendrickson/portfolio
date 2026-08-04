@@ -15,7 +15,6 @@ import ProjectStory from './components/ProjectStory'
 import { projects } from './data/projects'
 import { useIsMobile } from './hooks/useIsMobile'
 import { getRoute, ROUTE_CHANGE_EVENT } from './navigation'
-import { ForgeDesignMode } from 'forge-mode/design-mode'
 
 const BG = 'var(--color-bg-primary)'
 
@@ -50,11 +49,11 @@ export default function App() {
   }, [])
 
   if (route === '/work/invisible/onboarding') {
-    return <><ForgeDesignMode /><InvisibleOnboarding /></>
+    return <InvisibleOnboarding />
   }
 
   if (route === '/work/invisible') {
-    return <><ForgeDesignMode /><WorkPage title="Invisible" subtitle="Senior Product Designer" description="As the Lead Product Designer for Meridial, I held the bigger picture: shaping product vision, setting the bar for design quality, and building the ops that kept the team moving. That meant bringing in tools like Microsoft Clarity and Mixpanel to ground decisions in real user behavior, and folding AI into my workflow to move faster without losing craft." /></>
+    return <WorkPage title="Invisible" subtitle="Senior Product Designer" description="As the Lead Product Designer for Meridial, I held the bigger picture: shaping product vision, setting the bar for design quality, and building the ops that kept the team moving. That meant bringing in tools like Microsoft Clarity and Mixpanel to ground decisions in real user behavior, and folding AI into my workflow to move faster without losing craft." />
   }
 
   // Routes are pathnames like '/work/forge'.
@@ -71,12 +70,7 @@ export default function App() {
       <ProjectLanding project={project} />
     )
 
-    return (
-      <>
-        <ForgeDesignMode />
-        {page}
-      </>
-    )
+    return page
   }
 
   const tab = route === '/work' ? 'work' : 'me'
@@ -183,8 +177,6 @@ export default function App() {
       <div style={{ position: 'relative', zIndex: 1 }}>
         <Footer />
       </div>
-
-      <ForgeDesignMode />
     </div>
   )
 }

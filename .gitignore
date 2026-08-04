@@ -26,8 +26,5 @@ storybook-static
 .vercel
 .env*
 
-# The Forge runtime state (dev-only)
-.the-forge/
-
 # Per-machine Claude Code settings
 .claude/settings.local.json

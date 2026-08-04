@@ -32,7 +32,6 @@
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
-    "forge-mode": "^0.2.0",
     "globals": "^17.4.0",
     "storybook": "^10.5.4",
     "tailwindcss": "^4.2.2",

@@ -1,7 +1,6 @@
 import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
-import { theForge } from 'forge-mode/vite'
 
 const FIGMA_CAPTURE_SRC = 'https://mcp.figma.com/mcp/html-to-design/capture.js'
 
@@ -22,5 +21,5 @@ function figmaCapture(): Plugin {
 }
 
 export default defineConfig({
-  plugins: [theForge(), figmaCapture(), react(), tailwindcss()],
+  plugins: [figmaCapture(), react(), tailwindcss()],
 })
