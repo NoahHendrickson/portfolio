@@ -97,6 +97,20 @@ html, body {
   animation: tab-content-in 300ms cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
+/* Design-tab bento cards — orange stroke on the link (outline isn't clipped
+   by the article's overflow:hidden, and doesn't shift layout). */
+.work-bento-card:hover {
+  outline: 1px solid var(--color-orange);
+  outline-offset: -1px;
+}
+.work-bento-card .work-bento-arrow {
+  color: var(--color-text-primary);
+  transition: color 200ms ease;
+}
+.work-bento-card:hover .work-bento-arrow {
+  color: var(--color-orange);
+}
+
 /* Soft enter for D2 Stat Builder showcase variants (and media inside them). */
 @keyframes sb-fade-up {
   from {

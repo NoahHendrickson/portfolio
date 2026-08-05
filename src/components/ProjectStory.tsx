@@ -1,7 +1,6 @@
 import { Fragment, useState } from 'react'
 import { ArrowLeft, ArrowSquareOut } from '@phosphor-icons/react'
 import Header from './Header'
-import Footer from './Footer'
 import { resolvePalette, VARIANTS } from '../design-system/buttonStyles'
 import { color, control, radius, space, type } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
@@ -300,8 +299,6 @@ export default function ProjectStory({ project }: { project: Project }) {
           </div>
         </section>
       )}
-
-      <Footer />
     </div>
   )
 }

@@ -1,5 +1,13 @@
 import { color, type } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
+import { useMediaQuery } from '../hooks/useMediaQuery'
+
+/**
+ * Me is only 58.3vw. Below this viewport the 140px rail + 80px pad leaves the
+ * body column too narrow to read — stack the rail above the copy sooner than
+ * the global mobile breakpoint (which also drops the shader split).
+ */
+const STACK_RAIL_QUERY = '(max-width: 1400px)'
 
 const TEXT = color.text.primary
 const MUTED = color.text.muted
@@ -59,11 +67,13 @@ const entries: Entry[] = [
 
 /**
  * The résumé below the hero on the Me tab — a muted rail label beside a column
- * of copy, per the July 2026 Figma file. Mobile drops the rail into a heading
- * above the copy, since there is no 140px gutter to spend.
+ * of copy, per the July 2026 Figma file. When the Me column can't spare the
+ * 140px gutter (mid-width desktops and mobile), the rail becomes a heading
+ * above the copy.
  */
 export default function Experience() {
   const isMobile = useIsMobile()
+  const stackRail = useMediaQuery(STACK_RAIL_QUERY)
 
   return (
     <section
@@ -80,16 +90,16 @@ export default function Experience() {
           key={entry.rail.join('-')}
           style={{
             display: 'flex',
-            flexDirection: isMobile ? 'column' : 'row',
+            flexDirection: stackRail ? 'column' : 'row',
             alignItems: 'flex-start',
-            gap: isMobile ? '16px' : '32px',
+            gap: stackRail ? '16px' : '32px',
           }}
         >
           <h2
             style={{
               margin: 0,
               flexShrink: 0,
-              width: isMobile ? undefined : '140px',
+              width: stackRail ? undefined : '140px',
               fontSize: isMobile ? '20px' : '24px',
               fontWeight: 600,
               lineHeight: 1.2,

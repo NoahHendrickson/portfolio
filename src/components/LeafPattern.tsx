@@ -174,6 +174,11 @@ export default function LeafPattern() {
             top: leaf.y,
             width: LEAF_W,
             height: LEAF_H,
+            // Tailwind preflight sets `max-width: 100%` on img. The leaf panel
+            // is often narrower than one leaf (Design's ~12.7vw strip), and that
+            // rule would shrink width while our fixed height stayed — squashing
+            // the pixel art. Leaves intentionally overflow; the panel clips.
+            maxWidth: 'none',
             display: 'block',
             imageRendering: 'pixelated',
           }}

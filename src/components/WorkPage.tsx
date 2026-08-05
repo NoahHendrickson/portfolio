@@ -199,16 +199,21 @@ export default function WorkPage({ title, subtitle, description, projects = DEFA
               width: '100%',
             }}
           >
-            <label
-              htmlFor="work-password"
-              style={{
-                fontSize: type['heading-m'].fontSize,
-                fontWeight: type['heading-m'].fontWeight,
-                color: TEXT,
-              }}
-            >
-              Enter password to view work
-            </label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: space.sm }}>
+              <label
+                htmlFor="work-password"
+                style={{
+                  fontSize: type['heading-m'].fontSize,
+                  fontWeight: type['heading-m'].fontWeight,
+                  color: TEXT,
+                }}
+              >
+                Enter password to view work
+              </label>
+              <p style={{ margin: 0, fontSize: type['body-s'].fontSize, color: BODY }}>
+                Reach out on LinkedIn to get access.
+              </p>
+            </div>
             <input
               id="work-password"
               type="password"

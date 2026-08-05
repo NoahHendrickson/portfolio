@@ -1,16 +1,15 @@
-import { useState, type CSSProperties } from 'react'
-import { ArrowSquareOut, GithubLogo } from '@phosphor-icons/react'
+import { useState, type CSSProperties, type ReactNode } from 'react'
+import { ArrowSquareOut, ArrowUpRight, GithubLogo } from '@phosphor-icons/react'
+import AppLink from '../AppLink'
 import Button from '../design-system/Button'
 import IconButton from '../design-system/IconButton'
-import { color, type } from '../design-system/tokens'
-import { projects } from '../data/projects'
+import { color, radius, space, type } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
 import { navigate } from '../navigation'
 
 /**
- * The Design tab. A filter rail on the left, a divided list of entries on the
- * right — each one a logo, title and muted blurb on one line, then the links.
- * List rows match Figma node `104:2934` (July 2026 file).
+ * The Design tab. A filter rail on the left; Personal / For-fun projects use the
+ * WorkBento from Figma node `136:10637`, Career keeps the divided list rows.
  */
 
 type Link = { kind: 'site' | 'repo'; href: string }
@@ -28,47 +27,7 @@ type Row = {
   links: Link[]
 }
 
-type Filter = { id: string; label: string; rows: Row[] }
-
-const forFun: Row[] = [
-  {
-    id: 'stat-builder',
-    title: projects['stat-builder'].title,
-    logo: { src: '/work/logos/stat-builder.png', width: 16, height: 16 },
-    body: 'A Destiny 2 armor optimizer for Armor 3.0.',
-    showcase: '/work/stat-builder',
-    links: [
-      { kind: 'site', href: 'https://d2-stat-builder-dusky.vercel.app/' },
-      { kind: 'repo', href: 'https://github.com/NoahHendrickson/d2-stat-builder' },
-    ],
-  },
-  {
-    id: 'phanttom',
-    title: projects.phanttom.title,
-    logo: { src: '/work/logos/phanttom.png', width: 12, height: 17 },
-    body: 'My fork of ghostty because i wanted vertical tabs with additional information, and it sounded like fun.',
-    showcase: '/work/phanttom',
-    links: [{ kind: 'repo', href: 'https://github.com/NoahHendrickson/phanttom' }],
-  },
-  {
-    id: 'forge',
-    title: projects.forge.title,
-    logo: { src: '/work/logos/forge.svg', width: 13.333, height: 16 },
-    body: 'Experimental Figma-style design mode for your own app and coding agent',
-    showcase: '/work/forge',
-    links: [{ kind: 'repo', href: 'https://github.com/NoahHendrickson/the-forge' }],
-  },
-  {
-    id: 'armory',
-    title: projects.armory.title,
-    logo: { src: '/work/logos/armory.png', width: 16, height: 16 },
-    body: 'Command palette style filter and search for Destiny 2 the video game weapons.',
-    links: [
-      { kind: 'site', href: 'https://noeyarmory.vercel.app/' },
-      { kind: 'repo', href: 'https://github.com/NoahHendrickson/noeyarmory' },
-    ],
-  },
-]
+type Filter = { id: string; label: string; rows: Row[]; layout?: 'bento' | 'list' }
 
 const career: Row[] = [
   {
@@ -81,10 +40,24 @@ const career: Row[] = [
 ]
 
 const FILTERS: Filter[] = [
-  { id: 'fun', label: 'Personal projects', rows: forFun },
-  { id: 'career', label: 'Career', rows: career },
-  { id: 'graphic', label: 'Graphic Design', rows: [] },
+  { id: 'career', label: 'Career', rows: career, layout: 'list' },
+  { id: 'fun', label: 'Personal projects', rows: [], layout: 'bento' },
+  { id: 'graphic', label: 'Graphic Design', rows: [], layout: 'list' },
 ]
+
+/** Flip to true when the Personal projects bento is ready to ship. */
+const SHOW_PERSONAL_BENTO = false
+
+/** Card surfaces from the bento — tint stacks at three opacities in the file. */
+const CARD_BG = {
+  featured: 'rgba(255, 255, 255, 0.12)',
+  raised: color.bg.tint,
+  muted: 'rgba(255, 255, 255, 0.04)',
+} as const
+
+const FRAME_BORDER = '#4a4c4d'
+const FRAME_BORDER_SM = '#373737'
+const FRAME_BG = '#202124'
 
 export default function WorkList() {
   const isMobile = useIsMobile()
@@ -98,7 +71,7 @@ export default function WorkList() {
         flexDirection: isMobile ? 'row' : 'column',
         flexWrap: isMobile ? 'wrap' : undefined,
         alignItems: 'flex-start',
-        gap: '8px',
+        gap: space.sm,
       }}
     >
       {FILTERS.map((filter) => (
@@ -118,27 +91,28 @@ export default function WorkList() {
     </div>
   )
 
-  const list = (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-      {active.rows.length === 0 ? (
-        <p
-          key={`${activeId}-empty`}
-          className="tab-content-in"
-          style={{ margin: 0, fontSize: type['body-s'].fontSize, color: color.text.muted }}
-        >
-          Nothing here yet — still digging through the archive.
-        </p>
-      ) : (
-        active.rows.map((row, i) => (
+  const list =
+    active.layout === 'bento' && SHOW_PERSONAL_BENTO ? (
+      <WorkBento isMobile={isMobile} />
+    ) : active.layout === 'bento' || active.rows.length === 0 ? (
+      <p
+        key={`${activeId}-empty`}
+        className="tab-content-in"
+        style={{ margin: 0, fontSize: type['body-s'].fontSize, color: color.text.muted }}
+      >
+        {active.layout === 'bento' ? 'Coming soon' : 'Nothing here yet — still digging through the archive.'}
+      </p>
+    ) : (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: space.xl }}>
+        {active.rows.map((row, i) => (
           <ProjectRow key={row.id} row={row} index={i} isMobile={isMobile} />
-        ))
-      )}
-    </div>
-  )
+        ))}
+      </div>
+    )
 
   if (isMobile) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: space.xl }}>
         {rail}
         {list}
       </div>
@@ -147,10 +121,339 @@ export default function WorkList() {
 
   // 114px rail + an 80px gutter, matching the Figma file's 80 / 194 / 1240 columns.
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'max-content minmax(0, 1fr)', gap: '80px' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'max-content minmax(0, 1fr)', gap: space['5xl'] }}>
       {rail}
       {list}
     </div>
+  )
+}
+
+/** Featured + two stacked cards — Figma `WorkBento` / `136:10364`. */
+function WorkBento({ isMobile }: { isMobile: boolean }) {
+  return (
+    <div
+      className="tab-content-in"
+      style={{
+        display: 'grid',
+        gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 1.9fr) minmax(0, 1fr)',
+        gap: space.xl,
+        alignItems: 'stretch',
+      }}
+    >
+      <BentoLink href="/work/forge" ariaLabel="no3y Code">
+        <article
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            gap: space['2xl'],
+            height: '100%',
+            padding: space['2xl'],
+            borderRadius: radius['3xl'],
+            background: CARD_BG.featured,
+            overflow: 'hidden',
+            boxSizing: 'border-box',
+          }}
+        >
+          <div
+            style={{
+              width: '100%',
+              aspectRatio: '3456 / 2044',
+              borderRadius: '3.281px',
+              border: `0.234px solid ${FRAME_BORDER}`,
+              overflow: 'hidden',
+              background: FRAME_BG,
+              flexShrink: 0,
+            }}
+          >
+            <img
+              src="/work/bento/no3y-code.png"
+              alt="no3y Code — agent orchestration and design mode"
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            />
+          </div>
+
+          <div
+            style={{
+              display: 'flex',
+              gap: '10px',
+              alignItems: 'flex-end',
+              justifyContent: 'space-between',
+            }}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', minWidth: 0, flex: 1 }}>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    lineHeight: '21px',
+                    color: color.text.muted,
+                  }}
+                >
+                  Agent orchestration UI + Design mode (T3 Code fork)
+                </p>
+                <h2
+                  style={{
+                    margin: 0,
+                    fontSize: isMobile ? '28px' : '34px',
+                    fontWeight: 500,
+                    lineHeight: 'normal',
+                    letterSpacing: '-0.68px',
+                    color: color.text.primary,
+                  }}
+                >
+                  no3y Code
+                </h2>
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: space.lg,
+                  fontSize: type['body-l'].fontSize,
+                  fontWeight: 400,
+                  lineHeight: 'normal',
+                  color: color.text.secondary,
+                  maxWidth: '405px',
+                }}
+              >
+                <p style={{ margin: 0 }}>
+                  Experimental Figma-style design mode for your own app, in your own browser that
+                  hands its edits to whatever AI coding agent you already use.
+                </p>
+                <p style={{ margin: 0 }}>*UI is largely unfinished</p>
+              </div>
+            </div>
+            <CardArrow />
+          </div>
+        </article>
+      </BentoLink>
+
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: space.xl,
+          minWidth: 0,
+          height: isMobile ? undefined : '100%',
+        }}
+      >
+        <BentoLink href="/work/stat-builder" ariaLabel="D2 Stat Builder" fill={!isMobile}>
+          <SmallCard
+            tone="raised"
+            eyebrow="Destiny 2 - 3rd party tool"
+            title="D2 Stat Builder"
+            image={
+              <div
+                style={{
+                  width: '100%',
+                  borderRadius: '2.476px',
+                  border: `0.155px solid ${FRAME_BORDER_SM}`,
+                  overflow: 'hidden',
+                  background: FRAME_BG,
+                  flex: '1 1 auto',
+                  minHeight: 0,
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
+                <img
+                  src="/work/browser-bar.png"
+                  alt=""
+                  style={{ width: '100%', height: 'auto', display: 'block', flexShrink: 0 }}
+                />
+                <div style={{ position: 'relative', flex: '1 1 auto', minHeight: 120, overflow: 'hidden' }}>
+                  <img
+                    src="/work/bento/stat-builder.png"
+                    alt="D2 Stat Builder armor optimizer"
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '284%',
+                      maxWidth: 'none',
+                      display: 'block',
+                    }}
+                  />
+                </div>
+              </div>
+            }
+          />
+        </BentoLink>
+
+        <BentoLink href="https://noeyarmory.vercel.app/" ariaLabel="Moonfang Armory" external fill={!isMobile}>
+          <SmallCard
+            tone="muted"
+            eyebrow="Destiny 2 - 3rd party tool"
+            title="Moonfang Armory"
+            image={
+              <div
+                style={{
+                  position: 'relative',
+                  width: '100%',
+                  flex: '1 1 auto',
+                  minHeight: 120,
+                  borderRadius: radius.lg,
+                  overflow: 'hidden',
+                }}
+              >
+                <img
+                  src="/work/bento/armory.png"
+                  alt="Moonfang Armory weapon browser"
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    objectPosition: 'top',
+                    display: 'block',
+                  }}
+                />
+              </div>
+            }
+          />
+        </BentoLink>
+      </div>
+    </div>
+  )
+}
+
+function SmallCard({
+  tone,
+  eyebrow,
+  title,
+  image,
+}: {
+  tone: 'raised' | 'muted'
+  eyebrow: string
+  title: string
+  image: ReactNode
+}) {
+  return (
+    <article
+      style={{
+        // Image flexes to fill extra height; padding stays even on all sides
+        // (justify-end was parking leftover space above the shot).
+        display: 'flex',
+        flexDirection: 'column',
+        gap: space['2xl'],
+        minHeight: '150px',
+        padding: space.xl,
+        borderRadius: radius['3xl'],
+        background: CARD_BG[tone],
+        overflow: 'hidden',
+        boxSizing: 'border-box',
+        height: '100%',
+      }}
+    >
+      {image}
+      <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flexShrink: 0 }}>
+        <p
+          style={{
+            margin: 0,
+            fontSize: '14px',
+            fontWeight: 400,
+            lineHeight: '21px',
+            color: color.text.secondary,
+          }}
+        >
+          {eyebrow}
+        </p>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: space.sm,
+            minHeight: '25px',
+          }}
+        >
+          <h2
+            style={{
+              margin: 0,
+              fontSize: '22px',
+              fontWeight: 500,
+              lineHeight: 'normal',
+              letterSpacing: '-0.44px',
+              color: color.text.primary,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {title}
+          </h2>
+          <CardArrow />
+        </div>
+      </div>
+    </article>
+  )
+}
+
+function CardArrow() {
+  return (
+    <span
+      aria-hidden
+      className="work-bento-arrow"
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 24,
+        height: 24,
+        flexShrink: 0,
+      }}
+    >
+      <ArrowUpRight size={24} />
+    </span>
+  )
+}
+
+function BentoLink({
+  href,
+  ariaLabel,
+  external,
+  fill,
+  children,
+}: {
+  href: string
+  ariaLabel: string
+  external?: boolean
+  /** Stretch to fill a flex column cell (desktop side cards). */
+  fill?: boolean
+  children: ReactNode
+}) {
+  const style: CSSProperties = {
+    display: 'block',
+    minWidth: 0,
+    minHeight: 0,
+    color: 'inherit',
+    textDecoration: 'none',
+    borderRadius: radius['3xl'],
+    flex: fill ? '1 1 0' : undefined,
+  }
+
+  if (external) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={ariaLabel}
+        className="work-bento-card"
+        style={style}
+      >
+        {children}
+      </a>
+    )
+  }
+
+  return (
+    <AppLink href={href} aria-label={ariaLabel} className="work-bento-card" style={style}>
+      {children}
+    </AppLink>
   )
 }
 
@@ -195,19 +498,19 @@ function ProjectRow({
       style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: '16px',
-        paddingBottom: '16px',
+        gap: space.lg,
+        paddingBottom: space.lg,
         borderBottom: `1px solid ${color.border.subtle}`,
         // Cascades each row after the previous when the Design tab (or filter) mounts.
         animationDelay: `${index * ROW_STAGGER_MS}ms`,
       }}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: row.subhead ? '4px' : 0, minWidth: 0 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: row.subhead ? space.xs : 0, minWidth: 0 }}>
         <div
           style={{
             display: 'flex',
             alignItems: isMobile ? 'flex-start' : 'center',
-            gap: '8px',
+            gap: space.sm,
             minWidth: 0,
             flexWrap: isMobile ? 'wrap' : undefined,
           }}
@@ -244,7 +547,7 @@ function ProjectRow({
       </div>
 
       {(row.showcase || row.links.length > 0) && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: space.sm }}>
           {row.showcase && (
             <Button
               size="xs"

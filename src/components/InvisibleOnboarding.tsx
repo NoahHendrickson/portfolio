@@ -1,7 +1,6 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
 import { ArrowLeft } from '@phosphor-icons/react'
 import Header from './Header'
-import Footer from './Footer'
 import { VARIANTS } from '../design-system/buttonStyles'
 import { color, control, radius, space, type } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
@@ -214,8 +213,6 @@ export default function InvisibleOnboarding() {
           </StoryRow>
         </div>
       </main>
-
-      <Footer includeStatBuilder={false} />
     </div>
   )
 }

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import '@noey-17/yearn-ui/style.css'
 import Header from './components/Header'
-import Footer from './components/Footer'
 import Hero from './components/Hero'
 import WorkList from './components/WorkList'
 import ShaderPanel from './components/ShaderPanel'
@@ -167,15 +166,6 @@ export default function App() {
             <LlmWall />
           </>
         )}
-      </div>
-
-      {/*
-        Outside the content column — the footer is a full-width band in the file,
-        so it can't sit inside the Me tab's 58.3vw column. `position: relative`
-        keeps it above the shader's absolutely-positioned panel.
-      */}
-      <div style={{ position: 'relative', zIndex: 1 }}>
-        <Footer />
       </div>
     </div>
   )
