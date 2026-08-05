@@ -71,9 +71,9 @@ export default function InvisibleOnboarding() {
             body={
               <p style={{ ...bodyStyle, color: color.text.primary }}>
                 Meridial’s onboarding flow was sitting at a terrifying 2% conversion rate from
-                account creation to setting up their bank details. In between there were multiple
-                steps with tons of friction and huge drop-off. This was causing an operational
-                strain on staffing projects on-time and delivering results to clients.
+                account creation to setting up their bank details. There were multiple steps with
+                tons of friction and huge drop-off. This was causing an operational strain on
+                staffing projects on-time and delivering results to clients.
               </p>
             }
           >
