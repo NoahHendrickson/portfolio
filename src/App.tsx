@@ -76,7 +76,18 @@ export default function App() {
   const pageInset = isMobile ? '0 20px' : '0 80px'
 
   return (
-    <div data-style="simple" style={{ position: 'relative', minHeight: '100vh', background: BG }}>
+    <div
+      data-style="simple"
+      style={{
+        position: 'relative',
+        minHeight: '100vh',
+        background: BG,
+        // The leaf panel is absolutely positioned at 260vh. Without a footer the
+        // Me column is shorter than that, and the abs panel's overflow padded the
+        // document with empty scroll. Clip to in-flow content height.
+        overflow: 'hidden',
+      }}
+    >
       {/*
         Leaf field hangs in the top-right and runs past the fold, thinning out
         until it's gone — page scrolls over the same dark shell underneath.

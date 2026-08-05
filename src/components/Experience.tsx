@@ -1,3 +1,4 @@
+import AppLink from '../AppLink'
 import { color, type } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
 import { useMediaQuery } from '../hooks/useMediaQuery'
@@ -53,13 +54,13 @@ const entries: Entry[] = [
         setup: 'Led the research and redesign of our onboarding funnel',
         result: 'Doubled the overall conversion rate',
         // Lands on the showcase when unlocked; InvisibleOnboarding redirects
-        // locked visitors to the password gate on `#/work/invisible`.
-        href: '#/work/invisible/onboarding',
+        // locked visitors to the password gate on `/work/invisible`.
+        href: '/work/invisible/onboarding',
       },
       {
         setup: 'Redesigned the mobile experience for onboarding',
         result: '50% increase in profile completion on mobile',
-        href: '#/work/invisible/onboarding',
+        href: '/work/invisible/onboarding',
       },
     ],
   },
@@ -175,7 +176,7 @@ export default function Experience() {
                     >
                       <p style={{ margin: 0, color: TEXT }}>{hit.setup}</p>
                       {hit.href ? (
-                        <a
+                        <AppLink
                           href={hit.href}
                           style={{
                             display: 'block',
@@ -186,7 +187,7 @@ export default function Experience() {
                           }}
                         >
                           {hit.result}
-                        </a>
+                        </AppLink>
                       ) : (
                         <p style={{ margin: 0, color: ORANGE }}>{hit.result}</p>
                       )}
