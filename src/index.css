@@ -104,7 +104,8 @@ html, body {
   outline-offset: -1px;
 }
 .work-bento-card .work-bento-arrow {
-  color: var(--color-text-primary);
+  /* The July bento's cards are cream, so the arrow sits on the ink ramp. */
+  color: var(--color-ink);
   transition: color 200ms ease;
 }
 .work-bento-card:hover .work-bento-arrow {

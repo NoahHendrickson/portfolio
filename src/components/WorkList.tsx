@@ -3,6 +3,7 @@ import { ArrowSquareOut, ArrowUpRight, GithubLogo } from '@phosphor-icons/react'
 import AppLink from '../AppLink'
 import Button from '../design-system/Button'
 import IconButton from '../design-system/IconButton'
+import { projects } from '../data/projects'
 import { color, radius, space, type } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
 import { navigate } from '../navigation'
@@ -27,7 +28,25 @@ type Row = {
   links: Link[]
 }
 
-type Filter = { id: string; label: string; rows: Row[]; layout?: 'bento' | 'list' }
+/**
+ * `bento` is the Personal-projects layout (one featured card beside a stack of
+ * two); `even` is a plain grid of equal cards; `list` is the divided rows.
+ */
+type Filter = { id: string; label: string; rows: Row[]; layout?: 'bento' | 'even' | 'list' }
+
+/** A card in an `even` bento. */
+type BentoItem = {
+  href: string
+  art: string
+  artAlt: string
+  title: string
+  eyebrow: string
+  /**
+   * Fill behind the art, for a transparent PNG that would otherwise sit on the
+   * bare cream. The other cards bake their plate into the export.
+   */
+  artBg?: string
+}
 
 const career: Row[] = [
   {
@@ -39,25 +58,41 @@ const career: Row[] = [
   },
 ]
 
+const graphic: BentoItem[] = [
+  {
+    href: '/work/how-to-pc',
+    art: '/work/how-to-pc/thumbnail.png',
+    artAlt: 'How to Build a PC — the infographic’s title card',
+    title: projects['how-to-pc'].title,
+    eyebrow: 'Infographic',
+    // The title card is a transparent PNG, so it needs its own plate. Pink at
+    // the same lightness and saturation as the D2 card's orange.
+    artBg: '#e7308c',
+  },
+  {
+    href: '/work/nacho-box',
+    art: '/work/nacho-box/thumbnail.png',
+    artAlt: 'Nacho Box — the Hint of Lime pack art on its chip pattern',
+    title: projects['nacho-box'].title,
+    eyebrow: 'Packaging',
+  },
+]
+
 const FILTERS: Filter[] = [
   { id: 'career', label: 'Career', rows: career, layout: 'list' },
   { id: 'fun', label: 'Personal projects', rows: [], layout: 'bento' },
-  { id: 'graphic', label: 'Graphic Design', rows: [], layout: 'list' },
+  { id: 'graphic', label: 'Graphic Design', rows: [], layout: 'even' },
 ]
 
 /** Flip to true when the Personal projects bento is ready to ship. */
-const SHOW_PERSONAL_BENTO = false
+const SHOW_PERSONAL_BENTO = true
 
-/** Card surfaces from the bento — tint stacks at three opacities in the file. */
-const CARD_BG = {
-  featured: 'rgba(255, 255, 255, 0.12)',
-  raised: color.bg.tint,
-  muted: 'rgba(255, 255, 255, 0.04)',
-} as const
-
-const FRAME_BORDER = '#4a4c4d'
-const FRAME_BORDER_SM = '#373737'
-const FRAME_BG = '#202124'
+/**
+ * The bento card surface, and the fill on the rail's selected filter so the two
+ * read as one surface. A raw value rather than `--color-bg-cream` (#f5efe0):
+ * the July file draws the cards a step greyer than the token.
+ */
+const CARD_CREAM = '#e6dfd2'
 
 export default function WorkList() {
   const isMobile = useIsMobile()
@@ -83,7 +118,13 @@ export default function WorkList() {
           variant={filter.id === activeId ? 'secondary' : 'ghost'}
           onClick={() => setActiveId(filter.id)}
           aria-pressed={filter.id === activeId}
-          style={filter.id === activeId ? undefined : { borderColor: 'transparent' }}
+          // The selected pill takes the cards' cream, so the rail and the bento
+          // read as one surface. Secondary only dims on hover, so this holds.
+          style={
+            filter.id === activeId
+              ? { background: CARD_CREAM, borderColor: CARD_CREAM, color: color.ink.default }
+              : { borderColor: 'transparent' }
+          }
         >
           {filter.label}
         </Button>
@@ -94,6 +135,8 @@ export default function WorkList() {
   const list =
     active.layout === 'bento' && SHOW_PERSONAL_BENTO ? (
       <WorkBento isMobile={isMobile} />
+    ) : active.layout === 'even' ? (
+      <EvenBento items={graphic} isMobile={isMobile} />
     ) : active.layout === 'bento' || active.rows.length === 0 ? (
       <p
         key={`${activeId}-empty`}
@@ -128,193 +171,62 @@ export default function WorkList() {
   )
 }
 
-/** Featured + two stacked cards — Figma `WorkBento` / `136:10364`. */
+/**
+ * Featured + two stacked cards — Figma `WorkBento` / `249:31730`. The July redo
+ * turned the cards cream, so everything inside them runs on the **ink** ramp
+ * rather than the dark shell's text ramp.
+ */
 function WorkBento({ isMobile }: { isMobile: boolean }) {
   return (
     <div
       className="tab-content-in"
       style={{
         display: 'grid',
-        gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 1.9fr) minmax(0, 1fr)',
-        gap: space.xl,
+        // 625.078 / 324.922 of the file's 966px bento, on its 16px gutter.
+        gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 625.078fr) minmax(0, 324.922fr)',
+        gap: space.lg,
         alignItems: 'stretch',
       }}
     >
-      <BentoLink href="/work/forge" ariaLabel="no3y Code">
-        <article
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            gap: space['2xl'],
-            height: '100%',
-            padding: space['2xl'],
-            borderRadius: radius['3xl'],
-            background: CARD_BG.featured,
-            overflow: 'hidden',
-            boxSizing: 'border-box',
-          }}
-        >
-          <div
-            style={{
-              width: '100%',
-              aspectRatio: '3456 / 2044',
-              borderRadius: '3.281px',
-              border: `0.234px solid ${FRAME_BORDER}`,
-              overflow: 'hidden',
-              background: FRAME_BG,
-              flexShrink: 0,
-            }}
-          >
-            <img
-              src="/work/bento/no3y-code.png"
-              alt="no3y Code — agent orchestration and design mode"
-              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-            />
-          </div>
-
-          <div
-            style={{
-              display: 'flex',
-              gap: '10px',
-              alignItems: 'flex-end',
-              justifyContent: 'space-between',
-            }}
-          >
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', minWidth: 0, flex: 1 }}>
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: '14px',
-                    fontWeight: 500,
-                    lineHeight: '21px',
-                    color: color.text.muted,
-                  }}
-                >
-                  Agent orchestration UI + Design mode (T3 Code fork)
-                </p>
-                <h2
-                  style={{
-                    margin: 0,
-                    fontSize: isMobile ? '28px' : '34px',
-                    fontWeight: 500,
-                    lineHeight: 'normal',
-                    letterSpacing: '-0.68px',
-                    color: color.text.primary,
-                  }}
-                >
-                  no3y Code
-                </h2>
-              </div>
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: space.lg,
-                  fontSize: type['body-l'].fontSize,
-                  fontWeight: 400,
-                  lineHeight: 'normal',
-                  color: color.text.secondary,
-                  maxWidth: '405px',
-                }}
-              >
-                <p style={{ margin: 0 }}>
-                  Experimental Figma-style design mode for your own app, in your own browser that
-                  hands its edits to whatever AI coding agent you already use.
-                </p>
-                <p style={{ margin: 0 }}>*UI is largely unfinished</p>
-              </div>
-            </div>
-            <CardArrow />
-          </div>
-        </article>
+      <BentoLink href="/work/no3y-code" ariaLabel="no3y Code">
+        <BentoCard
+          featured
+          art="/work/bento/card-no3y-code.jpg"
+          artAlt="no3y Code — the thread sidebar beside design mode's properties panel"
+          artAspect="609.078 / 362.942"
+          title="no3y Code"
+          eyebrow="Forked project"
+          body="no3y Code is my fork of T3 Code, an agent and harness orchestration tool."
+        />
       </BentoLink>
 
+      {/* The stack splits the featured card's height 266.942 / 245 in the file. */}
       <div
         style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: space.xl,
+          gap: space.lg,
           minWidth: 0,
           height: isMobile ? undefined : '100%',
         }}
       >
-        <BentoLink href="/work/stat-builder" ariaLabel="D2 Stat Builder" fill={!isMobile}>
-          <SmallCard
-            tone="raised"
-            eyebrow="Destiny 2 - 3rd party tool"
+        <BentoLink href="/work/stat-builder" ariaLabel="D2 Stat Builder" grow={isMobile ? undefined : 266.942}>
+          <BentoCard
+            art="/work/bento/card-stat-builder.jpg"
+            artAlt="D2 Stat Builder — the armor table on its orange card"
+            artAspect="308.922 / 168.942"
             title="D2 Stat Builder"
-            image={
-              <div
-                style={{
-                  width: '100%',
-                  borderRadius: '2.476px',
-                  border: `0.155px solid ${FRAME_BORDER_SM}`,
-                  overflow: 'hidden',
-                  background: FRAME_BG,
-                  flex: '1 1 auto',
-                  minHeight: 0,
-                  display: 'flex',
-                  flexDirection: 'column',
-                }}
-              >
-                <img
-                  src="/work/browser-bar.png"
-                  alt=""
-                  style={{ width: '100%', height: 'auto', display: 'block', flexShrink: 0 }}
-                />
-                <div style={{ position: 'relative', flex: '1 1 auto', minHeight: 120, overflow: 'hidden' }}>
-                  <img
-                    src="/work/bento/stat-builder.png"
-                    alt="D2 Stat Builder armor optimizer"
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      height: '284%',
-                      maxWidth: 'none',
-                      display: 'block',
-                    }}
-                  />
-                </div>
-              </div>
-            }
+            eyebrow="Destiny 2 project"
           />
         </BentoLink>
 
-        <BentoLink href="https://noeyarmory.vercel.app/" ariaLabel="Moonfang Armory" external fill={!isMobile}>
-          <SmallCard
-            tone="muted"
-            eyebrow="Destiny 2 - 3rd party tool"
+        <BentoLink href="/work/armory" ariaLabel="Moonfang Armory" grow={isMobile ? undefined : 245}>
+          <BentoCard
+            art="/work/bento/card-armory.jpg"
+            artAlt="Moonfang Armory — the command palette filtering Destiny 2 weapons"
+            artAspect="308.922 / 147"
             title="Moonfang Armory"
-            image={
-              <div
-                style={{
-                  position: 'relative',
-                  width: '100%',
-                  flex: '1 1 auto',
-                  minHeight: 120,
-                  borderRadius: radius.lg,
-                  overflow: 'hidden',
-                }}
-              >
-                <img
-                  src="/work/bento/armory.png"
-                  alt="Moonfang Armory weapon browser"
-                  style={{
-                    position: 'absolute',
-                    inset: 0,
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    objectPosition: 'top',
-                    display: 'block',
-                  }}
-                />
-              </div>
-            }
+            eyebrow="Destiny 2 project"
           />
         </BentoLink>
       </div>
@@ -322,75 +234,160 @@ function WorkBento({ isMobile }: { isMobile: boolean }) {
   )
 }
 
-function SmallCard({
-  tone,
-  eyebrow,
+/**
+ * Equal cards in a plain grid — the Graphic Design filter. They share the small
+ * bento card's art ratio so the two filters read as one family.
+ */
+function EvenBento({ items, isMobile }: { items: BentoItem[]; isMobile: boolean }) {
+  return (
+    <div
+      className="tab-content-in"
+      style={{
+        display: 'grid',
+        gridTemplateColumns: isMobile ? '1fr' : `repeat(${items.length}, minmax(0, 1fr))`,
+        gap: space.lg,
+        alignItems: 'stretch',
+      }}
+    >
+      {items.map((item) => (
+        <BentoLink key={item.href} href={item.href} ariaLabel={item.title}>
+          <BentoCard
+            art={item.art}
+            artAlt={item.artAlt}
+            artAspect="308.922 / 168.942"
+            artBg={item.artBg}
+            title={item.title}
+            eyebrow={item.eyebrow}
+          />
+        </BentoLink>
+      ))}
+    </div>
+  )
+}
+
+/**
+ * One card: art in a rounded well, then the title block with the arrow pinned to
+ * its baseline. The art fills whatever height the stack gives it, so `artAspect`
+ * only sets the card's natural height.
+ */
+function BentoCard({
+  art,
+  artAlt,
+  artAspect,
+  artBg,
   title,
-  image,
+  eyebrow,
+  body,
+  featured,
 }: {
-  tone: 'raised' | 'muted'
-  eyebrow: string
+  art: string
+  artAlt: string
+  artAspect: string
+  /** Fill behind a transparent art PNG; the other cards bake their plate in. */
+  artBg?: string
   title: string
-  image: ReactNode
+  eyebrow: string
+  body?: string
+  featured?: boolean
 }) {
   return (
     <article
       style={{
-        // Image flexes to fill extra height; padding stays even on all sides
-        // (justify-end was parking leftover space above the shot).
         display: 'flex',
         flexDirection: 'column',
-        gap: space['2xl'],
+        justifyContent: 'flex-end',
+        gap: space.lg,
         minHeight: '150px',
-        padding: space.xl,
+        height: '100%',
+        // 8 on three sides, 24 under the copy.
+        padding: `${space.sm} ${space.sm} ${space.xl}`,
         borderRadius: radius['3xl'],
-        background: CARD_BG[tone],
+        background: CARD_CREAM,
         overflow: 'hidden',
         boxSizing: 'border-box',
-        height: '100%',
       }}
     >
-      {image}
-      <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flexShrink: 0 }}>
-        <p
+      <div
+        style={{
+          width: '100%',
+          aspectRatio: artAspect.replace(/\s/g, ''),
+          flex: '1 1 auto',
+          minHeight: 0,
+          borderRadius: radius['2xl'],
+          overflow: 'hidden',
+          background: artBg,
+        }}
+      >
+        <img
+          src={art}
+          alt={artAlt}
           style={{
-            margin: 0,
-            fontSize: '14px',
-            fontWeight: 400,
-            lineHeight: '21px',
-            color: color.text.secondary,
+            width: '100%',
+            height: '100%',
+            // A transparent PNG on a plate is artwork, not a screenshot — fit it
+            // whole rather than cropping to fill.
+            objectFit: artBg ? 'contain' : 'cover',
+            display: 'block',
           }}
-        >
-          {eyebrow}
-        </p>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: space.sm,
-            minHeight: '25px',
-          }}
-        >
-          <h2
-            style={{
-              margin: 0,
-              fontSize: '22px',
-              fontWeight: 500,
-              lineHeight: 'normal',
-              letterSpacing: '-0.44px',
-              color: color.text.primary,
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {title}
-          </h2>
-          <CardArrow />
+        />
+      </div>
+
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'flex-end',
+          gap: '10px',
+          padding: `0 ${space.xl}`,
+          flexShrink: 0,
+        }}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', minWidth: 0, flex: '1 0 0' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+            <h2
+              style={{
+                margin: 0,
+                fontSize: featured ? '34px' : '22px',
+                fontWeight: featured ? 600 : 500,
+                lineHeight: 'normal',
+                letterSpacing: featured ? '-0.68px' : '-0.44px',
+                color: color.ink.default,
+              }}
+            >
+              {title}
+            </h2>
+            <p
+              style={{
+                margin: 0,
+                fontSize: '16px',
+                fontWeight: 500,
+                lineHeight: '21px',
+                color: color.ink.muted,
+              }}
+            >
+              {eyebrow}
+            </p>
+          </div>
+          {body && (
+            <p
+              style={{
+                margin: 0,
+                fontSize: '16px',
+                fontWeight: 400,
+                lineHeight: 'normal',
+                color: color.ink.secondary,
+                maxWidth: '405px',
+              }}
+            >
+              {body}
+            </p>
+          )}
         </div>
+        <CardArrow />
       </div>
     </article>
   )
 }
+
 
 function CardArrow() {
   return (
@@ -415,14 +412,17 @@ function BentoLink({
   href,
   ariaLabel,
   external,
-  fill,
+  grow,
   children,
 }: {
   href: string
   ariaLabel: string
   external?: boolean
-  /** Stretch to fill a flex column cell (desktop side cards). */
-  fill?: boolean
+  /**
+   * Share of the stack's height, as the file's card heights (266.942 / 245), so
+   * the two side cards always add up to the featured card beside them.
+   */
+  grow?: number
   children: ReactNode
 }) {
   const style: CSSProperties = {
@@ -432,7 +432,7 @@ function BentoLink({
     color: 'inherit',
     textDecoration: 'none',
     borderRadius: radius['3xl'],
-    flex: fill ? '1 1 0' : undefined,
+    flex: grow ? `${grow} 1 0` : undefined,
   }
 
   if (external) {

@@ -10,6 +10,13 @@ const ORANGE = '#f95b1c'
 const GREEN = '#1f7a4c'
 const INDIGO = '#3d3a8f'
 const INK = '#1d1f1e'
+const PURPLE = '#691a85'
+const TEAL = '#00a5a5'
+/** Nacho Box's pack colour — the lime the 2022 page stood its title art on. */
+const LIME = '#cef982'
+
+/** Upstream of the no3y Code fork. */
+const T3_CODE = 'https://github.com/pingdotgg/t3code'
 
 export type Shot = {
   /** Shown on the placeholder card until `src` is filled in. */
@@ -69,6 +76,43 @@ export type LandingShot = {
 }
 
 /**
+ * A looping clip standing in for the hero `shot` — Moonfang Armory. It plays
+ * muted, inline and on a loop with no controls, and `prefers-reduced-motion`
+ * falls back to `poster` alone. With no `backdrop` it is cover-fit into
+ * `aspect`; with one it sits as a window on the desktop instead.
+ */
+export type LandingVideo = {
+  src: string
+  /** Opening frame, shown while the clip loads and in place of it when motion is reduced. */
+  poster: string
+  /** Describes the clip, since there is no audio track to fall back on. */
+  alt: string
+  /** Aspect ratio of the box, e.g. `1272 / 862`. */
+  aspect: string
+  /**
+   * Scale of the clip inside its window, for a capture whose subject sits small
+   * in the frame — 1.35 crops a quarter off each edge. Defaults to 1 (no crop).
+   */
+  zoom?: number
+  /** What the zoom holds still, as a `transform-origin`. Defaults to the centre. */
+  focus?: string
+  /**
+   * The macOS desktop the clip is seated on, the way the other heroes bake one
+   * into their PNG. Sizes are px at the box's designed width, so the window
+   * keeps its margin as the composition scales.
+   */
+  backdrop?: {
+    src: string
+    /** Window width; the rest of the box's width is split evenly as margin. */
+    width: number
+    /** The window's own ratio, e.g. `16 / 9` — it need not match the box. */
+    aspect: string
+    /** Window corner radius. Defaults to 12. */
+    radius?: number
+  }
+}
+
+/**
  * A panel laid over a screenshot. Its box is px inside the `shot` section's
  * `width` × `height`, so it keeps its overlap as the composition scales.
  */
@@ -80,6 +124,34 @@ export type ShotOverlay = {
   top: number
   width: number
 }
+
+/**
+ * One run inside a paragraph, for the copy the file styles in parts — no3y
+ * Code's "the idea" sets each project name semibold + underlined and drops the
+ * clause after it to the muted ink.
+ */
+export type TextRun = {
+  text: string
+  /** A `/work/…` href routes in-app; anything else opens in a new tab. Always underlined. */
+  href?: string
+  /** Semibold + underlined, which is how the file marks the project names. */
+  strong?: boolean
+  /** Dropped to `--color-text-muted`, which the file does for trailing clauses. */
+  muted?: boolean
+}
+
+/** A paragraph — plain text, or runs when the file styles part of it. */
+export type Paragraph = string | TextRun[]
+
+/** One paragraph, or several stacked with the file's 24px gap. */
+export type Prose = string | Paragraph[]
+
+/**
+ * One entry in the hairline-split eyebrow row above a story title — plain copy,
+ * an outbound link with its icon (The Forge's "Github"), or runs when only part
+ * of the entry is the link ("Fork of T3 Code").
+ */
+export type EyebrowEntry = string | { label: string; href: string } | TextRun[]
 
 /** A screenshot with its caption underneath — one column of a side-by-side pair. */
 export type StoryColumn = {
@@ -120,15 +192,20 @@ export type StorySection =
       kind: 'feature'
       gap: number
       heading: string
-      body: string | string[]
+      body: Prose
       copyWidth: number
       panelWidth: number
       shot: LandingShot
       /** CSS chrome around a raw screenshot — background defaults to `--color-bg-tint`. */
       panel?: { background?: string }
+      /**
+       * Runs the body at 18px on the primary ink instead of 16 on the secondary,
+       * which is how the July D2 frame sets its one row.
+       */
+      lead?: boolean
     }
   /** A centered 688px heading + body block, standing between shots — D2 Stat Builder. */
-  | { kind: 'copy'; heading: string; body: string | string[] }
+  | { kind: 'copy'; heading: string; body: Prose }
   /**
    * One screenshot on its own, optionally with a panel laid over it. The box is
    * the whole composition's footprint at the file's 1512 frame; the frame and
@@ -172,9 +249,10 @@ export type Landing = {
   /**
    * The muted line above the title. Several entries render as one row split by
    * hairlines ("Vibe coded / Figma+Cursor+Claude"). An entry can be a link —
-   * The Forge's "Github" with an outbound icon.
+   * The Forge's "Github" with an outbound icon — or runs, when only part of the
+   * entry is the link ("Fork of T3 Code" on no3y Code).
    */
-  eyebrow: string | Array<string | { label: string; href: string }>
+  eyebrow: string | EyebrowEntry[]
   /**
    * Row rhythm. `banded` (the default) makes every row its own 80px-padded
    * band, so consecutive rows sit 184px apart with the page's own 24px gap
@@ -188,19 +266,53 @@ export type Landing = {
    */
   gap?: number
   /**
+   * Gap between the rows themselves, when the frame spaces them wider than it
+   * spaces the title block from the hero shot. Defaults to `gap` — no3y Code is
+   * the only frame that splits them (120 into the rows, then 200 between them).
+   */
+  rowGap?: number
+  /**
    * Title + row alignment. `center` (the default) centres the title block and
    * floats Back beside it. `start` stacks Back above the eyebrows and left-aligns
    * the title with the rows — Phanttom.
    */
   align?: 'center' | 'start'
+  /**
+   * Title-block rhythm. `even` (the default) spaces Back, the eyebrow, the title
+   * and the body on one gap — Phanttom, The Forge and D2 all run 16. `paired` is
+   * no3y Code's frame: 24 between the blocks, with the eyebrow seated flush
+   * against the title as a group of its own (the file's Frame 465).
+   */
+  titleRhythm?: 'even' | 'paired'
+  /**
+   * Where the eyebrow sits relative to the title. `above` is every frame but
+   * Moonfang Armory, which seats it underneath. Only applies to `paired`.
+   */
+  eyebrowPlacement?: 'above' | 'below'
+  /** Title-block width. Defaults to 720; Moonfang Armory's paragraph runs 688. */
+  copyWidth?: number
+  /**
+   * Row alignment on its own, for a frame that left-aligns the title but still
+   * centres a row narrower than the content column — no3y Code's composer row is
+   * 1225 of 1272. Defaults to `align`.
+   */
+  rowAlign?: 'center' | 'start'
   /** Title block; every page runs it full width of its column. */
   hero: {
     /** Paragraphs under the title. Defaults to `[project.summary]`. */
     body?: string[]
     /** Outbound pills under the title — GitHub / live site, etc. */
     links?: { label: string; href: string }[]
+    /**
+     * The one call to action, seated under the copy rather than over it —
+     * Moonfang Armory's "Check it out". It takes the accent pill, since it is
+     * the only thing on the page asking to be clicked.
+     */
+    cta?: { label: string; href: string }
     /** App shot below the copy block. */
     shot?: LandingShot
+    /** A looping clip in place of `shot` — Moonfang Armory. Shares `shotWidth`. */
+    video?: LandingVideo
     /** Its width in px at the 1272px content width. */
     shotWidth?: number
   }
@@ -407,73 +519,60 @@ export const projects: Record<string, Project> = {
     },
     pageReady: true,
     landing: {
-      // Same continuous / left-aligned shell as Phanttom and The Forge.
-      eyebrow: [
-        'Vibe coded',
-        { label: 'GitHub', href: 'https://github.com/NoahHendrickson/d2-stat-builder' },
-        { label: 'Website', href: 'https://d2-stat-builder-dusky.vercel.app/' },
-      ],
+      // Frame 121:4922 — the July redo. Title over its eyebrow on an 80px
+      // rhythm, one composed hero panel, a single row, then the feedback band.
+      eyebrow: ['3rd party tool for the Destiny 2 community'],
       flow: 'continuous',
-      gap: 120,
+      gap: 80,
       align: 'start',
+      titleRhythm: 'paired',
+      eyebrowPlacement: 'below',
+      copyWidth: 688,
       hero: {
         body: [
-          'This is a tool for my favorite video game of all time, Destiny 2. It’s made for power users and nerds like myself. For those unfamiliar with Destiny 2, this allows you to set preferences and then finds the armor pieces you should equip to achieve that build.',
-          'There are other sites that do this, but I wanted to focus mine on the particular needs of hard core players and a change in the armor system that allowed me to speed up the search for builds once a user enters their parameters.',
+          'This is a tool for my favorite video game of all time, Destiny 2. I made it for power users and nerds like myself. In Destiny 2 there are different characters, stats and builds you can create. This app helps you find the gear for your perfect stat splits and builds.',
+          'Users set their stat targets, make some other selections and watch builds populate in the right column. Once they find a build they like, they can equip it in-game and save it as a loadout.',
         ],
         shot: {
-          // Frame 443 — browser chrome baked into the export (node 93:5358).
-          src: '/work/stat-builder/builder.png',
+          // Node 240:23742 — the browser frame and its desktop are one export,
+          // as the file draws the whole Chrome chrome inside the panel.
+          src: '/work/stat-builder/hero-panel.jpg',
           alt: 'The builder — armor summary, class tabs, six stat sliders, major mods and set bonuses on the left, ranked builds on the right',
-          aspect: '2233 / 1592',
+          aspect: '1272 / 862',
+          frame: 'plain',
         },
-        shotWidth: 1078,
+        shotWidth: 1272,
       },
       sections: [
         {
           kind: 'feature',
           gap: 80,
-          heading: 'I wanted to make finding my armor easier',
-          body: 'The armor system was changed, affecting stats and bonuses you could get. I wanted a really easy way to search and filter my armor across the things that mattered. I built a custom sorting feature that allows users to chain sorts together to mirror the mental model we use to rank armor.',
-          copyWidth: 573,
-          panelWidth: 572,
+          heading: 'making finding armor easy',
+          body: 'The in-game ‘vault’ for your armor and other 3rd party tools didn’t satisfy me when it came to searching through my armor. This made it difficult to know what armor pieces you should try to acquire. I went back to the basics and designed a table a view with quick filters and custom sorting.',
+          copyWidth: 524,
+          panelWidth: 668,
+          lead: true,
           shot: {
-            src: '/work/stat-builder/table.png',
-            alt: 'The armor table, filtered by class, archetype, tertiary stat and set bonus',
-            aspect: '1600 / 1020',
-          },
-          // Raw screenshot — CSS tinted frame like other D2 panels.
-          panel: {},
-        },
-        {
-          // The one overlapping composition in the file — the sort panel laid
-          // over the bottom-right of the table frame.
-          kind: 'shot',
-          width: 1064,
-          height: 580,
-          frame: { left: 35, top: 24, width: 879.75 },
-          shot: {
-            src: '/work/stat-builder/table-full.png',
-            alt: 'The armor table, filtered by class, archetype, tertiary stat and set bonus',
-            aspect: '879.75 / 497',
-            frame: 'chrome',
-            // 1202px of screenshot inside an 880px frame — the file crops in on
-            // the left of the table rather than fitting the whole width.
-            zoom: 1.366,
-          },
-          overlay: {
-            src: '/work/stat-builder/sort-panel.png',
-            alt: 'Sort by Tuned — a custom stat order dragged into place',
-            aspect: '626 / 736',
-            left: 780,
-            top: 130,
-            width: 250,
+            // Node 241:23813 — the table's browser frame runs off the panel's
+            // right edge, so the crop is baked into the export.
+            src: '/work/stat-builder/table-panel.jpg',
+            alt: 'The armor table, filtered by class, archetype, tertiary stat and set bonus, with the custom sort menu open',
+            aspect: '668 / 526',
+            frame: 'plain',
           },
         },
       ],
       feedback: {
         heading: 'Community feedback',
+        // The redo leads with the tall "only shows things i have" shot.
         shots: [
+          {
+            src: '/work/stat-builder/feedback-owned-only.jpg',
+            alt: '“ok one thing i love is that it only shows things i have, it doesnt give me an insanely long list of stuff i cant use”',
+            width: 205,
+            aspect: '1016 / 881',
+            pad: 6,
+          },
           {
             src: '/work/stat-builder/feedback-table-page.jpg',
             alt: '“omg the table page is so good, thank you — this is a dope site, good job, ill add it to #helpful-links”',
@@ -503,13 +602,6 @@ export const projects: Record<string, Project> = {
             alt: '“Hey dude, I really love your app, its so good and quick — easily the best one out there”',
             width: 283,
             aspect: '996 / 251',
-            pad: 6,
-          },
-          {
-            src: '/work/stat-builder/feedback-owned-only.jpg',
-            alt: '“ok one thing i love is that it only shows things i have, it doesnt give me an insanely long list of stuff i cant use”',
-            width: 205,
-            aspect: '1016 / 881',
             pad: 6,
           },
         ],
@@ -601,6 +693,43 @@ export const projects: Record<string, Project> = {
     bento: {
       eyebrow: 'Destiny 2 - 3rd party tool',
       cover: '/work/armory/hero.png',
+    },
+    pageReady: true,
+    landing: {
+      // Frame 247:27321 — title above the eyebrow, one 80px-gapped block, and a
+      // looping capture of the command palette where the other frames put a shot.
+      eyebrow: ['3rd party tool for the Destiny 2 community'],
+      flow: 'continuous',
+      gap: 80,
+      align: 'start',
+      titleRhythm: 'paired',
+      eyebrowPlacement: 'below',
+      copyWidth: 688,
+      hero: {
+        body: [
+          'So the name of this project is just a popular armor set from Destiny 2 the video game. What this site actually does is allow users to search for weapons in Destiny 2 based on certain perks, traits and many other parameters. It’s a command palette UX that allows for the chaining of many filters.',
+        ],
+        video: {
+          src: '/work/armory/hero.mp4',
+          poster: '/work/armory/hero-poster.jpg',
+          alt: 'The command palette filtering Destiny 2 weapons down to hand cannons, then chaining further filters across 125 results',
+          aspect: '1272 / 862',
+          // The palette only fills the middle third of the capture, so the clip
+          // crops into it. Its centre sits a little above the frame's, hence 40%.
+          zoom: 1.35,
+          focus: '50% 40%',
+          // Seated on the frame's macOS desktop at the same 80px side margin the
+          // other heroes bake into their PNG, so the clip stays a full 16:9.
+          backdrop: {
+            src: '/work/armory/desktop.jpg',
+            width: 1112,
+            aspect: '16 / 9',
+          },
+        },
+        shotWidth: 1272,
+        cta: { label: 'Check it out', href: 'https://noeyarmory.vercel.app/' },
+      },
+      sections: [],
     },
     summary:
       'A weapon and perk search app built after D2Foundry went dark. Find a weapon and see every possible random roll per column plus its stats. Find a perk and see every weapon in the game that can roll it. Then sign in with Bungie and run the same searches against the gear you actually own.',
@@ -805,6 +934,429 @@ export const projects: Record<string, Project> = {
       heading: 'A terminal that keeps up with how I actually work now.',
       label: 'See the repo',
       href: 'https://github.com/NoahHendrickson/phanttom',
+    },
+  },
+
+  'no3y-code': {
+    slug: 'no3y-code',
+    title: 'no3y Code',
+    eyebrow: ['Side project', '2026', 'Agent tooling'],
+    tagline:
+      'My fork of T3 Code — the sidebar I actually wanted when multi-tasking across agents, plus a design mode built into the harness.',
+    bento: {
+      eyebrow: 'Agent orchestration UI + Design mode (T3 Code fork)',
+      cover: '/work/bento/no3y-code.png',
+      tagline:
+        'My fork of T3 Code — the sidebar I actually wanted when multi-tasking across agents, plus a design mode built into the harness.',
+    },
+    pageReady: true,
+    landing: {
+      // Frame 149:12222 — continuous / left-aligned shell, but the rows sit 200
+      // apart where the title block runs 120 into the hero, and the composer row
+      // is centred at 1225 of the 1272 column.
+      eyebrow: [
+        [{ text: 'Fork of ' }, { text: 'T3 Code', href: T3_CODE }],
+        'Agent orchestration + Design mode',
+      ],
+      flow: 'continuous',
+      gap: 120,
+      rowGap: 200,
+      align: 'start',
+      rowAlign: 'center',
+      titleRhythm: 'paired',
+      hero: {
+        body: [
+          'This is the culmination of a few projects and ideas. I wanted to edit code with the precision of Figma’s design mode inside an agentic coding tool and tackle issues I have with most tools sidebar UX. I forked T3 Code so I could make UX/UI improvements, build a design mode and add small features I want. I am not associated with T3 Code in any way and only work on my fork :)',
+        ],
+        shot: {
+          src: '/work/no3y-code/hero.jpg',
+          alt: 'no3y Code — thread sidebar, an agent session and the design mode panel open over a project',
+          aspect: '1272 / 774.369',
+          frame: 'plain',
+        },
+        shotWidth: 1272,
+      },
+      sections: [
+        {
+          kind: 'feature',
+          gap: 80,
+          heading: 'the idea',
+          body: [
+            'I wanted a really powerful design mode in the agent orchestration tools I was using. I didn’t want to just select an element and prompt, sometimes i wanted to be precise with my edits and send those off to an agent to apply. I also wanted more information at glance when I was working on multiple projects at once.',
+            [
+              { text: 'the-forge', href: '/work/forge', strong: true },
+              {
+                text: ' I created the-forge which was an npm package that worked for vite apps that would provide a Design mode so you could make frontend changes via a sidebar and then send those edits to your coding agent to apply.',
+                muted: true,
+              },
+            ],
+            [
+              { text: 'Phanttom', href: '/work/phanttom', strong: true },
+              {
+                text: ' This is a fork of ghostty so I could add vertical tabs and make each tab show more information than just the first thing I wrote into the prompt. But I got tired of using a terminal real quck..',
+                muted: true,
+              },
+            ],
+            [
+              {
+                text: 'I wanted to combine these things to have one main app I used to get things done. But because I lack the technical expertise to create my own agent app from scratch, I forked an open-source one. Huge shoutout to ',
+              },
+              { text: 'T3 Code', href: T3_CODE },
+              { text: ', it is an awesome open-source app and very fork friendly.' },
+            ],
+          ],
+          copyWidth: 524,
+          panelWidth: 668,
+          shot: {
+            src: '/work/no3y-code/idea.jpg',
+            alt: 'no3y Code’s thread sidebar beside the design mode properties panel',
+            aspect: '668 / 526',
+            frame: 'plain',
+          },
+        },
+        {
+          kind: 'feature',
+          gap: 80,
+          heading: 'the sidebar',
+          body: 'One line was not enough for me. When multi-tasking and using different models in different projects I wanted more information at a glance about what project I was in, what branch and what model was being used. T3 Code setup great functionality for this and I designed the UX/UI with the things I care about in mind.',
+          copyWidth: 434.5,
+          panelWidth: 757.5,
+          shot: {
+            src: '/work/no3y-code/sidebar.png',
+            alt: 'The project sidebar beside the thread card component set — status, branch and model on every row',
+            aspect: '757.5 / 421.667',
+            frame: 'plain',
+          },
+        },
+        {
+          kind: 'feature',
+          gap: 80,
+          heading: 'Design mode',
+          body: [
+            'For awhile I have been wanting to build a design mode that works alongside coding agents and whatever harness I prefer at the time. This feature is very much a work in progress and I’m building it from scratch. I was important to get it functional so I could actually use and test it out.',
+            'The motivation for this was as a Designer there is still a ton of value in “getting your hands dirty”. Sometimes I need to try different variations, 16px or 24px and in design mode I can do that and then apply the one that works. ',
+          ],
+          copyWidth: 405,
+          panelWidth: 787,
+          shot: {
+            src: '/work/no3y-code/design-mode.jpg',
+            alt: 'Design mode open over a running app, with the properties panel down the right edge',
+            aspect: '787 / 476',
+            frame: 'plain',
+          },
+        },
+        {
+          kind: 'feature',
+          gap: 80,
+          heading: 'Message composer',
+          body: 'I prefer a compact message composer and broke it into 3 sections, the branch information, the input and then model paramenters. ',
+          copyWidth: 387.5,
+          panelWidth: 757.5,
+          shot: {
+            src: '/work/no3y-code/composer.png',
+            alt: 'The message composer — worktree and branch above the input, mode and model below it',
+            aspect: '757.5 / 421.667',
+            frame: 'plain',
+          },
+        },
+        {
+          // The closing full-width shot; this frame has no orange card under it.
+          kind: 'shot',
+          width: 1272,
+          height: 526,
+          frame: { left: 0, top: 0, width: 1272 },
+          shot: {
+            src: '/work/no3y-code/outro.jpg',
+            alt: 'no3y Code running a session end to end — sidebar, transcript and composer',
+            aspect: '1272 / 526',
+            frame: 'plain',
+          },
+        },
+      ],
+    },
+    /*
+      Everything below feeds the generic cream `ProjectLanding`, which this
+      project never renders because `landing` is set. Left at what the July frame
+      actually says rather than padded out with invented stats.
+    */
+    summary:
+      'This is the culmination of a few projects and ideas. I wanted to edit code with the precision of Figma’s design mode inside an agentic coding tool and tackle issues I have with most tools sidebar UX.',
+    accent: PURPLE,
+    accentIsDark: true,
+    links: [{ label: 'T3 Code — upstream', href: T3_CODE }],
+    stats: [],
+    heroShot: {
+      label: 'Thread sidebar, an agent session, and design mode open over a project',
+    },
+    sections: [
+      {
+        label: 'the idea',
+        paragraphs: [
+          'I wanted a really powerful design mode in the agent orchestration tools I was using. I didn’t want to just select an element and prompt, sometimes i wanted to be precise with my edits and send those off to an agent to apply.',
+          'I wanted to combine these things to have one main app I used to get things done. But because I lack the technical expertise to create my own agent app from scratch, I forked an open-source one.',
+        ],
+      },
+      {
+        label: 'the sidebar',
+        paragraphs: [
+          'One line was not enough for me. When multi-tasking and using different models in different projects I wanted more information at a glance about what project I was in, what branch and what model was being used.',
+        ],
+      },
+      {
+        label: 'design mode',
+        paragraphs: [
+          'A design mode that works alongside coding agents and whatever harness I prefer at the time. Very much a work in progress, and built from scratch — it was important to get it functional so I could actually use and test it out.',
+        ],
+      },
+    ],
+    stack: [],
+    status: [],
+    cta: {
+      heading: 'Forked from an open-source app that is very fork friendly.',
+      label: 'See T3 Code',
+      href: T3_CODE,
+    },
+  },
+
+  'how-to-pc': {
+    slug: 'how-to-pc',
+    title: 'How To Build a PC',
+    eyebrow: ['Graphic Design', '2022', 'Infographic'],
+    tagline:
+      'A supplemental infographic for building a custom PC — an overview of the parts and the order to install them in.',
+    bento: {
+      eyebrow: 'Graphic Design',
+      cover: '/work/how-to-pc/thumbnail.png',
+    },
+    pageReady: true,
+    landing: {
+      // Ported from the 2022 site (Noah-Site, /HowToPC). No Figma frame for this
+      // one — it reuses the story shell so it sits on the same dark theme.
+      eyebrow: ['Graphic Design', '2022'],
+      flow: 'continuous',
+      gap: 120,
+      align: 'start',
+      hero: {
+        body: [
+          'I am a tech enthusiast, so of course I build my own computers. I wanted to create a supplemental infograph for building a custom PC. The goal of this guide isn’t to get into detail about each step but rather give an overview and suggest an order of process to make the experience easier.',
+        ],
+      },
+      sections: [
+        {
+          // The poster runs 1378.6 × 5951.8; seated at 880 in the 1272 column so
+          // the callout copy stays a readable size rather than filling the page.
+          kind: 'shot',
+          width: 1272,
+          height: 3799,
+          frame: { left: 196, top: 0, width: 880 },
+          shot: {
+            src: '/work/how-to-pc/infographic.svg',
+            alt: 'How to Build a PC — a parts legend, then CPU, RAM, AIO cooler, motherboard, PSU and GPU installation steps, ending with the cable-connection checklist',
+            aspect: '1378.6 / 5951.8',
+            frame: 'plain',
+          },
+        },
+      ],
+    },
+    /* Generic-landing fields; unused because `landing` is set. */
+    summary:
+      'A supplemental infographic for building a custom PC. Rather than detailing every step, it gives an overview of the parts and suggests an order of process to make the build easier.',
+    accent: TEAL,
+    accentIsDark: true,
+    links: [],
+    stats: [],
+    heroShot: {
+      label: 'How to Build a PC — the full infographic',
+    },
+    sections: [
+      {
+        label: 'the idea',
+        paragraphs: [
+          'I am a tech enthusiast, so of course I build my own computers. I wanted to create a supplemental infograph for building a custom PC.',
+          'The goal of this guide isn’t to get into detail about each step but rather give an overview and suggest an order of process to make the experience easier.',
+        ],
+      },
+    ],
+    stack: [],
+    status: [],
+    cta: {
+      heading: 'An overview, not a manual.',
+      label: 'See the infographic',
+      href: '/work/how-to-pc',
+    },
+  },
+
+  'nacho-box': {
+    slug: 'nacho-box',
+    title: 'Nacho Box',
+    eyebrow: ['Graphic Design', '2022', 'Packaging'],
+    tagline:
+      'A chips-and-salsa box for parties — hand-drawn lettering, icons and patterns, carried through to the dieline.',
+    bento: {
+      eyebrow: 'Graphic Design',
+      cover: '/work/nacho-box/thumbnail.png',
+    },
+    pageReady: true,
+    landing: {
+      // Ported from the 2022 site (Noah-Site, /NachoBox), same as How to Build a
+      // PC. The artwork is black line on white, so every SVG carries a baked
+      // background rect — the 2022 page's cream for the sheets, the pack colours
+      // for the two dielines — rather than floating on the dark shell.
+      eyebrow: ['Graphic Design', '2022'],
+      flow: 'continuous',
+      gap: 120,
+      align: 'start',
+      hero: {
+        body: [
+          'A packaging project I made in college. The goal was to concept out a convenient chips-and-salsa container for parties and get-togethers — one box, three salsas, four flavours.',
+        ],
+        shot: {
+          src: '/work/nacho-box/covers.svg',
+          alt: 'Four pack fronts side by side — Original, Kick of Jalapeño, Hint of Lime and Kick of Chile — each over a tortilla-chip pattern with hot, guac and mild bowls along the bottom',
+          aspect: '1000 / 500',
+        },
+        shotWidth: 1272,
+      },
+      sections: [
+        {
+          kind: 'copy',
+          heading: 'Drawn by hand, cleaned up after',
+          body: 'To get an organic vibe, I hand drew all of the lettering and icons with pen and paper, then scanned them in and cleaned them up in Illustrator.',
+        },
+        {
+          kind: 'columns',
+          gap: 32,
+          columns: [
+            {
+              width: 620,
+              shot: {
+                src: '/work/nacho-box/lettering-sketch.jpg',
+                alt: 'A spiral sketchbook page of hand-drawn block letters spelling S T R C H P and LIME, with salsa bowls, lime wedges and jalapeño slices around them',
+                aspect: '4 / 3',
+              },
+              caption: 'The original pen-and-paper sheet.',
+            },
+            {
+              width: 620,
+              shot: {
+                src: '/work/nacho-box/lettering-clean.jpg',
+                alt: 'The same sheet after scanning — the notebook and shadows gone, the linework left clean on white',
+                aspect: '4 / 3',
+              },
+              caption: 'The same sheet, scanned and traced.',
+            },
+          ],
+        },
+        {
+          kind: 'copy',
+          heading: 'The finished alphabet',
+          body: 'The full character set that came out of it, plus the words the concept kept coming back to.',
+        },
+        {
+          // 890 of the 1272 column — the 2022 page ran the font sheet at 70%.
+          kind: 'shot',
+          width: 1272,
+          height: 679,
+          frame: { left: 191, top: 0, width: 890 },
+          shot: {
+            src: '/work/nacho-box/alphabet.svg',
+            alt: 'A hand-drawn A–Z in outlined block capitals, above the words TORTILLA, CHIPS, GUAC, VERDE, JALAPENO, HOT, DIPS, QUESO and CHILE set in the same face, each in a different colour',
+            aspect: '590.5 / 450.7',
+          },
+        },
+        {
+          kind: 'copy',
+          heading: 'Icons for the patterns',
+          body: 'The icons took the same approach — sketched first, then redrawn and tiled into a pattern for each flavour.',
+        },
+        {
+          kind: 'shot',
+          width: 1272,
+          height: 358,
+          frame: { left: 0, top: 0, width: 1272 },
+          shot: {
+            src: '/work/nacho-box/icon-sketches.jpg',
+            alt: 'Four sketchbook pages in a row — avocados, tomatoes and tomato slices, chile peppers, and a scatter of tortilla chips beside mild, guac and hot labels',
+            aspect: '2560 / 720',
+          },
+        },
+        {
+          kind: 'shot',
+          width: 1272,
+          height: 94,
+          frame: { left: 191, top: 0, width: 890 },
+          shot: {
+            src: '/work/nacho-box/icon-banner.svg',
+            alt: 'The ten finished icons in a line — tomato, avocado, chile, lime wedge, jalapeño slice, tortilla chip, salsa bowl, pepper, lime slice and a second chip',
+            aspect: '999.2 / 105.8',
+          },
+        },
+        {
+          kind: 'shot',
+          width: 1272,
+          height: 648,
+          frame: { left: 0, top: 0, width: 1272 },
+          shot: {
+            src: '/work/nacho-box/patterns.svg',
+            alt: 'Eight pattern sets laid out in a grid, each shown in three colourways — chips, chips with lime, chips with jalapeño, chips with chile, chiles, avocados, tomatoes and limes',
+            aspect: '1000 / 509.4',
+          },
+        },
+        {
+          kind: 'copy',
+          heading: 'The box itself',
+          body: 'Flat dielines for two of the four flavours — the pattern runs over the side panels, and THREE SALSAS INSIDE sits on the flap that opens.',
+        },
+        {
+          kind: 'columns',
+          gap: 32,
+          columns: [
+            {
+              width: 620,
+              shot: {
+                src: '/work/nacho-box/package-jalapeno.svg',
+                alt: 'The Kick of Jalapeño box laid flat on terracotta — front panel in yellow, side panels in the chip-and-jalapeño pattern, THREE SALSAS INSIDE along the bottom flap',
+                aspect: '1 / 1',
+              },
+              caption: 'Kick of Jalapeño.',
+            },
+            {
+              width: 620,
+              shot: {
+                src: '/work/nacho-box/package-lime.svg',
+                alt: 'The Hint of Lime box laid flat on lime green, in the same construction with the chip-and-lime pattern on its side panels',
+                aspect: '1 / 1',
+              },
+              caption: 'Hint of Lime.',
+            },
+          ],
+        },
+      ],
+    },
+    /* Generic-landing fields; unused because `landing` is set. */
+    summary:
+      'A packaging project from college — a chips-and-salsa box for parties, with three salsas inside. The lettering, icons and patterns were all drawn by hand and rebuilt in Illustrator.',
+    accent: LIME,
+    links: [],
+    stats: [],
+    heroShot: {
+      label: 'Nacho Box — the four pack fronts',
+    },
+    sections: [
+      {
+        label: 'the idea',
+        paragraphs: [
+          'This is a packaging project I created in college. My goal was to concept out a convenient chips-and-salsa container for parties or get-togethers.',
+          'To achieve an organic vibe, I hand drew all the lettering and icons with pen and paper, then scanned them into Illustrator and cleaned them up.',
+        ],
+      },
+    ],
+    stack: [],
+    status: [],
+    cta: {
+      heading: 'One box, three salsas.',
+      label: 'See the packaging',
+      href: '/work/nacho-box',
     },
   },
 }
