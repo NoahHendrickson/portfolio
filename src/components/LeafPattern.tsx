@@ -30,8 +30,16 @@ const COL_ODD_Y = 56
 
 /** How far leaf tips poke past the content column's right edge. */
 export const LEAF_TIP_INSET = 8
-/** Extra shift of the whole field away from the content edge (px). */
+/** Extra shift of the whole field away from the content edge (px) on Me. */
 export const LEAF_SHIFT_X = 100
+/**
+ * Figma frame width. On Me, viewports wider than this pick up an extra right
+ * nudge so the leaf field doesn't sit too close to the copy on large screens.
+ * Design never applies this.
+ */
+export const LEAF_SHIFT_LARGE_FROM_PX = 1512
+/** Cap on the large-screen extra Me nudge (px). */
+export const LEAF_SHIFT_LARGE_EXTRA_MAX = 80
 
 /**
  * How tall the leaf panel runs past the fold. Dense through the first viewport,

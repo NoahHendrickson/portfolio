@@ -86,6 +86,7 @@ export default function ContactMenu() {
         onClick={() => setIsOpen(o => !o)}
         aria-haspopup="menu"
         aria-expanded={isOpen}
+        style={{ paddingInline: 16 }}
       >
         Contact
       </Button>

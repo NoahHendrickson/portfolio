@@ -4,7 +4,13 @@ import Header from './components/Header'
 import Hero from './components/Hero'
 import WorkList from './components/WorkList'
 import ShaderPanel from './components/ShaderPanel'
-import { LEAF_PANEL_HEIGHT_VH, LEAF_SHIFT_X, LEAF_TIP_INSET } from './components/LeafPattern'
+import {
+  LEAF_PANEL_HEIGHT_VH,
+  LEAF_SHIFT_LARGE_EXTRA_MAX,
+  LEAF_SHIFT_LARGE_FROM_PX,
+  LEAF_SHIFT_X,
+  LEAF_TIP_INSET,
+} from './components/LeafPattern'
 import Experience from './components/Experience'
 import LlmWall from './components/LlmWall'
 import WorkPage from './components/WorkPage'
@@ -98,9 +104,12 @@ export default function App() {
           top: 0,
           // Track the active content edge so the first leaf column is always
           // fully visible — jagged silhouette instead of a mid-leaf square cut.
-          // Me keeps the 100px nudge; Design's strip is already tight (~12.7vw),
-          // so the same shift would clip leaves to a smushed half-column.
-          left: `calc(${CONTENT_PCT[tab]}vw - ${LEAF_TIP_INSET}px${tab === 'me' ? ` + ${LEAF_SHIFT_X}px` : ''})`,
+          // Me keeps the base nudge, plus a little more past the design width so
+          // large screens give the copy more air. Design's strip is already tight
+          // (~12.7vw), so any shift would clip leaves to a smushed half-column.
+          left: tab === 'me'
+            ? `calc(${CONTENT_PCT.me}vw - ${LEAF_TIP_INSET}px + ${LEAF_SHIFT_X}px + min(${LEAF_SHIFT_LARGE_EXTRA_MAX}px, max(0px, (100vw - ${LEAF_SHIFT_LARGE_FROM_PX}px) * 0.25)))`
+            : `calc(${CONTENT_PCT.work}vw - ${LEAF_TIP_INSET}px)`,
           right: 0,
           height: `${LEAF_PANEL_HEIGHT_VH}vh`,
           overflow: 'hidden',
