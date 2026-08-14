@@ -1,6 +1,6 @@
 import { color, radius, space } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
-import { PAGE_GUTTER, shellPad } from '../layout'
+import { pageGutter, shellPad } from '../layout'
 
 const TEXT = color.text.primary
 const MUTED = color.text.muted
@@ -92,16 +92,23 @@ function QuoteCard({ clipping }: { clipping: Clipping }) {
   )
 }
 
+/**
+ * A résumé bullet. Amazon's are plain lines; the Invisible role's each land on
+ * a measured outcome, which takes the orange the case studies mark their
+ * results in rather than reading as another peer bullet under the same dot.
+ */
+type Bullet = string | { text: string; result: string }
+
 type Entry = {
   role: string
   detail: string
   paragraphs: string[]
-  bullets?: string[]
+  bullets?: Bullet[]
 }
 
 const nowParagraphs = [
   "I have been spending a lot of time in different AI coding and design tools, trying to suss out what works for me when it comes to building. This is the most fun I've had as a designer/builder in my whole life. As a kid, Legos were my go-to toy and pastime because I loved making my own things. 80% of the time I wasn't building from an instruction set — I was making my own creations. That's why I was drawn to Product Design later in life, and now building my own things and trying crazy ideas is suddenly possible.",
-  'The rise of AI slop has made the job of a designer even more important. Despite all the amazing new tools out there, I still find myself in Figma when I am nailing down precise details of a design. I do a lot of back and forth from Figma to Claude or Cursor when building. I’ve been experimenting with design systems and Storybook, and using AI to automate tedious work.',
+  'The rise of AI slop has made the job of a designer even more important. Despite all the amazing new tools out there, I still find myself in Figma to nail down precise details of a design. I do a lot of back and forth from Figma to Claude or Cursor when building. I’ve been experimenting with design systems and Storybook, and using AI to automate tedious work.',
 ]
 
 const entries: Entry[] = [
@@ -109,9 +116,23 @@ const entries: Entry[] = [
     role: 'Senior Product Designer @',
     detail: 'Invisible Technologies / Aug 2022 - July 2026',
     paragraphs: [
-      'I joined Invisible as an Associate Product Designer, working across a range of surfaces and products with very different users. I grew into owning design for Meridial, one of our core platforms.',
+      'I joined Invisible as an Associate Product Designer, working across a range of surfaces and products with very different users. I grew into owning design for one of our core platforms, contributing to our design ops, driving adoption of new AI tools and workflows and serving as the connective tissue for 5+ teams.',
       "As Design Lead on Meridial, Invisible's talent marketplace for AI training projects, I owned end-to-end user flows, research, wireframes, and high-fidelity specs alongside multiple PMs and engineers. The product cut across the business, so I partnered closely with Legal, Compliance, Hiring & Recruiting, and Operations.",
-      "I also supported the 0-1 launch of Invisible's Annotations platform, building reusable components for AI training tasks and leading design direction through high-fidelity mockups tailored to specific client requirements.",
+      'I got to lead the design effort for launching our new AI training interfaces. The team had already built the foundation in a scrappy sprint and pulled me in to own the UX and visual design. I provided a set of re-usable standard components and high fidelity mockups for a few AI training use cases.',
+    ],
+    bullets: [
+      {
+        text: 'Users were stuck in our initial assessment stage for days, bottlenecking the businesses ability to scale. I designed our in app assessment flow to address this bottleneck',
+        result: '72 hrs → Less than 24hrs to complete assessments',
+      },
+      {
+        text: 'Led the research and redesign of our onboarding funnel',
+        result: 'Doubled the overall conversion rate',
+      },
+      {
+        text: 'Redesigned the mobile experience for onboarding',
+        result: '50% increase in profile completion on mobile',
+      },
     ],
   },
   {
@@ -182,9 +203,10 @@ export default function Experience() {
         display: 'flex',
         flexDirection: 'column',
         gap: isMobile ? '48px' : '56px',
-        // Shared left edge with the rest of the page; the right gutter stays
-        // fixed because this block sits inside the Me column (see `App`).
-        padding: isMobile ? '32px 20px 60px' : `80px ${PAGE_GUTTER}px 80px ${shellPad()}`,
+        // Shared left edge with the rest of the page; the right side stays on
+        // the plain gutter because this block sits inside the Me column (see
+        // `App`), which is narrower than the viewport the inset centres on.
+        padding: isMobile ? '32px 20px 60px' : `80px ${pageGutter()} 80px ${shellPad()}`,
       }}
     >
       <SectionHeading title="How I’m designing now" />
@@ -229,7 +251,10 @@ export default function Experience() {
             style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: entry.bullets ? 0 : isMobile ? '16px' : '24px',
+              // One rhythm for everything in the entry — paragraph to
+              // paragraph, and the last paragraph to the bullet list that
+              // closes it.
+              gap: isMobile ? '16px' : '24px',
             }}
           >
             {entry.paragraphs.map((paragraph) => (
@@ -245,11 +270,38 @@ export default function Experience() {
                   listStyleType: 'disc',
                 }}
               >
-                {entry.bullets.map((item) => (
-                  <li key={item} style={body}>
-                    {item}
-                  </li>
-                ))}
+                {entry.bullets.map((item, i) => {
+                  const text = typeof item === 'string' ? item : item.text
+                  return (
+                    <li
+                      key={text}
+                      style={{
+                        ...body,
+                        // A plain list runs its lines together, which is right
+                        // for Amazon's. Bullets that carry an outcome need air
+                        // between them so each result groups with its own
+                        // bullet — as a margin rather than the list turning
+                        // into a flex column, which would blockify the items
+                        // and drop their markers.
+                        ...(i > 0 && typeof item !== 'string' ? { marginTop: space.md } : null),
+                      }}
+                    >
+                      {text}
+                      {typeof item !== 'string' && (
+                        <span
+                          style={{
+                            display: 'block',
+                            marginTop: space.xs,
+                            color: ORANGE,
+                            fontWeight: 500,
+                          }}
+                        >
+                          {item.result}
+                        </span>
+                      )}
+                    </li>
+                  )
+                })}
               </ul>
             )}
           </div>

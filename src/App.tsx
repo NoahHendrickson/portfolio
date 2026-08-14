@@ -18,7 +18,7 @@ import ProjectStory from './components/ProjectStory'
 import { projects } from './data/projects'
 import { useIsMobile } from './hooks/useIsMobile'
 import { getRoute, navigate, subscribeToRoute } from './navigation'
-import { PAGE_GUTTER, shellPad } from './layout'
+import { pageGutter, shellPad } from './layout'
 
 const BG = 'var(--color-bg-primary)'
 
@@ -75,12 +75,12 @@ export default function App() {
     route === '/work/phanttom'
       ? 'work'
       : 'me'
-  // One shared left edge on every route (see `layout.ts`). The right gutter
-  // stays the fixed 120 — the shared inset is centred against the viewport,
-  // and mirroring it inside a column narrower than the viewport would eat the
+  // One shared left edge on every route (see `layout.ts`). The right side stays
+  // on the plain gutter — the shared inset is centred against the viewport, and
+  // mirroring it inside a column narrower than the viewport would eat the
   // content's width instead.
   const inset = isMobile ? '20px' : shellPad()
-  const rightInset = isMobile ? '20px' : `${PAGE_GUTTER}px`
+  const rightInset = isMobile ? '20px' : pageGutter()
   const pageInset = `0 ${rightInset} 0 ${inset}`
 
   return (

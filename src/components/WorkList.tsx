@@ -98,7 +98,9 @@ const career: BentoItem[] = [
     title: 'Launching new AI training interfaces',
     eyebrow: 'Invisible',
     shader: { colorA: '#3a2557', colorB: '#402a60', colorC: '#472f69', colorD: '#553a7c' },
-    shotWidth: '72%',
+    // Matches the onboarding card beside it — the two Career shots are near
+    // enough in aspect (1.64 vs 1.57) that a shared share reads as a pair.
+    shotWidth: '92%',
     accent: '#563a80',
   },
 ]
@@ -185,7 +187,10 @@ export default function WorkList() {
       {FILTERS.map((filter) => (
         <Button
           key={filter.id}
-          size="xs"
+          // `xs` is a 28px pill — fine as a quiet rail beside the list, small as
+          // the Design tab's only navigation once the rail wraps into a touch
+          // row. Mobile takes the 32 the header's own controls already run at.
+          size={isMobile ? 'sm' : 'xs'}
           // The active filter is the one filled pill in the rail; the rest read as
           // plain labels until hovered, so the rail stays quiet beside the list.
           variant={filter.id === activeId ? 'secondary' : 'ghost'}
@@ -334,7 +339,9 @@ function WorkBento({ isMobile, beside }: { isMobile: boolean; beside: boolean })
             shots={[
               {
                 src: '/work/bento/shot-stat-builder.png',
-                width: '74.775%',
+                // Matches the Career cards — the file's share left too much
+                // bare well around a shot this wide.
+                width: '92%',
                 alt: 'D2 Stat Builder — the armor table beside the stat sliders',
               },
             ]}

@@ -985,7 +985,7 @@ export const projects: Record<string, Project> = {
       eyebrowPlacement: 'below',
       hero: {
         body: [
-          'A packaging project I made in college. The goal was to design a convenient chips-and-salsa container for parties and get-togethers—one box, three salsas, and four flavors.',
+          'A packaging project I made in college. The goal was to design a convenient chips-and-salsa container for parties and get-togethers—one box, three salsas, and four flavors. I like to showcase this mostly for the graphics and illustrations, as I am really proud of the style I captured.',
         ],
         shot: {
           src: '/work/nacho-box/covers.svg',
