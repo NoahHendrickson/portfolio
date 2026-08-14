@@ -413,8 +413,14 @@ function TexturedBentoCard({
   compact?: boolean
 }) {
   const stillOnly = useMediaQuery('(prefers-reduced-motion: reduce)')
-  const titleSize = featured ? (compact ? '28px' : '34px') : compact ? '18px' : '22px'
+  const isMobile = useIsMobile()
+  // Mobile stacks every card full-width, so the beside-layout 34/22 sizes
+  // read huge; drop a step and give the copy the hover-reveal's 16px pad.
+  const titleSize = isMobile
+    ? featured ? '22px' : '18px'
+    : featured ? (compact ? '28px' : '34px') : compact ? '18px' : '22px'
   const metaSize = compact ? '14px' : '16px'
+  const copyPad = isMobile ? space.lg : undefined
 
   const titleRow = (
     <div
@@ -478,7 +484,7 @@ function TexturedBentoCard({
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'flex-start',
-        gap: 'var(--bento-shown-gap)',
+        gap: copyPad ?? 'var(--bento-shown-gap)',
         minHeight: '150px',
         height: '100%',
         aspectRatio: artAspect.replace(/\s/g, ''),
@@ -486,7 +492,7 @@ function TexturedBentoCard({
         // cream cards' mechanics rather than sitting outside a border.
         paddingTop: '4px',
         paddingRight: '4px',
-        paddingBottom: 'var(--bento-shown-pad)',
+        paddingBottom: copyPad ?? 'var(--bento-shown-pad)',
         paddingLeft: '4px',
         borderRadius: radius['2xl'],
         background: CARD_CREAM,

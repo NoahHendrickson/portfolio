@@ -117,7 +117,10 @@ export default function ProjectStory({ project }: { project: Project }) {
   const eyebrow = Array.isArray(landing.eyebrow) ? landing.eyebrow : [landing.eyebrow]
   const continuous = landing.flow === 'continuous'
   const continuousGap = isMobile ? space['2xl'] : `${landing.gap ?? 80}px`
-  const rowGap = isMobile ? space['2xl'] : `${landing.rowGap ?? landing.gap ?? 80}px`
+  // Desktop rows sit 80–200 apart. Mobile keeps heading+copy above the shot,
+  // so this gap is what stops one section's screenshot sitting on the next
+  // heading — 120 matches the page gutter rather than the old 32.
+  const rowGap = isMobile ? '120px' : `${landing.rowGap ?? landing.gap ?? 80}px`
   const flush = landing.align === 'start'
   const paired = landing.titleRhythm === 'paired'
   // Rows follow the title's alignment unless the frame splits them — no3y Code
