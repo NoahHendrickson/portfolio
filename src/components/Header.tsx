@@ -1,61 +1,110 @@
+import { ArrowLeft } from '@phosphor-icons/react'
 import TabBar, { type Tab } from './TabBar'
 import ContactMenu from './ContactMenu'
+import { VARIANTS } from '../design-system/buttonStyles'
+import { control, radius, space, type } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
+import AppLink from '../AppLink'
 
 type Props = {
-  active: Tab
+  active?: Tab
+  /**
+   * `tabs` is the Me / Design chrome. `back` swaps them for a Back pill — used
+   * on project pages so the tab bar doesn't sit above a second Back.
+   */
+  leading?: 'tabs' | 'back'
   /** Horizontal inset for the tab bar row. Pass '0' when the parent already pads the page. */
   barInset?: string
   /** Horizontal inset for the profile row. Pass '0' when the parent already pads the page. */
   contentInset?: string
   /**
-   * Horizontal offset for the tab bar, cancelling out a change in the column width
-   * so the tabs stay put when the column snaps wider on Design. See `TAB_SHIFT` in App.tsx.
+   * Right-side inset for the pinned Contact menu and the rows' right padding.
+   * Defaults to `barInset` — right for full-width pages, where the shared
+   * gutter is symmetric. The tabs pass the fixed page gutter instead, because
+   * their header sits inside a column narrower than the viewport and the
+   * growing left inset would drag Contact toward the column's centre.
    */
-  tabShift?: string
+  trailingInset?: string
   /** Pass `false` on pages whose design is just the tab bar. */
   showProfile?: boolean
 }
 
 export default function Header({
-  active,
-  barInset = '24px',
-  contentInset = '80px',
-  tabShift,
+  active = 'me',
+  leading = 'tabs',
+  barInset = '120px',
+  contentInset = '120px',
+  trailingInset,
   showProfile = true,
 }: Props) {
   const isMobile = useIsMobile()
   const bar = isMobile ? '20px' : barInset
   const content = isMobile ? '20px' : contentInset
+  const trailing = isMobile ? '20px' : (trailingInset ?? barInset)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
-      {/* Tab bar — tabs centered, Contact pinned right */}
+      {/* Leading control left-aligned with page content, Contact pinned right */}
       <div
         style={{
           position: 'relative',
           display: 'flex',
           alignItems: 'center',
-          // Tabs centre on desktop; on mobile they sit left so the Contact button has room.
-          justifyContent: isMobile ? 'flex-start' : 'center',
-          padding: isMobile ? `12px ${bar}` : `16px ${bar}`,
+          justifyContent: 'flex-start',
+          padding: isMobile ? `12px ${trailing} 12px ${bar}` : `16px ${trailing} 16px ${bar}`,
         }}
       >
-        <div className="tab-shift" style={{ transform: tabShift ? `translateX(${tabShift})` : undefined }}>
-          <TabBar active={active} />
-        </div>
-        <div style={{ position: 'absolute', right: bar, top: isMobile ? '10px' : '16px' }}>
+        {leading === 'back' ? <BackLink /> : <TabBar active={active} />}
+        <div style={{ position: 'absolute', right: trailing, top: isMobile ? '10px' : '16px' }}>
           <ContactMenu />
         </div>
       </div>
 
       {/* Profile row */}
       {showProfile && (
-        <div style={{ padding: isMobile ? `20px ${content}` : `32px ${content}` }}>
+        <div
+          style={{
+            padding: isMobile
+              ? `20px ${content}`
+              : `32px ${trailing} 32px ${content}`,
+          }}
+        >
           <ProfileRow />
         </div>
       )}
     </div>
+  )
+}
+
+/**
+ * Ghost pill matching the Design tab's controls. Kept as an `<a>` — `Button`
+ * renders a <button>, and nesting one inside a link is invalid.
+ */
+function BackLink() {
+  return (
+    <AppLink
+      href="/work"
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: space.sm,
+        height: control.sm,
+        boxSizing: 'border-box',
+        padding: `0 ${space.lg}`,
+        borderRadius: radius.full,
+        border: `1px solid ${VARIANTS.ghost.default.borderColor}`,
+        background: VARIANTS.ghost.default.background,
+        color: VARIANTS.ghost.default.color,
+        fontSize: type['label-m'].fontSize,
+        fontWeight: type['label-m'].fontWeight,
+        lineHeight: type['label-m'].lineHeight,
+        textDecoration: 'none',
+        whiteSpace: 'nowrap',
+      }}
+    >
+      <ArrowLeft size={16} />
+      Back
+    </AppLink>
   )
 }
 

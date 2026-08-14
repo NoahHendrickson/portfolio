@@ -37,16 +37,6 @@ const BACK_TO = [
  */
 const JUMP_TO: { label: string; href: string; logo: Logo }[] = [
   {
-    label: 'Phanttom',
-    href: '/work/phanttom',
-    logo: { src: '/work/logos/phanttom.png', width: 12, height: 17 },
-  },
-  {
-    label: 'The Forge',
-    href: '/work/forge',
-    logo: { src: '/work/logos/forge.svg', width: 13.333, height: 16 },
-  },
-  {
     label: 'D2 Stat Builder',
     href: '/work/stat-builder',
     logo: { src: '/work/logos/stat-builder.png', width: 16, height: 16 },
