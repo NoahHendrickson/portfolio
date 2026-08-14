@@ -1,80 +1,179 @@
-import AppLink from '../AppLink'
-import { color, type } from '../design-system/tokens'
+import { color, radius, space } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
-import { useMediaQuery } from '../hooks/useMediaQuery'
-
-/**
- * Me is only 58.3vw. Below this viewport the 140px rail + 80px pad leaves the
- * body column too narrow to read — stack the rail above the copy sooner than
- * the global mobile breakpoint (which also drops the shader split).
- */
-const STACK_RAIL_QUERY = '(max-width: 1400px)'
+import { PAGE_GUTTER, shellPad } from '../layout'
 
 const TEXT = color.text.primary
 const MUTED = color.text.muted
-const SECONDARY = color.text.secondary
 const ORANGE = color.accent.default
+const BORDER = color.border.default
+const TINT = color.bg.tint
 
-/**
- * One block of the résumé. `rail` is the muted left-hand label, broken into the
- * lines it should wrap onto; `caption` is the underlined role line above the copy.
- */
-type Entry = {
-  rail: string[]
-  caption?: string
-  paragraphs: React.ReactNode[]
-  /** Impact lines under the copy — setup in white, result in orange. */
-  quickHits?: { setup: string; result: string; href?: string }[]
+type Clipping = {
+  src: string
+  alt: string
+  width: number
+  aspect: string
+  crop: { width: string; left: string; height: string; top: string }
 }
+
+const clippings: Clipping[] = [
+  {
+    src: '/work/llm-wall-claude.jpeg',
+    alt: 'Claude replying “Hell yes — that’s the fix.”',
+    width: 153,
+    aspect: '153 / 46',
+    crop: { width: '110.46%', left: '-10.46%', height: '130.43%', top: '-30.43%' },
+  },
+  {
+    src: '/work/llm-wall-protected-by-luck.png',
+    alt: 'An LLM declaring “You were protected by luck:”',
+    width: 240,
+    aspect: '636 / 92',
+    crop: { width: '100%', left: '0%', height: '100%', top: '0%' },
+  },
+  {
+    src: '/work/llm-wall-close-to-fatal.png',
+    alt: 'An LLM saying “The review was right about the thing that mattered, and it was close to fatal.”',
+    width: 360,
+    aspect: '914 / 118',
+    crop: { width: '100%', left: '0%', height: '100%', top: '0%' },
+  },
+]
+
+function QuoteCard({ clipping }: { clipping: Clipping }) {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        padding: '4px',
+        borderRadius: radius.md,
+        background: TINT,
+        width: clipping.width + 8,
+        maxWidth: '100%',
+        flex: `1 1 ${clipping.width + 8}px`,
+        minWidth: 0,
+        boxSizing: 'border-box',
+      }}
+    >
+      <div
+        style={{
+          width: '100%',
+          padding: space.sm,
+          boxSizing: 'border-box',
+          borderRadius: '4px',
+          border: `1px solid ${BORDER}`,
+          background: '#181818',
+        }}
+      >
+        <div
+          style={{
+            position: 'relative',
+            width: '100%',
+            aspectRatio: clipping.aspect,
+            overflow: 'hidden',
+          }}
+        >
+          <img
+            src={clipping.src}
+            alt={clipping.alt}
+            style={{
+              position: 'absolute',
+              width: clipping.crop.width,
+              left: clipping.crop.left,
+              height: clipping.crop.height,
+              top: clipping.crop.top,
+              maxWidth: 'none',
+              display: 'block',
+            }}
+          />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+type Entry = {
+  role: string
+  detail: string
+  paragraphs: string[]
+  bullets?: string[]
+}
+
+const nowParagraphs = [
+  "I have been spending a lot of time in different AI coding and design tools, trying to suss out what works for me when it comes to building. This is the most fun I've had as a designer/builder in my whole life. As a kid, Legos were my go-to toy and pastime because I loved making my own things. 80% of the time I wasn't building from an instruction set — I was making my own creations. That's why I was drawn to Product Design later in life, and now building my own things and trying crazy ideas is suddenly possible.",
+  'The rise of AI slop has made the job of a designer even more important. Despite all the amazing new tools out there, I still find myself in Figma when I am nailing down precise details of a design. I do a lot of back and forth from Figma to Claude or Cursor when building. I’ve been experimenting with design systems and Storybook, and using AI to automate tedious work.',
+]
 
 const entries: Entry[] = [
   {
-    rail: ['most', 'recently'],
-    caption: 'Invisible Technologies | Senior Product Designer | Aug 2022 - July 2026',
+    role: 'Senior Product Designer @',
+    detail: 'Invisible Technologies / Aug 2022 - July 2026',
     paragraphs: [
-      'I started my time at Invisible as an Associate Product Designer and had the opportunity to work on many surfaces and products with very different users. I grew to owning the design for one of our core platforms, Meridial.',
-      <>
-        I led Product Design for Meridial, Invisible’s talent marketplace for AI training
-        projects. I was responsible for end-to-end user flows, research, wireframes, high
-        fidelity specs and collaborated closely with multiple Product Managers and
-        Engineers. This product cut across many functions and it was necessary for me to
-        partner with our Legal, Compliance, Hiring & Recruiting and Operations teams. I
-        immerse myself in the user journey to validate assumptions and ideas with proven
-        results.
-      </>,
-      'I provided design support for the 0-1 launch of Invisible’s Annotations platform, creating reusable custom components built for AI training tasks. I led design direction through high-fidelity mockups and custom interface designs tailored to specific client requirements.',
+      'I joined Invisible as an Associate Product Designer, working across a range of surfaces and products with very different users. I grew into owning design for Meridial, one of our core platforms.',
+      "As Design Lead on Meridial, Invisible's talent marketplace for AI training projects, I owned end-to-end user flows, research, wireframes, and high-fidelity specs alongside multiple PMs and engineers. The product cut across the business, so I partnered closely with Legal, Compliance, Hiring & Recruiting, and Operations.",
+      "I also supported the 0-1 launch of Invisible's Annotations platform, building reusable components for AI training tasks and leading design direction through high-fidelity mockups tailored to specific client requirements.",
     ],
-    quickHits: [
-      {
-        setup:
-          'Users were stuck in our initial assessment stage for days, bottlenecking the businesses ability to scale. I designed our in app assessment flow to address this bottleneck',
-        result: '72 hrs → Less than 24hrs to complete assessments',
-      },
-      {
-        setup: 'Led the research and redesign of our onboarding funnel',
-        result: 'Doubled the overall conversion rate',
-        // Lands on the showcase when unlocked; InvisibleOnboarding redirects
-        // locked visitors to the password gate on `/work/invisible`.
-        href: '/work/invisible/onboarding',
-      },
-      {
-        setup: 'Redesigned the mobile experience for onboarding',
-        result: '50% increase in profile completion on mobile',
-        href: '/work/invisible/onboarding',
-      },
+  },
+  {
+    role: 'Area Manager L5 @',
+    detail: 'Amazon Logistics / 2019 - 2021',
+    paragraphs: [
+      "I started at Amazon just to get a job after college. I didn't really have any expectations, but my work ethic said otherwise and I left as an L5 Area Manager. What got me there was learning to make calls off data instead of vibes, and finding out I could pick up something completely foreign and get good at it fast. That's the confidence I still run on. I had mentors who invested in me, and I learned to pass that down as well, helping four members of my team earn promotions.",
+    ],
+    bullets: [
+      'Led nightly shifts of 30 to 150 associates unloading, sorting, and staging 20,000 to 100,000 packages for driver dispatch.',
+      'Coached and promoted 4 associates and shift assistants into higher-level roles.',
+      'Responsible for hard deadlines where every miss is a customer who does not get their package.',
+      "Increased my Sort shift's productivity by 29% (42 to 55 Units per Hour) in summer 2020.",
+      'Maintained 62 UPH against a goal of 58, approximately 7% above target, for the first 18 weeks of 2021.',
     ],
   },
 ]
 
+function SectionHeading({ title }: { title: string }) {
+  return (
+    <h2
+      style={{
+        margin: 0,
+        width: '100%',
+        maxWidth: '700px',
+        paddingBottom: '8px',
+        borderBottom: `1px solid ${ORANGE}`,
+        fontSize: '20px',
+        fontWeight: 600,
+        lineHeight: 1.3,
+        letterSpacing: '-0.2px',
+        color: TEXT,
+      }}
+    >
+      {title}
+    </h2>
+  )
+}
+
 /**
- * The résumé below the hero on the Me tab — a muted rail label beside a column
- * of copy, per the July 2026 Figma file. When the Me column can't spare the
- * 140px gutter (mid-width desktops and mobile), the rail becomes a heading
- * above the copy.
+ * Below the fold on the Me tab — how I'm designing now, previous roles, and
+ * the LLM quotes. Drawn from the July 2026 file (node `265:33458`).
  */
 export default function Experience() {
   const isMobile = useIsMobile()
-  const stackRail = useMediaQuery(STACK_RAIL_QUERY)
+
+  const heading: React.CSSProperties = {
+    margin: 0,
+    fontSize: '20px',
+    fontWeight: 600,
+    lineHeight: 1.3,
+    letterSpacing: '-0.2px',
+  }
+
+  const body: React.CSSProperties = {
+    margin: 0,
+    fontSize: '16px',
+    fontWeight: 400,
+    lineHeight: 1.3,
+    letterSpacing: '-0.2px',
+    color: TEXT,
+  }
 
   return (
     <section
@@ -82,123 +181,116 @@ export default function Experience() {
       style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: isMobile ? '48px' : '80px',
-        padding: isMobile ? '32px 20px 0' : '80px',
+        gap: isMobile ? '48px' : '56px',
+        // Shared left edge with the rest of the page; the right gutter stays
+        // fixed because this block sits inside the Me column (see `App`).
+        padding: isMobile ? '32px 20px 60px' : `80px ${PAGE_GUTTER}px 80px ${shellPad()}`,
       }}
     >
+      <SectionHeading title="How I’m designing now" />
+
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '16px',
+          maxWidth: '700px',
+        }}
+      >
+        <p style={{ ...heading, color: MUTED }}>Vibe coding, design engineering, agent orchestrating?</p>
+        {nowParagraphs.map((paragraph) => (
+          <p key={paragraph.slice(0, 40)} style={body}>
+            {paragraph}
+          </p>
+        ))}
+      </div>
+
+      <SectionHeading title="Previous roles" />
+
       {entries.map((entry) => (
         <div
-          key={entry.rail.join('-')}
+          key={entry.role}
           style={{
             display: 'flex',
-            flexDirection: stackRail ? 'column' : 'row',
-            alignItems: 'flex-start',
-            gap: stackRail ? '16px' : '32px',
+            flexDirection: 'column',
+            gap: isMobile ? '16px' : '24px',
+            maxWidth: '700px',
+            width: '100%',
+            paddingBottom: '24px',
+            borderBottom: `1px solid ${BORDER}`,
           }}
         >
-          <h2
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <h3 style={{ ...heading, color: TEXT }}>{entry.role}</h3>
+            <p style={{ ...heading, color: MUTED }}>{entry.detail}</p>
+          </div>
+
+          <div
             style={{
-              margin: 0,
-              flexShrink: 0,
-              width: stackRail ? undefined : '140px',
-              fontSize: isMobile ? '20px' : '24px',
-              fontWeight: 600,
-              lineHeight: 1.2,
-              letterSpacing: '-1.6px',
-              color: MUTED,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: entry.bullets ? 0 : isMobile ? '16px' : '24px',
             }}
           >
-            {entry.rail.map((line) => (
-              <span key={line} style={{ display: 'block' }}>
-                {line}
-              </span>
+            {entry.paragraphs.map((paragraph) => (
+              <p key={paragraph} style={body}>
+                {paragraph}
+              </p>
             ))}
-          </h2>
-
-          <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {entry.caption && (
-              <span
+            {entry.bullets && (
+              <ul
                 style={{
-                  alignSelf: 'flex-start',
-                  paddingBottom: '8px',
-                  borderBottom: `1px solid ${color.border.default}`,
-                  fontSize: type['body-s'].fontSize,
-                  fontWeight: 400,
-                  lineHeight: 1.5,
-                  color: TEXT,
+                  margin: 0,
+                  paddingInlineStart: '24px',
+                  listStyleType: 'disc',
                 }}
               >
-                {entry.caption}
-              </span>
+                {entry.bullets.map((item) => (
+                  <li key={item} style={body}>
+                    {item}
+                  </li>
+                ))}
+              </ul>
             )}
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              {entry.paragraphs.map((paragraph, idx) => (
-                <p
-                  key={idx}
-                  style={{
-                    margin: 0,
-                    maxWidth: '720px',
-                    fontSize: type['body-l'].fontSize,
-                    fontWeight: 400,
-                    lineHeight: 1.6,
-                    color: TEXT,
-                  }}
-                >
-                  {paragraph}
-                </p>
-              ))}
-
-              {entry.quickHits && entry.quickHits.length > 0 && (
-                <>
-                  <p
-                    style={{
-                      margin: 0,
-                      fontSize: type['body-l'].fontSize,
-                      fontWeight: 400,
-                      lineHeight: 1.6,
-                      letterSpacing: '-0.16px',
-                      color: SECONDARY,
-                    }}
-                  >
-                    Quick hits
-                  </p>
-                  {entry.quickHits.map((hit) => (
-                    <div
-                      key={hit.result}
-                      style={{
-                        maxWidth: '495px',
-                        fontSize: type['body-l'].fontSize,
-                        fontWeight: 500,
-                        lineHeight: 1.4,
-                        letterSpacing: '-0.16px',
-                      }}
-                    >
-                      <p style={{ margin: 0, color: TEXT }}>{hit.setup}</p>
-                      {hit.href ? (
-                        <AppLink
-                          href={hit.href}
-                          style={{
-                            display: 'block',
-                            margin: 0,
-                            color: ORANGE,
-                            textDecoration: 'underline',
-                            textUnderlineOffset: '3px',
-                          }}
-                        >
-                          {hit.result}
-                        </AppLink>
-                      ) : (
-                        <p style={{ margin: 0, color: ORANGE }}>{hit.result}</p>
-                      )}
-                    </div>
-                  ))}
-                </>
-              )}
-            </div>
           </div>
         </div>
       ))}
+
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: space.xl,
+          width: '100%',
+        }}
+      >
+        <p
+          style={{
+            margin: 0,
+            fontSize: '16px',
+            fontWeight: 400,
+            lineHeight: 1.3,
+            letterSpacing: '-0.2px',
+            color: MUTED,
+          }}
+        >
+          Enjoy my favorite LLM quotes
+        </p>
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: space.lg,
+            width: '100%',
+            minWidth: 0,
+            alignItems: 'flex-start',
+          }}
+        >
+          {clippings.map((clipping) => (
+            <QuoteCard key={clipping.src} clipping={clipping} />
+          ))}
+        </div>
+      </div>
     </section>
   )
 }

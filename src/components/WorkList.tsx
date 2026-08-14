@@ -1,16 +1,22 @@
 import { useState, type CSSProperties, type ReactNode } from 'react'
 import { ArrowSquareOut, ArrowUpRight, GithubLogo } from '@phosphor-icons/react'
+import { Shader, Dither, FlowingGradient } from 'shaders/react'
 import AppLink from '../AppLink'
 import Button from '../design-system/Button'
 import IconButton from '../design-system/IconButton'
 import { projects } from '../data/projects'
 import { color, radius, space, type } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
+import { useMediaQuery } from '../hooks/useMediaQuery'
+import { WORK_LIST_MAX } from '../layout'
 import { navigate } from '../navigation'
 
 /**
  * The Design tab. A filter rail on the left; Personal / For-fun projects use the
- * WorkBento from Figma node `136:10637`, Career keeps the divided list rows.
+ * WorkBento from Figma node `273:39477` (the R3 page's full-bleed textured
+ * cards), and Career and Graphic Design run the even grid of the same cards.
+ * The divided list rows are still here as a layout, but no filter picks them
+ * today.
  */
 
 type Link = { kind: 'site' | 'repo'; href: string }
@@ -32,57 +38,114 @@ type Row = {
  * `bento` is the Personal-projects layout (one featured card beside a stack of
  * two); `even` is a plain grid of equal cards; `list` is the divided rows.
  */
-type Filter = { id: string; label: string; rows: Row[]; layout?: 'bento' | 'even' | 'list' }
+type Filter = {
+  id: string
+  label: string
+  rows: Row[]
+  layout?: 'bento' | 'even' | 'list'
+  /** Cards for an `even` filter. */
+  items?: BentoItem[]
+}
+
+/** A live dither backdrop — a FlowingGradient palette, kept to one colour
+ *  family so it reads as a single tone shifting gently under the dither. */
+type BentoShader = {
+  colorA: string
+  colorB: string
+  colorC: string
+  colorD: string
+}
 
 /** A card in an `even` bento. */
 type BentoItem = {
   href: string
+  /**
+   * The art floating on the live well — wants the bare window or lockup, as
+   * a baked plate would sit as a flat slab over the shader.
+   */
   art: string
   artAlt: string
   title: string
   eyebrow: string
-  /**
-   * Fill behind the art, for a transparent PNG that would otherwise sit on the
-   * bare cream. The other cards bake their plate into the export.
-   */
-  artBg?: string
+  /** The card's FlowingGradient palette. */
+  shader: BentoShader
+  /** The floating shot's share of the well. */
+  shotWidth?: string
+  /** Hover accent for the outline and arrow; unset falls back to orange. */
+  accent?: string
 }
 
-const career: Row[] = [
+/**
+ * The Invisible work, captioned by the client rather than the project type.
+ * Each card goes straight to its case study; that page shows the password form
+ * when locked, so Back from there is this list rather than a leftover index.
+ */
+const career: BentoItem[] = [
   {
-    id: 'invisible',
-    title: 'Senior Product Designer - Invisible Technologies',
-    subhead: 'Aug 2022 – July 2026.',
-    showcase: '/work/invisible',
-    links: [],
+    href: '/work/invisible/onboarding',
+    art: '/work/bento/shot-invisible-onboarding.png',
+    artAlt: 'Meridial onboarding — the profile step of the redesigned flow',
+    title: 'Revitalizing Meridial’s onboarding flow',
+    eyebrow: 'Invisible',
+    shader: { colorA: '#3f8dbd', colorB: '#4a9ac9', colorC: '#57a8d5', colorD: '#6fb5dc' },
+    shotWidth: '92%',
+    accent: '#3d85b5',
+  },
+  {
+    href: '/work/invisible/synapse',
+    art: '/work/bento/shot-invisible-synapse.png',
+    artAlt: 'Synapse — two model responses beside the task panel',
+    title: 'Launching new AI training interfaces',
+    eyebrow: 'Invisible',
+    shader: { colorA: '#3a2557', colorB: '#402a60', colorC: '#472f69', colorD: '#553a7c' },
+    shotWidth: '72%',
+    accent: '#563a80',
   },
 ]
 
 const graphic: BentoItem[] = [
   {
     href: '/work/how-to-pc',
+    // The title card is a transparent PNG, so it floats straight on the well.
     art: '/work/how-to-pc/thumbnail.png',
     artAlt: 'How to Build a PC — the infographic’s title card',
     title: projects['how-to-pc'].title,
     eyebrow: 'Infographic',
-    // The title card is a transparent PNG, so it needs its own plate. Pink at
-    // the same lightness and saturation as the D2 card's orange.
-    artBg: '#e7308c',
+    // Pink at the same lightness and saturation as the D2 card's orange.
+    shader: { colorA: '#c81f74', colorB: '#d62782', colorC: '#e7308c', colorD: '#ee549f' },
+    shotWidth: '78%',
+    accent: '#e7308c',
   },
   {
     href: '/work/nacho-box',
-    art: '/work/nacho-box/thumbnail.png',
-    artAlt: 'Nacho Box — the Hint of Lime pack art on its chip pattern',
+    // The Hint of Lime lockup keyed off the pack's chip-pattern plate.
+    art: '/work/bento/shot-nacho-lime.png',
+    artAlt: 'Nacho Box — the Hint of Lime lockup',
     title: projects['nacho-box'].title,
     eyebrow: 'Packaging',
+    shader: { colorA: '#e8dd6f', colorB: '#f0e77e', colorC: '#f9f18f', colorD: '#fcf6a5' },
+    shotWidth: '62%',
+    accent: '#b3a02f',
   },
 ]
 
 const FILTERS: Filter[] = [
-  { id: 'career', label: 'Career', rows: career, layout: 'list' },
+  { id: 'career', label: 'Career', rows: [], layout: 'even', items: career },
   { id: 'fun', label: 'Personal projects', rows: [], layout: 'bento' },
-  { id: 'graphic', label: 'Graphic Design', rows: [], layout: 'even' },
+  { id: 'graphic', label: 'Graphic Design', rows: [], layout: 'even', items: graphic },
 ]
+
+/** Survives refresh and Back — WorkList unmounts whenever you leave `/work`. */
+const FILTER_KEY = 'work-filter'
+
+function readFilter() {
+  const id = sessionStorage.getItem(FILTER_KEY)
+  return FILTERS.some((filter) => filter.id === id) ? id! : FILTERS[0].id
+}
+
+function writeFilter(id: string) {
+  sessionStorage.setItem(FILTER_KEY, id)
+}
 
 /** Flip to true when the Personal projects bento is ready to ship. */
 const SHOW_PERSONAL_BENTO = true
@@ -94,10 +157,20 @@ const SHOW_PERSONAL_BENTO = true
  */
 const CARD_CREAM = '#e6dfd2'
 
+/** Side-by-side bento needs the file's ~966px list; below this the two small
+ *  cards sit under the featured one instead of in a skinny right column. */
+const BENTO_BESIDE_QUERY = '(min-width: 1441px)'
+
 export default function WorkList() {
   const isMobile = useIsMobile()
-  const [activeId, setActiveId] = useState(FILTERS[0].id)
+  const bentoBeside = useMediaQuery(BENTO_BESIDE_QUERY)
+  const [activeId, setActiveId] = useState(readFilter)
   const active = FILTERS.find((f) => f.id === activeId) ?? FILTERS[0]
+
+  const selectFilter = (id: string) => {
+    setActiveId(id)
+    writeFilter(id)
+  }
 
   const rail = (
     <div
@@ -116,7 +189,7 @@ export default function WorkList() {
           // The active filter is the one filled pill in the rail; the rest read as
           // plain labels until hovered, so the rail stays quiet beside the list.
           variant={filter.id === activeId ? 'secondary' : 'ghost'}
-          onClick={() => setActiveId(filter.id)}
+          onClick={() => selectFilter(filter.id)}
           aria-pressed={filter.id === activeId}
           // The selected pill takes the cards' cream, so the rail and the bento
           // read as one surface. Secondary only dims on hover, so this holds.
@@ -134,9 +207,13 @@ export default function WorkList() {
 
   const list =
     active.layout === 'bento' && SHOW_PERSONAL_BENTO ? (
-      <WorkBento isMobile={isMobile} />
-    ) : active.layout === 'even' ? (
-      <EvenBento items={graphic} isMobile={isMobile} />
+      <WorkBento isMobile={isMobile} beside={bentoBeside} />
+    ) : active.layout === 'even' && active.items ? (
+      <EvenBento
+        items={active.items}
+        isMobile={isMobile}
+        compact={!bentoBeside && !isMobile}
+      />
     ) : active.layout === 'bento' || active.rows.length === 0 ? (
       <p
         key={`${activeId}-empty`}
@@ -163,8 +240,16 @@ export default function WorkList() {
   }
 
   // 114px rail + an 80px gutter, matching the Figma file's 80 / 194 / 1240 columns.
+  // The list stops at the file's 1240 rather than stretching with the column on
+  // a big screen; the page's own inset is what re-centres the pair.
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'max-content minmax(0, 1fr)', gap: space['5xl'] }}>
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: `max-content minmax(0, ${WORK_LIST_MAX}px)`,
+        gap: space['5xl'],
+      }}
+    >
       {rail}
       {list}
     </div>
@@ -172,59 +257,104 @@ export default function WorkList() {
 }
 
 /**
- * Featured + two stacked cards — Figma `WorkBento` / `249:31730`. The July redo
- * turned the cards cream, so everything inside them runs on the **ink** ramp
- * rather than the dark shell's text ramp.
+ * Featured + two stacked cards — Figma `WorkBento` / `273:39477` (R3). These
+ * are the full-bleed textured cards: a dithered gradient under a colour tint
+ * inside the cream border, with the screenshots floating on top and the title
+ * in a hover overlay rather than a reveal row. The even filters keep the older
+ * cream `BentoCard`.
  */
-function WorkBento({ isMobile }: { isMobile: boolean }) {
+function WorkBento({ isMobile, beside }: { isMobile: boolean; beside: boolean }) {
+  const compact = !beside && !isMobile
+
   return (
     <div
       className="tab-content-in"
       style={{
         display: 'grid',
-        // 625.078 / 324.922 of the file's 966px bento, on its 16px gutter.
-        gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 625.078fr) minmax(0, 324.922fr)',
+        // 569.342 / 380.657 of the file's 966px bento, on its 16px gutter.
+        gridTemplateColumns: beside ? 'minmax(0, 569.342fr) minmax(0, 380.657fr)' : '1fr',
         gap: space.lg,
         alignItems: 'stretch',
+        // Stacked, the list column can run ~800px; the file's featured card is
+        // 569, so cap before the shots stretch across the leaf strip.
+        maxWidth: compact ? 640 : undefined,
+        width: '100%',
       }}
     >
-      <BentoLink href="/work/no3y-code" ariaLabel="no3y Code">
-        <BentoCard
+      <BentoLink href="/work/no3y-code" ariaLabel="no3y Code" accent="rgb(9, 140, 87)">
+        <TexturedBentoCard
           featured
-          art="/work/bento/card-no3y-code.jpg"
-          artAlt="no3y Code — the thread sidebar beside design mode's properties panel"
-          artAspect="609.078 / 362.942"
+          compact={compact}
+          shaderBg={{ colorA: '#0c7a49', colorB: '#128a55', colorC: '#1d9a62', colorD: '#33a873' }}
+          // The file's 569.342 width, a quarter shorter than the height that
+          // would square the two cards beside it (777.314).
+          artAspect="569.342 / 583"
+          artAlign="start"
+          // The file's 32px inset and gutter, and 241.09 / 224.25 panels, as
+          // shares of the card so the composition scales with the column.
+          artPad="4.988%"
+          artGap="6.332%"
+          shots={[
+            {
+              src: '/work/bento/no3y-props.png',
+              width: '47.708%',
+              alt: "no3y Code — design mode's properties panel",
+            },
+            {
+              src: '/work/bento/no3y-sidebar.png',
+              width: '44.376%',
+              alt: 'no3y Code — the agent thread sidebar',
+            },
+          ]}
           title="no3y Code"
           eyebrow="Forked project"
           body="no3y Code is my fork of T3 Code, an agent and harness orchestration tool."
         />
       </BentoLink>
 
-      {/* The stack splits the featured card's height 266.942 / 245 in the file. */}
+      {/* Beside: the stack splits the featured card's height equally.
+          Narrower: the two cards sit in a row under the featured one. */}
       <div
         style={{
-          display: 'flex',
+          display: compact ? 'grid' : 'flex',
           flexDirection: 'column',
+          gridTemplateColumns: '1fr 1fr',
           gap: space.lg,
           minWidth: 0,
-          height: isMobile ? undefined : '100%',
+          height: beside ? '100%' : undefined,
         }}
       >
-        <BentoLink href="/work/stat-builder" ariaLabel="D2 Stat Builder" grow={isMobile ? undefined : 266.942}>
-          <BentoCard
-            art="/work/bento/card-stat-builder.jpg"
-            artAlt="D2 Stat Builder — the armor table on its orange card"
-            artAspect="308.922 / 168.942"
+        <BentoLink href="/work/stat-builder" ariaLabel="D2 Stat Builder" grow={beside ? 1 : undefined} accent="rgb(197, 100, 48)">
+          <TexturedBentoCard
+            compact={compact}
+            shaderBg={{ colorA: '#a85320', colorB: '#b45c29', colorC: '#c56430', colorD: '#d47740' }}
+            // Half the featured card's height less the 16px gap — slightly
+            // landscape rather than square.
+            artAspect="380.657 / 283.5"
+            shots={[
+              {
+                src: '/work/bento/shot-stat-builder.png',
+                width: '74.775%',
+                alt: 'D2 Stat Builder — the armor table beside the stat sliders',
+              },
+            ]}
             title="D2 Stat Builder"
             eyebrow="Destiny 2 project"
           />
         </BentoLink>
 
-        <BentoLink href="/work/armory" ariaLabel="Moonfang Armory" grow={isMobile ? undefined : 245}>
-          <BentoCard
-            art="/work/bento/card-armory.jpg"
-            artAlt="Moonfang Armory — the command palette filtering Destiny 2 weapons"
-            artAspect="308.922 / 147"
+        <BentoLink href="/work/armory" ariaLabel="Moonfang Armory" grow={beside ? 1 : undefined} accent="rgb(46, 110, 221)">
+          <TexturedBentoCard
+            compact={compact}
+            shaderBg={{ colorA: '#2456b1', colorB: '#2a63c8', colorC: '#2e6edd', colorD: '#4a80e4' }}
+            artAspect="380.657 / 283.5"
+            shots={[
+              {
+                src: '/work/bento/shot-armory.png',
+                width: '79.966%',
+                alt: 'Moonfang Armory — the command palette filtering Destiny 2 weapons',
+              },
+            ]}
             title="Moonfang Armory"
             eyebrow="Destiny 2 project"
           />
@@ -235,10 +365,238 @@ function WorkBento({ isMobile }: { isMobile: boolean }) {
 }
 
 /**
- * Equal cards in a plain grid — the Graphic Design filter. They share the small
- * bento card's art ratio so the two filters read as one family.
+ * A full-bleed card with a live dither well — a FlowingGradient under a
+ * source-coloured Dither, screenshots floating on top. The file's 4px cream
+ * frame is the card's padding rather than a border, so the card is the same
+ * cream-reveal build as `BentoCard` — the shader well is the mask, and
+ * hovering slides it up to show the title on the cream backdrop.
  */
-function EvenBento({ items, isMobile }: { items: BentoItem[]; isMobile: boolean }) {
+function TexturedBentoCard({
+  shaderBg,
+  artAspect,
+  artAlign = 'center',
+  artPad,
+  artGap,
+  shots,
+  title,
+  eyebrow,
+  body,
+  featured,
+  compact,
+}: {
+  /**
+   * The well's FlowingGradient palette, kept to one colour family per project
+   * so it stays background-like behind the floating shots.
+   */
+  shaderBg: BentoShader
+  /**
+   * The card's outer box. The card owns the ratio — not the well — so the
+   * hover reveal shrinks the art instead of ever resizing the card.
+   */
+  artAspect: string
+  /** `start` seats the shots top-left on `artPad` (the featured panels). */
+  artAlign?: 'start' | 'center'
+  artPad?: string
+  artGap?: string
+  shots: { src: string; width: string; alt: string }[]
+  title: string
+  eyebrow: string
+  body?: string
+  featured?: boolean
+  compact?: boolean
+}) {
+  const titleSize = featured ? (compact ? '28px' : '34px') : compact ? '18px' : '22px'
+  const metaSize = compact ? '14px' : '16px'
+
+  const titleRow = (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'flex-end',
+        gap: '10px',
+        padding: `0 ${compact ? space.lg : space.xl}`,
+        flexShrink: 0,
+      }}
+    >
+      <div style={{ display: 'flex', flexDirection: 'column', gap: compact ? space.sm : '10px', minWidth: 0, flex: '1 0 0' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+          <h2
+            style={{
+              margin: 0,
+              fontSize: titleSize,
+              fontWeight: featured ? 600 : 500,
+              lineHeight: 'normal',
+              letterSpacing: featured ? '-0.68px' : '-0.44px',
+              color: color.ink.default,
+            }}
+          >
+            {title}
+          </h2>
+          <p
+            style={{
+              margin: 0,
+              fontSize: metaSize,
+              fontWeight: 500,
+              lineHeight: compact ? '18px' : '21px',
+              color: color.ink.muted,
+            }}
+          >
+            {eyebrow}
+          </p>
+        </div>
+        {body && (
+          <p
+            style={{
+              margin: 0,
+              fontSize: metaSize,
+              fontWeight: 400,
+              lineHeight: 'normal',
+              color: color.ink.secondary,
+              maxWidth: '405px',
+            }}
+          >
+            {body}
+          </p>
+        )}
+      </div>
+      <CardArrow />
+    </div>
+  )
+
+  return (
+    <article
+      className="work-bento-art-first work-bento-tex"
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'flex-start',
+        gap: 'var(--bento-shown-gap)',
+        minHeight: '150px',
+        height: '100%',
+        aspectRatio: artAspect.replace(/\s/g, ''),
+        // The file's 4px cream frame, as padding so the reveal shares the
+        // cream cards' mechanics rather than sitting outside a border.
+        paddingTop: '4px',
+        paddingRight: '4px',
+        paddingBottom: 'var(--bento-shown-pad)',
+        paddingLeft: '4px',
+        borderRadius: radius['2xl'],
+        background: CARD_CREAM,
+        overflow: 'hidden',
+        boxSizing: 'border-box',
+      }}
+    >
+      {/* The art well — the mask that gives way to the title on hover. */}
+      <div
+        style={{
+          position: 'relative',
+          flex: '1 1 auto',
+          minHeight: 0,
+          // Seated 4px inside the 24px card, so the curve hugs the frame.
+          borderRadius: 'calc(var(--radius-2xl) - 4px)',
+          overflow: 'hidden',
+          // The shell's dark ground holds the well until the shader paints.
+          background: color.bg.primary,
+        }}
+      >
+        {/* The hero's recipe at half speed and a finer pixel than its 5. */}
+        <Shader
+          colorSpace="srgb"
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}
+        >
+          <FlowingGradient
+            colorA={shaderBg.colorA}
+            colorB={shaderBg.colorB}
+            colorC={shaderBg.colorC}
+            colorD={shaderBg.colorD}
+            speed={0.5}
+          />
+          <Dither colorMode="source" pixelSize={3} />
+        </Shader>
+
+        {/* A wash of the palette's base over the dither — quiets the pattern
+            while keeping the colour forward. */}
+        <div
+          aria-hidden
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: shaderBg.colorC,
+            opacity: 0.4,
+            pointerEvents: 'none',
+          }}
+        />
+
+        {/* Absolute so the shots' overflow can never size the well — anything
+            past its bottom edge just clips. Centered shots ride between two
+            spacers that split the leftover space, so they sit centered at
+            rest; the top spacer stops at 24px, so the reveal cuts the mock's
+            bottom edge instead of pushing it into the frame. */}
+        {artAlign === 'center' ? (
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+            }}
+          >
+            <div style={{ flex: '1 1 0%', minHeight: space.xl }} />
+            {shots.map((shot) => (
+              <img
+                key={shot.src}
+                src={shot.src}
+                alt={shot.alt}
+                style={{ width: shot.width, height: 'auto', display: 'block', flexShrink: 0 }}
+              />
+            ))}
+            <div style={{ flex: '1 1 0%', minHeight: 0 }} />
+          </div>
+        ) : (
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              display: 'flex',
+              alignItems: 'flex-start',
+              justifyContent: 'flex-start',
+              padding: artPad,
+              gap: artGap,
+              boxSizing: 'border-box',
+            }}
+          >
+            {shots.map((shot) => (
+              <img
+                key={shot.src}
+                src={shot.src}
+                alt={shot.alt}
+                style={{ width: shot.width, height: 'auto', display: 'block', flexShrink: 0 }}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="work-bento-reveal-title">{titleRow}</div>
+    </article>
+  )
+}
+
+/**
+ * Equal cards in a plain grid — the Career and Graphic Design filters. The
+ * personal cards' `TexturedBentoCard` at the small-card ratio, so every
+ * filter reads as one family.
+ */
+function EvenBento({
+  items,
+  isMobile,
+  compact,
+}: {
+  items: BentoItem[]
+  isMobile: boolean
+  compact?: boolean
+}) {
   return (
     <div
       className="tab-content-in"
@@ -250,12 +608,12 @@ function EvenBento({ items, isMobile }: { items: BentoItem[]; isMobile: boolean 
       }}
     >
       {items.map((item) => (
-        <BentoLink key={item.href} href={item.href} ariaLabel={item.title}>
-          <BentoCard
-            art={item.art}
-            artAlt={item.artAlt}
-            artAspect="308.922 / 168.942"
-            artBg={item.artBg}
+        <BentoLink key={item.href} href={item.href} ariaLabel={item.title} accent={item.accent}>
+          <TexturedBentoCard
+            compact={compact}
+            shaderBg={item.shader}
+            artAspect="380.657 / 283.5"
+            shots={[{ src: item.art, width: item.shotWidth ?? '85%', alt: item.artAlt }]}
             title={item.title}
             eyebrow={item.eyebrow}
           />
@@ -264,130 +622,6 @@ function EvenBento({ items, isMobile }: { items: BentoItem[]; isMobile: boolean 
     </div>
   )
 }
-
-/**
- * One card: art in a rounded well, then the title block with the arrow pinned to
- * its baseline. The art fills whatever height the stack gives it, so `artAspect`
- * only sets the card's natural height.
- */
-function BentoCard({
-  art,
-  artAlt,
-  artAspect,
-  artBg,
-  title,
-  eyebrow,
-  body,
-  featured,
-}: {
-  art: string
-  artAlt: string
-  artAspect: string
-  /** Fill behind a transparent art PNG; the other cards bake their plate in. */
-  artBg?: string
-  title: string
-  eyebrow: string
-  body?: string
-  featured?: boolean
-}) {
-  return (
-    <article
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-end',
-        gap: space.lg,
-        minHeight: '150px',
-        height: '100%',
-        // 8 on three sides, 24 under the copy.
-        padding: `${space.sm} ${space.sm} ${space.xl}`,
-        borderRadius: radius['3xl'],
-        background: CARD_CREAM,
-        overflow: 'hidden',
-        boxSizing: 'border-box',
-      }}
-    >
-      <div
-        style={{
-          width: '100%',
-          aspectRatio: artAspect.replace(/\s/g, ''),
-          flex: '1 1 auto',
-          minHeight: 0,
-          borderRadius: radius['2xl'],
-          overflow: 'hidden',
-          background: artBg,
-        }}
-      >
-        <img
-          src={art}
-          alt={artAlt}
-          style={{
-            width: '100%',
-            height: '100%',
-            // A transparent PNG on a plate is artwork, not a screenshot — fit it
-            // whole rather than cropping to fill.
-            objectFit: artBg ? 'contain' : 'cover',
-            display: 'block',
-          }}
-        />
-      </div>
-
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'flex-end',
-          gap: '10px',
-          padding: `0 ${space.xl}`,
-          flexShrink: 0,
-        }}
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', minWidth: 0, flex: '1 0 0' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-            <h2
-              style={{
-                margin: 0,
-                fontSize: featured ? '34px' : '22px',
-                fontWeight: featured ? 600 : 500,
-                lineHeight: 'normal',
-                letterSpacing: featured ? '-0.68px' : '-0.44px',
-                color: color.ink.default,
-              }}
-            >
-              {title}
-            </h2>
-            <p
-              style={{
-                margin: 0,
-                fontSize: '16px',
-                fontWeight: 500,
-                lineHeight: '21px',
-                color: color.ink.muted,
-              }}
-            >
-              {eyebrow}
-            </p>
-          </div>
-          {body && (
-            <p
-              style={{
-                margin: 0,
-                fontSize: '16px',
-                fontWeight: 400,
-                lineHeight: 'normal',
-                color: color.ink.secondary,
-                maxWidth: '405px',
-              }}
-            >
-              {body}
-            </p>
-          )}
-        </div>
-        <CardArrow />
-      </div>
-    </article>
-  )
-}
-
 
 function CardArrow() {
   return (
@@ -413,16 +647,22 @@ function BentoLink({
   ariaLabel,
   external,
   grow,
+  accent,
   children,
 }: {
   href: string
   ariaLabel: string
   external?: boolean
   /**
-   * Share of the stack's height, as the file's card heights (266.942 / 245), so
-   * the two side cards always add up to the featured card beside them.
+   * Share of the stack's height — the two side cards split it equally so they
+   * always add up to the featured card beside them.
    */
   grow?: number
+  /**
+   * Hover colour for the outline and arrow — the textured cards pass their
+   * tint so the hover matches the card. Unset falls back to orange.
+   */
+  accent?: string
   children: ReactNode
 }) {
   const style: CSSProperties = {
@@ -431,8 +671,9 @@ function BentoLink({
     minHeight: 0,
     color: 'inherit',
     textDecoration: 'none',
-    borderRadius: radius['3xl'],
+    borderRadius: radius['2xl'],
     flex: grow ? `${grow} 1 0` : undefined,
+    ['--bento-accent' as string]: accent,
   }
 
   if (external) {
@@ -451,7 +692,12 @@ function BentoLink({
   }
 
   return (
-    <AppLink href={href} aria-label={ariaLabel} className="work-bento-card" style={style}>
+    <AppLink
+      href={href}
+      aria-label={ariaLabel}
+      className="work-bento-card"
+      style={style}
+    >
       {children}
     </AppLink>
   )

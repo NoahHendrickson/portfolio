@@ -46,19 +46,21 @@ export default function Hero() {
 
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         <p style={{ ...subtitle, color: TEXT }}>Product Designer &amp;</p>
-        <p style={{ ...subtitle, color: MUTED }}>Design Engineer x Builder</p>
+        <p style={{ ...subtitle, color: MUTED }}>Design Engineer x Builder x Diva</p>
       </div>
 
       <p style={{ ...body, color: TEXT }}>
-        I have 5 years of experience taking business problems and ambitious ideas
-        and turning them into caring products. I adapt fast and am eager to immerse
-        myself in new domains and ways of working. I care about the craft, and about bringing
-        the people around me up with it.
+        I&rsquo;m a product designer who adapts quickly and dives deep to improve my
+        craft. I&rsquo;m looking for teams that empower people to just &ldquo;do the
+        thing&rdquo;. I want to build, iterate, and ship high-quality features and
+        products quickly.
       </p>
 
       <p style={{ ...body, color: MUTED }}>
-        I&rsquo;m looking for environments that prioritize shipping high-quality products
-        and features, and aren&rsquo;t afraid to see a designer in the codebase.
+        I have five years of experience turning business problems and ambitious
+        ideas into useful products and features. I use data and research to drive
+        measurable outcomes. I approach critique and adversity with humility, and
+        strive to build a positive and honest culture.
       </p>
     </div>
   )

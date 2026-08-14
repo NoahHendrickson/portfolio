@@ -1,13 +1,11 @@
-import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
-import { ArrowLeft } from '@phosphor-icons/react'
+import { useState, type CSSProperties, type ReactNode } from 'react'
 import Header from './Header'
-import { VARIANTS } from '../design-system/buttonStyles'
-import { color, control, radius, space, type } from '../design-system/tokens'
+import WorkGate from './WorkGate'
+import { color, radius, space, type } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
-import AppLink from '../AppLink'
-import { navigate } from '../navigation'
+import { shellPad } from '../layout'
+import { isUnlocked } from '../workGate'
 
-const UNLOCK_KEY = 'work-pages-unlocked'
 const CONTENT_WIDTH = 1225
 const COPY_WIDTH = 387.5
 const MEDIA_WIDTH = 757.5
@@ -31,13 +29,9 @@ const bodyStyle: CSSProperties = {
 
 export default function InvisibleOnboarding() {
   const isMobile = useIsMobile()
-  const [unlocked] = useState(() => sessionStorage.getItem(UNLOCK_KEY) === 'true')
+  const [unlocked, setUnlocked] = useState(isUnlocked)
 
-  useEffect(() => {
-    if (!unlocked) navigate('/work/invisible')
-  }, [unlocked])
-
-  if (!unlocked) return null
+  if (!unlocked) return <WorkGate onUnlock={() => setUnlocked(true)} />
 
   return (
     <div
@@ -47,12 +41,13 @@ export default function InvisibleOnboarding() {
         color: color.text.primary,
       }}
     >
-      <Header active="work" showProfile={false} />
+      <Header leading="back" showProfile={false} barInset={shellPad()} />
 
       <main
         style={{
           boxSizing: 'border-box',
-          padding: isMobile ? '40px 20px 64px' : '80px 0 80px 120px',
+          // Shared left edge with every other page (see `layout.ts`).
+          padding: isMobile ? '24px 20px 64px' : `32px 0 80px ${shellPad()}`,
         }}
       >
         <div
@@ -88,9 +83,8 @@ export default function InvisibleOnboarding() {
                   increase our onboarding conversion ASAP.
                 </p>
                 <p style={bodyStyle}>
-                  Myself and one of our Marketing Designers started by gathering information on our
-                  competitors and creating a large Figjam that served as the foundation for this
-                  initiative.
+                  One of our marketing designers and I began by researching competitors and
+                  creating a large FigJam board that became the foundation for the initiative.
                 </p>
                 <p style={bodyStyle}>
                   I felt strongly that we needed to collaborate with the Marketing team because our
@@ -110,16 +104,15 @@ export default function InvisibleOnboarding() {
               <Paragraphs>
                 <p style={bodyStyle}>
                   Next we mapped our user journey and annotated high risk areas, questions and
-                  idea’s.
+                  ideas.
                 </p>
                 <p style={bodyStyle}>
                   We focused heavily on high risk areas and crossed that with drop-off data to make
                   a strong case about where design focus would be most valuable.
                 </p>
                 <p style={bodyStyle}>
-                  We worked across 2 vectors: overall flow and order of steps and removing
-                  unnecessary friction &amp; honing in on certain steps that caused the most
-                  dropoff.
+                  We worked across two tracks: improving the overall flow and sequence of steps,
+                  and removing unnecessary friction from the steps with the highest drop-off.
                 </p>
               </Paragraphs>
             }
@@ -140,7 +133,7 @@ export default function InvisibleOnboarding() {
                 <p style={bodyStyle}>
                   Due to the short timeline, the team decided to try a new workflow where a vibe
                   coded prototype would serve as the source of truth for the designs. We needed to
-                  iterate fast and wanted to handover the protoype to the engineers to use that
+                  iterate fast and wanted to hand over the prototype to the engineers to use that
                   frontend code to accelerate the build.
                 </p>
               </Paragraphs>
@@ -158,20 +151,20 @@ export default function InvisibleOnboarding() {
             body={
               <Paragraphs>
                 <p style={bodyStyle}>
-                  We built this flow behind a feature flag with the intent to run an experiment.
-                  Our new onboarding versus the old one. We set up a 50/50 split between the old
-                  and new versions and tracked the data using Mixpanel and Microsoft Clarity.
+                  We placed the new flow behind a feature flag and ran a 50/50 experiment against
+                  the existing onboarding experience, tracking results with Mixpanel and Microsoft
+                  Clarity.
                 </p>
                 <p style={bodyStyle}>
                   After 3 weeks of the experiment the numbers were in, and supported our original
                   hypothesis for the high risk areas we targeted.
                 </p>
                 <ResultCopy>
-                  4x increased conversion for our highest friction step.{' '}
+                  4x increase in conversion for our highest friction step.{' '}
                   <span style={{ color: color.text.muted, fontWeight: 400 }}>
                     During the research phase we saw the largest drop off during the initial
                     assessment that users must complete. We took the assessment ourselves, met with
-                    various teams to understand if they used those results in a meaningful way..
+                    various teams to understand if they used those results in a meaningful way —
                     they didn’t. So we completely cut that step out. The largest impact didn’t
                     actually require designs.
                   </span>
@@ -184,10 +177,9 @@ export default function InvisibleOnboarding() {
                   </span>
                 </ResultCopy>
                 <ResultCopy>
-                  Doubled overall funnel conversion{' '}
+                  Doubled overall funnel conversion.{' '}
                   <span style={{ color: color.text.muted, fontWeight: 400 }}>
-                    The new designs resulted in 100% increase in users getting all the way through
-                    the flow.
+                    The new design increased the number of users completing the flow by 100%.
                   </span>
                 </ResultCopy>
               </Paragraphs>
@@ -204,7 +196,7 @@ export default function InvisibleOnboarding() {
                 onboarding. I made sure to go through both experiments to document why I thought
                 one performed better than the other. Our onboarding flow was still full of legacy
                 requirements that we couldn’t get to in this new version. I was once again
-                researching to find the next risk areas that needed designs attention.
+                researching to find the next risk areas that needed design attention.
               </p>
             }
           >
@@ -232,32 +224,6 @@ function Hero({ isMobile }: { isMobile: boolean }) {
         gap: space.lg,
       }}
     >
-      <AppLink
-        href="/work/invisible"
-        style={{
-          alignSelf: 'flex-start',
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: space.sm,
-          height: control.sm,
-          boxSizing: 'border-box',
-          padding: `0 ${space.lg}`,
-          borderRadius: radius.full,
-          border: `1px solid ${VARIANTS.ghost.default.borderColor}`,
-          background: VARIANTS.ghost.default.background,
-          color: VARIANTS.ghost.default.color,
-          fontSize: type['label-m'].fontSize,
-          fontWeight: type['label-m'].fontWeight,
-          lineHeight: type['label-m'].lineHeight,
-          textDecoration: 'none',
-          whiteSpace: 'nowrap',
-        }}
-      >
-        <ArrowLeft aria-hidden="true" size={16} />
-        Back
-      </AppLink>
-
       <h1
         style={{
           margin: 0,

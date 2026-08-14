@@ -6,10 +6,8 @@
  * A shot with no `src` renders the placeholder card with its `label` on it.
  */
 
-const ORANGE = '#f95b1c'
 const GREEN = '#1f7a4c'
 const INDIGO = '#3d3a8f'
-const INK = '#1d1f1e'
 const PURPLE = '#691a85'
 const TEAL = '#00a5a5'
 /** Nacho Box's pack colour — the lime the 2022 page stood its title art on. */
@@ -21,7 +19,7 @@ const T3_CODE = 'https://github.com/pingdotgg/t3code'
 export type Shot = {
   /** Shown on the placeholder card until `src` is filled in. */
   label: string
-  /** e.g. `/work/forge/panel.png` */
+  /** e.g. `/work/stat-builder/panel.png` */
   src?: string
   alt?: string
   caption?: string
@@ -45,7 +43,7 @@ export type Section = {
 export type BentoCopy = {
   /** Muted line above the title, e.g. `Destiny 2 - 3rd party tool`. */
   eyebrow: string
-  /** Card screenshot, e.g. `/work/forge/hero.png`. */
+  /** Card screenshot, e.g. `/work/stat-builder/hero.png`. */
   cover: string
   /** Wide and tall cards only — the two compact cards are eyebrow + title. */
   tagline?: string
@@ -92,10 +90,18 @@ export type LandingVideo = {
   /**
    * Scale of the clip inside its window, for a capture whose subject sits small
    * in the frame — 1.35 crops a quarter off each edge. Defaults to 1 (no crop).
+   * Applied for the whole clip unless `zoomAfter` delays it.
    */
   zoom?: number
   /** What the zoom holds still, as a `transform-origin`. Defaults to the centre. */
   focus?: string
+  /**
+   * Seconds into playback before `zoom` eases in. Reduced-motion keeps the
+   * poster at 1×. Without `zoomUntil`, the crop snaps off when the clip loops.
+   */
+  zoomAfter?: number
+  /** Seconds into playback when the crop eases back to 1×. */
+  zoomUntil?: number
   /**
    * The macOS desktop the clip is seated on, the way the other heroes bake one
    * into their PNG. Sizes are px at the box's designed width, so the window
@@ -219,6 +225,27 @@ export type StorySection =
       frame: { left: number; top: number; width: number }
       shot: LandingShot
       overlay?: ShotOverlay
+    }
+  /**
+   * A full-bleed closing band — no3y Code's "Learning to Design Engineer". The
+   * copy sits over a darkened corner of a wallpaper with the screenshot beside
+   * it. Every measure is px at the file's content width and the row renders as
+   * proportional columns; `height` is the file's, which the band keeps unless
+   * the copy wraps past it.
+   */
+  | {
+      kind: 'band'
+      width: number
+      height: number
+      /** The wallpaper filling the box. Decorative, so it carries no alt. */
+      background: string
+      heading: string
+      body: Prose
+      /** The pads either side of the two columns. */
+      pad: { left: number; right: number }
+      copyWidth: number
+      shotWidth: number
+      shot: LandingShot
     }
 
 /** One chat screenshot in the community-feedback wall. */
@@ -357,156 +384,6 @@ export type Project = {
 }
 
 export const projects: Record<string, Project> = {
-  forge: {
-    slug: 'forge',
-    title: 'The Forge',
-    eyebrow: ['Side project', '2026', 'Design tooling'],
-    tagline:
-      'A Figma-style design mode for your own app, in your own browser — that hands its edits to whatever AI coding agent you already use.',
-    bento: {
-      eyebrow: 'Design tooling',
-      cover: '/work/forge/hero.png',
-      tagline:
-        'Experimental Figma-style design mode for your own app, in your own browser that hands its edits to whatever AI coding agent you already use.',
-      note: '*UI is largely unfinished',
-    },
-    pageReady: true,
-    landing: {
-      // Frame 102:2048 — continuous / left-aligned shell, orange-tinted panels.
-      eyebrow: [
-        'Vibe coded',
-        { label: 'Github', href: 'https://github.com/NoahHendrickson/the-forge' },
-      ],
-      flow: 'continuous',
-      gap: 120,
-      align: 'start',
-      hero: {
-        body: [
-          'Experimental Figma-style design mode for your own app, in your own browser that hands its edits to whatever AI coding agent you already use.',
-        ],
-      },
-      sections: [
-        {
-          kind: 'feature',
-          gap: 80,
-          heading: 'the idea',
-          body: "Basically I wanted Cursor's design mode in Claude. It's not always possible to get the level of precision you want with just prompting and pointing at elements. My workflow consists of a lot of back and forth between different AI coding tools and Figma. While I actually think this workflow is a great way of working, I wanted to try something new. I wanted to make changes like I do in figma and have whatever coding agent i prefer, apply them.",
-          copyWidth: 573,
-          panelWidth: 572,
-          shot: {
-            src: '/work/forge/idea-panel.png',
-            alt: 'Design mode properties panel over a live app — Layout, Size, Padding and Fill on a selected card',
-            aspect: '572 / 430',
-            frame: 'plain',
-          },
-        },
-        {
-          kind: 'feature',
-          gap: 80,
-          heading: 'the process',
-          body: 'This project has been mostly done without and figma designs yet. I spent a good chunk of time going back and forth with claude to ground out the idea and feature I wanted. I first wanted to prove out the functionality before taking a pass at polishing the UX/UI of it.',
-          copyWidth: 387.5,
-          panelWidth: 757.5,
-          shot: {
-            src: '/work/forge/process-panel.png',
-            alt: 'The Forge running at localhost over an infinite canvas of Master and Discipline cards',
-            aspect: '757.5 / 421.667',
-            frame: 'plain',
-          },
-        },
-      ],
-      outro: {
-        heading: 'Try it in your own project with',
-        command: 'npx forge-mode init',
-      },
-    },
-    summary:
-      'Run your dev server, flip on design mode, and click any element to get a real properties panel. Scrub padding, drag corner radius, tweak opacity, compare before and after. Every edit previews instantly on the live DOM. When it looks right, The Forge packages the change into a deterministic, token-aware request — exact file and line, py-2.5 → py-6 in your project’s own Tailwind vocabulary — and hands it to Claude Code, Cursor, or Codex to apply to your actual source.',
-    accent: ORANGE,
-    links: [
-      { label: 'GitHub', href: 'https://github.com/NoahHendrickson/the-forge' },
-      { label: 'npm — forge-mode', href: 'https://www.npmjs.com/package/forge-mode' },
-    ],
-    stats: [
-      { value: '1', label: 'command to install' },
-      { value: '2', label: 'frameworks — Vite & Next' },
-      { value: 'file:line', label: 'precision on every edit' },
-    ],
-    heroShot: {
-      label: 'Design mode on, element selected, properties panel open',
-      caption: 'The panel lives in a shadow-DOM overlay, so it never inherits a single style from your app.',
-    },
-    sections: [
-      {
-        label: 'the problem',
-        heading: 'Designers can see the fix. Getting it into the codebase is the expensive part.',
-        paragraphs: [
-          'I can spot a spacing problem in two seconds and fix it in devtools in ten. Then it evaporates on refresh, and the actual change becomes a screenshot, a Slack thread, and a ticket that gets translated twice before it lands.',
-          'Coding agents removed the translation step — but only if you can tell them precisely what to change. “Make the card tighter” gets you slop. “src/App.tsx line 7, py-2.5 → py-6” gets you the change. The Forge is the thing that turns the first sentence into the second.',
-        ],
-      },
-      {
-        label: 'how it works',
-        heading: 'See → Edit → Package → Deliver → Verify',
-        paragraphs: [
-          'A dev-only plugin tags every element with its source location, so a click in the browser maps back to an exact line. Edits apply as drafts — inline styles on the live DOM — so your framework is never touched while you explore.',
-          'Hit send and the queued drafts go to an agent session over MCP. It applies them to real source, HMR reloads, and the browser re-reads computed styles to confirm the change actually landed before flipping the draft to Implemented.',
-        ],
-        bullets: [
-          'Layout section with a 9-dot align matrix, gap, and size modes',
-          'Typography, Fill and Stroke with a popover color picker',
-          'A token picker that binds values to your design tokens instead of hardcoding them',
-          'Multi-select with relative deltas',
-          'Before/after compare and one-click reset on every draft',
-        ],
-        shots: [
-          { label: 'Hover outlines and click-to-inspect', caption: 'M1 — See' },
-          { label: 'Properties panel: padding, radius, opacity', caption: 'M2 — Edit' },
-          { label: 'Change request with before → after deltas', caption: 'M3 — Package' },
-          { label: 'Embedded agent session streaming into the panel', caption: 'M-Embed' },
-        ],
-      },
-      {
-        label: 'the bet',
-        heading: 'Complementary, never a replacement.',
-        paragraphs: [
-          'The Forge never owns your workflow. It feeds the agent session you already have open, on the subscription you already pay for — no API keys, no new place to live. Uninstall it and nothing breaks.',
-          'That constraint drove most of the design decisions: dev-only, zero production footprint, and a fallback ladder so a send still reaches you whether you’re in an embedded session, a linked watcher, a terminal, or just pasting into a chat.',
-        ],
-      },
-      {
-        label: 'what i owned',
-        paragraphs: [
-          'Everything: the product concept, the interaction model for the panel, the visual design, and the implementation — a Vite plugin, a Next plugin, the shadow-DOM overlay, the Tailwind token mapper, the MCP server, and the npm package.',
-          'This is the project where “designer who works in the codebase” stopped being a description of how I work and became the whole product.',
-        ],
-      },
-    ],
-    stack: [
-      'TypeScript',
-      'Vite plugin',
-      'Next.js 15/16',
-      'Shadow DOM overlay',
-      'Tailwind v4 tokens',
-      'MCP server',
-      'npm package',
-    ],
-    status: [
-      { label: 'See — source-tagged elements + inspect overlay', state: 'shipped' },
-      { label: 'Edit — draft engine, scrubbable controls, compare', state: 'shipped' },
-      { label: 'Package — token mapper + change requests', state: 'shipped' },
-      { label: 'Deliver — MCP loop, /forge-design, verification', state: 'shipped' },
-      { label: 'Published — npx forge-mode init, Vite + Next', state: 'shipped' },
-      { label: 'Embedded sessions + unified composer', state: 'building' },
-      { label: 'Effects, shadows, gradients', state: 'next' },
-    ],
-    cta: {
-      heading: 'Try it in your own project — one command.',
-      label: 'npx forge-mode init',
-      href: 'https://github.com/NoahHendrickson/the-forge',
-    },
-  },
-
   'stat-builder': {
     slug: 'stat-builder',
     title: 'D2 Stat Builder',
@@ -521,7 +398,7 @@ export const projects: Record<string, Project> = {
     landing: {
       // Frame 121:4922 — the July redo. Title over its eyebrow on an 80px
       // rhythm, one composed hero panel, a single row, then the feedback band.
-      eyebrow: ['3rd party tool for the Destiny 2 community'],
+      eyebrow: ['Third-party tool for the Destiny 2 community.'],
       flow: 'continuous',
       gap: 80,
       align: 'start',
@@ -548,7 +425,7 @@ export const projects: Record<string, Project> = {
           kind: 'feature',
           gap: 80,
           heading: 'making finding armor easy',
-          body: 'The in-game ‘vault’ for your armor and other 3rd party tools didn’t satisfy me when it came to searching through my armor. This made it difficult to know what armor pieces you should try to acquire. I went back to the basics and designed a table a view with quick filters and custom sorting.',
+          body: 'Destiny 2’s in-game vault and existing third-party tools made it difficult to search my armor or identify which pieces to pursue. I went back to basics and designed a table view with quick filters and custom sorting.',
           copyWidth: 524,
           panelWidth: 668,
           lead: true,
@@ -689,7 +566,7 @@ export const projects: Record<string, Project> = {
     slug: 'armory',
     title: 'Moonfang Armory',
     eyebrow: ['Side project', '2026', 'Destiny 2'],
-    tagline: 'Command palette style filter and search for Destiny 2 the video game weapons.',
+    tagline: 'A command-palette-style filter and search for Destiny 2 weapons.',
     bento: {
       eyebrow: 'Destiny 2 - 3rd party tool',
       cover: '/work/armory/hero.png',
@@ -698,7 +575,7 @@ export const projects: Record<string, Project> = {
     landing: {
       // Frame 247:27321 — title above the eyebrow, one 80px-gapped block, and a
       // looping capture of the command palette where the other frames put a shot.
-      eyebrow: ['3rd party tool for the Destiny 2 community'],
+      eyebrow: ['Third-party tool for the Destiny 2 community.'],
       flow: 'continuous',
       gap: 80,
       align: 'start',
@@ -707,7 +584,7 @@ export const projects: Record<string, Project> = {
       copyWidth: 688,
       hero: {
         body: [
-          'So the name of this project is just a popular armor set from Destiny 2 the video game. What this site actually does is allow users to search for weapons in Destiny 2 based on certain perks, traits and many other parameters. It’s a command palette UX that allows for the chaining of many filters.',
+          'So the name of this project is just a popular armor set from Destiny 2, the video game. What this site actually does is allow users to search for weapons in Destiny 2 based on certain perks, traits and many other parameters. It’s a command palette UX that allows for the chaining of many filters.',
         ],
         video: {
           src: '/work/armory/hero.mp4',
@@ -806,137 +683,6 @@ export const projects: Record<string, Project> = {
     },
   },
 
-  phanttom: {
-    slug: 'phanttom',
-    title: 'Phanttom',
-    eyebrow: ['Side project', '2026', 'macOS app'],
-    tagline:
-      'A terminal built for a desk full of agents — vertical tabs, live status, and a sidebar that tells you which session needs you.',
-    bento: {
-      eyebrow: 'Design tooling (WIP)',
-      cover: '/work/phanttom/hero.png',
-      tagline:
-        'My fork of ghostty because i wanted vertical tabs with additional information, and it sounded like fun.',
-    },
-    pageReady: true,
-    landing: {
-      // Frame 97:8539 — continuous 120px rhythm, feature rows with tinted panels.
-      eyebrow: ['Vibe coded', 'Figma+Cursor+Claude'],
-      flow: 'continuous',
-      gap: 120,
-      align: 'start',
-      hero: {
-        body: [
-          'This is a fork of Ghostty, a popular terminal emulator. I wanted to design my own terminal for a few reasons: I really like vertical tabs and more importantly I really wanted to see more information at a glance when using the terminal.',
-        ],
-      },
-      sections: [
-        {
-          kind: 'feature',
-          gap: 80,
-          heading: 'the idea',
-          body: "In basically every agentic coding tool I've used or seen, a thread is always afforded as a single that is the first message of the session. When it comes to multi-tasking I was finding this a bit annoying. I wasn't always sure what branch I was on, what branch was checked out, or if I was in a worktree. I would need to click into a thread to actually get info. So I explored adding more information to the thread tabs themselves.",
-          copyWidth: 573,
-          panelWidth: 572,
-          shot: {
-            src: '/work/phanttom/idea-panel.png',
-            alt: 'Phanttom session — vertical sidebar of agent tabs beside a Claude Code terminal',
-            aspect: '572 / 430',
-            frame: 'plain',
-          },
-        },
-        {
-          kind: 'feature',
-          gap: 80,
-          heading: 'the process',
-          body: 'I dove right into claude and talked through how we could fork ghostty with the main goal of adding vertical tabs with more information. Once something was up and running that I could interact with I then went into figma and got precise with the design of the tabs and the information to show.',
-          copyWidth: 387.5,
-          panelWidth: 757.5,
-          shot: {
-            src: '/work/phanttom/process-panel.png',
-            alt: 'Tab design explorations beside a Phanttom sidebar of session tabs',
-            aspect: '757.5 / 421.667',
-            frame: 'plain',
-          },
-        },
-      ],
-    },
-    summary:
-      'A fork of Ghostty with tabs moved into a vertical sidebar, a real appearance settings GUI, and first-class support for AI coding agents: tabs that name themselves from your first prompt, working / done / attention status per session, and a pixel-rain indicator that shows a session is alive. Phantom with two t’s, in the spirit of Ghostty’s.',
-    accent: INK,
-    accentIsDark: true,
-    links: [{ label: 'GitHub', href: 'https://github.com/NoahHendrickson/phanttom' }],
-    stats: [
-      { value: '∞', label: 'tabs that stay readable' },
-      { value: '3', label: 'states — working, done, attention' },
-      { value: '0', label: 'lines of the Zig core touched' },
-    ],
-    heroShot: {
-      label: 'Sidebar with several agent sessions, one in attention state',
-      caption: 'Horizontal tabs stop working at about four sessions. This starts working at four.',
-    },
-    sections: [
-      {
-        label: 'the problem',
-        heading: 'Six agent sessions, six tabs labelled “zsh”.',
-        paragraphs: [
-          'Once you’re running several coding agents at once, a horizontal tab strip collapses. Titles truncate to nothing, and there’s no way to tell which session is thinking, which finished, and which is sitting on a permission prompt waiting for you.',
-          'The fix isn’t a better tab title. It’s giving the terminal enough of a model of what’s running inside it to say something useful — which meant the app had to understand agent sessions, not just shells.',
-        ],
-      },
-      {
-        label: 'what it adds',
-        paragraphs: [
-          'Everything Phanttom adds lives in the macOS layer. The upstream terminal core is untouched, which keeps rebasing onto new Ghostty releases boring — exactly what you want from a fork you intend to keep.',
-        ],
-        bullets: [
-          'Vertical tabs in a collapsible sidebar with persisted width',
-          'Automatic tab names extracted from the first prompt of a session, with a Reset Name action to re-arm it',
-          'Per-tab status: working, done, needs attention',
-          'Pixel-rain activity indicator so a live session reads as alive at a glance',
-          'Git branch per tab, read off the main thread so the UI never stalls',
-          'An appearance settings GUI instead of a config file',
-          'Signed builds and auto-updates through its own release feed',
-        ],
-        shots: [
-          { label: 'Sidebar, expanded — tabs with names, branches, status', caption: 'Vertical tabs' },
-          { label: 'Pixel-rain indicator on an active session', caption: 'Activity' },
-          { label: 'Appearance settings window', caption: 'Settings GUI' },
-          { label: 'Sidebar collapsed to icons', tall: true, caption: 'Collapsed' },
-        ],
-      },
-      {
-        label: 'the craft',
-        heading: 'Status has to be earned, not guessed.',
-        paragraphs: [
-          'Tab state comes from the agent itself — hooks in the session emit escape sequences the app listens for, so “done” means done rather than “output stopped for a few seconds.” Getting that plumbing right meant chasing bytes through four layers of escaping to find a bell character that was arriving as the literal text 007.',
-          'The design work was mostly restraint: this is someone’s terminal, and it should still feel like Ghostty. The sidebar borrows the titlebar zone, matches the window’s material, and disappears entirely when you collapse it.',
-        ],
-      },
-    ],
-    stack: [
-      'Swift',
-      'AppKit + SwiftUI',
-      'Ghostty (Zig core, untouched)',
-      'OSC escape sequences',
-      'Claude Code hooks',
-      'Sparkle auto-updates',
-      'GitHub Releases',
-    ],
-    status: [
-      { label: 'Vertical tab sidebar with collapse + persistence', state: 'shipped' },
-      { label: 'Appearance settings GUI', state: 'shipped' },
-      { label: 'Agent status, auto-naming, pixel rain', state: 'shipped' },
-      { label: 'Signed builds + auto-update feed', state: 'shipped' },
-      { label: 'Rebasing onto upstream releases', state: 'building' },
-    ],
-    cta: {
-      heading: 'A terminal that keeps up with how I actually work now.',
-      label: 'See the repo',
-      href: 'https://github.com/NoahHendrickson/phanttom',
-    },
-  },
-
   'no3y-code': {
     slug: 'no3y-code',
     title: 'no3y Code',
@@ -964,15 +710,29 @@ export const projects: Record<string, Project> = {
       align: 'start',
       rowAlign: 'center',
       titleRhythm: 'paired',
+      eyebrowPlacement: 'below',
       hero: {
         body: [
-          'This is the culmination of a few projects and ideas. I wanted to edit code with the precision of Figma’s design mode inside an agentic coding tool and tackle issues I have with most tools sidebar UX. I forked T3 Code so I could make UX/UI improvements, build a design mode and add small features I want. I am not associated with T3 Code in any way and only work on my fork :)',
+          'This is the culmination of a few projects and ideas. I wanted to edit code with the precision of Figma’s design mode inside an agentic coding tool and tackle issues I have with most tools’ sidebar UX. I forked T3 Code so I could make UX/UI improvements, build a design mode and add small features I want. I am not associated with T3 Code in any way and only work on my fork :)',
         ],
-        shot: {
-          src: '/work/no3y-code/hero.jpg',
-          alt: 'no3y Code — thread sidebar, an agent session and the design mode panel open over a project',
-          aspect: '1272 / 774.369',
-          frame: 'plain',
+        video: {
+          src: '/work/no3y-code/hero.mp4',
+          poster: '/work/no3y-code/hero-poster.jpg',
+          alt: 'A session in no3y Code: the preview opens beside the thread, then design mode selects an element and queues a gap change back to the agent',
+          // The capture is cropped to the window itself — the recording pads it
+          // with black where the shadow was — and seated at 1192, on half the
+          // 80px margin the baked heroes use, so the box is 694 + 80 tall.
+          aspect: '1272 / 774',
+          // Full window for 7s, ease into the top-right, ease out again at 25s.
+          zoom: 1.5,
+          focus: '100% 0%',
+          zoomAfter: 7,
+          zoomUntil: 25,
+          backdrop: {
+            src: '/work/no3y-code/desktop.jpg',
+            width: 1192,
+            aspect: '3000 / 1746',
+          },
         },
         shotWidth: 1272,
       },
@@ -982,27 +742,27 @@ export const projects: Record<string, Project> = {
           gap: 80,
           heading: 'the idea',
           body: [
-            'I wanted a really powerful design mode in the agent orchestration tools I was using. I didn’t want to just select an element and prompt, sometimes i wanted to be precise with my edits and send those off to an agent to apply. I also wanted more information at glance when I was working on multiple projects at once.',
+            'I wanted a really powerful design mode in the agent orchestration tools I was using. I didn’t want to just select an element and prompt. Sometimes I wanted to be precise with my edits and send those off to an agent to apply. I also wanted more information at a glance when I was working on multiple projects at once.',
             [
-              { text: 'the-forge', href: '/work/forge', strong: true },
+              { text: 'the-forge.', strong: true },
               {
-                text: ' I created the-forge which was an npm package that worked for vite apps that would provide a Design mode so you could make frontend changes via a sidebar and then send those edits to your coding agent to apply.',
+                text: ' I created the-forge, an npm package for Vite apps that provides a design mode for making frontend changes in a sidebar and sending those edits to a coding agent.',
                 muted: true,
               },
             ],
             [
-              { text: 'Phanttom', href: '/work/phanttom', strong: true },
+              { text: 'Phanttom.', strong: true },
               {
-                text: ' This is a fork of ghostty so I could add vertical tabs and make each tab show more information than just the first thing I wrote into the prompt. But I got tired of using a terminal real quck..',
+                text: ' This Ghostty fork added vertical tabs and surfaced more useful context for each session. I eventually found that I didn’t want my primary workflow to live in a terminal.',
                 muted: true,
               },
             ],
             [
               {
-                text: 'I wanted to combine these things to have one main app I used to get things done. But because I lack the technical expertise to create my own agent app from scratch, I forked an open-source one. Huge shoutout to ',
+                text: 'I wanted to combine these things to have one main app I used to get things done. But because I lack the technical expertise to create my own agent app from scratch, I forked an open-source one. Huge shout-out to ',
               },
               { text: 'T3 Code', href: T3_CODE },
-              { text: ', it is an awesome open-source app and very fork friendly.' },
+              { text: '—it’s an awesome open-source app and is very fork-friendly.' },
             ],
           ],
           copyWidth: 524,
@@ -1018,7 +778,7 @@ export const projects: Record<string, Project> = {
           kind: 'feature',
           gap: 80,
           heading: 'the sidebar',
-          body: 'One line was not enough for me. When multi-tasking and using different models in different projects I wanted more information at a glance about what project I was in, what branch and what model was being used. T3 Code setup great functionality for this and I designed the UX/UI with the things I care about in mind.',
+          body: 'One line wasn’t enough. When multitasking across projects and models, I wanted to see the project, branch, and model at a glance. T3 Code provided a strong foundation, and I designed the interface around the context I rely on most.',
           copyWidth: 434.5,
           panelWidth: 757.5,
           shot: {
@@ -1033,8 +793,8 @@ export const projects: Record<string, Project> = {
           gap: 80,
           heading: 'Design mode',
           body: [
-            'For awhile I have been wanting to build a design mode that works alongside coding agents and whatever harness I prefer at the time. This feature is very much a work in progress and I’m building it from scratch. I was important to get it functional so I could actually use and test it out.',
-            'The motivation for this was as a Designer there is still a ton of value in “getting your hands dirty”. Sometimes I need to try different variations, 16px or 24px and in design mode I can do that and then apply the one that works. ',
+            'For a while I have been wanting to build a design mode that works alongside coding agents and whatever harness I prefer at the time. This feature is very much a work in progress and I’m building it from scratch. It was important to get it functional so I could actually use and test it out.',
+            'My motivation was that, as a designer, I still see enormous value in getting my hands dirty. Sometimes I need to compare variations—16 px or 24 px—and design mode lets me test both before applying the one that works.',
           ],
           copyWidth: 405,
           panelWidth: 787,
@@ -1046,10 +806,15 @@ export const projects: Record<string, Project> = {
           },
         },
         {
+          kind: 'copy',
+          heading: 'Canvas mode',
+          body: 'Canvas mode was another feature I knew I wanted. It allows lets user pan around the page and focus on certain areas. It also allowed an easy way to see the page at different sizes.',
+        },
+        {
           kind: 'feature',
           gap: 80,
           heading: 'Message composer',
-          body: 'I prefer a compact message composer and broke it into 3 sections, the branch information, the input and then model paramenters. ',
+          body: 'I prefer a compact message composer and broke it into 3 sections: the branch information, the input and then model parameters.',
           copyWidth: 387.5,
           panelWidth: 757.5,
           shot: {
@@ -1060,15 +825,23 @@ export const projects: Record<string, Project> = {
           },
         },
         {
-          // The closing full-width shot; this frame has no orange card under it.
-          kind: 'shot',
+          // The closing band; this frame has no orange card under it.
+          kind: 'band',
           width: 1272,
           height: 526,
-          frame: { left: 0, top: 0, width: 1272 },
+          background: '/work/no3y-code/learning-bg.jpg',
+          heading: 'Learning to be a Design Engineer',
+          body: [
+            'This project served as a really great learning space and experiment on diving into agentic coding. I wanted to make sure I could make edits and change my fork while still being able to easily sync with upstream to benefit from new features.',
+            'Using YouTube and some prior coding knowledge, I created a system to keep my fork from becoming pure AI slop. I set up a couple of automated reviews based on principles and rules from the Cursor and Anthropic teams.',
+          ],
+          pad: { left: 77, right: 123 },
+          copyWidth: 387.5,
+          shotWidth: 513,
           shot: {
-            src: '/work/no3y-code/outro.jpg',
-            alt: 'no3y Code running a session end to end — sidebar, transcript and composer',
-            aspect: '1272 / 526',
+            src: '/work/no3y-code/learning.jpg',
+            alt: 'An automated review running in no3y Code — the agent works through its findings above the composer',
+            aspect: '513 / 422',
             frame: 'plain',
           },
         },
@@ -1080,7 +853,7 @@ export const projects: Record<string, Project> = {
       actually says rather than padded out with invented stats.
     */
     summary:
-      'This is the culmination of a few projects and ideas. I wanted to edit code with the precision of Figma’s design mode inside an agentic coding tool and tackle issues I have with most tools sidebar UX.',
+      'This is the culmination of a few projects and ideas. I wanted to edit code with the precision of Figma’s design mode inside an agentic coding tool and tackle issues I have with most tools’ sidebar UX.',
     accent: PURPLE,
     accentIsDark: true,
     links: [{ label: 'T3 Code — upstream', href: T3_CODE }],
@@ -1092,7 +865,7 @@ export const projects: Record<string, Project> = {
       {
         label: 'the idea',
         paragraphs: [
-          'I wanted a really powerful design mode in the agent orchestration tools I was using. I didn’t want to just select an element and prompt, sometimes i wanted to be precise with my edits and send those off to an agent to apply.',
+          'I wanted a really powerful design mode in the agent orchestration tools I was using. I didn’t want to just select an element and prompt. Sometimes I wanted to be precise with my edits and send those off to an agent to apply.',
           'I wanted to combine these things to have one main app I used to get things done. But because I lack the technical expertise to create my own agent app from scratch, I forked an open-source one.',
         ],
       },
@@ -1121,7 +894,7 @@ export const projects: Record<string, Project> = {
   'how-to-pc': {
     slug: 'how-to-pc',
     title: 'How To Build a PC',
-    eyebrow: ['Graphic Design', '2022', 'Infographic'],
+    eyebrow: ['Graphic Design', '2019', 'Infographic'],
     tagline:
       'A supplemental infographic for building a custom PC — an overview of the parts and the order to install them in.',
     bento: {
@@ -1132,13 +905,15 @@ export const projects: Record<string, Project> = {
     landing: {
       // Ported from the 2022 site (Noah-Site, /HowToPC). No Figma frame for this
       // one — it reuses the story shell so it sits on the same dark theme.
-      eyebrow: ['Graphic Design', '2022'],
+      eyebrow: ['Graphic Design', '2019'],
       flow: 'continuous',
       gap: 120,
       align: 'start',
+      titleRhythm: 'paired',
+      eyebrowPlacement: 'below',
       hero: {
         body: [
-          'I am a tech enthusiast, so of course I build my own computers. I wanted to create a supplemental infograph for building a custom PC. The goal of this guide isn’t to get into detail about each step but rather give an overview and suggest an order of process to make the experience easier.',
+          'I am a tech enthusiast, so of course I build my own computers. I wanted to create a supplemental infographic for building a custom PC. The goal of this guide isn’t to get into detail about each step but rather give an overview and suggest an order of process to make the experience easier.',
         ],
       },
       sections: [
@@ -1172,7 +947,7 @@ export const projects: Record<string, Project> = {
       {
         label: 'the idea',
         paragraphs: [
-          'I am a tech enthusiast, so of course I build my own computers. I wanted to create a supplemental infograph for building a custom PC.',
+          'I am a tech enthusiast, so of course I build my own computers. I wanted to create a supplemental infographic for building a custom PC.',
           'The goal of this guide isn’t to get into detail about each step but rather give an overview and suggest an order of process to make the experience easier.',
         ],
       },
@@ -1189,7 +964,7 @@ export const projects: Record<string, Project> = {
   'nacho-box': {
     slug: 'nacho-box',
     title: 'Nacho Box',
-    eyebrow: ['Graphic Design', '2022', 'Packaging'],
+    eyebrow: ['Graphic Design', '2019', 'Packaging'],
     tagline:
       'A chips-and-salsa box for parties — hand-drawn lettering, icons and patterns, carried through to the dieline.',
     bento: {
@@ -1202,13 +977,15 @@ export const projects: Record<string, Project> = {
       // PC. The artwork is black line on white, so every SVG carries a baked
       // background rect — the 2022 page's cream for the sheets, the pack colours
       // for the two dielines — rather than floating on the dark shell.
-      eyebrow: ['Graphic Design', '2022'],
+      eyebrow: ['Graphic Design', '2019'],
       flow: 'continuous',
       gap: 120,
       align: 'start',
+      titleRhythm: 'paired',
+      eyebrowPlacement: 'below',
       hero: {
         body: [
-          'A packaging project I made in college. The goal was to concept out a convenient chips-and-salsa container for parties and get-togethers — one box, three salsas, four flavours.',
+          'A packaging project I made in college. The goal was to design a convenient chips-and-salsa container for parties and get-togethers—one box, three salsas, and four flavors.',
         ],
         shot: {
           src: '/work/nacho-box/covers.svg',

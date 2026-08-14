@@ -15,31 +15,38 @@ const LEAVES = [
 ]
 
 /**
- * Display size — exact 1/3 of the 546×378 source so X/Y scale match and
- * `image-rendering: pixelated` lands on whole device pixels (184×128 was a
- * slightly non-uniform squash and made shared edges stairstep).
+ * Display size — 2/7 of the 546×378 source (was 1/3) so X/Y scale match and
+ * `image-rendering: pixelated` lands on whole device pixels. A bit smaller
+ * than the Figma-scale pass; pitches below keep the same interlocking ratio.
  */
-const LEAF_W = 182
-const LEAF_H = 126
-/** Horizontal column pitch — Figma ~124, scaled to the 182px leaf. */
-const COL_X = 123
+const LEAF_W = 156
+const LEAF_H = 108
+/** Horizontal column pitch — Figma ~124, scaled to the 156px leaf. */
+const COL_X = 105
 /** Vertical step within a column — even so the brick offset stays integer. */
-const ROW_Y = 112
+const ROW_Y = 96
 /** Odd-column brick offset — exactly half the row pitch, whole pixels only. */
-const COL_ODD_Y = 56
+const COL_ODD_Y = 48
 
 /** How far leaf tips poke past the content column's right edge. */
 export const LEAF_TIP_INSET = 8
-/** Extra shift of the whole field away from the content edge (px) on Me. */
-export const LEAF_SHIFT_X = 100
 /**
- * Figma frame width. On Me, viewports wider than this pick up an extra right
- * nudge so the leaf field doesn't sit too close to the copy on large screens.
- * Design never applies this.
+ * Extra shift of the whole field away from the content edge (px) on Me. This is
+ * what places the panel below ~1660px, so raising it is how the field moves
+ * right on an ordinary screen.
  */
-export const LEAF_SHIFT_LARGE_FROM_PX = 1512
-/** Cap on the large-screen extra Me nudge (px). */
-export const LEAF_SHIFT_LARGE_EXTRA_MAX = 80
+export const LEAF_SHIFT_X = 160
+/**
+ * How much of the field shows past the content column on Me. The panel is hung
+ * off the column's right edge, which is a share of the viewport, so the strip
+ * kept widening with the screen — 539px at the 1512 frame but 951px at 2700,
+ * far more pattern than the frame ever shows. Holding it at roughly the width it
+ * has at 1512 pushes the field right on a big screen instead of growing it. It
+ * only binds past ~1660px; below that `LEAF_SHIFT_X` off the column edge is
+ * still what places the panel. Design keeps its own tight strip and never
+ * applies this.
+ */
+export const LEAF_STRIP_MAX = 540
 
 /**
  * How tall the leaf panel runs past the fold. Dense through the first viewport,

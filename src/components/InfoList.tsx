@@ -38,7 +38,7 @@ export default function InfoList() {
       }}
     >
       <span style={chipStyle}>
-        4yrs of experience
+        4 years of experience
       </span>
 
       <span style={chipStyle}>
