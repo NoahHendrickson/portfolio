@@ -52,7 +52,7 @@ export default function InvisibleOnboarding() {
       >
         <div
           style={{
-            width: isMobile ? '100%' : `min(${CONTENT_WIDTH}px, calc(100vw - 240px))`,
+            width: isMobile ? '100%' : `min(${CONTENT_WIDTH}px, calc(100vw - 2 * ${shellPad()}))`,
             display: 'flex',
             flexDirection: 'column',
             gap: isMobile ? space['4xl'] : '120px',

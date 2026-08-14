@@ -412,6 +412,7 @@ function TexturedBentoCard({
   featured?: boolean
   compact?: boolean
 }) {
+  const stillOnly = useMediaQuery('(prefers-reduced-motion: reduce)')
   const titleSize = featured ? (compact ? '28px' : '34px') : compact ? '18px' : '22px'
   const metaSize = compact ? '14px' : '16px'
 
@@ -506,7 +507,8 @@ function TexturedBentoCard({
           background: color.bg.primary,
         }}
       >
-        {/* The hero's recipe at half speed and a finer pixel than its 5. */}
+        {/* The hero's recipe at half speed and a finer pixel than its 5.
+            `speed={0}` freezes the same dithered frame when motion is reduced. */}
         <Shader
           colorSpace="srgb"
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}
@@ -516,7 +518,7 @@ function TexturedBentoCard({
             colorB={shaderBg.colorB}
             colorC={shaderBg.colorC}
             colorD={shaderBg.colorD}
-            speed={0.5}
+            speed={stillOnly ? 0 : 0.5}
           />
           <Dither colorMode="source" pixelSize={3} />
         </Shader>

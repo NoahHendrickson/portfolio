@@ -808,7 +808,7 @@ export const projects: Record<string, Project> = {
         {
           kind: 'copy',
           heading: 'Canvas mode',
-          body: 'Canvas mode was another feature I knew I wanted. It allows lets user pan around the page and focus on certain areas. It also allowed an easy way to see the page at different sizes.',
+          body: 'Canvas mode was another feature I knew I wanted. It lets you pan around the page and focus on certain areas. It also allowed an easy way to see the page at different sizes.',
         },
         {
           kind: 'feature',
