@@ -795,6 +795,7 @@ export const projects: Record<string, Project> = {
           body: [
             'For a while I have been wanting to build a design mode that works alongside coding agents and whatever harness I prefer at the time. This feature is very much a work in progress and I’m building it from scratch. It was important to get it functional so I could actually use and test it out.',
             'My motivation was that, as a designer, I still see enormous value in getting my hands dirty. Sometimes I need to compare variations—16 px or 24 px—and design mode lets me test both before applying the one that works.',
+            'Canvas mode was another feature I knew I wanted. It lets you pan around the page and focus on certain areas. It also allowed an easy way to see the page at different sizes.',
           ],
           copyWidth: 405,
           panelWidth: 787,
@@ -804,11 +805,6 @@ export const projects: Record<string, Project> = {
             aspect: '787 / 476',
             frame: 'plain',
           },
-        },
-        {
-          kind: 'copy',
-          heading: 'Canvas mode',
-          body: 'Canvas mode was another feature I knew I wanted. It lets you pan around the page and focus on certain areas. It also allowed an easy way to see the page at different sizes.',
         },
         {
           kind: 'feature',
