@@ -71,6 +71,8 @@ export type LandingShot = {
    * rather than fits. Pinned top-left, so the extra runs off the right edge.
    */
   zoom?: number
+  /** `object-position` when the box crops the image. */
+  position?: string
 }
 
 /**
@@ -81,6 +83,11 @@ export type LandingShot = {
  */
 export type LandingVideo = {
   src: string
+  /**
+   * Optional HEVC (`hvc1`) encode, listed first so Safari / Chrome-on-Mac can
+   * keep a 10-bit file. `src` is the H.264 fallback.
+   */
+  hevc?: string
   /** Opening frame, shown while the clip loads and in place of it when motion is reduced. */
   poster: string
   /** Describes the clip, since there is no audio track to fall back on. */
@@ -200,9 +207,13 @@ export type StorySection =
       heading: string
       body: Prose
       copyWidth: number
-      panelWidth: number
-      shot: LandingShot
-      /** CSS chrome around a raw screenshot — background defaults to `--color-bg-tint`. */
+      panelWidth?: number
+      /** Heading and copy above the media, which then runs the full column. */
+      stack?: boolean
+      shot?: LandingShot
+      /** A looping clip in place of `shot` — no3y Code's design mode row. */
+      video?: LandingVideo
+      /** CSS clip around the media — background defaults to `--color-bg-tint`. */
       panel?: { background?: string }
       /**
        * Runs the body at 18px on the primary ink instead of 16 on the secondary,
@@ -715,24 +726,11 @@ export const projects: Record<string, Project> = {
         body: [
           'This is the culmination of a few projects and ideas. I wanted to edit code with the precision of Figma’s design mode inside an agentic coding tool and tackle issues I have with most tools’ sidebar UX. I forked T3 Code so I could make UX/UI improvements, build a design mode and add small features I want. I am not associated with T3 Code in any way and only work on my fork :)',
         ],
-        video: {
-          src: '/work/no3y-code/hero.mp4',
-          poster: '/work/no3y-code/hero-poster.jpg',
-          alt: 'A session in no3y Code: the preview opens beside the thread, then design mode selects an element and queues a gap change back to the agent',
-          // The capture is cropped to the window itself — the recording pads it
-          // with black where the shadow was — and seated at 1192, on half the
-          // 80px margin the baked heroes use, so the box is 694 + 80 tall.
-          aspect: '1272 / 774',
-          // Full window for 7s, ease into the top-right, ease out again at 25s.
-          zoom: 1.5,
-          focus: '100% 0%',
-          zoomAfter: 7,
-          zoomUntil: 25,
-          backdrop: {
-            src: '/work/no3y-code/desktop.jpg',
-            width: 1192,
-            aspect: '3000 / 1746',
-          },
+        shot: {
+          src: '/work/no3y-code/hero.png',
+          alt: 'no3y Code on the desktop — a new portfolio thread asking what we should build',
+          aspect: '1728 / 1117',
+          frame: 'plain',
         },
         shotWidth: 1272,
       },
@@ -765,26 +763,26 @@ export const projects: Record<string, Project> = {
               { text: '—it’s an awesome open-source app and is very fork-friendly.' },
             ],
           ],
-          copyWidth: 524,
-          panelWidth: 668,
+          copyWidth: 625,
+          panelWidth: 567,
           shot: {
-            src: '/work/no3y-code/idea.jpg',
-            alt: 'no3y Code’s thread sidebar beside the design mode properties panel',
-            aspect: '668 / 526',
+            src: '/work/no3y-code/idea.png',
+            alt: 'no3y Code’s thread sidebar beside the design mode properties panel, over a fluted gradient',
+            aspect: '567 / 464',
             frame: 'plain',
           },
         },
         {
           kind: 'feature',
           gap: 80,
-          heading: 'the sidebar',
+          heading: 'Thread cards',
           body: 'One line wasn’t enough. When multitasking across projects and models, I wanted to see the project, branch, and model at a glance. T3 Code provided a strong foundation, and I designed the interface around the context I rely on most.',
           copyWidth: 434.5,
           panelWidth: 757.5,
           shot: {
             src: '/work/no3y-code/sidebar.png',
-            alt: 'The project sidebar beside the thread card component set — status, branch and model on every row',
-            aspect: '757.5 / 421.667',
+            alt: 'Thread card v2 — status, prompt, branch and model across default, hover and selected states',
+            aspect: '789 / 422',
             frame: 'plain',
           },
         },
@@ -797,47 +795,30 @@ export const projects: Record<string, Project> = {
             'My motivation was that, as a designer, I still see enormous value in getting my hands dirty. Sometimes I need to compare variations—16 px or 24 px—and design mode lets me test both before applying the one that works.',
             'Canvas mode was another feature I knew I wanted. It lets you pan around the page and focus on certain areas. It also allowed an easy way to see the page at different sizes.',
           ],
-          copyWidth: 405,
-          panelWidth: 787,
-          shot: {
-            src: '/work/no3y-code/design-mode.jpg',
-            alt: 'Design mode open over a running app, with the properties panel down the right edge',
-            aspect: '787 / 476',
-            frame: 'plain',
+          copyWidth: 720,
+          stack: true,
+          video: {
+            src: '/work/no3y-code/design-mode.mp4',
+            hevc: '/work/no3y-code/design-mode-hevc.mp4',
+            poster: '/work/no3y-code/design-mode-poster.jpg',
+            alt: 'Design mode in no3y Code: the preview opens beside the thread, then an element is selected and a gap change is queued to the agent',
+            aspect: '16 / 9',
           },
         },
         {
+          // Frame 287:6508 draws the BentoCard at 456×351; the page runs it at
+          // the sidebar row's 757.5 so it doesn't sit small under Design mode.
+          // The export is square-cornered — MOCKUP_RADIUS clips it in CSS.
           kind: 'feature',
           gap: 80,
           heading: 'Message composer',
-          body: 'I prefer a compact message composer and broke it into 3 sections: the branch information, the input and then model parameters.',
-          copyWidth: 387.5,
+          body: 'I prefer a compact message composer and broke it into 3 sections, the branch information, the input and then model parameters.',
+          copyWidth: 434.5,
           panelWidth: 757.5,
           shot: {
             src: '/work/no3y-code/composer.png',
-            alt: 'The message composer — worktree and branch above the input, mode and model below it',
-            aspect: '757.5 / 421.667',
-            frame: 'plain',
-          },
-        },
-        {
-          // The closing band; this frame has no orange card under it.
-          kind: 'band',
-          width: 1272,
-          height: 526,
-          background: '/work/no3y-code/learning-bg.jpg',
-          heading: 'Learning to be a Design Engineer',
-          body: [
-            'This project served as a really great learning space and experiment on diving into agentic coding. I wanted to make sure I could make edits and change my fork while still being able to easily sync with upstream to benefit from new features.',
-            'Using YouTube and some prior coding knowledge, I created a system to keep my fork from becoming pure AI slop. I set up a couple of automated reviews based on principles and rules from the Cursor and Anthropic teams.',
-          ],
-          pad: { left: 77, right: 123 },
-          copyWidth: 387.5,
-          shotWidth: 513,
-          shot: {
-            src: '/work/no3y-code/learning.jpg',
-            alt: 'An automated review running in no3y Code — the agent works through its findings above the composer',
-            aspect: '513 / 422',
+            alt: 'The message composer on a gradient card — worktree and branch above the input, mode and model below it',
+            aspect: '456 / 351',
             frame: 'plain',
           },
         },

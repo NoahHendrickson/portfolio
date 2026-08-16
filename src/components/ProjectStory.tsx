@@ -51,6 +51,8 @@ const CONTENT_WIDTH = 1512 - PAGE_GUTTER * 2
 // the feedback band's tint has to keep running edge to edge.
 /** The centered copy column — the title block and the `copy` rows both run on it. */
 const COPY_WIDTH = 720
+/** Outer clip on story mockups — hero, feature stills, and looping clips. */
+const MOCKUP_RADIUS = radius.md
 /** Gap between the feedback wall's cards, 9.588 in the file. */
 const WALL_GAP = 10
 
@@ -369,8 +371,9 @@ function sectionKey(section: StorySection, i: number) {
       return `${i}-${section.heading}`
     case 'columns':
       return section.columns[0].shot.src
-    case 'row':
     case 'feature':
+      return section.video?.src ?? section.shot?.src ?? section.heading
+    case 'row':
     case 'shot':
     case 'band':
       return section.shot.src
@@ -423,7 +426,76 @@ function SectionContent({ section }: { section: StorySection }) {
   if (section.kind === 'band') return <Band section={section} />
 
   if (section.kind === 'feature') {
-    const total = section.copyWidth + section.gap + section.panelWidth
+    const copy = (
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: space.xl,
+          ...(section.stack ? { maxWidth: `${section.copyWidth}px` } : null),
+        }}
+      >
+        <h2 style={ROW_HEADING}>{section.heading}</h2>
+        <Body body={section.body} lead={section.lead} />
+      </div>
+    )
+    const media = section.video ? (
+      <StoryClip video={section.video} />
+    ) : section.panel && section.shot ? (
+      /*
+        CSS clip around the media. D2 uses it to tint a raw screenshot.
+      */
+      <div
+        style={{
+          width: '100%',
+          aspectRatio: section.shot.aspect.replace(/\s/g, ''),
+          background: section.panel.background ?? TINT,
+          overflow: 'hidden',
+          borderRadius: MOCKUP_RADIUS,
+        }}
+      >
+        <img
+          src={section.shot.src}
+          alt={section.shot.alt}
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            objectPosition: section.shot.position ?? 'center',
+            display: 'block',
+          }}
+        />
+      </div>
+    ) : section.shot ? (
+      <img
+        src={section.shot.src}
+        alt={section.shot.alt}
+        style={{
+          width: '100%',
+          height: 'auto',
+          display: 'block',
+          borderRadius: MOCKUP_RADIUS,
+        }}
+      />
+    ) : null
+
+    if (section.stack) {
+      return (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: isMobile ? space['2xl'] : `${section.gap}px`,
+            width: '100%',
+          }}
+        >
+          {copy}
+          {media}
+        </div>
+      )
+    }
+
+    const total = section.copyWidth + section.gap + (section.panelWidth ?? 0)
     return (
       <div
         style={
@@ -438,44 +510,8 @@ function SectionContent({ section }: { section: StorySection }) {
               }
         }
       >
-        {/* The file's feature rows all run a 24px gap between heading and copy. */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: space.xl }}>
-          <h2 style={ROW_HEADING}>{section.heading}</h2>
-          <Body body={section.body} lead={section.lead} />
-        </div>
-        {section.panel ? (
-          /*
-            CSS panel chrome for raw screenshots (D2). Phanttom and Forge bake the
-            tinted frame into the PNG, so they skip this and render the shot alone.
-          */
-          <div
-            style={{
-              width: '100%',
-              aspectRatio: section.shot.aspect.replace(/\s/g, ''),
-              background: section.panel.background ?? TINT,
-              overflow: 'hidden',
-              borderRadius: radius.xl,
-            }}
-          >
-            <img
-              src={section.shot.src}
-              alt={section.shot.alt}
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                objectPosition: 'center',
-                display: 'block',
-              }}
-            />
-          </div>
-        ) : (
-          <img
-            src={section.shot.src}
-            alt={section.shot.alt}
-            style={{ width: '100%', height: 'auto', display: 'block' }}
-          />
-        )}
+        {copy}
+        {media}
       </div>
     )
   }
@@ -608,13 +644,48 @@ function Runs({ runs }: { runs: TextRun[] }) {
 }
 
 /**
- * The hero as a looping clip rather than a still — Moonfang Armory and no3y
- * Code. It plays muted and inline so mobile Safari will autoplay it, and
- * carries a `poster` so the box shows the opening frame instead of black while
- * the file loads. The clip is cover-fit, so a source wider than the designed
- * box is cropped evenly rather than letterboxed. `prefers-reduced-motion` gets
- * the poster alone. `zoomAfter` eases into `zoom` mid-clip; `zoomUntil` eases
- * back out so the loop meets a full-bleed frame.
+ * A looping clip standing in for a feature-row still. Muted and inline so
+ * mobile Safari will autoplay it; `prefers-reduced-motion` gets the poster.
+ * Unlike `HeroVideo` it just fills the panel — no backdrop, no mid-clip zoom.
+ */
+function StoryClip({ video }: { video: LandingVideo }) {
+  const stillOnly = useMediaQuery('(prefers-reduced-motion: reduce)')
+  const fill: React.CSSProperties = {
+    width: '100%',
+    aspectRatio: video.aspect.replace(/\s/g, ''),
+    objectFit: 'cover',
+    display: 'block',
+    borderRadius: MOCKUP_RADIUS,
+    overflow: 'hidden',
+  }
+
+  return stillOnly ? (
+    <img src={video.poster} alt={video.alt} style={fill} />
+  ) : (
+    <video
+      poster={video.poster}
+      aria-label={video.alt}
+      autoPlay
+      loop
+      muted
+      playsInline
+      preload="metadata"
+      style={fill}
+    >
+      {video.hevc && <source src={video.hevc} type='video/mp4; codecs="hvc1"' />}
+      <source src={video.src} type="video/mp4" />
+    </video>
+  )
+}
+
+/**
+ * The hero as a looping clip rather than a still — Moonfang Armory. It plays
+ * muted and inline so mobile Safari will autoplay it, and carries a `poster`
+ * so the box shows the opening frame instead of black while the file loads.
+ * The clip is cover-fit, so a source wider than the designed box is cropped
+ * evenly rather than letterboxed. `prefers-reduced-motion` gets the poster
+ * alone. `zoomAfter` eases into `zoom` mid-clip; `zoomUntil` eases back out
+ * so the loop meets a full-bleed frame.
  */
 const ZOOM_IN = 'transform 1.35s cubic-bezier(0.4, 0, 0.2, 1)'
 const ZOOM_OUT = 'transform 2s cubic-bezier(0.4, 0, 0.2, 1)'
@@ -985,8 +1056,8 @@ function ShotFrame({ shot, style }: { shot: LandingShot; style?: React.CSSProper
         border: framed
           ? `${shot.frame === 'border' ? '2px' : '0.57px'} solid ${FRAME_BORDER}`
           : undefined,
-        borderRadius: plain ? undefined : framed ? '9px' : radius.md,
-        overflow: plain ? undefined : 'hidden',
+        borderRadius: plain ? MOCKUP_RADIUS : framed ? '9px' : radius.md,
+        overflow: 'hidden',
         background: plain ? undefined : FRAME_BG,
         display: 'flex',
         flexDirection: 'column',

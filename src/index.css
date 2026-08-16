@@ -114,63 +114,6 @@ html, body {
   color: var(--bento-accent, var(--color-orange));
 }
 
-/* Bento cards: cream + mockup until hover reveals the title. */
-.work-bento-art-first {
-  --bento-shown-pad: var(--space-sm);
-  --bento-shown-gap: 0px;
-}
-@media (hover: hover) {
-  .work-bento-card .work-bento-art-first {
-    transition: padding-bottom 220ms ease, gap 220ms ease;
-  }
-  .work-bento-card:hover .work-bento-art-first,
-  .work-bento-card:focus-visible .work-bento-art-first {
-    --bento-shown-pad: 16px;
-    --bento-shown-gap: 16px;
-  }
-  .work-bento-art-first .work-bento-reveal-title {
-    display: grid;
-    grid-template-rows: 0fr;
-    flex: 0 0 0;
-    max-height: 0;
-    opacity: 0;
-    overflow: hidden;
-    pointer-events: none;
-    transition:
-      grid-template-rows 220ms ease,
-      max-height 220ms ease,
-      opacity 180ms ease;
-  }
-  .work-bento-art-first .work-bento-reveal-title > * {
-    min-height: 0;
-    overflow: hidden;
-  }
-  .work-bento-card:hover .work-bento-art-first .work-bento-reveal-title,
-  .work-bento-card:focus-visible .work-bento-art-first .work-bento-reveal-title {
-    grid-template-rows: 1fr;
-    flex: 0 0 auto;
-    max-height: 16rem;
-    opacity: 1;
-    pointer-events: auto;
-  }
-}
-
-/* Personal-projects bento (Figma 273:39477): full-bleed textured cards. The
-   file's 4px cream frame is the card's padding rather than a border, so these
-   share the cream cards' reveal — on hover the art well's mask slides up and
-   the title shows on the cream backdrop beneath. Only the resting pad
-   differs: 4px keeps the frame hairline until the reveal widens it. */
-.work-bento-tex {
-  --bento-shown-pad: 4px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .work-bento-card .work-bento-art-first,
-  .work-bento-art-first .work-bento-reveal-title {
-    transition: none;
-  }
-}
-
 /* Soft enter for D2 Stat Builder showcase variants (and media inside them). */
 @keyframes sb-fade-up {
   from {
