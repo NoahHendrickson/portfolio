@@ -9,9 +9,10 @@ export const PAGE_GUTTER = 120
 
 /**
  * The widest tablet the desktop split still runs on (iPad Pro 12.9 landscape).
- * Below the mobile breakpoint (900) the pages go single-column on a 20px inset,
- * so this band — 901 to 1366 — is where the desktop geometry has to survive on
- * a screen a third narrower than the frame it was drawn at.
+ * Below the mobile breakpoint (900) the tabs go single-column on a 20px inset
+ * and project pages on `PROJECT_MOBILE_PAD`, so this band — 901 to 1366 — is
+ * where the desktop geometry has to survive on a screen a third narrower than
+ * the frame it was drawn at.
  */
 const TABLET_MAX = 1366
 
@@ -55,7 +56,14 @@ export const WORK_LIST_MAX = 1240
 /**
  * Horizontal page padding: `pageGutter()` until the viewport passes
  * `SHELL_MAX`, then whatever keeps that reference width centred. Call sites
- * keep their own 20px mobile inset, where there is nothing to centre.
+ * keep their own mobile inset, where there is nothing to centre.
  */
 export const shellPad = () =>
   `max(${pageGutter()}, calc((100vw - ${SHELL_MAX}px) / 2))`
+
+/**
+ * Project-page gutter below 900. Display titles wrap against the glass on the
+ * 20px the tabs use, so these full-bleed pages take a step up. Header reads
+ * the same value via `barInset` so Back / Contact stay on the copy's edge.
+ */
+export const PROJECT_MOBILE_PAD = '32px'

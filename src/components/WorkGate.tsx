@@ -3,7 +3,7 @@ import Header from './Header'
 import Button from '../design-system/Button'
 import { color, radius, space, type } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
-import { shellPad } from '../layout'
+import { PROJECT_MOBILE_PAD, shellPad } from '../layout'
 import { unlock } from '../workGate'
 
 const TEXT = color.text.primary
@@ -17,6 +17,7 @@ export default function WorkGate({ onUnlock }: { onUnlock: () => void }) {
   const isMobile = useIsMobile()
   const [input, setInput] = useState('')
   const [error, setError] = useState(false)
+  const pad = isMobile ? PROJECT_MOBILE_PAD : shellPad()
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -41,7 +42,7 @@ export default function WorkGate({ onUnlock }: { onUnlock: () => void }) {
         overflowX: 'clip',
       }}
     >
-      <Header leading="back" showProfile={false} barInset={shellPad()} />
+      <Header leading="back" showProfile={false} barInset={pad} />
 
       <div
         style={{
@@ -49,7 +50,7 @@ export default function WorkGate({ onUnlock }: { onUnlock: () => void }) {
           flexDirection: 'column',
           gap: isMobile ? space.xl : space['2xl'],
           // Shared gutter, so Back/Contact don't jump when the page unlocks.
-          padding: isMobile ? `0 20px` : `0 ${shellPad()}`,
+          padding: `0 ${pad}`,
           flex: 1,
           minWidth: 0,
           boxSizing: 'border-box',

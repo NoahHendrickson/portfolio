@@ -7,7 +7,7 @@ import { color, control, radius, space, type } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import AppLink from '../AppLink'
-import { PAGE_GUTTER, shellPad } from '../layout'
+import { PAGE_GUTTER, PROJECT_MOBILE_PAD, shellPad } from '../layout'
 import type {
   EyebrowEntry,
   FeedbackShot,
@@ -113,7 +113,7 @@ export default function ProjectStory({ project }: { project: Project }) {
   const landing = project.landing
   if (!landing) return null
 
-  const gutter = isMobile ? '20px' : shellPad()
+  const gutter = isMobile ? PROJECT_MOBILE_PAD : shellPad()
   const rowPad = isMobile ? '40px' : '80px'
   const heroBody = landing.hero.body ?? [project.summary]
   const eyebrow = Array.isArray(landing.eyebrow) ? landing.eyebrow : [landing.eyebrow]

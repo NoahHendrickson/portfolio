@@ -2,6 +2,7 @@ import { ArrowNarrowLeft } from '@untitledui/icons/ArrowNarrowLeft'
 import { ArrowNarrowRight } from '@untitledui/icons/ArrowNarrowRight'
 import Header from './Header'
 import { useIsMobile } from '../hooks/useIsMobile'
+import { PROJECT_MOBILE_PAD } from '../layout'
 import AppLink from '../AppLink'
 import type { Project, Section, Shot } from '../data/projects'
 
@@ -28,7 +29,7 @@ export default function ProjectLanding({ project }: { project: Project }) {
         minHeight: '100vh',
         background: CREAM_BG,
         color: TEXT_DARK,
-        padding: isMobile ? '0 20px 60px' : '0 80px 120px',
+        padding: isMobile ? `0 ${PROJECT_MOBILE_PAD} 60px` : '0 80px 120px',
         display: 'flex',
         flexDirection: 'column',
         gap: isMobile ? '24px' : '40px',

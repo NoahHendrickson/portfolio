@@ -3,7 +3,7 @@ import Header from './Header'
 import WorkGate from './WorkGate'
 import { color, radius, space, type } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
-import { shellPad } from '../layout'
+import { PROJECT_MOBILE_PAD, shellPad } from '../layout'
 import { isUnlocked } from '../workGate'
 
 const CONTENT_WIDTH = 1225
@@ -57,6 +57,7 @@ const bodyStyle: CSSProperties = {
 export default function InvisibleSynapse() {
   const isMobile = useIsMobile()
   const [unlocked, setUnlocked] = useState(isUnlocked)
+  const pad = isMobile ? PROJECT_MOBILE_PAD : shellPad()
 
   if (!unlocked) return <WorkGate onUnlock={() => setUnlocked(true)} />
 
@@ -68,13 +69,13 @@ export default function InvisibleSynapse() {
         color: color.text.primary,
       }}
     >
-      <Header leading="back" showProfile={false} barInset={shellPad()} />
+      <Header leading="back" showProfile={false} barInset={pad} />
 
       <main
         style={{
           boxSizing: 'border-box',
           // Shared left edge with every other page (see `layout.ts`).
-          padding: isMobile ? '24px 20px 64px' : `32px 0 80px ${shellPad()}`,
+          padding: isMobile ? `24px ${pad} 64px` : `32px 0 80px ${pad}`,
         }}
       >
         <div

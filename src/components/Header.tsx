@@ -13,9 +13,9 @@ type Props = {
    * on project pages so the tab bar doesn't sit above a second Back.
    */
   leading?: 'tabs' | 'back'
-  /** Horizontal inset for the tab bar row. Pass '0' when the parent already pads the page. */
+  /** Horizontal inset for the tab bar row. Honoured on mobile too — pass '0' when the parent already pads the page. */
   barInset?: string
-  /** Horizontal inset for the profile row. Pass '0' when the parent already pads the page. */
+  /** Horizontal inset for the profile row. Honoured on mobile too — pass '0' when the parent already pads the page. */
   contentInset?: string
   /**
    * Right-side inset for the pinned Contact menu and the rows' right padding.
@@ -32,15 +32,15 @@ type Props = {
 export default function Header({
   active = 'me',
   leading = 'tabs',
-  barInset = '120px',
-  contentInset = '120px',
+  barInset,
+  contentInset,
   trailingInset,
   showProfile = true,
 }: Props) {
   const isMobile = useIsMobile()
-  const bar = isMobile ? '20px' : barInset
-  const content = isMobile ? '20px' : contentInset
-  const trailing = isMobile ? '20px' : (trailingInset ?? barInset)
+  const bar = barInset ?? (isMobile ? '20px' : '120px')
+  const content = contentInset ?? (isMobile ? '20px' : '120px')
+  const trailing = trailingInset ?? bar
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
