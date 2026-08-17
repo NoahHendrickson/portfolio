@@ -11,14 +11,14 @@ import { WORK_LIST_MAX } from '../layout'
 
 /**
  * The Design tab. A filter rail on the left, and whatever the active filter
- * renders beside it — since Figma node `293:10433` that is one shape for every
- * filter: full-width rows, each a live shader well with the screenshots
- * floating on it over a cream caption bar. The old featured-plus-stack bento
- * and the two-up even grid are both gone.
+ * renders beside it. Career and Personal are full-width rows (Figma node
+ * `293:10433`): a live shader well with the screenshots floating on it, and a
+ * frosted title shim over the well on hover. Graphic Design is the exception —
+ * two squares side by side on a flat fill, not stacked shader rows.
  */
 
 /** A live shader backdrop — the FlowingGradient palette under the well. */
-type BentoShader = {
+type FlowingShader = {
   colorA: string
   colorB: string
   colorC: string
@@ -31,6 +31,11 @@ type BentoShader = {
   distortion?: number
   /** Which arrangement of those bands you get. */
   seed?: number
+  /**
+   * Layer scale on the gradient. Above 1 zooms in, so the dithered colour
+   * sections read larger. Default 1 is the shader's native frequency.
+   */
+  scale?: number
 }
 
 /**
@@ -60,27 +65,33 @@ type ProjectCard = {
   desc: string
   /**
    * The well's FlowingGradient palette. Omitted on a card that ships its whole
-   * composition as `image` instead.
+   * composition as `image`, a still `backdrop`, or a flat `fill`.
    */
-  shader?: BentoShader
+  shader?: FlowingShader
+  /** A solid well colour. Career and Graphic Design drop the shader and sit on this. */
+  fill?: string
+  /**
+   * A still photograph filling the well under the panels. D2 Stat Builder
+   * sits on the Monterey dark wallpaper rather than a live shader.
+   */
+  backdrop?: string
   /**
    * The composition exported whole out of Figma, filling the well in place of
    * the shader and its panels. no3y Code's frame is a fluted-glass refraction
-   * over a multi-stop gradient — neither is in the pinned `shaders` v2 — so it
-   * rides as flat art rather than as an approximation that drifts from the
-   * file. It also spares the row a WebGL context.
+   * over a multi-stop gradient — both exist in `shaders` v3 (`FlutedGlass` +
+   * `LinearGradient` stops) but this card still ships as flat art until a live
+   * composition matches the file. It also spares the row a WebGPU context.
    */
   image?: { src: string; alt: string }
   /** Hover colour for the card outline and the arrow. */
   accent: string
   /**
-   * The well's designed box, and the frame the panel shares resolve against.
-   * Defaults to the 966 × 266 the row frames draw; no3y Code's own export is
-   * half again as tall, which is what gives its panels room.
+   * The well's designed box. Defaults to the 966 × 266 the Career rows draw;
+   * Personal rows share no3y Code's taller export so the three cards match.
    */
   aspect?: string
   panels: Panel[]
-  /** The file leaves no3y Code's gradient smooth and dithers the other two. */
+  /** Dither the well. Armory opts in; the rest stay smooth or skip the shader. */
   dither?: boolean
 }
 
@@ -88,7 +99,12 @@ type Filter = {
   id: string
   label: string
   cards: ProjectCard[]
+  /** Side-by-side columns instead of a stacked list. Graphic Design is 2. */
+  columns?: number
 }
+
+/** no3y Code's export. Personal rows share it so the three cards match. */
+const PERSONAL_ASPECT = '4423 / 1460'
 
 const personal: ProjectCard[] = [
   {
@@ -96,7 +112,7 @@ const personal: ProjectCard[] = [
     title: 'no3y Code',
     desc: 'no3y Code is my fork of T3 Code, an agent and harness orchestration tool.',
     accent: '#6f5efb',
-    aspect: '4423 / 1460',
+    aspect: PERSONAL_ASPECT,
     image: {
       src: '/work/bento/no3y-card.jpg',
       alt: 'no3y Code — the thread sidebar, the composer and design mode’s properties panel over a fluted gradient',
@@ -107,9 +123,9 @@ const personal: ProjectCard[] = [
     href: '/work/stat-builder',
     title: projects['stat-builder'].title,
     desc: '3rd party tool for the Destiny 2 community',
-    shader: { colorA: '#d4600d', colorB: '#ef7310', colorC: '#ff8b12', colorD: '#ffcc7c' },
-    dither: true,
+    backdrop: '/work/bento/monterey-dark.webp',
     accent: '#c56430',
+    aspect: PERSONAL_ASPECT,
     panels: [
       {
         src: '/work/bento/shot-stat-builder.png',
@@ -124,9 +140,17 @@ const personal: ProjectCard[] = [
     href: '/work/armory',
     title: projects.armory.title,
     desc: 'A command-palette-style filter and search for Destiny 2 weapons.',
-    shader: { colorA: '#0d6e2b', colorB: '#12903a', colorC: '#1aab4a', colorD: '#26e875' },
+    shader: {
+      colorA: '#0d6e2b',
+      colorB: '#12903a',
+      colorC: '#1aab4a',
+      colorD: '#26e875',
+      // Native frequency packs a lot of thin swirls into this wide well.
+      scale: 3,
+    },
     dither: true,
     accent: '#128a45',
+    aspect: PERSONAL_ASPECT,
     panels: [
       {
         src: '/work/bento/shot-armory.png',
@@ -149,9 +173,8 @@ const career: ProjectCard[] = [
     href: '/work/invisible/onboarding',
     title: 'Revitalizing Meridial’s onboarding flow',
     desc: 'Design lead on Invisible’s onboarding platform.',
-    shader: { colorA: '#2d6f9c', colorB: '#3f8dbd', colorC: '#57a8d5', colorD: '#8fc9e6' },
-    dither: true,
-    accent: '#3d85b5',
+    fill: '#f95b1c',
+    accent: '#ff8f0c',
     // The Career shots are near enough in aspect (1.57 and 1.64) that the D2
     // row's placement reads as a pair across both cards.
     panels: [
@@ -168,9 +191,8 @@ const career: ProjectCard[] = [
     href: '/work/invisible/synapse',
     title: 'Launching new AI training interfaces',
     desc: 'Launch design lead on Invisible’s annotations platform.',
-    shader: { colorA: '#3a2557', colorB: '#4a3070', colorC: '#5d3d8c', colorD: '#8163b8' },
-    dither: true,
-    accent: '#563a80',
+    fill: '#26b846',
+    accent: '#3aed62',
     panels: [
       {
         src: '/work/bento/shot-invisible-synapse.png',
@@ -188,17 +210,16 @@ const graphic: ProjectCard[] = [
     href: '/work/how-to-pc',
     title: projects['how-to-pc'].title,
     desc: 'An overview of the parts, and the order to install them in.',
-    // Pink at the same lightness and saturation as the D2 card's orange.
-    shader: { colorA: '#c81f74', colorB: '#d62782', colorC: '#e7308c', colorD: '#ee549f' },
-    dither: true,
-    accent: '#e7308c',
+    fill: '#e7308c',
+    accent: '#ff7eb6',
+    aspect: '1 / 1',
     panels: [
       {
         // Flat art rather than an app window, so it sits whole and centred.
         src: '/work/how-to-pc/thumbnail.png',
         alt: 'How to Build a PC — the infographic’s title card',
-        left: '27%',
-        width: '46%',
+        left: '12%',
+        width: '76%',
         align: 'center',
       },
     ],
@@ -207,26 +228,19 @@ const graphic: ProjectCard[] = [
     href: '/work/nacho-box',
     title: projects['nacho-box'].title,
     desc: 'A chips-and-salsa box — hand-drawn lettering, icons and patterns.',
-    shader: { colorA: '#d8cc55', colorB: '#e8dd6f', colorC: '#f9f18f', colorD: '#fcf6a5' },
-    dither: true,
-    accent: '#b3a02f',
-    panels: [
-      {
-        // The Hint of Lime lockup keyed off the pack's chip-pattern plate.
-        src: '/work/bento/shot-nacho-lime.png',
-        alt: 'Nacho Box — the Hint of Lime lockup',
-        left: '34%',
-        width: '32%',
-        align: 'center',
-      },
-    ],
+    // Plate colour under the chip pattern, until the thumbnail paints.
+    fill: '#f9f18f',
+    backdrop: '/work/nacho-box/thumbnail.png',
+    accent: '#6b9b2a',
+    aspect: '1 / 1',
+    panels: [],
   },
 ]
 
 const FILTERS: Filter[] = [
   { id: 'career', label: 'Career', cards: career },
   { id: 'fun', label: 'Personal projects', cards: personal },
-  { id: 'graphic', label: 'Graphic Design', cards: graphic },
+  { id: 'graphic', label: 'Graphic Design', cards: graphic, columns: 2 },
 ]
 
 /** Survives refresh and Back — WorkList unmounts whenever you leave `/work`. */
@@ -246,12 +260,6 @@ function writeFilter(id: string) {
  * `--color-bg-cream` (#f5efe0): the July file draws it a step greyer.
  */
 const CARD_CREAM = '#e6dfd2'
-
-/**
- * The caption bar under each well. Greyer again than the rail's pill — the file
- * draws the two a step apart, so they stay two raw values rather than a token.
- */
-const BAND_CREAM = '#ded9c4'
 
 export default function WorkList() {
   const isMobile = useIsMobile()
@@ -309,7 +317,7 @@ export default function WorkList() {
         Nothing here yet — still digging through the archive.
       </p>
     ) : (
-      <CardList key={activeId} cards={active.cards} isMobile={isMobile} />
+      <CardList key={activeId} cards={active.cards} isMobile={isMobile} columns={active.columns} />
     )
 
   if (isMobile) {
@@ -339,15 +347,26 @@ export default function WorkList() {
 }
 
 /**
- * The list every filter renders — Figma node `293:10433`. Each row is one card:
- * a live shader well the screenshots float on, over a cream caption bar. The
- * file stacks them 342 tall on a 48px gap.
+ * Career and Personal stack as full-width rows (Figma node `293:10433`).
+ * Graphic Design passes `columns: 2` and sits as a pair of squares.
  */
-function CardList({ cards, isMobile }: { cards: ProjectCard[]; isMobile: boolean }) {
+function CardList({
+  cards,
+  isMobile,
+  columns = 1,
+}: {
+  cards: ProjectCard[]
+  isMobile: boolean
+  columns?: number
+}) {
   return (
     <div
       className="tab-content-in"
-      style={{ display: 'flex', flexDirection: 'column', gap: space['3xl'] }}
+      style={{
+        display: 'grid',
+        gridTemplateColumns: columns > 1 ? `repeat(${columns}, minmax(0, 1fr))` : '1fr',
+        gap: space['3xl'],
+      }}
     >
       {cards.map((card) => (
         <BentoLink key={card.href} href={card.href} ariaLabel={card.title} accent={card.accent}>
@@ -358,17 +377,17 @@ function CardList({ cards, isMobile }: { cards: ProjectCard[]; isMobile: boolean
   )
 }
 
-/** The row frames' 966 x 266 well, which every card but no3y Code is drawn at. */
+/** The row frames' 966 × 266 well. Career cards draw at this; clipped panels
+ *  still resolve against it when a Personal row is taller. */
 const WELL_ASPECT = '966 / 266'
 /** Mobile keeps the composition but stands the well up, so a shot that clips at
  *  the file's ratio has room to read at a third of the width. */
 const WELL_ASPECT_MOBILE = '966 / 460'
 
 /**
- * One row: the shader well with its floating panels, then the caption bar. The
- * well is a rounded rect in its own right — its top corners land on the card's,
- * and its bottom two curve back off the cream — so the card clips the caption
- * bar into the bottom corners and nothing else.
+ * One row: the shader well with its floating panels, and a frosted title shim
+ * over the well. The card is the well — rounded and clipped — so the shim
+ * sits on the art instead of adding a caption chunk underneath.
  */
 function ProjectRowCard({ card, isMobile }: { card: ProjectCard; isMobile: boolean }) {
   const stillOnly = useMediaQuery('(prefers-reduced-motion: reduce)')
@@ -379,25 +398,21 @@ function ProjectRowCard({ card, isMobile }: { card: ProjectCard; isMobile: boole
   return (
     <article
       style={{
-        display: 'flex',
-        flexDirection: 'column',
         borderRadius: radius['2xl'],
-        background: BAND_CREAM,
         overflow: 'hidden',
       }}
     >
       <div
         style={{
           position: 'relative',
-          // Mobile stands a shader well up so a clipped shot still reads at a
-          // third of the width. An `image` card has nowhere to clip to and only
-          // a 4.7% margin around its panels, so it holds its own ratio and
-          // simply scales down.
-          aspectRatio: isMobile && !card.image ? WELL_ASPECT_MOBILE : aspect,
-          borderRadius: radius['2xl'],
+          // Mobile stands a row well up so a clipped shot still reads at a
+          // third of the width. An `image` card has nowhere to clip to, and a
+          // square (Graphic Design) already has its own ratio.
+          aspectRatio: isMobile && !card.image && card.aspect !== '1 / 1' ? WELL_ASPECT_MOBILE : aspect,
           overflow: 'hidden',
-          // The shell's dark ground holds the well until the shader paints.
-          background: color.bg.primary,
+          // A flat fill (Graphic Design) is the well; otherwise the shell's
+          // dark ground holds a flowing well until it paints.
+          background: card.fill ?? color.bg.primary,
         }}
       >
         {/* A card that ships its whole composition fills the well with it. The
@@ -407,6 +422,26 @@ function ProjectRowCard({ card, isMobile }: { card: ProjectCard; isMobile: boole
           <img
             src={card.image.src}
             alt={card.image.alt}
+            loading="lazy"
+            style={{
+              position: 'absolute',
+              inset: 0,
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              display: 'block',
+            }}
+          />
+        )}
+
+        {/* A still photograph under the panels — D2 Stat Builder's Monterey
+            wallpaper. Distinct from `image`, which replaces the whole well
+            and holds its own ratio on mobile. */}
+        {card.backdrop && (
+          <img
+            src={card.backdrop}
+            alt=""
+            aria-hidden
             loading="lazy"
             style={{
               position: 'absolute',
@@ -434,6 +469,7 @@ function ProjectRowCard({ card, isMobile }: { card: ProjectCard; isMobile: boole
               distortion={card.shader.distortion}
               seed={card.shader.seed}
               speed={stillOnly ? 0 : 0.5}
+              transform={card.shader.scale != null ? { scale: card.shader.scale } : undefined}
             />
             {card.dither && <Dither colorMode="source" pixelSize={3} />}
           </Shader>
@@ -454,11 +490,12 @@ function ProjectRowCard({ card, isMobile }: { card: ProjectCard; isMobile: boole
           />
         )}
 
-        {/* The clipped panels ride a layer held at the file's ratio, so their
-            offsets stay design-true and the taller mobile well simply reveals
-            more of each shot rather than moving anything. */}
+        {/* The clipped panels ride a layer held at the 966 × 266 the
+            percentages were measured on, so their offsets stay design-true
+            and a taller well (Personal, or mobile) simply reveals more of
+            each shot rather than moving anything. */}
         {clipped.length > 0 && (
-          <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', aspectRatio: aspect }}>
+          <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', aspectRatio: WELL_ASPECT }}>
             {clipped.map((panel) => (
               <img
                 key={panel.src}
@@ -495,62 +532,63 @@ function ProjectRowCard({ card, isMobile }: { card: ProjectCard; isMobile: boole
             }}
           />
         ))}
-      </div>
 
-      {/* The file draws this band 76 tall on 20px type. It read as the loudest
-          thing in the row against the art, so it runs a step down throughout —
-          16px type on a 28px line, a 12px pad and a 20px arrow. */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: space.sm,
-          padding: `${space.md} ${space.xl}`,
-        }}
-      >
+        {/* Frosted title shim over the well. Extra top pad is the fade zone —
+            the mask feathers the frost out above the type so the strip has no
+            hard edge. Hidden until hover on pointer devices. */}
         <div
+          className="work-bento-shim"
           style={{
             display: 'flex',
-            // The file runs the pair on one line; mobile stacks them rather
-            // than ellipsing the description away.
-            flexDirection: isMobile ? 'column' : 'row',
-            alignItems: isMobile ? 'flex-start' : 'center',
-            gap: isMobile ? space.xs : space.sm,
-            height: isMobile ? undefined : '28px',
-            minWidth: 0,
-            flex: '1 0 0',
+            alignItems: 'center',
+            gap: space.sm,
+            padding: `${space['3xl']} ${space.xl} ${space.md}`,
           }}
         >
-          <h2
+          <div
             style={{
-              margin: 0,
-              fontSize: isMobile ? '15px' : type['label-l'].fontSize,
-              fontWeight: 600,
-              lineHeight: 'normal',
-              letterSpacing: '-0.4px',
-              color: color.ink.default,
-            }}
-          >
-            {card.title}
-          </h2>
-          <p
-            style={{
-              margin: 0,
+              display: 'flex',
+              // The file runs the pair on one line; mobile stacks them rather
+              // than ellipsing the description away.
+              flexDirection: isMobile ? 'column' : 'row',
+              alignItems: isMobile ? 'flex-start' : 'center',
+              gap: isMobile ? space.xs : space.sm,
+              height: isMobile ? undefined : '28px',
               minWidth: 0,
-              flex: isMobile ? undefined : '1 0 0',
-              fontSize: isMobile ? type['body-s'].fontSize : type['body-l'].fontSize,
-              fontWeight: 400,
-              lineHeight: 'normal',
-              color: color.ink.muted,
-              ...(isMobile
-                ? {}
-                : { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }),
+              flex: '1 0 0',
             }}
           >
-            {card.desc}
-          </p>
+            <h2
+              style={{
+                margin: 0,
+                fontSize: isMobile ? '15px' : type['label-l'].fontSize,
+                fontWeight: 600,
+                lineHeight: 'normal',
+                letterSpacing: '-0.4px',
+                color: color.text.primary,
+              }}
+            >
+              {card.title}
+            </h2>
+            <p
+              style={{
+                margin: 0,
+                minWidth: 0,
+                flex: isMobile ? undefined : '1 0 0',
+                fontSize: isMobile ? type['body-s'].fontSize : type['body-l'].fontSize,
+                fontWeight: 400,
+                lineHeight: 'normal',
+                color: color.text.muted,
+                ...(isMobile
+                  ? {}
+                  : { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }),
+              }}
+            >
+              {card.desc}
+            </p>
+          </div>
+          <CardArrow />
         </div>
-        <CardArrow />
       </div>
     </article>
   )
