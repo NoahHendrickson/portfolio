@@ -1,9 +1,9 @@
 import { Fragment, useRef, useState } from 'react'
 import { ArrowSquareOut } from '@phosphor-icons/react'
 import Header from './Header'
-import { resolvePalette } from '../design-system/buttonStyles'
+import { resolvePalette, HOVER_OPACITY } from '../design-system/buttonStyles'
 import type { ButtonVariant } from '../design-system/buttonStyles'
-import { color, control, radius, space, type } from '../design-system/tokens'
+import { color, control, radius, radiusPx, space, type } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import AppLink from '../AppLink'
@@ -39,6 +39,12 @@ const FRAME_BORDER = '#373737'
 const FRAME_BG = '#202124'
 const CARD_BG = '#1a191e'
 const OVERLAY_BORDER = '#3358c1'
+/**
+ * no3y Code's Github pill — the file's purple → pink → peach wash, not the
+ * orange accent. Stops measured off node 317:25669.
+ */
+const NO3Y_CTA =
+  'linear-gradient(to right, rgba(131,113,255,0.8) 0%, rgba(255,139,219,0.8) 53.365%, rgba(247,187,163,0.8) 100%)'
 
 /** The content width inside the page gutters, which every row width is measured against. */
 const CONTENT_WIDTH = 1512 - PAGE_GUTTER * 2
@@ -51,8 +57,17 @@ const CONTENT_WIDTH = 1512 - PAGE_GUTTER * 2
 // the feedback band's tint has to keep running edge to edge.
 /** The centered copy column — the title block and the `copy` rows both run on it. */
 const COPY_WIDTH = 720
-/** Outer clip on story mockups — hero, feature stills, and looping clips. */
-const MOCKUP_RADIUS = radius.md
+/**
+ * Outer clip on every mockup across the project pages — hero shots, feature
+ * stills, looping clips, the hero video's wallpaper box and the closing band.
+ * One value on purpose: anything whose surface is a screenshot, a video or a
+ * chart lands here. Nested chrome inside a mockup (a `framed` shot's optical
+ * inset, `Composition`'s overlay panel, a `backdrop` window) keeps its own
+ * smaller radius — this is the *outer* corner only.
+ */
+const MOCKUP_RADIUS = radius.xl
+/** A `framed` shot draws its border outside the clip, so it takes an optical +1. */
+const FRAMED_RADIUS = `${radiusPx.xl + 1}px`
 /** Gap between the feedback wall's cards, 9.588 in the file. */
 const WALL_GAP = 10
 
@@ -78,14 +93,14 @@ const BODY_STYLE: React.CSSProperties = {
   color: BODY_TEXT,
 }
 
-/** The muted heading over a row's copy — `feature` rows and the closing band. */
+/** The heading over a row's copy — `feature` rows and the closing band. */
 const ROW_HEADING: React.CSSProperties = {
   margin: 0,
   fontSize: '24px',
   fontWeight: 600,
   lineHeight: 'normal',
   letterSpacing: '-0.067em',
-  color: MUTED,
+  color: TEXT,
 }
 
 /** The muted line(s) above a story title. */
@@ -210,7 +225,12 @@ export default function ProjectStory({ project }: { project: Project }) {
       {/* Wrapped so the pill sizes to its label instead of stretching the column. */}
       {landing.hero.cta && (
         <div style={{ display: 'flex' }}>
-          <OutLink href={landing.hero.cta.href} label={landing.hero.cta.label} variant="primary" />
+          <OutLink
+            href={landing.hero.cta.href}
+            label={landing.hero.cta.label}
+            variant="primary"
+            gradient={landing.hero.cta.gradient}
+          />
         </div>
       )}
     </div>
@@ -388,8 +408,8 @@ function sectionKey(section: StorySection, i: number) {
  * The body of one story row, centered in the content column without a band
  * around it — the page decides whether it gets one. `columns` puts shots side
  * by side with their captions underneath, `row` seats a single shot beside its
- * caption, `feature` puts muted heading + body beside a tinted panel, `copy` is
- * a heading and body on the title column, and `shot` stands one screenshot on
+ * caption, `feature` puts muted heading + body beside a tinted panel — or
+ * stacked, copy then media — `copy` is a heading and body on the title column, and `shot` stands one screenshot on
  * its own. Widths are px at the file's content width, rendered as shares so each
  * group scales together.
  */
@@ -432,7 +452,9 @@ function SectionContent({ section }: { section: StorySection }) {
           display: 'flex',
           flexDirection: 'column',
           gap: space.xl,
-          ...(section.stack ? { maxWidth: `${section.copyWidth}px` } : null),
+          ...(section.stack
+            ? { width: '100%', maxWidth: `${section.copyWidth}px` }
+            : null),
         }}
       >
         <h2 style={ROW_HEADING}>{section.heading}</h2>
@@ -485,12 +507,21 @@ function SectionContent({ section }: { section: StorySection }) {
           style={{
             display: 'flex',
             flexDirection: 'column',
+            alignItems: 'center',
             gap: isMobile ? space['2xl'] : `${section.gap}px`,
             width: '100%',
           }}
         >
           {copy}
-          {media}
+          {media && (
+            <div
+              style={{
+                width: section.panelWidth ? heroWidth(section.panelWidth) : '100%',
+              }}
+            >
+              {media}
+            </div>
+          )}
         </div>
       )
     }
@@ -701,7 +732,7 @@ function HeroVideo({ video, maxWidth }: { video: LandingVideo; maxWidth: number 
     position: 'relative',
     width: heroWidth(maxWidth),
     aspectRatio: video.aspect.replace(/\s/g, ''),
-    borderRadius: radius['2xl'],
+    borderRadius: MOCKUP_RADIUS,
     overflow: 'hidden',
     background: FRAME_BG,
   }
@@ -800,11 +831,14 @@ function OutLink({
   href,
   label,
   variant = 'ghost',
+  gradient,
 }: {
   href: string
   label: string
   /** `primary` for the hero CTA; the link rows stay on the ghost pill. */
   variant?: ButtonVariant
+  /** no3y Code's purple–pink wash in place of the orange accent. */
+  gradient?: boolean
 }) {
   const [hovered, setHovered] = useState(false)
   const palette = resolvePalette(variant, hovered ? 'hover' : 'default')
@@ -824,15 +858,16 @@ function OutLink({
         boxSizing: 'border-box',
         padding: `0 ${space.lg}`,
         borderRadius: radius.full,
-        border: `1px solid ${palette.borderColor}`,
-        background: palette.background,
-        color: palette.color,
+        border: gradient ? 'none' : `1px solid ${palette.borderColor}`,
+        background: gradient ? NO3Y_CTA : palette.background,
+        color: gradient ? color.accent.onAccent : palette.color,
+        opacity: hovered && gradient ? HOVER_OPACITY : 1,
         fontSize: type['label-m'].fontSize,
         fontWeight: type['label-m'].fontWeight,
         lineHeight: type['label-m'].lineHeight,
         textDecoration: 'none',
         whiteSpace: 'nowrap',
-        transition: 'background 150ms ease, border-color 150ms ease',
+        transition: 'background 150ms ease, border-color 150ms ease, opacity 150ms ease',
       }}
     >
       {label}
@@ -976,7 +1011,7 @@ function Band({ section }: { section: Extract<StorySection, { kind: 'band' }> })
       style={{
         position: 'relative',
         width: pct(width, CONTENT_WIDTH),
-        borderRadius: radius['2xl'],
+        borderRadius: MOCKUP_RADIUS,
         overflow: 'hidden',
         ...(isMobile
           ? { display: 'flex', flexDirection: 'column', gap: space.xl, padding: space.xl }
@@ -1056,7 +1091,7 @@ function ShotFrame({ shot, style }: { shot: LandingShot; style?: React.CSSProper
         border: framed
           ? `${shot.frame === 'border' ? '2px' : '0.57px'} solid ${FRAME_BORDER}`
           : undefined,
-        borderRadius: plain ? MOCKUP_RADIUS : framed ? '9px' : radius.md,
+        borderRadius: framed ? FRAMED_RADIUS : MOCKUP_RADIUS,
         overflow: 'hidden',
         background: plain ? undefined : FRAME_BG,
         display: 'flex',

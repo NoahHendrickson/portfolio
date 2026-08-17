@@ -209,104 +209,125 @@ export default function Experience() {
         padding: isMobile ? '32px 20px 60px' : `80px ${pageGutter()} 80px ${shellPad()}`,
       }}
     >
-      <SectionHeading title="How I’m designing now" />
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: space.xl,
+          maxWidth: '700px',
+        }}
+      >
+        <SectionHeading title="How I’m designing now" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <p style={{ ...heading, color: MUTED }}>Vibe coding, design engineering, agent orchestrating?</p>
+          {nowParagraphs.map((paragraph) => (
+            <p key={paragraph.slice(0, 40)} style={body}>
+              {paragraph}
+            </p>
+          ))}
+        </div>
+      </div>
 
       <div
         style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: '16px',
-          maxWidth: '700px',
+          gap: space.xl,
+          width: '100%',
+          // A step up from the section gap so this heading sits farther from
+          // "How I'm designing now" than a title sits from its own copy.
+          paddingTop: isMobile ? space.lg : space.xl,
         }}
       >
-        <p style={{ ...heading, color: MUTED }}>Vibe coding, design engineering, agent orchestrating?</p>
-        {nowParagraphs.map((paragraph) => (
-          <p key={paragraph.slice(0, 40)} style={body}>
-            {paragraph}
-          </p>
-        ))}
-      </div>
-
-      <SectionHeading title="Previous roles" />
-
-      {entries.map((entry) => (
+        <SectionHeading title="Previous roles" />
         <div
-          key={entry.role}
           style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: isMobile ? '16px' : '24px',
-            maxWidth: '700px',
+            gap: isMobile ? '48px' : '56px',
             width: '100%',
-            paddingBottom: '24px',
-            borderBottom: `1px solid ${BORDER}`,
           }}
         >
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <h3 style={{ ...heading, color: TEXT }}>{entry.role}</h3>
-            <p style={{ ...heading, color: MUTED }}>{entry.detail}</p>
-          </div>
+          {entries.map((entry) => (
+            <div
+              key={entry.role}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: isMobile ? '16px' : '24px',
+                maxWidth: '700px',
+                width: '100%',
+                paddingBottom: '24px',
+                borderBottom: `1px solid ${BORDER}`,
+              }}
+            >
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <h3 style={{ ...heading, color: TEXT }}>{entry.role}</h3>
+                <p style={{ ...heading, color: MUTED }}>{entry.detail}</p>
+              </div>
 
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              // One rhythm for everything in the entry — paragraph to
-              // paragraph, and the last paragraph to the bullet list that
-              // closes it.
-              gap: isMobile ? '16px' : '24px',
-            }}
-          >
-            {entry.paragraphs.map((paragraph) => (
-              <p key={paragraph} style={body}>
-                {paragraph}
-              </p>
-            ))}
-            {entry.bullets && (
-              <ul
+              <div
                 style={{
-                  margin: 0,
-                  paddingInlineStart: '24px',
-                  listStyleType: 'disc',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  // One rhythm for everything in the entry — paragraph to
+                  // paragraph, and the last paragraph to the bullet list that
+                  // closes it.
+                  gap: isMobile ? '16px' : '24px',
                 }}
               >
-                {entry.bullets.map((item, i) => {
-                  const text = typeof item === 'string' ? item : item.text
-                  return (
-                    <li
-                      key={text}
-                      style={{
-                        ...body,
-                        // A plain list runs its lines together, which is right
-                        // for Amazon's. Bullets that carry an outcome need air
-                        // between them so each result groups with its own
-                        // bullet — as a margin rather than the list turning
-                        // into a flex column, which would blockify the items
-                        // and drop their markers.
-                        ...(i > 0 && typeof item !== 'string' ? { marginTop: space.md } : null),
-                      }}
-                    >
-                      {text}
-                      {typeof item !== 'string' && (
-                        <span
+                {entry.paragraphs.map((paragraph) => (
+                  <p key={paragraph} style={body}>
+                    {paragraph}
+                  </p>
+                ))}
+                {entry.bullets && (
+                  <ul
+                    style={{
+                      margin: 0,
+                      paddingInlineStart: '24px',
+                      listStyleType: 'disc',
+                    }}
+                  >
+                    {entry.bullets.map((item, i) => {
+                      const text = typeof item === 'string' ? item : item.text
+                      return (
+                        <li
+                          key={text}
                           style={{
-                            display: 'block',
-                            marginTop: space.xs,
-                            color: ORANGE,
-                            fontWeight: 500,
+                            ...body,
+                            // A plain list runs its lines together, which is right
+                            // for Amazon's. Bullets that carry an outcome need air
+                            // between them so each result groups with its own
+                            // bullet — as a margin rather than the list turning
+                            // into a flex column, which would blockify the items
+                            // and drop their markers.
+                            ...(i > 0 && typeof item !== 'string' ? { marginTop: space.md } : null),
                           }}
                         >
-                          {item.result}
-                        </span>
-                      )}
-                    </li>
-                  )
-                })}
-              </ul>
-            )}
-          </div>
+                          {text}
+                          {typeof item !== 'string' && (
+                            <span
+                              style={{
+                                display: 'block',
+                                marginTop: space.xs,
+                                color: ORANGE,
+                                fontWeight: 500,
+                              }}
+                            >
+                              {item.result}
+                            </span>
+                          )}
+                        </li>
+                      )
+                    })}
+                  </ul>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
-      ))}
+      </div>
 
       <div
         style={{

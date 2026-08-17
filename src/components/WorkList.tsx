@@ -71,8 +71,7 @@ type ProjectCard = {
   /** A solid well colour. Career and Graphic Design drop the shader and sit on this. */
   fill?: string
   /**
-   * A still photograph filling the well under the panels. D2 Stat Builder
-   * sits on the Monterey dark wallpaper rather than a live shader.
+   * A still photograph filling the well under the panels.
    */
   backdrop?: string
   /**
@@ -86,8 +85,8 @@ type ProjectCard = {
   /** Hover colour for the card outline and the arrow. */
   accent: string
   /**
-   * The well's designed box. Defaults to the 966 × 266 the Career rows draw;
-   * Personal rows share no3y Code's taller export so the three cards match.
+   * The well's designed box. Defaults to the 966 × 266 the Career rows draw.
+   * Personal `image` cards use their export's ratio.
    */
   aspect?: string
   panels: Panel[]
@@ -123,18 +122,13 @@ const personal: ProjectCard[] = [
     href: '/work/stat-builder',
     title: projects['stat-builder'].title,
     desc: '3rd party tool for the Destiny 2 community',
-    backdrop: '/work/bento/monterey-dark.webp',
     accent: '#c56430',
-    aspect: PERSONAL_ASPECT,
-    panels: [
-      {
-        src: '/work/bento/shot-stat-builder.png',
-        alt: 'D2 Stat Builder — the armor table beside the stat sliders',
-        left: '17.184%',
-        top: '17.293%',
-        width: '65.838%',
-      },
-    ],
+    aspect: '3063 / 951',
+    image: {
+      src: '/work/bento/stat-builder-card.jpg',
+      alt: 'D2 Stat Builder — the armor table, class tabs and stat sliders in a browser window, with pixel armor icons on yellow',
+    },
+    panels: [],
   },
   {
     href: '/work/armory',
@@ -434,9 +428,8 @@ function ProjectRowCard({ card, isMobile }: { card: ProjectCard; isMobile: boole
           />
         )}
 
-        {/* A still photograph under the panels — D2 Stat Builder's Monterey
-            wallpaper. Distinct from `image`, which replaces the whole well
-            and holds its own ratio on mobile. */}
+        {/* A still photograph under the panels. Distinct from `image`, which
+            replaces the whole well and holds its own ratio on mobile. */}
         {card.backdrop && (
           <img
             src={card.backdrop}

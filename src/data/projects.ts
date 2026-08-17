@@ -15,6 +15,8 @@ const LIME = '#cef982'
 
 /** Upstream of the no3y Code fork. */
 const T3_CODE = 'https://github.com/pingdotgg/t3code'
+/** Desktop builds — GitHub Releases on the fork. */
+const NO3Y_CODE_DOWNLOAD = 'https://github.com/NoahHendrickson/t3code/releases'
 
 export type Shot = {
   /** Shown on the placeholder card until `src` is filled in. */
@@ -208,7 +210,7 @@ export type StorySection =
       body: Prose
       copyWidth: number
       panelWidth?: number
-      /** Heading and copy above the media, which then runs the full column. */
+      /** Heading and copy above the media. Copy is a centred `copyWidth` column; media fills the row, or `panelWidth` if set. */
       stack?: boolean
       shot?: LandingShot
       /** A looping clip in place of `shot` — no3y Code's design mode row. */
@@ -344,9 +346,10 @@ export type Landing = {
     /**
      * The one call to action, seated under the copy rather than over it —
      * Moonfang Armory's "Check it out". It takes the accent pill, since it is
-     * the only thing on the page asking to be clicked.
+     * the only thing on the page asking to be clicked. `gradient` is no3y
+     * Code's purple–pink fill instead of the orange accent.
      */
-    cta?: { label: string; href: string }
+    cta?: { label: string; href: string; gradient?: boolean }
     /** App shot below the copy block. */
     shot?: LandingShot
     /** A looping clip in place of `shot` — Moonfang Armory. Shares `shotWidth`. */
@@ -708,9 +711,8 @@ export const projects: Record<string, Project> = {
     },
     pageReady: true,
     landing: {
-      // Frame 149:12222 — continuous / left-aligned shell, but the rows sit 200
-      // apart where the title block runs 120 into the hero, and the composer row
-      // is centred at 1225 of the 1272 column.
+      // Frame 287:5099 — stacked sections, copy centred at 700. Title block
+      // runs 120 into the hero, rows sit 200 apart.
       eyebrow: [
         [{ text: 'Fork of ' }, { text: 'T3 Code', href: T3_CODE }],
         'Agent orchestration + Design mode',
@@ -718,14 +720,15 @@ export const projects: Record<string, Project> = {
       flow: 'continuous',
       gap: 120,
       rowGap: 200,
-      align: 'start',
-      rowAlign: 'center',
+      align: 'center',
+      copyWidth: 700,
       titleRhythm: 'paired',
       eyebrowPlacement: 'below',
       hero: {
         body: [
           'This is the culmination of a few projects and ideas. I wanted to edit code with the precision of Figma’s design mode inside an agentic coding tool and tackle issues I have with most tools’ sidebar UX. I forked T3 Code so I could make UX/UI improvements, build a design mode and add small features I want. I am not associated with T3 Code in any way and only work on my fork :)',
         ],
+        cta: { label: 'Github', href: NO3Y_CODE_DOWNLOAD, gradient: true },
         shot: {
           src: '/work/no3y-code/hero.png',
           alt: 'no3y Code on the desktop — a new portfolio thread asking what we should build',
@@ -738,7 +741,7 @@ export const projects: Record<string, Project> = {
         {
           kind: 'feature',
           gap: 80,
-          heading: 'the idea',
+          heading: 'The idea',
           body: [
             'I wanted a really powerful design mode in the agent orchestration tools I was using. I didn’t want to just select an element and prompt. Sometimes I wanted to be precise with my edits and send those off to an agent to apply. I also wanted more information at a glance when I was working on multiple projects at once.',
             [
@@ -763,12 +766,12 @@ export const projects: Record<string, Project> = {
               { text: '—it’s an awesome open-source app and is very fork-friendly.' },
             ],
           ],
-          copyWidth: 625,
-          panelWidth: 567,
+          copyWidth: 700,
+          stack: true,
           shot: {
             src: '/work/no3y-code/idea.png',
             alt: 'no3y Code’s thread sidebar beside the design mode properties panel, over a fluted gradient',
-            aspect: '567 / 464',
+            aspect: '1272 / 464',
             frame: 'plain',
           },
         },
@@ -777,8 +780,9 @@ export const projects: Record<string, Project> = {
           gap: 80,
           heading: 'Thread cards',
           body: 'One line wasn’t enough. When multitasking across projects and models, I wanted to see the project, branch, and model at a glance. T3 Code provided a strong foundation, and I designed the interface around the context I rely on most.',
-          copyWidth: 434.5,
-          panelWidth: 757.5,
+          copyWidth: 700,
+          panelWidth: 789,
+          stack: true,
           shot: {
             src: '/work/no3y-code/sidebar.png',
             alt: 'Thread card v2 — status, prompt, branch and model across default, hover and selected states',
@@ -795,7 +799,7 @@ export const projects: Record<string, Project> = {
             'My motivation was that, as a designer, I still see enormous value in getting my hands dirty. Sometimes I need to compare variations—16 px or 24 px—and design mode lets me test both before applying the one that works.',
             'Canvas mode was another feature I knew I wanted. It lets you pan around the page and focus on certain areas. It also allowed an easy way to see the page at different sizes.',
           ],
-          copyWidth: 720,
+          copyWidth: 700,
           stack: true,
           video: {
             src: '/work/no3y-code/design-mode.mp4',
@@ -806,19 +810,19 @@ export const projects: Record<string, Project> = {
           },
         },
         {
-          // Frame 287:6508 draws the BentoCard at 456×351; the page runs it at
-          // the sidebar row's 757.5 so it doesn't sit small under Design mode.
+          // Frame 287:6508 — BentoCard 1225×351, centred under 700-wide copy.
           // The export is square-cornered — MOCKUP_RADIUS clips it in CSS.
           kind: 'feature',
           gap: 80,
           heading: 'Message composer',
           body: 'I prefer a compact message composer and broke it into 3 sections, the branch information, the input and then model parameters.',
-          copyWidth: 434.5,
-          panelWidth: 757.5,
+          copyWidth: 700,
+          panelWidth: 1225,
+          stack: true,
           shot: {
             src: '/work/no3y-code/composer.png',
             alt: 'The message composer on a gradient card — worktree and branch above the input, mode and model below it',
-            aspect: '456 / 351',
+            aspect: '1225 / 351',
             frame: 'plain',
           },
         },
