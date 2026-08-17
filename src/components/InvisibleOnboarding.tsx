@@ -6,10 +6,42 @@ import { useIsMobile } from '../hooks/useIsMobile'
 import { PROJECT_MOBILE_PAD, shellPad } from '../layout'
 import { isUnlocked } from '../workGate'
 
-const CONTENT_WIDTH = 1225
-const COPY_WIDTH = 387.5
-const MEDIA_WIDTH = 757.5
-const ROW_GAP = 80
+/*
+  The page runs no3y Code's stacked rhythm (`ProjectStory`'s `continuous` flow
+  with `stack` rows): a centred 700px copy column with the media below it at the
+  full width of the content column, rather than the copy-left / media-right
+  1225 grid this page opened on. The measures below are that frame's — 1272 for
+  the content column, 700 for the copy, 80 from a heading's copy to its media.
+*/
+/** The content column at the 1512 frame, which every media width is a share of. */
+const CONTENT_WIDTH = 1272
+/** The centred copy column — the title block and every row's heading + body. */
+const COPY_WIDTH = 700
+/**
+ * The two charts are drawn at their own width rather than filling the column:
+ * they are CSS boxes on a fixed 766 × 430, so stretching them to the column
+ * would stand a 590px-tall orange block between two paragraphs.
+ */
+const CHART_WIDTH = 766
+/** Copy to media inside one row. */
+const STACK_GAP = 80
+/**
+ * The space above a row. A row opening its own heading stands clear of the one
+ * before it; one continuing the heading above it (the three "process" beats)
+ * sits closer, so the group still reads as one section.
+ */
+const LEAD = { title: 120, section: 200, tight: 120 } as const
+const LEAD_MOBILE = { title: 64, section: 120, tight: 64 } as const
+
+/** Outer clip on the mockups — `ProjectStory`'s `MOCKUP_RADIUS`. */
+const MOCKUP_RADIUS = radius.xl
+
+/**
+ * A media width. Holds the designed px until the column reaches the frame's
+ * width, then takes the same share of it — the same curve `ProjectStory` runs,
+ * so a fixed-px chart doesn't stay pinned while the screenshots grow.
+ */
+const mediaWidth = (px: number) => `min(100%, max(${px}px, ${(px / CONTENT_WIDTH) * 100}%))`
 
 const media = {
   research: '/work/invisible/onboarding/research.png',
@@ -47,23 +79,32 @@ export default function InvisibleOnboarding() {
       <main
         style={{
           boxSizing: 'border-box',
-          // Shared left edge with every other page (see `layout.ts`).
-          padding: isMobile ? `24px ${pad} 64px` : `32px 0 80px ${pad}`,
+          /*
+            The gutter is symmetric now that the column is centred inside it —
+            `shellPad()` is itself viewport-centred, so a full-width row still
+            resolves the same left edge as every other page (see `layout.ts`).
+          */
+          padding: isMobile ? `24px ${pad} 64px` : `32px ${pad} 80px`,
         }}
       >
+        {/*
+          One track, no gap — the hero and every row carry their own lead, so a
+          continuation row can sit closer than one opening a heading.
+        */}
         <div
           style={{
-            width: isMobile ? '100%' : `min(${CONTENT_WIDTH}px, calc(100vw - 2 * ${shellPad()}))`,
+            width: '100%',
             display: 'flex',
             flexDirection: 'column',
-            gap: isMobile ? space['4xl'] : '120px',
+            alignItems: 'center',
           }}
         >
           <Hero isMobile={isMobile} />
 
           <StoryRow
-            heading="the problem"
-            wideMedia
+            lead="title"
+            heading="The problem"
+            width={CHART_WIDTH}
             body={
               <p style={{ ...bodyStyle, color: color.text.primary }}>
                 Meridial’s onboarding flow conversion rate was severely underperforming. There were
@@ -76,7 +117,7 @@ export default function InvisibleOnboarding() {
           </StoryRow>
 
           <StoryRow
-            heading="the process"
+            heading="The process"
             body={
               <Paragraphs>
                 <p style={bodyStyle}>
@@ -101,6 +142,7 @@ export default function InvisibleOnboarding() {
           </StoryRow>
 
           <StoryRow
+            lead="tight"
             body={
               <Paragraphs>
                 <p style={bodyStyle}>
@@ -125,6 +167,7 @@ export default function InvisibleOnboarding() {
           </StoryRow>
 
           <StoryRow
+            lead="tight"
             body={
               <Paragraphs>
                 <p style={bodyStyle}>
@@ -147,8 +190,8 @@ export default function InvisibleOnboarding() {
           </StoryRow>
 
           <StoryRow
-            heading="the experiment"
-            wideMedia
+            heading="The experiment results"
+            width={CHART_WIDTH}
             body={
               <Paragraphs>
                 <p style={bodyStyle}>
@@ -190,7 +233,7 @@ export default function InvisibleOnboarding() {
           </StoryRow>
 
           <StoryRow
-            heading="what’s next?"
+            heading="What’s next?"
             body={
               <p style={bodyStyle}>
                 I wanted to carry the momentum from the experiment and continue to improve our
@@ -219,21 +262,24 @@ function Hero({ isMobile }: { isMobile: boolean }) {
   return (
     <section
       style={{
-        width: isMobile ? '100%' : '720px',
+        width: '100%',
+        maxWidth: `${COPY_WIDTH}px`,
         display: 'flex',
         flexDirection: 'column',
         gap: space.lg,
       }}
     >
+      {/*
+        The title wraps inside the 700 column now rather than running out past
+        it on one line, which is what seats it over the stacked rows.
+      */}
       <h1
         style={{
           margin: 0,
-          width: isMobile ? '100%' : '980px',
-          fontSize: isMobile ? '36px' : '56px',
+          fontSize: isMobile ? '34px' : 'clamp(40px, 4vw, 56px)',
           fontWeight: 600,
           lineHeight: 'normal',
-          letterSpacing: '-1.6px',
-          whiteSpace: isMobile ? undefined : 'nowrap',
+          letterSpacing: '-0.029em',
         }}
       >
         Revitalizing Meridial’s onboarding flow
@@ -288,42 +334,42 @@ function Hero({ isMobile }: { isMobile: boolean }) {
   )
 }
 
+/**
+ * One stacked row: heading + copy on the centred 700 column, media below it at
+ * the full width of the content column unless `width` names its own. `lead` is
+ * the space above the row — `section` for one opening a heading, `tight` for
+ * one continuing the heading above it, `title` for the first row under the hero.
+ */
 function StoryRow({
   heading,
   body,
   children,
-  wideMedia = false,
+  width,
+  lead = 'section',
 }: {
   heading?: string
   body: ReactNode
   children: ReactNode
-  wideMedia?: boolean
+  width?: number
+  lead?: keyof typeof LEAD
 }) {
   const isMobile = useIsMobile()
-  const copyWidth = wideMedia ? 379 : COPY_WIDTH
-  const mediaWidth = wideMedia ? 766 : MEDIA_WIDTH
 
   return (
     <section
-      style={
-        isMobile
-          ? {
-              width: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: space['2xl'],
-            }
-          : {
-              width: '100%',
-              display: 'grid',
-              gridTemplateColumns: `${copyWidth}fr ${mediaWidth}fr`,
-              columnGap: `${(ROW_GAP / CONTENT_WIDTH) * 100}%`,
-              alignItems: 'start',
-            }
-      }
+      style={{
+        width: '100%',
+        marginTop: `${(isMobile ? LEAD_MOBILE : LEAD)[lead]}px`,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: isMobile ? space['2xl'] : `${STACK_GAP}px`,
+      }}
     >
       <div
         style={{
+          width: '100%',
+          maxWidth: `${COPY_WIDTH}px`,
           minWidth: 0,
           display: 'flex',
           flexDirection: 'column',
@@ -337,8 +383,8 @@ function StoryRow({
               fontSize: '24px',
               fontWeight: 600,
               lineHeight: 'normal',
-              letterSpacing: '-1.6px',
-              color: color.text.muted,
+              letterSpacing: '-0.067em',
+              color: color.text.primary,
             }}
           >
             {heading}
@@ -346,7 +392,7 @@ function StoryRow({
         )}
         {body}
       </div>
-      {children}
+      <div style={{ width: width ? mediaWidth(width) : '100%' }}>{children}</div>
     </section>
   )
 }
@@ -371,8 +417,9 @@ function MediaPanel({ src, alt }: { src: string; alt: string }) {
       style={{
         display: 'block',
         width: '100%',
-        aspectRatio: `${MEDIA_WIDTH} / 421.6667`,
-        borderRadius: '13.333px',
+        // The exports' own ratio, now that they run the width of the column.
+        aspectRatio: '1515 / 844',
+        borderRadius: MOCKUP_RADIUS,
       }}
     />
   )
@@ -390,7 +437,7 @@ function FunnelChart() {
         width: '100%',
         aspectRatio: '766 / 430',
         overflow: 'hidden',
-        borderRadius: radius.xl,
+        borderRadius: MOCKUP_RADIUS,
         background: color.accent.default,
       }}
     >
@@ -438,7 +485,7 @@ function ExperimentChart() {
         width: '100%',
         aspectRatio: '766 / 430',
         overflow: 'hidden',
-        borderRadius: radius.xl,
+        borderRadius: MOCKUP_RADIUS,
         background: color.accent.default,
       }}
     >

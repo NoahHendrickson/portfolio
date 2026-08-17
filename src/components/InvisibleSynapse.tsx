@@ -6,34 +6,54 @@ import { useIsMobile } from '../hooks/useIsMobile'
 import { PROJECT_MOBILE_PAD, shellPad } from '../layout'
 import { isUnlocked } from '../workGate'
 
-const CONTENT_WIDTH = 1225
-const ROW_GAP = 80
+/*
+  The page runs no3y Code's stacked rhythm, the same as the onboarding study:
+  a centred 700px copy column with the media below it rather than the
+  copy-left / media-right 1225 grid the frame draws. See `InvisibleOnboarding`.
+*/
+/** The content column at the 1512 frame, which every media width is a share of. */
+const CONTENT_WIDTH = 1272
+/** The centred copy column — the title block and every row's heading + body. */
+const COPY_WIDTH = 700
+/** Copy to media inside one row. */
+const STACK_GAP = 80
+/** The space above a row — see `InvisibleOnboarding`'s `LEAD`. */
+const LEAD = { title: 120, section: 200, tight: 120 } as const
+const LEAD_MOBILE = { title: 64, section: 120, tight: 64 } as const
 
 /**
- * Each row in the frame splits the 1225 column differently, so the widths ride
- * along with the row rather than living on the page. They're rendered as `fr`
- * shares, so copy and media scale together below the design width.
+ * Outer clip on the mockups — `ProjectStory`'s `MOCKUP_RADIUS`, so the screenshot,
+ * the diagram and the library panel all land on the same corner as every other
+ * project page. The boxes drawn *inside* the diagram keep their own smaller radii.
  */
-const SPLITS = {
-  problem: { copy: 412, media: 733 },
-  process: { copy: 413, media: 732 },
-  library: { copy: 388, media: 757 },
-} as const
+const MOCKUP_RADIUS = radius.xl
 
+/** Holds the drawn px until the column reaches the frame's width, then takes its share. */
+const mediaWidth = (px: number) => `min(100%, max(${px}px, ${(px / CONTENT_WIDTH) * 100}%))`
+
+/*
+  Both screenshots come out of section `319:30670` whole rather than as loose
+  captures the page composes. The blueprint is two task windows on a Monterey
+  gradient (the wallpaper is a Figma gradient, so there is nothing to rebuild in
+  CSS) and the library is its own dark panel — the frame's 32px pad, 36px column
+  gap and 24px row gap are all inside the export, which is why `LibraryPanel` is
+  gone. Both are wide landscape compositions, so unlike the diagram they fill the
+  content column; at 1272 that is 2.09× and 2.01× of their exports.
+
+  The library export bakes Figma's `#1e1e1e` canvas outside a ~9.5px corner. It
+  is left in rather than cut to transparent because `MOCKUP_RADIUS` clips further
+  in than that, so the wedge never renders — re-check that if the radius drops.
+*/
 const media = {
-  blueprint: '/work/invisible/synapse/blueprint.png',
-  library: [
-    '/work/invisible/synapse/library-1.png',
-    '/work/invisible/synapse/library-2.png',
-    '/work/invisible/synapse/library-3.png',
-  ],
+  blueprint: '/work/invisible/synapse/blueprint.jpg',
+  library: '/work/invisible/synapse/library.png',
 } as const
 
-/** Aspect of each library shot, kept from the source capture. */
-const LIBRARY_ASPECTS = ['2044 / 1528', '2098 / 1568', '3396 / 876'] as const
-
-/** The wash behind the library shots is the frame's own panel, not a theme surface. */
-const LIBRARY_PANEL = 'rgba(255, 255, 255, 0.24)'
+/** Each export's own ratio, so neither is stretched. */
+const MEDIA_ASPECT = {
+  blueprint: '1328 / 586',
+  library: '2554 / 1682',
+} as const
 
 /** The legacy-platform diagram is drawn in the frame, so its palette is literal too. */
 const DIAGRAM = {
@@ -74,23 +94,29 @@ export default function InvisibleSynapse() {
       <main
         style={{
           boxSizing: 'border-box',
-          // Shared left edge with every other page (see `layout.ts`).
-          padding: isMobile ? `24px ${pad} 64px` : `32px 0 80px ${pad}`,
+          /*
+            Symmetric gutter with the column centred inside it — `shellPad()` is
+            itself viewport-centred, so this still resolves the same left edge as
+            every other page (see `layout.ts`).
+          */
+          padding: isMobile ? `24px ${pad} 64px` : `32px ${pad} 80px`,
         }}
       >
+        {/* One track, no gap — the hero and every row carry their own lead. */}
         <div
           style={{
-            width: isMobile ? '100%' : `min(${CONTENT_WIDTH}px, calc(100vw - 2 * ${shellPad()}))`,
+            width: '100%',
             display: 'flex',
             flexDirection: 'column',
-            gap: isMobile ? space['4xl'] : '120px',
+            alignItems: 'center',
           }}
         >
           <Hero isMobile={isMobile} />
 
           <StoryRow
-            heading="the problem"
-            split={SPLITS.problem}
+            lead="title"
+            heading="The problem"
+            width={DIAGRAM.width}
             body={
               <Paragraphs>
                 <p style={{ ...bodyStyle, color: color.text.primary }}>
@@ -116,46 +142,56 @@ export default function InvisibleSynapse() {
             <LegacyDiagram />
           </StoryRow>
 
+          {/*
+            The frame runs "the process" and "the blueprint" as one row, with the
+            second heading buried mid-copy beside a single screenshot. Stacked,
+            that heading has nowhere to sit, so the two become their own beats —
+            the process copy stands alone and the blueprint takes the shot, on a
+            tight lead so the pair still reads as one section.
+          */}
           <StoryRow
-            heading="the process"
-            split={SPLITS.process}
+            heading="The process"
             body={
-              <>
-                <Paragraphs gap={space.lg}>
-                  <p style={bodyStyle}>
-                    I met with the team who built the foundation of our “next-gen” annotations
-                    platform to ask questions, make suggestions and understand what they thought
-                    they needed from a Designer.
-                  </p>
-                  <p style={bodyStyle}>
-                    I interviewed some SMEs, users and operations managers to understand the
-                    problems and the needs for an AI training interface.
-                  </p>
-                </Paragraphs>
-                <SectionHeading>the blueprint</SectionHeading>
+              <Paragraphs gap={space.lg}>
                 <p style={bodyStyle}>
-                  I started with an RLHF interface to lay the foundation for our new product. One
-                  clear UX improvement we needed to add was instructions in the interface that guide
-                  you through the task. The right panel now housed instructions and gave users a
-                  tooltip that points to the element where input is needed.
+                  I met with the team who built the foundation of our “next-gen” annotations
+                  platform to ask questions, make suggestions and understand what they thought they
+                  needed from a Designer.
                 </p>
-              </>
+                <p style={bodyStyle}>
+                  I interviewed some SMEs, users and operations managers to understand the problems
+                  and the needs for an AI training interface.
+                </p>
+              </Paragraphs>
+            }
+          />
+
+          <StoryRow
+            lead="tight"
+            heading="The blueprint"
+            body={
+              <p style={bodyStyle}>
+                I started with an RLHF interface to lay the foundation for our new product. One
+                clear UX improvement we needed to add was instructions in the interface that guide
+                you through the task. The right panel now housed instructions and gave users a
+                tooltip that points to the element where input is needed.
+              </p>
             }
           >
             <img
               src={media.blueprint}
-              alt="RLHF task interface with a step-by-step instructions panel and tooltips pointing at the prompt composer"
+              alt="Two RLHF task windows side by side — one stepping through the instructions panel to the prompt composer, one annotating a pair of model responses"
               style={{
                 display: 'block',
                 width: '100%',
-                aspectRatio: `${SPLITS.process.media} / 772`,
+                aspectRatio: MEDIA_ASPECT.blueprint,
+                borderRadius: MOCKUP_RADIUS,
               }}
             />
           </StoryRow>
 
           <StoryRow
-            heading="make it re-usable"
-            split={SPLITS.library}
+            heading="Make it re-usable"
             body={
               <p style={bodyStyle}>
                 I created reusable Figma components so designing interfaces for new use cases and
@@ -163,7 +199,16 @@ export default function InvisibleSynapse() {
               </p>
             }
           >
-            <LibraryPanel />
+            <img
+              src={media.library}
+              alt="The Figma component library — header, tooling group and panel components beside the prompt, response and review-response sets, over a board of task composites"
+              style={{
+                display: 'block',
+                width: '100%',
+                aspectRatio: MEDIA_ASPECT.library,
+                borderRadius: MOCKUP_RADIUS,
+              }}
+            />
           </StoryRow>
         </div>
       </main>
@@ -175,7 +220,8 @@ function Hero({ isMobile }: { isMobile: boolean }) {
   return (
     <section
       style={{
-        width: isMobile ? '100%' : '720px',
+        width: '100%',
+        maxWidth: `${COPY_WIDTH}px`,
         display: 'flex',
         flexDirection: 'column',
         gap: space.lg,
@@ -184,10 +230,10 @@ function Hero({ isMobile }: { isMobile: boolean }) {
       <h1
         style={{
           margin: 0,
-          fontSize: isMobile ? '36px' : '56px',
+          fontSize: isMobile ? '34px' : 'clamp(40px, 4vw, 56px)',
           fontWeight: 600,
           lineHeight: 'normal',
-          letterSpacing: '-1.6px',
+          letterSpacing: '-0.029em',
         }}
       >
         Launching New AI Training Interfaces
@@ -210,40 +256,41 @@ function Hero({ isMobile }: { isMobile: boolean }) {
   )
 }
 
+/**
+ * One stacked row: heading + copy on the centred 700 column, media below it at
+ * `width`. `children` is optional — "The process" is copy on its own. `lead` is
+ * the space above the row, as on the onboarding study.
+ */
 function StoryRow({
   heading,
   body,
   children,
-  split,
+  width,
+  lead = 'section',
 }: {
   heading: string
   body: ReactNode
-  children: ReactNode
-  split: { copy: number; media: number }
+  children?: ReactNode
+  width?: number
+  lead?: keyof typeof LEAD
 }) {
   const isMobile = useIsMobile()
 
   return (
     <section
-      style={
-        isMobile
-          ? {
-              width: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: space['2xl'],
-            }
-          : {
-              width: '100%',
-              display: 'grid',
-              gridTemplateColumns: `${split.copy}fr ${split.media}fr`,
-              columnGap: `${(ROW_GAP / CONTENT_WIDTH) * 100}%`,
-              alignItems: 'start',
-            }
-      }
+      style={{
+        width: '100%',
+        marginTop: `${(isMobile ? LEAD_MOBILE : LEAD)[lead]}px`,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: isMobile ? space['2xl'] : `${STACK_GAP}px`,
+      }}
     >
       <div
         style={{
+          width: '100%',
+          maxWidth: `${COPY_WIDTH}px`,
           minWidth: 0,
           display: 'flex',
           flexDirection: 'column',
@@ -253,7 +300,7 @@ function StoryRow({
         <SectionHeading>{heading}</SectionHeading>
         {body}
       </div>
-      {children}
+      {children && <div style={{ width: width ? mediaWidth(width) : '100%' }}>{children}</div>}
     </section>
   )
 }
@@ -266,8 +313,8 @@ function SectionHeading({ children }: { children: ReactNode }) {
         fontSize: '24px',
         fontWeight: 600,
         lineHeight: 'normal',
-        letterSpacing: '-1.6px',
-        color: color.text.muted,
+        letterSpacing: '-0.067em',
+        color: color.text.primary,
       }}
     >
       {children}
@@ -296,7 +343,7 @@ function LegacyDiagram() {
         width: '100%',
         aspectRatio: `${DIAGRAM.width} / ${DIAGRAM.height}`,
         overflow: 'hidden',
-        borderRadius: radius.xl,
+        borderRadius: MOCKUP_RADIUS,
         background: DIAGRAM.bg,
       }}
     >
@@ -348,44 +395,3 @@ function LegacyDiagram() {
   )
 }
 
-/**
- * The component library sits on a tinted panel. Its padding and the gaps between
- * shots are percentages of the panel width, so the inset holds its proportion
- * instead of crushing the shots when the column narrows.
- */
-function LibraryPanel() {
-  const inset = (px: number) => `${(px / SPLITS.library.media) * 100}%`
-
-  return (
-    <div
-      style={{
-        boxSizing: 'border-box',
-        width: '100%',
-        padding: `${inset(24)} ${inset(80)}`,
-        borderRadius: radius.lg,
-        background: LIBRARY_PANEL,
-        overflow: 'hidden',
-      }}
-    >
-      {media.library.map((src, index) => (
-        <img
-          key={src}
-          src={src}
-          alt={
-            index === 2
-              ? 'Component library page of task panel variants'
-              : 'Figma component library of annotation interface pieces'
-          }
-          style={{
-            display: 'block',
-            width: '100%',
-            aspectRatio: LIBRARY_ASPECTS[index],
-            // Flex `gap` in percent resolves against an indefinite block size, so
-            // the rhythm is a top margin — that one resolves against the width.
-            marginTop: index === 0 ? 0 : inset(24),
-          }}
-        />
-      ))}
-    </div>
-  )
-}
