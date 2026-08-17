@@ -16,6 +16,7 @@ storybook-static
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
+.cursor
 .idea
 .DS_Store
 *.suo
@@ -28,3 +29,8 @@ storybook-static
 
 # Per-machine Claude Code settings
 .claude/settings.local.json
+
+# Scratch from local tooling — review-run artifacts and generated documents.
+# Neither is site source; nothing in src/ or public/ reads from them.
+bridge
+outputs
