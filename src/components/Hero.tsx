@@ -5,17 +5,18 @@ const TEXT = color.text.primary
 const MUTED = color.text.muted
 
 /**
- * The Me tab's opening block. The display sizes here sit off the shared type
- * ramp — the Figma frame sets them directly — so they stay literal, with a
- * clamp so they scale down with the column below 1512px.
+ * The Me tab's opening block. The sizes sit off the shared type ramp — the
+ * Figma frame (`320:30805`) sets them directly: a 24px medium title over 18px
+ * subtitle and body copy, all small enough now that nothing needs to clamp
+ * with the column.
  */
 export default function Hero() {
   const isMobile = useIsMobile()
 
   const body: React.CSSProperties = {
     margin: 0,
-    maxWidth: '721px',
-    fontSize: isMobile ? '17px' : 'clamp(16px, 1.6vw, 24px)',
+    maxWidth: '700px',
+    fontSize: isMobile ? '17px' : '18px',
     fontWeight: 400,
     lineHeight: 1.35,
     letterSpacing: '-0.2px',
@@ -23,20 +24,21 @@ export default function Hero() {
 
   const subtitle: React.CSSProperties = {
     margin: 0,
-    fontSize: isMobile ? '19px' : 'clamp(18px, 1.6vw, 24px)',
-    fontWeight: 600,
+    fontSize: '18px',
+    fontWeight: 500,
     lineHeight: 1.3,
     letterSpacing: '-0.2px',
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '16px' : 'clamp(14px, 1.6vw, 24px)' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '16px' : '24px' }}>
       <h1
         style={{
           margin: 0,
-          fontSize: isMobile ? '34px' : 'clamp(32px, 3.2vw, 48px)',
-          fontWeight: 600,
+          fontSize: '24px',
+          fontWeight: 500,
           lineHeight: 1.1,
+          // The file keeps the display tracking on the smaller title.
           letterSpacing: '-1.6px',
           color: TEXT,
         }}

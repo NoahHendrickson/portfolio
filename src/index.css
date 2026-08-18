@@ -97,10 +97,10 @@ html, body {
   animation: tab-content-in 300ms cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
-/* Design-tab bento cards — accent stroke on the link (outline isn't clipped
-   by the article's overflow:hidden, and doesn't shift layout). The textured
-   cards set --bento-accent to their tint colour; everything else falls back
-   to the sitewide orange. */
+/* Work-tab card art — accent stroke on the link (outline isn't clipped by the
+   overflow:hidden, and doesn't shift layout). Each card sets --bento-accent to
+   its palette's tint; anything without one falls back to the sitewide orange.
+   The caption sits below the art now, so there is no frost shim over it. */
 .work-bento-card {
   position: relative;
   transition: transform 220ms ease, box-shadow 220ms ease;
@@ -109,32 +109,6 @@ html, body {
   outline: 1px solid var(--bento-accent, var(--color-orange));
   outline-offset: -1px;
 }
-.work-bento-card .work-bento-arrow {
-  /* The shim is a dark frost over the well, so the arrow rides the light ramp. */
-  color: var(--color-text-primary);
-  transition: color 200ms ease;
-}
-.work-bento-card:hover .work-bento-arrow {
-  color: var(--color-on-accent);
-}
-
-/* Title shim — a low-opacity frost over the well, masked so the top edge
-   feathers out instead of cutting a hard line. Touch keeps it visible;
-   hover hides it until the card is hovered or focused, so the art reads first. */
-.work-bento-shim {
-  position: absolute;
-  left: 0;
-  right: 0;
-  /* backdrop-filter + overflow:hidden + radius leaves a 1px unpainted
-     strip at the clip edge; hang past it so the card's overflow hides it. */
-  bottom: -2px;
-  z-index: 1;
-  background: color-mix(in srgb, var(--color-bg-primary) 40%, transparent);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  mask-image: linear-gradient(to bottom, transparent, #000 var(--space-3xl));
-  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 var(--space-3xl));
-}
 @media (hover: hover) {
   .work-bento-card:hover,
   .work-bento-card:focus-visible {
@@ -142,23 +116,9 @@ html, body {
     transform: translateY(-4px) scale(1.02);
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
   }
-  .work-bento-shim {
-    opacity: 0;
-    transform: translateY(6px);
-    pointer-events: none;
-    transition:
-      opacity 180ms ease,
-      transform 220ms ease;
-  }
-  .work-bento-card:hover .work-bento-shim,
-  .work-bento-card:focus-visible .work-bento-shim {
-    opacity: 1;
-    transform: none;
-  }
 }
 @media (prefers-reduced-motion: reduce) {
-  .work-bento-card,
-  .work-bento-shim {
+  .work-bento-card {
     transition: none;
   }
   .work-bento-card:hover,

@@ -15,8 +15,8 @@ const LIME = '#cef982'
 
 /** Upstream of the no3y Code fork. */
 const T3_CODE = 'https://github.com/pingdotgg/t3code'
-/** Desktop builds — GitHub Releases on the fork. */
-const NO3Y_CODE_DOWNLOAD = 'https://github.com/NoahHendrickson/t3code/releases'
+/** Desktop builds — GitHub Releases on the fork. `WorkList`'s card links here too. */
+export const NO3Y_CODE_DOWNLOAD = 'https://github.com/NoahHendrickson/t3code/releases'
 
 export type Shot = {
   /** Shown on the placeholder card until `src` is filled in. */

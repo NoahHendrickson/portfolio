@@ -1,6 +1,5 @@
 import { color, radius, space } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
-import { pageGutter, shellPad } from '../layout'
 
 const TEXT = color.text.primary
 const MUTED = color.text.muted
@@ -151,7 +150,13 @@ const entries: Entry[] = [
   },
 ]
 
-function SectionHeading({ title }: { title: string }) {
+/**
+ * A panel's title over its rule. The rule is the plain divider border rather
+ * than the accent it used to be — an orange hairline under every section
+ * heading read as a highlight on the one thing that needs none, and it spent
+ * the accent on chrome that repeats on every tab.
+ */
+export function SectionHeading({ title }: { title: string }) {
   return (
     <h2
       style={{
@@ -159,7 +164,7 @@ function SectionHeading({ title }: { title: string }) {
         width: '100%',
         maxWidth: '700px',
         paddingBottom: '8px',
-        borderBottom: `1px solid ${ORANGE}`,
+        borderBottom: `1px solid ${BORDER}`,
         fontSize: '20px',
         fontWeight: 600,
         lineHeight: 1.3,
@@ -172,74 +177,77 @@ function SectionHeading({ title }: { title: string }) {
   )
 }
 
-/**
- * Below the fold on the Me tab — how I'm designing now, previous roles, and
- * the LLM quotes. Drawn from the July 2026 file (node `265:33458`).
+const heading: React.CSSProperties = {
+  margin: 0,
+  fontSize: '20px',
+  fontWeight: 600,
+  lineHeight: 1.3,
+  letterSpacing: '-0.2px',
+}
+
+// The role title pair matches the Hero's "Product Designer &" subtitle style.
+const roleTitle: React.CSSProperties = {
+  margin: 0,
+  fontSize: '18px',
+  fontWeight: 500,
+  lineHeight: 1.3,
+  letterSpacing: '-0.2px',
+}
+
+const body: React.CSSProperties = {
+  margin: 0,
+  fontSize: '16px',
+  fontWeight: 400,
+  lineHeight: 1.3,
+  letterSpacing: '-0.2px',
+  color: TEXT,
+}
+
+/*
+ * These three used to stack as one `Experience` section below the Me tab's
+ * fold. The vertical-tab home page splits them across its own tabs — How I
+ * design, Where I've been, LOLs — so each exports on its own, with the page
+ * column supplying the width and padding they carried themselves before.
  */
-export default function Experience() {
-  const isMobile = useIsMobile()
 
-  const heading: React.CSSProperties = {
-    margin: 0,
-    fontSize: '20px',
-    fontWeight: 600,
-    lineHeight: 1.3,
-    letterSpacing: '-0.2px',
-  }
-
-  const body: React.CSSProperties = {
-    margin: 0,
-    fontSize: '16px',
-    fontWeight: 400,
-    lineHeight: 1.3,
-    letterSpacing: '-0.2px',
-    color: TEXT,
-  }
-
+/** The "How I design" tab — drawn from the July 2026 file (node `265:33458`). */
+export function DesigningNow() {
   return (
     <section
-      id="about"
       style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: isMobile ? '48px' : '56px',
-        // Shared left edge with the rest of the page; the right side stays on
-        // the plain gutter because this block sits inside the Me column (see
-        // `App`), which is narrower than the viewport the inset centres on.
-        padding: isMobile ? '32px 20px 60px' : `80px ${pageGutter()} 80px ${shellPad()}`,
+        gap: space.xl,
+        maxWidth: '700px',
       }}
     >
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: space.xl,
-          maxWidth: '700px',
-        }}
-      >
-        <SectionHeading title="How I’m designing now" />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <p style={{ ...heading, color: MUTED }}>Vibe coding, design engineering, agent orchestrating?</p>
-          {nowParagraphs.map((paragraph) => (
-            <p key={paragraph.slice(0, 40)} style={body}>
-              {paragraph}
-            </p>
-          ))}
-        </div>
+      <SectionHeading title="How I’m designing now" />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <p style={{ ...heading, color: MUTED }}>Vibe coding, design engineering, agent orchestrating?</p>
+        {nowParagraphs.map((paragraph) => (
+          <p key={paragraph.slice(0, 40)} style={body}>
+            {paragraph}
+          </p>
+        ))}
       </div>
+    </section>
+  )
+}
 
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: space.xl,
-          width: '100%',
-          // A step up from the section gap so this heading sits farther from
-          // "How I'm designing now" than a title sits from its own copy.
-          paddingTop: isMobile ? space.lg : space.xl,
-        }}
-      >
-        <SectionHeading title="Previous roles" />
+/** The "Where I've been" tab — the career entries. */
+export function PreviousRoles() {
+  const isMobile = useIsMobile()
+
+  return (
+    <section
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: space.xl,
+        width: '100%',
+      }}
+    >
+      <SectionHeading title="Previous roles" />
         <div
           style={{
             display: 'flex',
@@ -262,8 +270,8 @@ export default function Experience() {
               }}
             >
               <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <h3 style={{ ...heading, color: TEXT }}>{entry.role}</h3>
-                <p style={{ ...heading, color: MUTED }}>{entry.detail}</p>
+                <h3 style={{ ...roleTitle, color: TEXT }}>{entry.role}</h3>
+                <p style={{ ...roleTitle, color: MUTED }}>{entry.detail}</p>
               </div>
 
               <div
@@ -327,42 +335,46 @@ export default function Experience() {
             </div>
           ))}
         </div>
-      </div>
+    </section>
+  )
+}
 
+/** The "LOLs" tab — the LLM quote clippings. */
+export function LlmQuotes() {
+  return (
+    <section
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: space.xl,
+        width: '100%',
+      }}
+    >
+      <p
+        style={{
+          margin: 0,
+          fontSize: '16px',
+          fontWeight: 400,
+          lineHeight: 1.3,
+          letterSpacing: '-0.2px',
+          color: MUTED,
+        }}
+      >
+        Enjoy my favorite LLM quotes
+      </p>
       <div
         style={{
           display: 'flex',
-          flexDirection: 'column',
-          gap: space.xl,
+          flexWrap: 'wrap',
+          gap: space.lg,
           width: '100%',
+          minWidth: 0,
+          alignItems: 'flex-start',
         }}
       >
-        <p
-          style={{
-            margin: 0,
-            fontSize: '16px',
-            fontWeight: 400,
-            lineHeight: 1.3,
-            letterSpacing: '-0.2px',
-            color: MUTED,
-          }}
-        >
-          Enjoy my favorite LLM quotes
-        </p>
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: space.lg,
-            width: '100%',
-            minWidth: 0,
-            alignItems: 'flex-start',
-          }}
-        >
-          {clippings.map((clipping) => (
-            <QuoteCard key={clipping.src} clipping={clipping} />
-          ))}
-        </div>
+        {clippings.map((clipping) => (
+          <QuoteCard key={clipping.src} clipping={clipping} />
+        ))}
       </div>
     </section>
   )

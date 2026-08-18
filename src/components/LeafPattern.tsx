@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useMediaQuery } from '../hooks/useMediaQuery'
 
 /**
  * Pixel-art leaf field for the right panel. Opaque PNG overlays — black in the
@@ -15,18 +16,19 @@ const LEAVES = [
 ]
 
 /**
- * Display size — 2/7 of the 546×378 source (was 1/3) so X/Y scale match and
- * `image-rendering: pixelated` lands on whole device pixels. A bit smaller
- * than the Figma-scale pass; pitches below keep the same interlocking ratio.
+ * Display size — 3/14 of the 546×378 source (was 2/7) so X/Y scale match and
+ * `image-rendering: pixelated` lands on whole device pixels. A step smaller
+ * again for the vertical-tab home page's finer field; pitches below keep the
+ * same interlocking ratio.
  */
-const LEAF_W = 156
-const LEAF_H = 108
-/** Horizontal column pitch — Figma ~124, scaled to the 156px leaf. */
-const COL_X = 105
+const LEAF_W = 117
+const LEAF_H = 81
+/** Horizontal column pitch — the 2/7 pass's 105, scaled to the 117px leaf. */
+const COL_X = 79
 /** Vertical step within a column — even so the brick offset stays integer. */
-const ROW_Y = 96
+const ROW_Y = 72
 /** Odd-column brick offset — exactly half the row pitch, whole pixels only. */
-const COL_ODD_Y = 48
+const COL_ODD_Y = 36
 
 /** How far leaf tips poke past the content column's right edge. */
 export const LEAF_TIP_INSET = 8
@@ -60,11 +62,34 @@ export const LEAF_PANEL_HEIGHT_VH = 260
  */
 const LEFT_EDGE = [0, 1, 1, 0, 1, 2, 1, 1, 0, 1, 2, 1, 0, 1, 1, 2, 1, 0]
 
+/**
+ * The tab-switch slide. Work's content column runs wider than every other
+ * tab's, so the field starts further right there (`App` hands the delta down as
+ * `shift`); the leaves travel that distance rather than cutting to it.
+ *
+ * The wave runs left to right — the column that just widened moves its
+ * neighbours first and the rest follow, which reads as the leaves being pushed
+ * aside rather than the whole block sliding as one slab. The hash scatter keeps
+ * the leading edge from arriving as a straight line.
+ *
+ * The duration and easing are exported because the content column's fill has to
+ * travel on exactly the same curve — see `App`'s column mask. The leftmost
+ * column takes no delay, so it rides the fill's edge the whole way and nothing
+ * is ever overtaken by it.
+ */
+export const SHIFT_MS = 620
+export const SHIFT_EASE = 'cubic-bezier(0.22, 1, 0.36, 1)'
+const SHIFT_COL_DELAY = 14
+const SHIFT_COL_DELAY_MAX = 180
+const SHIFT_SCATTER_MS = 70
+
 type Leaf = {
   key: string
   src: string
   x: number
   y: number
+  /** Stagger for the tab-switch slide, ms. */
+  delay: number
 }
 
 /** First column to draw for this visual band — jagged left frontier. */
@@ -128,15 +153,31 @@ function buildLeaves(width: number, height: number, viewH: number): Leaf[] {
         // Whole CSS pixels only — no subpixel top edges between neighbours.
         x: Math.round(x),
         y: Math.round(y),
+        delay:
+          Math.min(col * SHIFT_COL_DELAY, SHIFT_COL_DELAY_MAX) +
+          Math.round(hash01(row, col) * SHIFT_SCATTER_MS),
       })
     }
   }
   return leaves
 }
 
+type LeafPatternProps = {
+  /**
+   * How far right of the panel's own left edge the field sits, as a CSS length
+   * (`'0px'` at rest). The panel itself is always hung at the *leftmost* tab's
+   * edge — the widest strip — and the leaves translate inside it, so the
+   * field's width never changes
+   * — a moving `left` would re-run `buildLeaves` on every frame of the slide,
+   * and `transform` composites where `left` doesn't.
+   */
+  shift?: string
+}
+
 /** Full-bleed static leaf pattern — drop-in replacement for the shader panel. */
-export default function LeafPattern() {
+export default function LeafPattern({ shift = '0px' }: LeafPatternProps) {
   const rootRef = useRef<HTMLDivElement>(null)
+  const stillOnly = useMediaQuery('(prefers-reduced-motion: reduce)')
   const [size, setSize] = useState({ w: 0, h: 0, viewH: 0 })
 
   useEffect(() => {
@@ -196,6 +237,10 @@ export default function LeafPattern() {
             maxWidth: 'none',
             display: 'block',
             imageRendering: 'pixelated',
+            transform: `translate3d(${shift}, 0, 0)`,
+            transition: stillOnly
+              ? undefined
+              : `transform ${SHIFT_MS}ms ${SHIFT_EASE} ${leaf.delay}ms`,
           }}
         />
       ))}

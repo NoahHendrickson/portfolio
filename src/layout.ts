@@ -50,9 +50,6 @@ export const pageGutter = () =>
  */
 export const SHELL_MAX = 1600
 
-/** The list column on the Design tab, 1240 of the file's three columns. */
-export const WORK_LIST_MAX = 1240
-
 /**
  * Horizontal page padding: `pageGutter()` until the viewport passes
  * `SHELL_MAX`, then whatever keeps that reference width centred. Call sites
