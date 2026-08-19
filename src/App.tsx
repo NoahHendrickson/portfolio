@@ -1,4 +1,4 @@
-import { useEffect, useState, useSyncExternalStore } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import '@noey-17/yearn-ui/style.css'
 import { ProfileRow } from './components/Header'
 import Hero from './components/Hero'
@@ -57,6 +57,43 @@ const PANEL_MAX = { default: 700, work: 937 }
 const SCROLL_BLEED = 40
 
 /**
+ * A wheel notch over the rail or the leaf field scrolls the panel between them.
+ *
+ * The panel is the only scroller on desktop home, so anywhere outside it the
+ * wheel had nothing to move — the pointer had to be inside a ~700px column for
+ * the page to respond. This forwards the delta instead, and only when the event
+ * didn't already land inside the panel (or any other scroller, so a nested one
+ * keeps its own wheel). `passive: false` is what lets it call `preventDefault`,
+ * which stops the rubber-band bounce the redirected notch would otherwise leave
+ * on the window.
+ */
+function useWheelAnywhere(panel: React.RefObject<HTMLElement | null>, enabled: boolean) {
+  useEffect(() => {
+    if (!enabled) return
+
+    const onWheel = (event: WheelEvent) => {
+      const target = panel.current
+      if (!target) return
+      if (event.target instanceof Node && target.contains(event.target)) return
+
+      // Firefox reports lines and (rarely) pages rather than pixels.
+      const scale =
+        event.deltaMode === WheelEvent.DOM_DELTA_LINE
+          ? 16
+          : event.deltaMode === WheelEvent.DOM_DELTA_PAGE
+            ? target.clientHeight
+            : 1
+
+      event.preventDefault()
+      target.scrollTop += event.deltaY * scale
+    }
+
+    window.addEventListener('wheel', onWheel, { passive: false })
+    return () => window.removeEventListener('wheel', onWheel)
+  }, [panel, enabled])
+}
+
+/**
  * Where the leaf field's left frontier sits for a given content width — the
  * column's right edge less the tip overhang, pinned so the strip stops growing
  * past `LEAF_STRIP_MAX` on a big screen.
@@ -98,6 +135,8 @@ export default function App() {
   // Landing on a legacy work route mid-session (a project page's Back pill)
   // flips the tab during render, so the redirected-to home never paints the
   // previous tab first. The initializer covers a cold load on `/work`.
+  const panelRef = useRef<HTMLElement | null>(null)
+
   const [prevRoute, setPrevRoute] = useState(route)
   if (route !== prevRoute) {
     setPrevRoute(route)
@@ -111,6 +150,10 @@ export default function App() {
     // deep in Work or Previous roles starts the next tab at its top.
     window.scrollTo({ top: 0 })
   }
+
+  // Home only: project routes scroll the window and have no panel to redirect
+  // into, and mobile keeps the ordinary page scroll.
+  useWheelAnywhere(panelRef, !isMobile && !route.startsWith('/work/'))
 
   useEffect(() => {
     if (legacyWork) {
@@ -278,7 +321,8 @@ export default function App() {
         <HomeRail active={tab} onSelect={selectTab} isMobile={isMobile} />
         <main
           key={tab}
-          className="tab-content-in"
+          ref={panelRef}
+          className={isMobile ? 'tab-content-in' : 'tab-content-in panel-scroll'}
           style={{
             flex: isMobile ? undefined : `0 1 ${panelMax + SCROLL_BLEED * 2}px`,
             width: isMobile ? '100%' : undefined,

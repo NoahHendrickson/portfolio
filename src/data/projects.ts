@@ -17,6 +17,8 @@ const LIME = '#cef982'
 const T3_CODE = 'https://github.com/pingdotgg/t3code'
 /** Desktop builds — GitHub Releases on the fork. `WorkList`'s card links here too. */
 export const NO3Y_CODE_DOWNLOAD = 'https://github.com/NoahHendrickson/t3code/releases'
+/** Live D2 Stat Builder. The Work card and the case-study CTA both point here. */
+export const STAT_BUILDER_SITE = 'https://d2-stat-builder-dusky.vercel.app/'
 
 export type Shot = {
   /** Shown on the placeholder card until `src` is filled in. */
@@ -424,6 +426,7 @@ export const projects: Record<string, Project> = {
           'This is a tool for my favorite video game of all time, Destiny 2. I made it for power users and nerds like myself. In Destiny 2 there are different characters, stats and builds you can create. This app helps you find the gear for your perfect stat splits and builds.',
           'Users set their stat targets, make some other selections and watch builds populate in the right column. Once they find a build they like, they can equip it in-game and save it as a loadout.',
         ],
+        cta: { label: 'Check it out', href: STAT_BUILDER_SITE },
         shot: {
           // Node 240:23742 — the browser frame and its desktop are one export,
           // as the file draws the whole Chrome chrome inside the panel.

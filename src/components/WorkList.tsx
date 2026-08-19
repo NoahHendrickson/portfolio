@@ -3,7 +3,7 @@ import { ArrowRight, ArrowSquareOut } from '@phosphor-icons/react'
 import AppLink from '../AppLink'
 import Button from '../design-system/Button'
 import { VARIANTS } from '../design-system/buttonStyles'
-import { NO3Y_CODE_DOWNLOAD, projects } from '../data/projects'
+import { NO3Y_CODE_DOWNLOAD, STAT_BUILDER_SITE, projects } from '../data/projects'
 import { color, control, radius, space, type } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
 
@@ -56,9 +56,7 @@ const statBuilder: WorkCard = {
     alt: 'D2 Stat Builder — the armor table in a dark window on yellow',
   },
   accent: '#c56430',
-  // The file labels this "View the site", but no live deployment exists in the
-  // data — the repo is the closest real destination until one does.
-  extra: { label: 'View on GitHub', href: 'https://github.com/NoahHendrickson/d2-stat-builder' },
+  extra: { label: 'View the site', href: STAT_BUILDER_SITE },
 }
 
 const onboarding: WorkCard = {
