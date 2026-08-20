@@ -37,6 +37,15 @@ const LEAD_MOBILE = { title: 64, section: 120, tight: 64 } as const
 const MOCKUP_RADIUS = radius.xl
 
 /**
+ * The study's own accent. The August 2026 frame recoloured this page off the
+ * site's orange onto a magenta — the hero's outcome rows and the plate behind
+ * both charts — and the prototype band's export bakes the same family in. It is
+ * this page's colour rather than a theme surface, so like the screenshots' own
+ * chrome it stays a hex here instead of reaching for `--color-orange`.
+ */
+const STUDY_ACCENT = '#cb52b9'
+
+/**
  * A media width. Holds the designed px until the column reaches the frame's
  * width, then takes the same share of it — the same curve `ProjectStory` runs,
  * so a fixed-px chart doesn't stay pinned while the screenshots grow.
@@ -107,8 +116,9 @@ export default function InvisibleOnboarding() {
             width={CHART_WIDTH}
             body={
               <p style={{ ...bodyStyle, color: color.text.primary }}>
-                Meridial’s onboarding flow conversion rate was severely underperforming. There were
-                many steps with tons of friction and huge drop-off. This was causing an operational
+                Meridial’s onboarding flow was sitting at a terrifying 2% conversion rate from
+                account creation to setting up their bank details. In between there were multiple
+                steps with tons of friction and huge drop-off. This was causing an operational
                 strain on staffing projects on-time and delivering results to clients.
               </p>
             }
@@ -154,9 +164,39 @@ export default function InvisibleOnboarding() {
                   a strong case about where design focus would be most valuable.
                 </p>
                 <p style={bodyStyle}>
-                  We worked across two tracks: improving the overall flow and sequence of steps,
-                  and removing unnecessary friction from the steps with the highest drop-off.
+                  We worked across two vectors: the overall flow and order of steps, and removing
+                  unnecessary friction by honing in on the steps that caused the most drop-off. Some
+                  key findings were the following:
                 </p>
+                {/*
+                  Tailwind's preflight strips list markers, so the numbers are
+                  set back on explicitly — the same fix Synapse's list needs.
+                */}
+                <ol
+                  style={{
+                    ...bodyStyle,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: space.sm,
+                    margin: 0,
+                    paddingLeft: space.xl,
+                    listStyleType: 'decimal',
+                  }}
+                >
+                  <li>
+                    We asked for way too much information on the profile. Our internal teams were
+                    not using this information and it was not playing a major role in any of our
+                    internal sourcing tools.
+                  </li>
+                  <li>
+                    Our ID and Address verification steps were under-explained, and we were setting
+                    a false expectation with some of the copy.
+                  </li>
+                  <li>
+                    Our Initial Assessment step was the largest barrier and, like the profile
+                    details, was barely useful to the business.
+                  </li>
+                </ol>
               </Paragraphs>
             }
           >
@@ -175,6 +215,13 @@ export default function InvisibleOnboarding() {
                   correct areas to focus on, I moved into the design phase.
                 </p>
                 <p style={bodyStyle}>
+                  A few of the design decisions we arrived at were: we wanted to create a more
+                  directive and sequenced flow. Our old onboarding dropped users onto the homepage
+                  pretty early with “optional” setup steps, and the new flow would follow a more
+                  standard onboarding wizard UX. We also pinned down what details were absolutely
+                  necessary per step and removed the details that were not.
+                </p>
+                <p style={bodyStyle}>
                   Due to the short timeline, the team decided to try a new workflow where a vibe
                   coded prototype would serve as the source of truth for the designs. We needed to
                   iterate fast and wanted to hand over the prototype to the engineers to use that
@@ -185,12 +232,13 @@ export default function InvisibleOnboarding() {
           >
             <MediaPanel
               src={media.prototype}
-              alt="Meridial onboarding prototype with resume, skills and language fields"
+              alt="Meridial onboarding prototype: the profile step beside the address verification step"
+              aspect={BAND_ASPECT}
             />
           </StoryRow>
 
           <StoryRow
-            heading="The experiment results"
+            heading="The experiment"
             width={CHART_WIDTH}
             body={
               <Paragraphs>
@@ -287,9 +335,9 @@ function Hero({ isMobile }: { isMobile: boolean }) {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: space.lg }}>
         <p style={{ ...bodyStyle, color: color.text.primary }}>
-          The team for this project was 1.5 Designers, 1 Product Manager and 5 Engineers. The
+          The team for this initiative was 1.5 Designers, 1 Product Manager and 5 Engineers. The
           business relied on Meridial to onboard users to scale our AI training business and meet the
-          demand of our clients. I was the Design Lead for this team and worked closely
+          requirements set by our clients. I was the Design Lead for this team and worked closely
           with our Product Manager and many other teams such as Legal, Compliance, Hiring and
           Operations to ensure the Product didn’t have any blind spots.
         </p>
@@ -308,7 +356,7 @@ function Hero({ isMobile }: { isMobile: boolean }) {
                 display: 'flex',
                 alignItems: 'flex-start',
                 gap: space.sm,
-                color: color.accent.default,
+                color: STUDY_ACCENT,
               }}
             >
               <img
@@ -321,7 +369,7 @@ function Hero({ isMobile }: { isMobile: boolean }) {
                   margin: 0,
                   maxWidth: '495px',
                   ...type['label-l'],
-                  color: color.accent.default,
+                  color: STUDY_ACCENT,
                 }}
               >
                 {outcome}
@@ -409,7 +457,23 @@ function ResultCopy({ children }: { children: ReactNode }) {
   )
 }
 
-function MediaPanel({ src, alt }: { src: string; alt: string }) {
+/**
+ * The exports' own ratio, now that they run the width of the column. The
+ * prototype band is drawn across the whole 1225 column rather than the 757.5
+ * the FigJam boards sit on, so it names its own.
+ */
+const MEDIA_ASPECT = '1515 / 844'
+const BAND_ASPECT = '2450 / 845'
+
+function MediaPanel({
+  src,
+  alt,
+  aspect = MEDIA_ASPECT,
+}: {
+  src: string
+  alt: string
+  aspect?: string
+}) {
   return (
     <img
       src={src}
@@ -417,8 +481,7 @@ function MediaPanel({ src, alt }: { src: string; alt: string }) {
       style={{
         display: 'block',
         width: '100%',
-        // The exports' own ratio, now that they run the width of the column.
-        aspectRatio: '1515 / 844',
+        aspectRatio: aspect,
         borderRadius: MOCKUP_RADIUS,
       }}
     />
@@ -438,7 +501,7 @@ function FunnelChart() {
         aspectRatio: '766 / 430',
         overflow: 'hidden',
         borderRadius: MOCKUP_RADIUS,
-        background: color.accent.default,
+        background: STUDY_ACCENT,
       }}
     >
       {fills.map((height, index) => {
@@ -486,7 +549,7 @@ function ExperimentChart() {
         aspectRatio: '766 / 430',
         overflow: 'hidden',
         borderRadius: MOCKUP_RADIUS,
-        background: color.accent.default,
+        background: STUDY_ACCENT,
       }}
     >
       <div
