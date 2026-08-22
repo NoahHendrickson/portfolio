@@ -65,9 +65,11 @@ const onboarding: WorkCard = {
   subtitle: 'Research & Product Design',
   art: {
     src: '/work/bento/card-invisible-onboarding.png',
-    alt: 'Meridial — the onboarding profile step on a deep red dither',
+    alt: 'Meridial — the onboarding profile step on a magenta dither',
   },
-  accent: '#ff8f0c',
+  // Follows the art, which the August 2026 frame recoloured onto the study's
+  // own magenta — the same family `InvisibleOnboarding`'s `STUDY_ACCENT` runs.
+  accent: '#cb52b9',
   extra: { label: '@ Invisible Technologies' },
 }
 

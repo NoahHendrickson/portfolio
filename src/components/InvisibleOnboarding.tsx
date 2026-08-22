@@ -55,7 +55,8 @@ const mediaWidth = (px: number) => `min(100%, max(${px}px, ${(px / CONTENT_WIDTH
 const media = {
   research: '/work/invisible/onboarding/research.png',
   journey: '/work/invisible/onboarding/journey.png',
-  prototype: '/work/invisible/onboarding/prototype.png',
+  prototypeProfile: '/work/invisible/onboarding/prototype-profile.png',
+  prototypeAddress: '/work/invisible/onboarding/prototype-address.png',
   next: '/work/invisible/onboarding/next.png',
 } as const
 
@@ -116,9 +117,8 @@ export default function InvisibleOnboarding() {
             width={CHART_WIDTH}
             body={
               <p style={{ ...bodyStyle, color: color.text.primary }}>
-                Meridial’s onboarding flow was sitting at a terrifying 2% conversion rate from
-                account creation to setting up their bank details. In between there were multiple
-                steps with tons of friction and huge drop-off. This was causing an operational
+                Meridial’s onboarding flow conversion rate was severely underperforming. There were
+                many steps with tons of friction and huge drop-off. This was causing an operational
                 strain on staffing projects on-time and delivering results to clients.
               </p>
             }
@@ -128,6 +128,7 @@ export default function InvisibleOnboarding() {
 
           <StoryRow
             heading="The process"
+            width={RESEARCH_WIDTH}
             body={
               <Paragraphs>
                 <p style={bodyStyle}>
@@ -148,6 +149,7 @@ export default function InvisibleOnboarding() {
             <MediaPanel
               src={media.research}
               alt="Competitive research and onboarding references organized in FigJam"
+              aspect={RESEARCH_ASPECT}
             />
           </StoryRow>
 
@@ -208,6 +210,7 @@ export default function InvisibleOnboarding() {
 
           <StoryRow
             lead="tight"
+            width={PROTOTYPE_WIDTH}
             body={
               <Paragraphs>
                 <p style={bodyStyle}>
@@ -230,11 +233,24 @@ export default function InvisibleOnboarding() {
               </Paragraphs>
             }
           >
-            <MediaPanel
-              src={media.prototype}
-              alt="Meridial onboarding prototype: the profile step beside the address verification step"
-              aspect={BAND_ASPECT}
-            />
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: `${PROTOTYPE_GAP}px`,
+              }}
+            >
+              <MediaPanel
+                src={media.prototypeProfile}
+                alt="Meridial onboarding prototype: the profile details step, with resume upload, skills and languages"
+                aspect={PROTOTYPE_ASPECT}
+              />
+              <MediaPanel
+                src={media.prototypeAddress}
+                alt="Meridial onboarding prototype: the address verification step, with the tips panel beside it"
+                aspect={PROTOTYPE_ASPECT}
+              />
+            </div>
           </StoryRow>
 
           <StoryRow
@@ -463,7 +479,27 @@ function ResultCopy({ children }: { children: ReactNode }) {
  * the FigJam boards sit on, so it names its own.
  */
 const MEDIA_ASPECT = '1515 / 844'
-const BAND_ASPECT = '2450 / 845'
+/**
+ * The two prototype windows (nodes `331:50353` / `331:50585`). The frame used
+ * to sit them side by side on a magenta band; it now stacks them at 810 on the
+ * page's own `#171615`, so they are exported as the bare windows and the page
+ * shows through, rather than as one image carrying a ground we already have.
+ */
+const PROTOTYPE_ASPECT = '1620 / 1089'
+const PROTOTYPE_WIDTH = 810
+/** The frame's space between the stacked windows. */
+const PROTOTYPE_GAP = 56
+/**
+ * The research board is the bare capture (node `332:51387`) rather than the
+ * crop the frame's plate used to hold, so it carries its own portrait ratio.
+ * Its width is the one thing the source dictates: the file is 1742px wide, so
+ * half of that is the widest it renders at a clean 2× and the last width that
+ * still reads sharp. The frame draws it on the 700 copy column, which is 2.5×
+ * — this runs a step past that rather than out to the content column, where it
+ * would drop under 1.4× and go soft again.
+ */
+const RESEARCH_ASPECT = '1742 / 1622'
+const RESEARCH_WIDTH = 871
 
 function MediaPanel({
   src,
