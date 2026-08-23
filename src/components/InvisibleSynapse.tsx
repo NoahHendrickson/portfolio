@@ -3,7 +3,7 @@ import Header from './Header'
 import WorkGate from './WorkGate'
 import { color, radius, space, type } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
-import { PROJECT_MOBILE_PAD, shellPad } from '../layout'
+import { copyPad, PROJECT_MOBILE_PAD, shellPad } from '../layout'
 import { isUnlocked } from '../workGate'
 
 /*
@@ -89,7 +89,12 @@ export default function InvisibleSynapse() {
         color: color.text.primary,
       }}
     >
-      <Header leading="back" showProfile={false} barInset={pad} />
+      <Header
+        leading="back"
+        showProfile={false}
+        barInset={isMobile ? pad : copyPad(COPY_WIDTH)}
+        trailingInset={pad}
+      />
 
       <main
         style={{

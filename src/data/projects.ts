@@ -412,15 +412,16 @@ export const projects: Record<string, Project> = {
     },
     pageReady: true,
     landing: {
-      // Frame 121:4922 — the July redo. Title over its eyebrow on an 80px
-      // rhythm, one composed hero panel, a single row, then the feedback band.
+      // Same stacked rhythm as no3y Code / the Invisible studies: centred 700
+      // copy, 120 into the hero, then heading + body over the media. The table
+      // holds 668 — its export is 1336 wide, so that's the last clean 2×.
       eyebrow: ['Third-party tool for the Destiny 2 community.'],
       flow: 'continuous',
-      gap: 80,
-      align: 'start',
+      gap: 120,
+      align: 'center',
       titleRhythm: 'paired',
       eyebrowPlacement: 'below',
-      copyWidth: 688,
+      copyWidth: 700,
       hero: {
         body: [
           'This is a tool for my favorite video game of all time, Destiny 2. I made it for power users and nerds like myself. In Destiny 2 there are different characters, stats and builds you can create. This app helps you find the gear for your perfect stat splits and builds.',
@@ -441,11 +442,11 @@ export const projects: Record<string, Project> = {
         {
           kind: 'feature',
           gap: 80,
-          heading: 'making finding armor easy',
+          heading: 'Making finding armor easy',
           body: 'Destiny 2’s in-game vault and existing third-party tools made it difficult to search my armor or identify which pieces to pursue. I went back to basics and designed a table view with quick filters and custom sorting.',
-          copyWidth: 524,
+          copyWidth: 700,
           panelWidth: 668,
-          lead: true,
+          stack: true,
           shot: {
             // Node 241:23813 — the table's browser frame runs off the panel's
             // right edge, so the crop is baked into the export.

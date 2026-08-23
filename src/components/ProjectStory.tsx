@@ -7,7 +7,7 @@ import { color, control, radius, radiusPx, space, type } from '../design-system/
 import { useIsMobile } from '../hooks/useIsMobile'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import AppLink from '../AppLink'
-import { PAGE_GUTTER, PROJECT_MOBILE_PAD, shellPad } from '../layout'
+import { copyPad, PAGE_GUTTER, PROJECT_MOBILE_PAD, shellPad } from '../layout'
 import type {
   EyebrowEntry,
   FeedbackShot,
@@ -247,7 +247,12 @@ export default function ProjectStory({ project }: { project: Project }) {
         gap: continuous ? '0' : space.xl,
       }}
     >
-      <Header leading="back" showProfile={false} barInset={gutter} />
+      <Header
+        leading="back"
+        showProfile={false}
+        barInset={isMobile || flush ? gutter : copyPad(landing.copyWidth ?? COPY_WIDTH)}
+        trailingInset={gutter}
+      />
 
       {/*
         Hero — title block. On a `continuous` page the rest of the rows run in

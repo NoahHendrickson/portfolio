@@ -59,6 +59,15 @@ export const shellPad = () =>
   `max(${pageGutter()}, calc((100vw - ${SHELL_MAX}px) / 2))`
 
 /**
+ * Left edge of a centred copy column `width` px wide. Never tighter than
+ * `shellPad()`, so on a narrow viewport the pill stays on the page gutter
+ * with the copy (which then fills the column). Contact stays on `shellPad()`
+ * via `trailingInset` — only Back walks in to meet the text.
+ */
+export const copyPad = (width: number) =>
+  `max(${shellPad()}, calc((100vw - ${width}px) / 2))`
+
+/**
  * Project-page gutter below 900. Display titles wrap against the glass on the
  * 20px the tabs use, so these full-bleed pages take a step up. Header reads
  * the same value via `barInset` so Back / Contact stay on the copy's edge.

@@ -3,7 +3,7 @@ import Header from './Header'
 import Button from '../design-system/Button'
 import { color, radius, space, type } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
-import { PROJECT_MOBILE_PAD, shellPad } from '../layout'
+import { copyPad, PROJECT_MOBILE_PAD, shellPad } from '../layout'
 import { unlock } from '../workGate'
 
 const TEXT = color.text.primary
@@ -42,7 +42,13 @@ export default function WorkGate({ onUnlock }: { onUnlock: () => void }) {
         overflowX: 'clip',
       }}
     >
-      <Header leading="back" showProfile={false} barInset={pad} />
+      <Header
+        leading="back"
+        showProfile={false}
+        // Same 700 as the studies, so Back doesn't jump when the page unlocks.
+        barInset={isMobile ? pad : copyPad(700)}
+        trailingInset={pad}
+      />
 
       <div
         style={{

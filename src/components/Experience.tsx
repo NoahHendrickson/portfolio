@@ -217,11 +217,9 @@ export function DesigningNow() {
       style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: space.xl,
         maxWidth: '700px',
       }}
     >
-      <SectionHeading title="How I’m designing now" />
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <p style={{ ...heading, color: MUTED }}>Vibe coding, design engineering, agent orchestrating?</p>
         {nowParagraphs.map((paragraph) => (
@@ -243,19 +241,17 @@ export function PreviousRoles() {
       style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: space.xl,
         width: '100%',
       }}
     >
-      <SectionHeading title="Previous roles" />
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: isMobile ? '48px' : '56px',
-            width: '100%',
-          }}
-        >
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: isMobile ? '48px' : '56px',
+          width: '100%',
+        }}
+      >
           {entries.map((entry) => (
             <div
               key={entry.role}
@@ -334,7 +330,7 @@ export function PreviousRoles() {
               </div>
             </div>
           ))}
-        </div>
+      </div>
     </section>
   )
 }
