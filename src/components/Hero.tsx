@@ -54,15 +54,15 @@ export default function Hero() {
       <p style={{ ...body, color: TEXT }}>
         I&rsquo;m a product designer who adapts quickly and dives deep to improve my
         craft. I&rsquo;m looking for teams that empower people to just &ldquo;do the
-        thing&rdquo;. I want to build, iterate, and ship high-quality features and
+        thing.&rdquo; I want to build, iterate, and ship high-quality features and
         products quickly.
       </p>
 
       <p style={{ ...body, color: MUTED }}>
         I have five years of experience turning business problems and ambitious
         ideas into useful products and features. I use data and research to drive
-        measurable outcomes. I approach critique and adversity with humility, and
-        strive to build a positive and honest culture.
+        measurable outcomes. I respond to critique and adversity with humility and
+        strive to build a positive, honest culture.
       </p>
     </div>
   )

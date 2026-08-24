@@ -125,9 +125,8 @@ export default function InvisibleSynapse() {
             body={
               <Paragraphs>
                 <p style={{ ...bodyStyle, color: color.text.primary }}>
-                  Our legacy platform for AI training tasks was not created with that type of work
-                  in mind. Therefore it was far too strict and inflexible to support the different
-                  use cases we needed for our clients.
+                  Our legacy platform was not designed for AI training tasks, so it was too rigid to
+                  support the range of client use cases we needed.
                 </p>
                 {/* The frame runs the lead-in and its list as one text block, no gap between. */}
                 <div style={{ ...bodyStyle, color: color.text.primary }}>
@@ -159,13 +158,12 @@ export default function InvisibleSynapse() {
             body={
               <Paragraphs gap={space.lg}>
                 <p style={bodyStyle}>
-                  I met with the team who built the foundation of our “next-gen” annotations
-                  platform to ask questions, make suggestions and understand what they thought they
-                  needed from a Designer.
+                  I met with the team that built the foundation of our “next-gen” annotation platform
+                  to ask questions, offer suggestions, and understand what they needed from design.
                 </p>
                 <p style={bodyStyle}>
-                  I interviewed some SMEs, users and operations managers to understand the problems
-                  and the needs for an AI training interface.
+                  I also interviewed subject-matter experts, users, and operations managers to learn
+                  what an AI training interface needed to support.
                 </p>
               </Paragraphs>
             }
@@ -176,10 +174,10 @@ export default function InvisibleSynapse() {
             heading="The blueprint"
             body={
               <p style={bodyStyle}>
-                I started with an RLHF interface to lay the foundation for our new product. One
-                clear UX improvement we needed to add was instructions in the interface that guide
-                you through the task. The right panel now housed instructions and gave users a
-                tooltip that points to the element where input is needed.
+                I started with an RLHF interface to establish the product’s foundation. One clear UX
+                improvement was adding in-context instructions to guide users through each task. The
+                right panel housed those instructions, while tooltips pointed to the elements that
+                required input.
               </p>
             }
           >
@@ -196,7 +194,7 @@ export default function InvisibleSynapse() {
           </StoryRow>
 
           <StoryRow
-            heading="Make it re-usable"
+            heading="Make it reusable"
             body={
               <p style={bodyStyle}>
                 I created reusable Figma components so designing interfaces for new use cases and
@@ -246,15 +244,14 @@ function Hero({ isMobile }: { isMobile: boolean }) {
 
       <Paragraphs gap={space.lg}>
         <p style={{ ...bodyStyle, color: color.text.primary }}>
-          I led the design for the launch of Invisible’s annotations platform, Synapse. I was
-          responsible for creating reusable custom components built for AI training tasks. I
-          design-directed through high-fidelity mockups and custom interface designs tailored to
-          specific client requirements.
+          I led design for the launch of Synapse, Invisible’s annotation platform. I created reusable
+          components for AI training tasks and directed the experience through high-fidelity mockups
+          tailored to specific client requirements.
         </p>
         <p style={{ ...bodyStyle, color: color.text.primary }}>
-          This was a small team of myself, 3-4 engineers and a PM. This project did not follow a
-          traditional product roadmap or launch. The foundation was built before I was brought in to
-          support and direct the UX of the product.
+          The small team included me, three to four engineers, and a product manager. The project did
+          not follow a traditional product roadmap or launch process: the foundation was built before
+          I joined to define and direct the UX.
         </p>
       </Paragraphs>
     </section>
@@ -399,4 +396,3 @@ function LegacyDiagram() {
     </div>
   )
 }
-

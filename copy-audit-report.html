@@ -1,0 +1,1024 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Portfolio Copy Audit — August 2026</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #11110f;
+      --panel: #191917;
+      --panel-2: #20201d;
+      --text: #f1f0e9;
+      --muted: #aaa99f;
+      --border: #383832;
+      --orange: #ff6a2a;
+      --red: #ff8474;
+      --yellow: #f0c76d;
+      --green: #85d49e;
+      --blue: #8cbcff;
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 15px/1.5 ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    button, input, select { font: inherit; }
+    button { color: inherit; }
+
+    .shell {
+      width: min(1220px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 56px 0 96px;
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--orange);
+      font-size: 12px;
+      font-weight: 750;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 820px;
+      font-size: clamp(36px, 5vw, 64px);
+      line-height: 1.02;
+      letter-spacing: -.045em;
+    }
+
+    .lede {
+      max-width: 760px;
+      margin: 22px 0 0;
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 34px;
+    }
+
+    .stat, .note, .finding {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      border-radius: var(--radius);
+    }
+
+    .stat { padding: 16px; }
+    .stat strong { display: block; font-size: 28px; line-height: 1; }
+    .stat span { display: block; margin-top: 7px; color: var(--muted); }
+
+    .note {
+      margin-top: 18px;
+      padding: 18px 20px;
+      color: var(--muted);
+    }
+
+    .note strong { color: var(--text); }
+    .note code, .location code {
+      color: #d8d7cf;
+      font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: grid;
+      grid-template-columns: minmax(240px, 1fr) auto auto auto auto;
+      gap: 10px;
+      margin: 38px 0 20px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: rgba(17, 17, 15, .94);
+      backdrop-filter: blur(12px);
+    }
+
+    .control {
+      width: 100%;
+      min-width: 0;
+      min-height: 40px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: var(--panel-2);
+      color: var(--text);
+      padding: 8px 12px;
+    }
+
+    button.control { cursor: pointer; }
+    button.control:hover { border-color: #5e5e55; }
+
+    .results-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 16px;
+      margin-bottom: 14px;
+      color: var(--muted);
+    }
+
+    .results-meta h2 { margin: 0; color: var(--text); font-size: 24px; }
+    .findings { display: grid; gap: 14px; }
+
+    .finding {
+      overflow: hidden;
+    }
+
+    .finding.decision-apply { border-color: #415846; }
+    .finding.decision-ignore { opacity: .58; }
+    .finding.decision-custom { border-color: #4e5070; }
+    .finding-body { min-width: 0; padding: 18px; }
+
+    .finding-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .finding-head h3 {
+      flex: 1 1 420px;
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.3;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 750;
+      letter-spacing: .045em;
+      text-transform: uppercase;
+    }
+
+    .badge.fix { color: var(--red); background: rgba(255,132,116,.1); }
+    .badge.revise { color: var(--yellow); background: rgba(240,199,109,.1); }
+    .badge.polish { color: var(--blue); background: rgba(140,188,255,.1); }
+    .badge.category { color: var(--muted); background: rgba(255,255,255,.055); }
+
+    .location { margin: 7px 0 0; color: var(--muted); font-size: 12px; }
+    .why { margin: 13px 0; color: #cac9c0; }
+
+    .copy-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .copy-block {
+      position: relative;
+      min-width: 0;
+      padding: 13px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--panel-2);
+    }
+
+    .copy-block.after { border-color: #415846; background: rgba(133,212,158,.045); }
+    .copy-label {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 750;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .copy-text { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .copy-button {
+      margin-top: 11px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      background: transparent;
+      padding: 5px 8px;
+      color: var(--muted);
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .copy-button:hover { color: var(--text); border-color: #5e5e55; }
+
+    .decision-panel {
+      margin-top: 14px;
+      padding: 13px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: rgba(255,255,255,.018);
+    }
+
+    .decision-panel fieldset { margin: 0; padding: 0; border: 0; }
+    .decision-panel legend {
+      margin-bottom: 9px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 750;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .decision-options {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .decision-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      padding: 9px 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--panel-2);
+      cursor: pointer;
+    }
+
+    .decision-option:has(input:checked) { border-color: var(--green); }
+    .decision-option input { margin: 0; accent-color: var(--green); }
+    .decision-option span { overflow-wrap: anywhere; }
+
+    .custom-change { margin-top: 12px; }
+    .custom-change label {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .custom-change textarea {
+      display: block;
+      width: 100%;
+      min-height: 104px;
+      resize: vertical;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--panel-2);
+      color: var(--text);
+      padding: 10px;
+      font: inherit;
+    }
+
+    .decision-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .decision-actions:empty { display: none; }
+    .empty { padding: 56px 20px; text-align: center; color: var(--muted); }
+
+    .footer-note {
+      margin-top: 34px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 760px) {
+      .shell { width: min(100% - 24px, 1220px); padding-top: 30px; }
+      .summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .toolbar { position: static; grid-template-columns: 1fr 1fr; }
+      .toolbar input { grid-column: 1 / -1; }
+      .copy-grid { grid-template-columns: 1fr; }
+      .finding-body { padding: 15px; }
+      .decision-options { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <p class="eyebrow">Copy audit · 23 August 2026</p>
+    <h1>Portfolio spelling, grammar &amp; phrasing audit</h1>
+    <p class="lede">
+      A visitor-facing review of the live home tabs, work cards, five public project stories,
+      two gated Invisible case studies, shared controls, accessibility text, and page metadata.
+      Each recommendation includes the source location and copy-ready replacement.
+    </p>
+
+    <section class="summary" aria-label="Audit summary">
+      <div class="stat"><strong id="total-count">0</strong><span>findings</span></div>
+      <div class="stat"><strong id="fix-count">0</strong><span>fix first</span></div>
+      <div class="stat"><strong id="revise-count">0</strong><span>recommended rewrites</span></div>
+      <div class="stat"><strong id="polish-count">0</strong><span>optional polish</span></div>
+    </section>
+
+    <aside class="note">
+      <strong>Editorial call:</strong> Keep the casual, builder-led voice—including “AI slop,” “vibes,”
+      “nerds like myself,” and the smiley. The report corrects genuine mistakes and tightens passages
+      that obscure the work; it does not turn the portfolio into corporate copy. Direct community
+      feedback in screenshots is quoted verbatim and intentionally excluded. Archived generic-landing
+      fields, code comments, and Storybook documentation are also out of scope.
+    </aside>
+
+    <div class="toolbar" aria-label="Finding filters">
+      <input id="search" class="control" type="search" placeholder="Search copy, surface, issue, or file…">
+      <select id="priority" class="control" aria-label="Filter by priority">
+        <option value="all">All priorities</option>
+        <option value="fix">Fix first</option>
+        <option value="revise">Recommended</option>
+        <option value="polish">Optional polish</option>
+      </select>
+      <select id="surface" class="control" aria-label="Filter by surface">
+        <option value="all">All surfaces</option>
+      </select>
+      <button id="hide-decided" class="control" type="button" aria-pressed="false">Hide decided</button>
+      <button id="export-decisions" class="control" type="button">Export decisions</button>
+    </div>
+
+    <div class="results-meta">
+      <h2>Findings</h2>
+      <span id="visible-count"></span>
+    </div>
+    <section id="findings" class="findings" aria-live="polite"></section>
+
+    <p class="footer-note">
+      Suggested application order: apply “Fix first,” review “Recommended” in page context, then use
+      “Optional polish” only where it still sounds like Noah. Decisions and custom edits are stored in
+      this browser. “Export decisions” downloads them as a JSON file for implementation; copy buttons
+      place text on the clipboard but do not edit source files.
+    </p>
+  </main>
+
+  <script>
+    const findings = [
+      {
+        id: 'hero-quote-punctuation', priority: 'fix', category: 'Punctuation', surface: 'Home · Me',
+        title: 'Put the period inside the closing quotation mark',
+        location: 'src/components/Hero.tsx:57',
+        why: 'The current period sits outside the closing quotation mark. The suggested version follows the site’s otherwise American-English punctuation style.',
+        current: 'I’m looking for teams that empower people to just “do the thing”.',
+        suggested: 'I’m looking for teams that empower people to just “do the thing.”'
+      },
+      {
+        id: 'hero-critique', priority: 'polish', category: 'Clarity', surface: 'Home · Me',
+        title: 'Use a more natural verb with critique',
+        location: 'src/components/Hero.tsx:66',
+        why: '“Approach critique” is understandable but stiff. “Respond to critique” sounds more direct, and the comma before “and” is unnecessary.',
+        current: 'I approach critique and adversity with humility, and strive to build a positive and honest culture.',
+        suggested: 'I respond to critique and adversity with humility and strive to build a positive, honest culture.'
+      },
+      {
+        id: 'designing-now-opening', priority: 'revise', category: 'Run-on', surface: 'Home · How I design',
+        title: 'Tighten the long LEGO / product-design paragraph',
+        location: 'src/components/Experience.tsx:109',
+        why: 'The paragraph repeats “building” and “making my own things,” shifts into a percentage abruptly, and capitalizes generic “product design.” This version keeps the personal story while cutting the detour.',
+        current: 'I have been spending a lot of time in different AI coding and design tools, trying to suss out what works for me when it comes to building. This is the most fun I\'ve had as a designer/builder in my whole life. As a kid, Legos were my go-to toy and pastime because I loved making my own things. 80% of the time I wasn\'t building from an instruction set — I was making my own creations. That\'s why I was drawn to Product Design later in life, and now building my own things and trying crazy ideas is suddenly possible.',
+        suggested: 'I’ve been spending a lot of time in AI coding and design tools, figuring out what works for me as a builder. It’s the most fun I’ve had in my career. As a kid, LEGO bricks were my go-to pastime because I loved making my own things; most of the time, I ignored the instructions. That same instinct drew me to product design, and AI has made it possible to build and test my wildest ideas.'
+      },
+      {
+        id: 'designing-now-tools', priority: 'revise', category: 'Clarity', surface: 'Home · How I design',
+        title: 'Replace “do a lot of back and forth from”',
+        location: 'src/components/Experience.tsx:110',
+        why: 'The current phrasing is awkward and the final comma breaks a compound predicate. The rewrite also avoids repeating “design” in “details of a design.”',
+        current: 'The rise of AI slop has made the job of a designer even more important. Despite all the amazing new tools out there, I still find myself in Figma to nail down precise details of a design. I do a lot of back and forth from Figma to Claude or Cursor when building. I’ve been experimenting with design systems and Storybook, and using AI to automate tedious work.',
+        suggested: 'The rise of AI slop has made designers even more important. Despite all the new tools, I still return to Figma to nail down precise design details. I move back and forth between Figma and Claude or Cursor while building. I’ve also been experimenting with design systems and Storybook and using AI to automate tedious work.'
+      },
+      {
+        id: 'invisible-date-range', priority: 'fix', category: 'Consistency', surface: 'Home · Where I’ve been',
+        title: 'Use an en dash for the date range',
+        location: 'src/components/Experience.tsx:116',
+        why: 'Date ranges take an en dash, matching the typographic care used elsewhere in the site.',
+        current: 'Invisible Technologies / Aug 2022 - July 2026',
+        suggested: 'Invisible Technologies / Aug 2022–July 2026'
+      },
+      {
+        id: 'invisible-role-list', priority: 'revise', category: 'Clarity', surface: 'Home · Where I’ve been',
+        title: 'Make the responsibility list parallel',
+        location: 'src/components/Experience.tsx:118',
+        why: 'The list needs a comma before its final item, and “for 5+ teams” is less natural than “across.”',
+        current: 'I grew into owning design for one of our core platforms, contributing to our design ops, driving adoption of new AI tools and workflows and serving as the connective tissue for 5+ teams.',
+        suggested: 'I grew into owning design for one of our core platforms, contributing to design ops, driving adoption of new AI tools and workflows, and serving as the connective tissue across more than five teams.'
+      },
+      {
+        id: 'invisible-interface-launch', priority: 'revise', category: 'Clarity', surface: 'Home · Where I’ve been',
+        title: 'Strengthen the AI-interface launch paragraph',
+        location: 'src/components/Experience.tsx:120',
+        why: '“Got to lead” weakens the accomplishment; “re-usable” is nonstandard here; “high fidelity” needs a hyphen as a compound modifier; and “standard components” is redundant.',
+        current: 'I got to lead the design effort for launching our new AI training interfaces. The team had already built the foundation in a scrappy sprint and pulled me in to own the UX and visual design. I provided a set of re-usable standard components and high fidelity mockups for a few AI training use cases.',
+        suggested: 'I led the design effort for launching our new AI training interfaces. The team had built the foundation in a scrappy sprint, then brought me in to own the UX and visual design. I created reusable components and high-fidelity mockups for several AI training use cases.'
+      },
+      {
+        id: 'assessment-possessive', priority: 'fix', category: 'Grammar', surface: 'Home · Where I’ve been',
+        title: 'Fix the possessive, compound modifier, and missing punctuation',
+        location: 'src/components/Experience.tsx:124',
+        why: '“Businesses” should be the possessive “business’s,” “in-app” needs a hyphen, and the bullet needs terminal punctuation.',
+        current: 'Users were stuck in our initial assessment stage for days, bottlenecking the businesses ability to scale. I designed our in app assessment flow to address this bottleneck',
+        suggested: 'Users were stuck in our initial assessment stage for days, limiting the business’s ability to scale. I designed an in-app assessment flow to remove that bottleneck.'
+      },
+      {
+        id: 'assessment-hours', priority: 'fix', category: 'Consistency', surface: 'Home · Where I’ve been',
+        title: 'Standardize the assessment outcome and unit spacing',
+        location: 'src/components/Experience.tsx:125',
+        why: '“24hrs” is missing a space, the abbreviation style changes within one line, and the current wording does not state what changed.',
+        current: '72 hrs → Less than 24hrs to complete assessments',
+        suggested: 'Reduced assessment completion time from 72 hours to less than 24 hours'
+      },
+      {
+        id: 'amazon-opening', priority: 'polish', category: 'Tone', surface: 'Home · Where I’ve been',
+        title: 'Remove the self-undercutting Amazon opening',
+        location: 'src/components/Experience.tsx:141',
+        why: '“Just to get a job” and “my work ethic said otherwise” are conversational but vague and undercut a strong progression. The rewrite keeps the honesty and lands sooner on what changed.',
+        current: 'I started at Amazon just to get a job after college. I didn’t really have any expectations, but my work ethic said otherwise and I left as an L5 Area Manager. What got me there was learning to make calls off data instead of vibes, and finding out I could pick up something completely foreign and get good at it fast. That’s the confidence I still run on. I had mentors who invested in me, and I learned to pass that down as well, helping four members of my team earn promotions.',
+        suggested: 'I joined Amazon after college and left as an L5 Area Manager. Along the way, I learned to make decisions based on data, pick up unfamiliar work quickly, and pass along the support my mentors gave me. I helped four members of my team earn promotions, and that experience still shapes the confidence I bring to new problems.'
+      },
+      {
+        id: 'amazon-deadlines', priority: 'fix', category: 'Grammar', surface: 'Home · Where I’ve been',
+        title: 'Turn the résumé fragment into an active sentence',
+        location: 'src/components/Experience.tsx:146',
+        why: '“Responsible for…” is a fragment while the surrounding bullets use past-tense action verbs.',
+        current: 'Responsible for hard deadlines where every miss is a customer who does not get their package.',
+        suggested: 'Owned hard deadlines where every miss meant a customer did not receive a package.'
+      },
+      {
+        id: 'amazon-productivity', priority: 'fix', category: 'Consistency', surface: 'Home · Where I’ve been',
+        title: 'Use sentence case and cleaner number punctuation',
+        location: 'src/components/Experience.tsx:147',
+        why: '“Units per Hour” should not be title-cased, and em dashes make the parenthetical comparison easier to scan.',
+        current: 'Increased my Sort shift’s productivity by 29% (42 to 55 Units per Hour) in summer 2020.',
+        suggested: 'Increased my sort shift’s productivity by 29%—from 42 to 55 units per hour—in summer 2020.'
+      },
+      {
+        id: 'github-branding', priority: 'fix', category: 'Spelling', surface: 'Home · Work + no3y Code',
+        title: 'Use the official “GitHub” capitalization everywhere',
+        location: 'src/components/WorkList.tsx:47; src/data/projects.ts:735',
+        why: 'The brand is “GitHub,” not “Github.” Two visitor-facing calls to action use the wrong form.',
+        current: 'Download from Github\nGithub',
+        suggested: 'Download from GitHub\nGitHub'
+      },
+      {
+        id: 'packaging-subtitle', priority: 'revise', category: 'Clarity', surface: 'Home · Work',
+        title: 'Replace the cramped slash construction',
+        location: 'src/components/WorkList.tsx:92',
+        why: 'The slash reads like an internal taxonomy label. The other card subtitles use natural phrases.',
+        current: 'Packaging/Graphic design project',
+        suggested: 'Packaging and graphic design project'
+      },
+      {
+        id: 'graphic-design-filter', priority: 'fix', category: 'Consistency', surface: 'Home · Work',
+        title: 'Match sentence case across filter labels',
+        location: 'src/components/WorkList.tsx:137',
+        why: '“Personal projects” is sentence case, so “Graphic Design” should follow the same UI-label convention.',
+        current: 'Graphic Design',
+        suggested: 'Graphic design'
+      },
+      {
+        id: 'pc-title-case', priority: 'fix', category: 'Capitalization', surface: 'Home · Work + How to Build a PC',
+        title: 'Lowercase “to” in the project title',
+        location: 'src/data/projects.ts:881',
+        why: 'Short prepositions are lowercase in standard title case. The value feeds both the card and project-page title.',
+        current: 'How To Build a PC',
+        suggested: 'How to Build a PC'
+      },
+      {
+        id: 'metadata-title', priority: 'revise', category: 'Clarity', surface: 'Shared · Browser metadata',
+        title: 'Make the browser title identify the person and role',
+        location: 'index.html:7',
+        why: '“Noah Design” is vague in tabs, bookmarks, and search results. A descriptive title is clearer and more credible.',
+        current: 'Noah Design',
+        suggested: 'Noah Hendrickson — Product Designer & Design Engineer'
+      },
+      {
+        id: 'd2-opening', priority: 'revise', category: 'Run-on', surface: 'Project · D2 Stat Builder',
+        title: 'Remove repeated setup from the opening paragraph',
+        location: 'src/data/projects.ts:427',
+        why: 'The paragraph says “Destiny 2” three times in four sentences and treats characters, stats, and builds as equivalent things a player creates.',
+        current: 'This is a tool for my favorite video game of all time, Destiny 2. I made it for power users and nerds like myself. In Destiny 2 there are different characters, stats and builds you can create. This app helps you find the gear for your perfect stat splits and builds.',
+        suggested: 'Destiny 2 is my favorite game, and I built this tool for power users and nerds like me. Players can create countless builds across different characters and stat combinations; this app helps them find the right gear for a specific build.'
+      },
+      {
+        id: 'd2-flow', priority: 'revise', category: 'Clarity', surface: 'Project · D2 Stat Builder',
+        title: 'Replace “some other selections” with the actual action',
+        location: 'src/data/projects.ts:428',
+        why: '“Some other selections” is vague in a portfolio case study. “Choose constraints” describes the design more precisely.',
+        current: 'Users set their stat targets, make some other selections and watch builds populate in the right column. Once they find a build they like, they can equip it in-game and save it as a loadout.',
+        suggested: 'Users set stat targets, choose constraints, and see matching builds populate in the right column. When they find one they like, they can equip it in-game and save it as a loadout.'
+      },
+      {
+        id: 'd2-heading', priority: 'revise', category: 'Clarity', surface: 'Project · D2 Stat Builder',
+        title: 'Untangle “Making finding armor easy”',
+        location: 'src/data/projects.ts:445',
+        why: 'Two gerunds back to back make the heading harder to parse than it needs to be.',
+        current: 'Making finding armor easy',
+        suggested: 'Making armor easier to find'
+      },
+      {
+        id: 'd2-table-copy', priority: 'revise', category: 'Clarity', surface: 'Project · D2 Stat Builder',
+        title: 'Name the inventory and simplify the table description',
+        location: 'src/data/projects.ts:446',
+        why: '“Search my armor” is imprecise, and “table view” can simply be “table.”',
+        current: 'Destiny 2’s in-game vault and existing third-party tools made it difficult to search my armor or identify which pieces to pursue. I went back to basics and designed a table view with quick filters and custom sorting.',
+        suggested: 'Destiny 2’s in-game vault and existing third-party tools made it difficult to search my armor inventory or identify which pieces to pursue. I went back to basics and designed a table with quick filters and custom sorting.'
+      },
+      {
+        id: 'armory-opening', priority: 'revise', category: 'Tone', surface: 'Project · Moonfang Armory',
+        title: 'Open with confidence instead of “So… just…”',
+        location: 'src/data/projects.ts:605',
+        why: 'The current opening delays the point and diminishes the name. “Certain perks, traits and many other parameters” is also vague, while “allows for the chaining” is a heavy nominalization.',
+        current: 'So the name of this project is just a popular armor set from Destiny 2, the video game. What this site actually does is allow users to search for weapons in Destiny 2 based on certain perks, traits and many other parameters. It’s a command palette UX that allows for the chaining of many filters.',
+        suggested: 'Moonfang Armory takes its name from a popular armor set in Destiny 2. The site lets players search for weapons by perks, traits, and other attributes through a command-palette interface that supports chained filters.'
+      },
+      {
+        id: 'no3y-hero', priority: 'revise', category: 'Run-on', surface: 'Project · no3y Code',
+        title: 'Give the no3y Code introduction a cleaner arc',
+        location: 'src/data/projects.ts:733',
+        why: 'The paragraph repeats “I wanted,” uses a long three-part sentence, and ends with a formal disclaimer that clashes with the smiley. The rewrite keeps both the disclaimer and personality.',
+        current: 'This is the culmination of a few projects and ideas. I wanted to edit code with the precision of Figma’s design mode inside an agentic coding tool and tackle issues I have with most tools’ sidebar UX. I forked T3 Code so I could make UX/UI improvements, build a design mode and add small features I want. I am not associated with T3 Code in any way and only work on my fork :)',
+        suggested: 'no3y Code brings together several projects and ideas. I wanted the precision of Figma’s design mode inside an agentic coding tool, along with a better sidebar for managing multiple agents. I forked T3 Code to improve the UX/UI, build a design mode, and add a few features I wanted. I’m not associated with T3 Code; I only work on my fork. :)'
+      },
+      {
+        id: 'no3y-idea-opening', priority: 'revise', category: 'Clarity', surface: 'Project · no3y Code',
+        title: 'Clarify what “precise with my edits” means',
+        location: 'src/data/projects.ts:750',
+        why: '“Select an element and prompt” is missing an object, “those” has an unclear antecedent, and the paragraph repeats “wanted.”',
+        current: 'I wanted a really powerful design mode in the agent orchestration tools I was using. I didn’t want to just select an element and prompt. Sometimes I wanted to be precise with my edits and send those off to an agent to apply. I also wanted more information at a glance when I was working on multiple projects at once.',
+        suggested: 'I wanted a powerful design mode in the agent orchestration tools I used—not just a way to select an element and write a prompt. Sometimes I wanted to make precise visual edits, then send them to an agent to apply. I also wanted more context at a glance when working across multiple projects.'
+      },
+      {
+        id: 'forge-branding', priority: 'fix', category: 'Consistency', surface: 'Project · no3y Code',
+        title: 'Use the project’s displayed name, “The Forge”',
+        location: 'src/data/projects.ts:752–754',
+        why: 'The site and repository documentation refer to the project as “The Forge”; the lowercase package-style form reads like an accidental filename.',
+        current: 'the-forge. I created the-forge, an npm package for Vite apps…',
+        suggested: 'The Forge. I created The Forge, an npm package for Vite apps…'
+      },
+      {
+        id: 'no3y-combination', priority: 'revise', category: 'Clarity', surface: 'Project · no3y Code',
+        title: 'Simplify the explanation for choosing a fork',
+        location: 'src/data/projects.ts:767–770',
+        why: '“Combine these things to have one main app I used to get things done” is indirect. “Fork-friendly” is also one compound adjective.',
+        current: 'I wanted to combine these things to have one main app I used to get things done. But because I lack the technical expertise to create my own agent app from scratch, I forked an open-source one. Huge shout-out to T3 Code—it’s an awesome open-source app and is very fork-friendly.',
+        suggested: 'I wanted to combine these ideas in one app for getting things done. Because I didn’t have the technical expertise to build an agent app from scratch, I forked an open-source one. Huge shout-out to T3 Code—it’s an excellent, fork-friendly app.'
+      },
+      {
+        id: 'thread-cards', priority: 'revise', category: 'Clarity', surface: 'Project · no3y Code',
+        title: 'Tighten the thread-card rationale',
+        location: 'src/data/projects.ts:786',
+        why: 'The paragraph says “at a glance” twice across this section and can state the design need more directly.',
+        current: 'One line wasn’t enough. When multitasking across projects and models, I wanted to see the project, branch, and model at a glance. T3 Code provided a strong foundation, and I designed the interface around the context I rely on most.',
+        suggested: 'A single line didn’t provide enough context. While multitasking across projects and models, I needed to see each thread’s project, branch, and model immediately. T3 Code provided a strong foundation, and I designed the interface around that information.'
+      },
+      {
+        id: 'design-mode-progress', priority: 'revise', category: 'Run-on', surface: 'Project · no3y Code',
+        title: 'Cut repetition from the design-mode status paragraph',
+        location: 'src/data/projects.ts:802',
+        why: '“For a while I have been wanting” is wordy, and “actually use and test it out” repeats the same idea.',
+        current: 'For a while I have been wanting to build a design mode that works alongside coding agents and whatever harness I prefer at the time. This feature is very much a work in progress and I’m building it from scratch. It was important to get it functional so I could actually use and test it out.',
+        suggested: 'I’ve long wanted a design mode that works alongside coding agents, regardless of which harness I’m using. The feature is still a work in progress, but I prioritized a functional version so I could test it in my own workflow.'
+      },
+      {
+        id: 'canvas-mode', priority: 'fix', category: 'Grammar', surface: 'Project · no3y Code',
+        title: 'Replace “allowed an easy way” and keep tense consistent',
+        location: 'src/data/projects.ts:804',
+        why: 'A feature “provides” a way; it does not “allow a way.” The surrounding copy describes the current product, so present tense is clearer.',
+        current: 'Canvas mode was another feature I knew I wanted. It lets you pan around the page and focus on certain areas. It also allowed an easy way to see the page at different sizes.',
+        suggested: 'Canvas mode was another feature I knew I wanted. It lets users pan around the page, focus on specific areas, and preview the page at different sizes.'
+      },
+      {
+        id: 'composer-sections', priority: 'fix', category: 'Punctuation', surface: 'Project · no3y Code',
+        title: 'Use a colon before the three-part list',
+        location: 'src/data/projects.ts:822',
+        why: 'The current comma incorrectly joins the setup to its list. Spelling out “three” and using parallel nouns makes the sentence read cleanly.',
+        current: 'I prefer a compact message composer and broke it into 3 sections, the branch information, the input and then model parameters.',
+        suggested: 'I prefer a compact message composer, so I broke it into three sections: branch information, the input, and model parameters.'
+      },
+      {
+        id: 'pc-introduction', priority: 'revise', category: 'Clarity', surface: 'Project · How to Build a PC',
+        title: 'Replace “order of process” with “build order”',
+        location: 'src/data/projects.ts:901',
+        why: '“Get into detail” and “order of process” are not idiomatic. The rewrite also removes an unnecessary setup sentence.',
+        current: 'I am a tech enthusiast, so of course I build my own computers. I wanted to create a supplemental infographic for building a custom PC. The goal of this guide isn’t to get into detail about each step but rather give an overview and suggest an order of process to make the experience easier.',
+        suggested: 'As a tech enthusiast who builds my own computers, I wanted to create a supplemental infographic for assembling a custom PC. Rather than explain every step in detail, the guide gives an overview of the parts and suggests a build order that makes the process easier.'
+      },
+      {
+        id: 'nacho-opening', priority: 'revise', category: 'Tone', surface: 'Project · Nacho Box',
+        title: 'Make the project introduction more direct',
+        location: 'src/data/projects.ts:973',
+        why: '“A project I made” and “I like to showcase this mostly” sound tentative. The rewrite leads with the concept and closes on the part worth showcasing.',
+        current: 'A packaging project I made in college. The goal was to design a convenient chips-and-salsa container for parties and get-togethers—one box, three salsas, and four flavors. I like to showcase this mostly for the graphics and illustrations, as I am really proud of the style I captured.',
+        suggested: 'For this college packaging project, I designed a convenient chips-and-salsa container for parties and get-togethers: one box, three salsas, and four flavors. I’m especially proud of the visual style across the lettering, illustrations, and patterns.'
+      },
+      {
+        id: 'nacho-hand-drawn', priority: 'revise', category: 'Clarity', surface: 'Project · Nacho Box',
+        title: 'Use the cleaner “drew … by hand” construction',
+        location: 'src/data/projects.ts:986',
+        why: '“Hand drew all of the” is heavy and slightly awkward. The suggested phrasing is more natural without changing the process.',
+        current: 'To get an organic vibe, I hand drew all of the lettering and icons with pen and paper, then scanned them in and cleaned them up in Illustrator.',
+        suggested: 'To create an organic feel, I drew all the lettering and icons by hand, then scanned and cleaned them up in Illustrator.'
+      },
+      {
+        id: 'nacho-alphabet', priority: 'revise', category: 'Clarity', surface: 'Project · Nacho Box',
+        title: 'Replace vague references in the alphabet caption',
+        location: 'src/data/projects.ts:1015',
+        why: '“Came out of it” has no clear antecedent, and a concept cannot literally “come back to” words.',
+        current: 'The full character set that came out of it, plus the words the concept kept coming back to.',
+        suggested: 'The final character set, along with the words that shaped the concept.'
+      },
+      {
+        id: 'us-spelling-alts', priority: 'fix', category: 'Consistency', surface: 'Project · Nacho Box + Work card alt text',
+        title: 'Standardize visitor-facing text on American English',
+        location: 'src/data/projects.ts:1025, 1032, 1063, 1070; src/components/WorkList.tsx:118',
+        why: 'The site uses American forms such as “favorite,” “armor,” and “color” elsewhere. These descriptions switch to British “colour,” “flavour,” and “centred.” Code comments are excluded.',
+        current: 'colour · flavour · colourways · flavours · centred',
+        suggested: 'color · flavor · colorways · flavors · centered'
+      },
+      {
+        id: 'onboarding-hero-team', priority: 'revise', category: 'Run-on', surface: 'Case study · Invisible onboarding',
+        title: 'Restructure the team-and-scope introduction',
+        location: 'src/components/InvisibleOnboarding.tsx:359–363',
+        why: 'Role names and “product” are incorrectly capitalized, “the business” repeats, and the final sentence stacks several responsibilities into a run-on.',
+        current: 'The team for this initiative was 1.5 Designers, 1 Product Manager and 5 Engineers. The business relied on Meridial to onboard users to scale our AI training business and meet the requirements set by our clients. I was the Design Lead for this team and worked closely with our Product Manager and many other teams such as Legal, Compliance, Hiring and Operations to ensure the Product didn’t have any blind spots.',
+        suggested: 'The team included 1.5 designers, one product manager, and five engineers. Invisible relied on Meridial to onboard enough users to scale AI training work and meet client demand. As design lead, I worked closely with the product manager and teams across Legal, Compliance, Hiring, and Operations to ensure the product accounted for cross-functional requirements.'
+      },
+      {
+        id: 'onboarding-problem', priority: 'revise', category: 'Clarity', surface: 'Case study · Invisible onboarding',
+        title: 'Make the conversion problem specific and grammatical',
+        location: 'src/components/InvisibleOnboarding.tsx:125–127',
+        why: '“Flow conversion rate” is clumsy, “tons” and “huge” are vague, and “strain on staffing projects on-time” is not grammatical. “On time” is not hyphenated in this position.',
+        current: 'Meridial’s onboarding flow conversion rate was severely underperforming. There were many steps with tons of friction and huge drop-off. This was causing an operational strain on staffing projects on-time and delivering results to clients.',
+        suggested: 'Meridial’s onboarding conversion rate was severely underperforming. Its many high-friction steps caused significant drop-off. This strained operations as teams tried to staff projects on time and deliver results to clients.'
+      },
+      {
+        id: 'onboarding-urgency', priority: 'revise', category: 'Tone', surface: 'Case study · Invisible onboarding',
+        title: 'Replace “ASAP” and the repeated “friction”',
+        location: 'src/components/InvisibleOnboarding.tsx:139–150',
+        why: '“Move quickly,” “ASAP,” and “points of friction” repeat the same urgency. Generic department names do not need title case.',
+        current: 'We needed to move quickly and intelligently to solve these points of friction and increase our onboarding conversion ASAP. One of our marketing designers and I began by researching competitors and creating a large FigJam board that became the foundation for the initiative. I felt strongly that we needed to collaborate with the Marketing team because our Marketing site was one of the larger entry points into the product.',
+        suggested: 'We needed to identify the highest-impact friction quickly and improve onboarding conversion. One of our marketing designers and I began by researching competitors and creating a FigJam board that became the initiative’s foundation. We collaborated closely with the marketing team because the marketing site was a major entry point into the product.'
+      },
+      {
+        id: 'onboarding-risk-data', priority: 'fix', category: 'Grammar', surface: 'Case study · Invisible onboarding',
+        title: 'Hyphenate “high-risk” and replace “crossed that with”',
+        location: 'src/components/InvisibleOnboarding.tsx:166–176',
+        why: '“High-risk” is a compound modifier, “crossed that with” is awkward, and the correct idiom is “homing in,” not “honing in.” “Vectors” adds jargon without helping the reader.',
+        current: 'Next we mapped our user journey and annotated high risk areas, questions and ideas. We focused heavily on high risk areas and crossed that with drop-off data to make a strong case about where design focus would be most valuable. We worked across two vectors: the overall flow and order of steps, and removing unnecessary friction by honing in on the steps that caused the most drop-off. Some key findings were the following:',
+        suggested: 'Next, we mapped the user journey and annotated high-risk areas, questions, and ideas. We combined those risks with drop-off data to show where design attention would be most valuable. We worked on two fronts: improving the overall flow and sequence, and removing unnecessary friction by homing in on the steps with the most drop-off. Key findings included:'
+      },
+      {
+        id: 'onboarding-findings', priority: 'revise', category: 'Clarity', surface: 'Case study · Invisible onboarding',
+        title: 'Clarify the three research findings',
+        location: 'src/components/InvisibleOnboarding.tsx:193–205',
+        why: 'The current list repeats “information,” inconsistently capitalizes generic steps, and uses the awkward “under-explained.”',
+        current: '1. We asked for way too much information on the profile. Our internal teams were not using this information and it was not playing a major role in any of our internal sourcing tools.\n2. Our ID and Address verification steps were under-explained, and we were setting a false expectation with some of the copy.\n3. Our Initial Assessment step was the largest barrier and, like the profile details, was barely useful to the business.',
+        suggested: '1. We requested too much profile information. Internal teams rarely used it, and it played little role in our sourcing tools.\n2. Our identity- and address-verification steps lacked context, and some copy set false expectations.\n3. The initial assessment was the largest barrier and, like the profile details, provided little value to the business.'
+      },
+      {
+        id: 'onboarding-decisions', priority: 'revise', category: 'Run-on', surface: 'Case study · Invisible onboarding',
+        title: 'Break the design-decisions paragraph into clear claims',
+        location: 'src/components/InvisibleOnboarding.tsx:221–230',
+        why: 'The opening is overqualified, and the colon after “were” introduces a full sentence rather than a clean list.',
+        current: 'Once we felt our research and brainstorming were solid, and we had targeted the correct areas to focus on, I moved into the design phase. A few of the design decisions we arrived at were: we wanted to create a more directive and sequenced flow. Our old onboarding dropped users onto the homepage pretty early with “optional” setup steps, and the new flow would follow a more standard onboarding wizard UX. We also pinned down what details were absolutely necessary per step and removed the details that were not.',
+        suggested: 'Once research and brainstorming identified the right focus areas, I moved into design. We chose a more directive, sequential flow: instead of dropping users on the homepage with “optional” setup steps, the new experience followed a standard onboarding wizard. We also identified the details required at each step and removed everything else.'
+      },
+      {
+        id: 'onboarding-prototype', priority: 'revise', category: 'Clarity', surface: 'Case study · Invisible onboarding',
+        title: 'Tighten the prototype handoff explanation',
+        location: 'src/components/InvisibleOnboarding.tsx:233–236',
+        why: '“Vibe coded” needs a hyphen as a compound modifier, and the final sentence repeats “prototype,” “engineers,” “use,” and “code.”',
+        current: 'Due to the short timeline, the team decided to try a new workflow where a vibe coded prototype would serve as the source of truth for the designs. We needed to iterate fast and wanted to hand over the prototype to the engineers to use that frontend code to accelerate the build.',
+        suggested: 'Given the short timeline, the team tried a new workflow in which a vibe-coded prototype served as the design source of truth. We could iterate quickly, then hand engineers working frontend code to accelerate the build.'
+      },
+      {
+        id: 'onboarding-experiment-result', priority: 'fix', category: 'Grammar', surface: 'Case study · Invisible onboarding',
+        title: 'Repair the experiment-results sentence',
+        location: 'src/components/InvisibleOnboarding.tsx:272–273',
+        why: 'The current comma separates the subject “numbers” from “supported,” and the sentence needs a comma after its introductory phrase. “Three weeks of the experiment” is also wordy.',
+        current: 'After 3 weeks of the experiment the numbers were in, and supported our original hypothesis for the high risk areas we targeted.',
+        suggested: 'After three weeks, the results supported our original hypotheses about the high-risk areas we targeted.'
+      },
+      {
+        id: 'onboarding-assessment-result', priority: 'revise', category: 'Run-on', surface: 'Case study · Invisible onboarding',
+        title: 'Clarify why removing the assessment worked',
+        location: 'src/components/InvisibleOnboarding.tsx:276–282',
+        why: '“Highest friction” needs a hyphen, “drop off” is a noun here and needs a hyphen, and the middle sentence splices separate thoughts with an em dash.',
+        current: '4x increase in conversion for our highest friction step. During the research phase we saw the largest drop off during the initial assessment that users must complete. We took the assessment ourselves, met with various teams to understand if they used those results in a meaningful way — they didn’t. So we completely cut that step out. The largest impact didn’t actually require designs.',
+        suggested: '4× increase in conversion at our highest-friction step. During research, we saw the largest drop-off at the required initial assessment. We completed it ourselves and met with teams to learn whether they used the results meaningfully. They didn’t, so we removed the step entirely. The largest impact did not require a design solution.'
+      },
+      {
+        id: 'onboarding-outcomes', priority: 'fix', category: 'Consistency', surface: 'Case study · Invisible onboarding',
+        title: 'Standardize outcome notation and articles',
+        location: 'src/components/InvisibleOnboarding.tsx:325–329',
+        why: 'Use the multiplication sign rather than the letter “x,” and include “the” in the final outcome for a complete phrase.',
+        current: '4x increase by removing the step causing the most friction.\nDoubled overall conversion rate.',
+        suggested: '4× increase by removing the step causing the most friction.\nDoubled the overall conversion rate.'
+      },
+      {
+        id: 'onboarding-whats-next', priority: 'revise', category: 'Run-on', surface: 'Case study · Invisible onboarding',
+        title: 'Remove repetition from “What’s next?”',
+        location: 'src/components/InvisibleOnboarding.tsx:307–312',
+        why: 'The paragraph repeats “onboarding,” “experiments,” and “areas,” while “go through” and “couldn’t get to” are vague.',
+        current: 'I wanted to carry the momentum from the experiment and continue to improve our onboarding. I made sure to go through both experiments to document why I thought one performed better than the other. Our onboarding flow was still full of legacy requirements that we couldn’t get to in this new version. I was once again researching to find the next risk areas that needed design attention.',
+        suggested: 'I wanted to carry the experiment’s momentum into the next onboarding improvements. I reviewed both variants and documented why one outperformed the other. The flow still contained legacy requirements we could not address in this release, so I returned to research to identify the next risks that needed design attention.'
+      },
+      {
+        id: 'synapse-hero', priority: 'revise', category: 'Clarity', surface: 'Case study · Invisible Synapse',
+        title: 'Replace the awkward “design-directed through” construction',
+        location: 'src/components/InvisibleSynapse.tsx:249–252',
+        why: '“Reusable custom components built for” stacks overlapping modifiers, and “design-directed through” is not natural phrasing.',
+        current: 'I led the design for the launch of Invisible’s annotations platform, Synapse. I was responsible for creating reusable custom components built for AI training tasks. I design-directed through high-fidelity mockups and custom interface designs tailored to specific client requirements.',
+        suggested: 'I led design for the launch of Synapse, Invisible’s annotation platform. I created reusable components for AI training tasks and directed the experience through high-fidelity mockups tailored to specific client requirements.'
+      },
+      {
+        id: 'synapse-team', priority: 'fix', category: 'Grammar', surface: 'Case study · Invisible Synapse',
+        title: 'Replace “a team of myself”',
+        location: 'src/components/InvisibleSynapse.tsx:255–257',
+        why: '“A team of myself” is ungrammatical, the numeric range should use an en dash, and the final sentence uses “support and direct” without a clear object.',
+        current: 'This was a small team of myself, 3-4 engineers and a PM. This project did not follow a traditional product roadmap or launch. The foundation was built before I was brought in to support and direct the UX of the product.',
+        suggested: 'The small team included me, three to four engineers, and a product manager. The project did not follow a traditional product roadmap or launch process: the foundation was built before I joined to define and direct the UX.'
+      },
+      {
+        id: 'synapse-problem', priority: 'fix', category: 'Punctuation', surface: 'Case study · Invisible Synapse',
+        title: 'Join the cause and effect without a sentence fragment',
+        location: 'src/components/InvisibleSynapse.tsx:128–130',
+        why: '“Therefore” needs a following comma, but combining the sentences is cleaner and more direct.',
+        current: 'Our legacy platform for AI training tasks was not created with that type of work in mind. Therefore it was far too strict and inflexible to support the different use cases we needed for our clients.',
+        suggested: 'Our legacy platform was not designed for AI training tasks, so it was too rigid to support the range of client use cases we needed.'
+      },
+      {
+        id: 'synapse-interviews', priority: 'revise', category: 'Clarity', surface: 'Case study · Invisible Synapse',
+        title: 'Clarify what the interviews were meant to uncover',
+        location: 'src/components/InvisibleSynapse.tsx:161–169',
+        why: 'Generic “Designer” should be lowercase, and “understand the problems and the needs for” is vague and repetitive.',
+        current: 'I met with the team who built the foundation of our “next-gen” annotations platform to ask questions, make suggestions and understand what they thought they needed from a Designer. I interviewed some SMEs, users and operations managers to understand the problems and the needs for an AI training interface.',
+        suggested: 'I met with the team that built the foundation of our “next-gen” annotation platform to ask questions, offer suggestions, and understand what they needed from design. I also interviewed subject-matter experts, users, and operations managers to learn what an AI training interface needed to support.'
+      },
+      {
+        id: 'synapse-blueprint', priority: 'revise', category: 'Consistency', surface: 'Case study · Invisible Synapse',
+        title: 'Keep the blueprint paragraph in one point of view and tense',
+        location: 'src/components/InvisibleSynapse.tsx:179–182',
+        why: 'The paragraph shifts from “users” to “you” and from “needed” to “now housed” to “points.”',
+        current: 'I started with an RLHF interface to lay the foundation for our new product. One clear UX improvement we needed to add was instructions in the interface that guide you through the task. The right panel now housed instructions and gave users a tooltip that points to the element where input is needed.',
+        suggested: 'I started with an RLHF interface to establish the product’s foundation. One clear UX improvement was adding in-context instructions to guide users through each task. The right panel housed those instructions, while tooltips pointed to the elements that required input.'
+      },
+      {
+        id: 'synapse-reusable', priority: 'fix', category: 'Spelling', surface: 'Case study · Invisible Synapse',
+        title: 'Use “reusable” as one word',
+        location: 'src/components/InvisibleSynapse.tsx:199',
+        why: 'The standard modern spelling is “reusable,” consistent with the body copy directly below the heading.',
+        current: 'Make it re-usable',
+        suggested: 'Make it reusable'
+      },
+      {
+        id: 'work-gate-label', priority: 'polish', category: 'Clarity', surface: 'Shared · Password gate',
+        title: 'Say what the password unlocks',
+        location: 'src/components/WorkGate.tsx:86',
+        why: '“View work” is broad; visitors are opening one specific case study.',
+        current: 'Enter password to view work',
+        suggested: 'Enter the password to view this case study'
+      }
+    ];
+
+    const priorityLabel = { fix: 'Fix first', revise: 'Recommended', polish: 'Optional polish' };
+    const savedDecisions = JSON.parse(localStorage.getItem('portfolio-copy-audit-decisions') || '{}');
+    const legacyDone = JSON.parse(localStorage.getItem('portfolio-copy-audit-done') || '[]');
+    legacyDone.forEach((id) => {
+      if (!savedDecisions[id]) savedDecisions[id] = { choice: 'apply', custom: '' };
+    });
+
+    const state = {
+      search: '',
+      priority: 'all',
+      surface: 'all',
+      hideDecided: false,
+      decisions: savedDecisions
+    };
+
+    const escapeHtml = (value) => value.replace(/[&<>"]/g, (char) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'
+    })[char]);
+
+    const normalize = (value) => value.toLocaleLowerCase();
+
+    function saveDecisions() {
+      localStorage.setItem('portfolio-copy-audit-decisions', JSON.stringify(state.decisions));
+      localStorage.removeItem('portfolio-copy-audit-done');
+    }
+
+    async function copyText(value) {
+      if (navigator.clipboard && window.isSecureContext) {
+        try {
+          await navigator.clipboard.writeText(value);
+          return true;
+        } catch (_) {
+          // Fall through to the selection-based copy path below.
+        }
+      }
+
+      const field = document.createElement('textarea');
+      field.value = value;
+      field.setAttribute('readonly', '');
+      field.style.position = 'fixed';
+      field.style.opacity = '0';
+      document.body.appendChild(field);
+      field.select();
+      const copied = document.execCommand('copy');
+      field.remove();
+      return copied;
+    }
+
+    function render() {
+      const query = normalize(state.search.trim());
+      const visible = findings.filter((item) => {
+        const decision = state.decisions[item.id];
+        const haystack = normalize(`${Object.values(item).join(' ')} ${decision?.custom || ''}`);
+        return (state.priority === 'all' || item.priority === state.priority)
+          && (state.surface === 'all' || item.surface === state.surface)
+          && (!state.hideDecided || !decision?.choice)
+          && (!query || haystack.includes(query));
+      });
+
+      const decided = findings.filter((item) => state.decisions[item.id]?.choice).length;
+      document.querySelector('#visible-count').textContent = `${visible.length} of ${findings.length} shown · ${decided} decided`;
+      const root = document.querySelector('#findings');
+      if (!visible.length) {
+        root.innerHTML = '<div class="empty note">No findings match these filters.</div>';
+        return;
+      }
+
+      root.innerHTML = visible.map((item) => {
+        const decision = state.decisions[item.id] || { choice: '', custom: '' };
+        return `
+        <article class="finding ${decision.choice ? `decision-${decision.choice}` : ''}" data-id="${item.id}">
+          <div class="finding-body">
+            <div class="finding-head">
+              <span class="badge ${item.priority}">${priorityLabel[item.priority]}</span>
+              <span class="badge category">${escapeHtml(item.category)}</span>
+              <h3>${escapeHtml(item.title)}</h3>
+            </div>
+            <p class="location">${escapeHtml(item.surface)} · <code>${escapeHtml(item.location)}</code></p>
+            <p class="why">${escapeHtml(item.why)}</p>
+            <div class="copy-grid">
+              <div class="copy-block">
+                <span class="copy-label">Current</span>
+                <p class="copy-text">${escapeHtml(item.current)}</p>
+              </div>
+              <div class="copy-block after">
+                <span class="copy-label">Suggested</span>
+                <p class="copy-text">${escapeHtml(item.suggested)}</p>
+                <button class="copy-button" type="button" data-copy="${item.id}">Copy suggestion</button>
+              </div>
+            </div>
+            <div class="decision-panel">
+              <fieldset>
+                <legend>Choose what to do</legend>
+                <div class="decision-options">
+                  <label class="decision-option">
+                    <input type="radio" name="decision-${item.id}" value="apply" ${decision.choice === 'apply' ? 'checked' : ''}>
+                    <span>Apply your suggestion</span>
+                  </label>
+                  <label class="decision-option">
+                    <input type="radio" name="decision-${item.id}" value="ignore" ${decision.choice === 'ignore' ? 'checked' : ''}>
+                    <span>Ignore</span>
+                  </label>
+                  <label class="decision-option">
+                    <input type="radio" name="decision-${item.id}" value="custom" ${decision.choice === 'custom' ? 'checked' : ''}>
+                    <span>Write my own</span>
+                  </label>
+                </div>
+              </fieldset>
+              ${decision.choice === 'custom' ? `
+                <div class="custom-change">
+                  <label for="custom-${item.id}">My replacement</label>
+                  <textarea id="custom-${item.id}" data-custom="${item.id}" placeholder="Write your replacement copy here…">${escapeHtml(decision.custom || '')}</textarea>
+                </div>
+              ` : ''}
+              <div class="decision-actions">
+                ${decision.choice === 'custom' && decision.custom ? `<button class="copy-button" type="button" data-copy-custom="${item.id}">Copy my change</button>` : ''}
+                ${decision.choice ? `<button class="copy-button" type="button" data-clear="${item.id}">Clear decision</button>` : ''}
+              </div>
+            </div>
+          </div>
+        </article>
+      `;
+      }).join('');
+
+      root.querySelectorAll('input[type="radio"]').forEach((radio) => {
+        radio.addEventListener('change', (event) => {
+          const card = event.target.closest('.finding');
+          const id = card.dataset.id;
+          const existing = state.decisions[id] || { custom: '' };
+          state.decisions[id] = { choice: event.target.value, custom: existing.custom || '' };
+          saveDecisions();
+          render();
+        });
+      });
+
+      root.querySelectorAll('[data-custom]').forEach((field) => {
+        field.addEventListener('input', (event) => {
+          const id = event.target.dataset.custom;
+          state.decisions[id] = { choice: 'custom', custom: event.target.value };
+          saveDecisions();
+          const actions = event.target.closest('.decision-panel').querySelector('.decision-actions');
+          actions.innerHTML = `${event.target.value ? `<button class="copy-button" type="button" data-copy-custom="${id}">Copy my change</button>` : ''}<button class="copy-button" type="button" data-clear="${id}">Clear decision</button>`;
+          wireDecisionActions(actions);
+          const decided = findings.filter((item) => state.decisions[item.id]?.choice).length;
+          document.querySelector('#visible-count').textContent = `${visible.length} of ${findings.length} shown · ${decided} decided`;
+        });
+      });
+
+      root.querySelectorAll('[data-copy]').forEach((button) => {
+        button.addEventListener('click', async () => {
+          const item = findings.find((entry) => entry.id === button.dataset.copy);
+          const copied = await copyText(item.suggested);
+          button.textContent = copied ? 'Copied' : 'Select text to copy';
+          window.setTimeout(() => { button.textContent = 'Copy suggestion'; }, 1000);
+        });
+      });
+
+      wireDecisionActions(root);
+    }
+
+    function wireDecisionActions(container) {
+      container.querySelectorAll('[data-copy-custom]').forEach((button) => {
+        button.addEventListener('click', async () => {
+          const copied = await copyText(state.decisions[button.dataset.copyCustom]?.custom || '');
+          button.textContent = copied ? 'Copied' : 'Select text to copy';
+          window.setTimeout(() => { button.textContent = 'Copy my change'; }, 1000);
+        });
+      });
+
+      container.querySelectorAll('[data-clear]').forEach((button) => {
+        button.addEventListener('click', () => {
+          delete state.decisions[button.dataset.clear];
+          saveDecisions();
+          render();
+        });
+      });
+    }
+
+    document.querySelector('#total-count').textContent = findings.length;
+    document.querySelector('#fix-count').textContent = findings.filter((item) => item.priority === 'fix').length;
+    document.querySelector('#revise-count').textContent = findings.filter((item) => item.priority === 'revise').length;
+    document.querySelector('#polish-count').textContent = findings.filter((item) => item.priority === 'polish').length;
+
+    const surfaces = [...new Set(findings.map((item) => item.surface))].sort();
+    document.querySelector('#surface').insertAdjacentHTML('beforeend', surfaces.map((surface) =>
+      `<option value="${escapeHtml(surface)}">${escapeHtml(surface)}</option>`
+    ).join(''));
+
+    document.querySelector('#search').addEventListener('input', (event) => { state.search = event.target.value; render(); });
+    document.querySelector('#priority').addEventListener('change', (event) => { state.priority = event.target.value; render(); });
+    document.querySelector('#surface').addEventListener('change', (event) => { state.surface = event.target.value; render(); });
+    document.querySelector('#hide-decided').addEventListener('click', (event) => {
+      state.hideDecided = !state.hideDecided;
+      event.currentTarget.setAttribute('aria-pressed', String(state.hideDecided));
+      event.currentTarget.textContent = state.hideDecided ? 'Show decided' : 'Hide decided';
+      render();
+    });
+    document.querySelector('#export-decisions').addEventListener('click', (event) => {
+      const decisions = findings
+        .filter((item) => state.decisions[item.id]?.choice)
+        .map((item) => {
+          const decision = state.decisions[item.id];
+          return {
+            id: item.id,
+            choice: decision.choice,
+            custom: decision.custom || '',
+            selectedText:
+              decision.choice === 'apply'
+                ? item.suggested
+                : decision.choice === 'custom'
+                  ? decision.custom || ''
+                  : '',
+            title: item.title,
+            location: item.location,
+          };
+        });
+      const payload = {
+        exportedAt: new Date().toISOString(),
+        decided: decisions.length,
+        total: findings.length,
+        decisions,
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'copy-audit-decisions.json';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      event.currentTarget.textContent = `Exported ${decisions.length}`;
+      window.setTimeout(() => { event.currentTarget.textContent = 'Export decisions'; }, 1400);
+    });
+
+    render();
+  </script>
+</body>
+</html>

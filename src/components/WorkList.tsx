@@ -44,7 +44,7 @@ const no3y: WorkCard = {
     alt: 'no3y Code — the composer bar over a red-and-violet gradient',
   },
   accent: '#6f5efb',
-  extra: { label: 'Download from Github', href: NO3Y_CODE_DOWNLOAD },
+  extra: { label: 'Download from GitHub', href: NO3Y_CODE_DOWNLOAD },
 }
 
 const statBuilder: WorkCard = {
@@ -88,7 +88,7 @@ const synapse: WorkCard = {
 const nachoBox: WorkCard = {
   href: '/work/nacho-box',
   title: projects['nacho-box'].title,
-  subtitle: 'Packaging/Graphic design project',
+  subtitle: 'Packaging and graphic design project',
   art: {
     src: '/work/nacho-box/thumbnail.png',
     alt: 'Nacho Box — the “Hint of Lime” lockup on a chip-pattern yellow',
@@ -115,7 +115,7 @@ const armory: WorkCard = {
   subtitle: 'Community tool for Destiny 2',
   art: {
     src: '/work/bento/card-armory.png',
-    alt: 'Moonfang Armory — a pixel weapon sprite centred on a blue dither',
+    alt: 'Moonfang Armory — a pixel weapon sprite centered on a blue dither',
   },
   accent: '#3a6df0',
   extra: { label: 'View the site', href: 'https://noeyarmory.vercel.app/' },
@@ -131,7 +131,7 @@ const FILTERS: Filter[] = [
   { id: 'all', label: 'All', cards: [no3y, statBuilder, onboarding, synapse, nachoBox, howToPc, armory] },
   { id: 'fun', label: 'Personal projects', cards: [no3y, statBuilder, armory] },
   { id: 'career', label: 'Career', cards: [onboarding, synapse] },
-  { id: 'graphic', label: 'Graphic Design', cards: [nachoBox, howToPc] },
+  { id: 'graphic', label: 'Graphic design', cards: [nachoBox, howToPc] },
 ]
 
 /** Survives refresh — the whole home page lives on `/`, so the filter isn't in the path. */

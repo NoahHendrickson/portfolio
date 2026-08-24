@@ -424,7 +424,7 @@ export const projects: Record<string, Project> = {
       copyWidth: 700,
       hero: {
         body: [
-          'This is a tool for my favorite video game of all time, Destiny 2. I made it for power users and nerds like myself. In Destiny 2 there are different characters, stats and builds you can create. This app helps you find the gear for your perfect stat splits and builds.',
+          'Destiny 2 is my favorite game, and I built this tool for power users and nerds like me. Players can create countless builds across different characters and stat combinations; this app helps them find the right gear for a specific build.',
           'Users set their stat targets, make some other selections and watch builds populate in the right column. Once they find a build they like, they can equip it in-game and save it as a loadout.',
         ],
         cta: { label: 'Check it out', href: STAT_BUILDER_SITE },
@@ -442,8 +442,8 @@ export const projects: Record<string, Project> = {
         {
           kind: 'feature',
           gap: 80,
-          heading: 'Making finding armor easy',
-          body: 'Destiny 2’s in-game vault and existing third-party tools made it difficult to search my armor or identify which pieces to pursue. I went back to basics and designed a table view with quick filters and custom sorting.',
+          heading: 'Making armor easier to find',
+          body: 'Destiny 2’s in-game vault and existing third-party tools made it difficult to search my armor inventory or identify which pieces to pursue. I went back to basics and designed a table with quick filters and custom sorting.',
           copyWidth: 700,
           panelWidth: 668,
           stack: true,
@@ -602,7 +602,7 @@ export const projects: Record<string, Project> = {
       copyWidth: 688,
       hero: {
         body: [
-          'So the name of this project is just a popular armor set from Destiny 2, the video game. What this site actually does is allow users to search for weapons in Destiny 2 based on certain perks, traits and many other parameters. It’s a command palette UX that allows for the chaining of many filters.',
+          'Moonfang Armory takes its name from a popular armor set in Destiny 2. The site lets players search for weapons by perks, traits, and other attributes through a command-palette interface that supports chained filters.',
         ],
         video: {
           src: '/work/armory/hero.mp4',
@@ -730,9 +730,9 @@ export const projects: Record<string, Project> = {
       eyebrowPlacement: 'below',
       hero: {
         body: [
-          'This is the culmination of a few projects and ideas. I wanted to edit code with the precision of Figma’s design mode inside an agentic coding tool and tackle issues I have with most tools’ sidebar UX. I forked T3 Code so I could make UX/UI improvements, build a design mode and add small features I want. I am not associated with T3 Code in any way and only work on my fork :)',
+          'no3y Code brings together several projects and ideas. I wanted the precision of Figma’s design mode inside an agentic coding tool, along with a better sidebar for managing multiple agents. I forked T3 Code to improve the UX/UI, build a design mode, and add a few features I wanted. I’m not associated with T3 Code; I only work on my fork. :)',
         ],
-        cta: { label: 'Github', href: NO3Y_CODE_DOWNLOAD, gradient: true },
+        cta: { label: 'GitHub', href: NO3Y_CODE_DOWNLOAD, gradient: true },
         shot: {
           src: '/work/no3y-code/hero.png',
           alt: 'no3y Code on the desktop — a new portfolio thread asking what we should build',
@@ -749,9 +749,9 @@ export const projects: Record<string, Project> = {
           body: [
             'I wanted a really powerful design mode in the agent orchestration tools I was using. I didn’t want to just select an element and prompt. Sometimes I wanted to be precise with my edits and send those off to an agent to apply. I also wanted more information at a glance when I was working on multiple projects at once.',
             [
-              { text: 'the-forge.', strong: true },
+              { text: 'The Forge.', strong: true },
               {
-                text: ' I created the-forge, an npm package for Vite apps that provides a design mode for making frontend changes in a sidebar and sending those edits to a coding agent.',
+                text: ' I created The Forge, an npm package for Vite apps that provides a design mode for making frontend changes in a sidebar and sending those edits to a coding agent.',
                 muted: true,
               },
             ],
@@ -783,7 +783,7 @@ export const projects: Record<string, Project> = {
           kind: 'feature',
           gap: 80,
           heading: 'Thread cards',
-          body: 'One line wasn’t enough. When multitasking across projects and models, I wanted to see the project, branch, and model at a glance. T3 Code provided a strong foundation, and I designed the interface around the context I rely on most.',
+          body: 'A single line didn’t provide enough context. While multitasking across projects and models, I needed to see each thread’s project, branch, and model immediately. T3 Code provided a strong foundation, and I designed the interface around that information.',
           copyWidth: 700,
           panelWidth: 789,
           stack: true,
@@ -799,9 +799,9 @@ export const projects: Record<string, Project> = {
           gap: 80,
           heading: 'Design mode',
           body: [
-            'For a while I have been wanting to build a design mode that works alongside coding agents and whatever harness I prefer at the time. This feature is very much a work in progress and I’m building it from scratch. It was important to get it functional so I could actually use and test it out.',
+            'I’ve long wanted a design mode that works alongside coding agents, regardless of which harness I’m using. The feature is still a work in progress, but I prioritized a functional version so I could test it in my own workflow.',
             'My motivation was that, as a designer, I still see enormous value in getting my hands dirty. Sometimes I need to compare variations—16 px or 24 px—and design mode lets me test both before applying the one that works.',
-            'Canvas mode was another feature I knew I wanted. It lets you pan around the page and focus on certain areas. It also allowed an easy way to see the page at different sizes.',
+            'Canvas mode was another feature I knew I wanted. It lets users pan around the page, focus on specific areas, and preview the page at different sizes.',
           ],
           copyWidth: 700,
           stack: true,
@@ -819,7 +819,7 @@ export const projects: Record<string, Project> = {
           kind: 'feature',
           gap: 80,
           heading: 'Message composer',
-          body: 'I prefer a compact message composer and broke it into 3 sections, the branch information, the input and then model parameters.',
+          body: 'I prefer a compact message composer, so I broke it into three sections: branch information, the input, and model parameters.',
           copyWidth: 700,
           panelWidth: 1225,
           stack: true,
@@ -878,7 +878,7 @@ export const projects: Record<string, Project> = {
 
   'how-to-pc': {
     slug: 'how-to-pc',
-    title: 'How To Build a PC',
+    title: 'How to Build a PC',
     eyebrow: ['Graphic Design', '2019', 'Infographic'],
     tagline:
       'A supplemental infographic for building a custom PC — an overview of the parts and the order to install them in.',
@@ -898,7 +898,7 @@ export const projects: Record<string, Project> = {
       eyebrowPlacement: 'below',
       hero: {
         body: [
-          'I am a tech enthusiast, so of course I build my own computers. I wanted to create a supplemental infographic for building a custom PC. The goal of this guide isn’t to get into detail about each step but rather give an overview and suggest an order of process to make the experience easier.',
+          'As a tech enthusiast who builds my own computers, I wanted to create a supplemental infographic for assembling a custom PC. Rather than explain every step in detail, the guide gives an overview of the parts and suggests a build order that makes the process easier.',
         ],
       },
       sections: [
@@ -983,7 +983,7 @@ export const projects: Record<string, Project> = {
         {
           kind: 'copy',
           heading: 'Drawn by hand, cleaned up after',
-          body: 'To get an organic vibe, I hand drew all of the lettering and icons with pen and paper, then scanned them in and cleaned them up in Illustrator.',
+          body: 'To create an organic feel, I drew all the lettering and icons by hand, then scanned and cleaned them up in Illustrator.',
         },
         {
           kind: 'columns',
@@ -1012,7 +1012,7 @@ export const projects: Record<string, Project> = {
         {
           kind: 'copy',
           heading: 'The finished alphabet',
-          body: 'The full character set that came out of it, plus the words the concept kept coming back to.',
+          body: 'The final character set, along with the words that shaped the concept.',
         },
         {
           // 890 of the 1272 column — the 2022 page ran the font sheet at 70%.
@@ -1022,14 +1022,14 @@ export const projects: Record<string, Project> = {
           frame: { left: 191, top: 0, width: 890 },
           shot: {
             src: '/work/nacho-box/alphabet.svg',
-            alt: 'A hand-drawn A–Z in outlined block capitals, above the words TORTILLA, CHIPS, GUAC, VERDE, JALAPENO, HOT, DIPS, QUESO and CHILE set in the same face, each in a different colour',
+            alt: 'A hand-drawn A–Z in outlined block capitals, above the words TORTILLA, CHIPS, GUAC, VERDE, JALAPENO, HOT, DIPS, QUESO and CHILE set in the same face, each in a different color',
             aspect: '590.5 / 450.7',
           },
         },
         {
           kind: 'copy',
           heading: 'Icons for the patterns',
-          body: 'The icons took the same approach — sketched first, then redrawn and tiled into a pattern for each flavour.',
+          body: 'The icons took the same approach — sketched first, then redrawn and tiled into a pattern for each flavor.',
         },
         {
           kind: 'shot',
@@ -1060,14 +1060,14 @@ export const projects: Record<string, Project> = {
           frame: { left: 0, top: 0, width: 1272 },
           shot: {
             src: '/work/nacho-box/patterns.svg',
-            alt: 'Eight pattern sets laid out in a grid, each shown in three colourways — chips, chips with lime, chips with jalapeño, chips with chile, chiles, avocados, tomatoes and limes',
+            alt: 'Eight pattern sets laid out in a grid, each shown in three colorways — chips, chips with lime, chips with jalapeño, chips with chile, chiles, avocados, tomatoes and limes',
             aspect: '1000 / 509.4',
           },
         },
         {
           kind: 'copy',
           heading: 'The box itself',
-          body: 'Flat dielines for two of the four flavours — the pattern runs over the side panels, and THREE SALSAS INSIDE sits on the flap that opens.',
+          body: 'Flat dielines for two of the four flavors — the pattern runs over the side panels, and THREE SALSAS INSIDE sits on the flap that opens.',
         },
         {
           kind: 'columns',

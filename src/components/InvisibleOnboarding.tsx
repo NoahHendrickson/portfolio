@@ -122,9 +122,9 @@ export default function InvisibleOnboarding() {
             width={CHART_WIDTH}
             body={
               <p style={{ ...bodyStyle, color: color.text.primary }}>
-                Meridial’s onboarding flow conversion rate was severely underperforming. There were
-                many steps with tons of friction and huge drop-off. This was causing an operational
-                strain on staffing projects on-time and delivering results to clients.
+                Meridial’s onboarding conversion rate was severely underperforming. Its many
+                high-friction steps caused significant drop-off. This strained operations as teams
+                tried to staff projects on time and deliver results to clients.
               </p>
             }
           >
@@ -137,16 +137,16 @@ export default function InvisibleOnboarding() {
             body={
               <Paragraphs>
                 <p style={bodyStyle}>
-                  We needed to move quickly and intelligently to solve these points of friction and
-                  increase our onboarding conversion ASAP.
+                  We needed to identify the highest-impact friction quickly and improve onboarding
+                  conversion.
                 </p>
                 <p style={bodyStyle}>
                   One of our marketing designers and I began by researching competitors and
-                  creating a large FigJam board that became the foundation for the initiative.
+                  creating a FigJam board that became the initiative’s foundation.
                 </p>
                 <p style={bodyStyle}>
-                  I felt strongly that we needed to collaborate with the Marketing team because our
-                  Marketing site was one of the larger entry points into the product.
+                  We collaborated closely with the marketing team because the marketing site was a
+                  major entry point into the product.
                 </p>
               </Paragraphs>
             }
@@ -163,17 +163,17 @@ export default function InvisibleOnboarding() {
             body={
               <Paragraphs>
                 <p style={bodyStyle}>
-                  Next we mapped our user journey and annotated high risk areas, questions and
+                  Next, we mapped the user journey and annotated high-risk areas, questions, and
                   ideas.
                 </p>
                 <p style={bodyStyle}>
-                  We focused heavily on high risk areas and crossed that with drop-off data to make
-                  a strong case about where design focus would be most valuable.
+                  We combined those risks with drop-off data to show where design attention would be
+                  most valuable.
                 </p>
                 <p style={bodyStyle}>
-                  We worked across two vectors: the overall flow and order of steps, and removing
-                  unnecessary friction by honing in on the steps that caused the most drop-off. Some
-                  key findings were the following:
+                  We worked on two fronts: improving the overall flow and sequence, and removing
+                  unnecessary friction by homing in on the steps with the most drop-off. Key findings
+                  included:
                 </p>
                 {/*
                   Tailwind's preflight strips list markers, so the numbers are
@@ -219,21 +219,19 @@ export default function InvisibleOnboarding() {
             body={
               <Paragraphs>
                 <p style={bodyStyle}>
-                  Once we felt our research and brainstorming were solid, and we had targeted the
-                  correct areas to focus on, I moved into the design phase.
+                  Once research and brainstorming identified the right focus areas, I moved into
+                  design.
                 </p>
                 <p style={bodyStyle}>
-                  A few of the design decisions we arrived at were: we wanted to create a more
-                  directive and sequenced flow. Our old onboarding dropped users onto the homepage
-                  pretty early with “optional” setup steps, and the new flow would follow a more
-                  standard onboarding wizard UX. We also pinned down what details were absolutely
-                  necessary per step and removed the details that were not.
+                  We chose a more directive, sequential flow: instead of dropping users on the
+                  homepage with “optional” setup steps, the new experience followed a standard
+                  onboarding wizard. We also identified the details required at each step and removed
+                  everything else.
                 </p>
                 <p style={bodyStyle}>
-                  Due to the short timeline, the team decided to try a new workflow where a vibe
-                  coded prototype would serve as the source of truth for the designs. We needed to
-                  iterate fast and wanted to hand over the prototype to the engineers to use that
-                  frontend code to accelerate the build.
+                  Given the short timeline, the team tried a new workflow in which a vibe-coded
+                  prototype served as the design source of truth. We could iterate quickly, then hand
+                  engineers working frontend code to accelerate the build.
                 </p>
               </Paragraphs>
             }
@@ -269,17 +267,15 @@ export default function InvisibleOnboarding() {
                   Clarity.
                 </p>
                 <p style={bodyStyle}>
-                  After 3 weeks of the experiment the numbers were in, and supported our original
-                  hypothesis for the high risk areas we targeted.
+                  After three weeks, the results supported our original hypotheses about the
+                  high-risk areas we targeted.
                 </p>
                 <ResultCopy>
-                  4x increase in conversion for our highest friction step.{' '}
+                  4× increase in conversion at our highest-friction step.{' '}
                   <span style={{ color: color.text.muted, fontWeight: 400 }}>
-                    During the research phase we saw the largest drop off during the initial
-                    assessment that users must complete. We took the assessment ourselves, met with
-                    various teams to understand if they used those results in a meaningful way —
-                    they didn’t. So we completely cut that step out. The largest impact didn’t
-                    actually require designs.
+                    During research, we saw the largest drop-off at the required initial assessment.
+                    We completed it ourselves and met with teams to learn whether they used the
+                    results meaningfully. They didn’t, so we removed the step entirely.
                   </span>
                 </ResultCopy>
                 <ResultCopy>
@@ -305,11 +301,10 @@ export default function InvisibleOnboarding() {
             heading="What’s next?"
             body={
               <p style={bodyStyle}>
-                I wanted to carry the momentum from the experiment and continue to improve our
-                onboarding. I made sure to go through both experiments to document why I thought
-                one performed better than the other. Our onboarding flow was still full of legacy
-                requirements that we couldn’t get to in this new version. I was once again
-                researching to find the next risk areas that needed design attention.
+                I wanted to carry the experiment’s momentum into the next onboarding improvements. I
+                reviewed both variants and documented why one outperformed the other. The flow still
+                contained legacy requirements we could not address in this release, so I returned to
+                research to identify the next risks that needed design attention.
               </p>
             }
           >
@@ -324,8 +319,8 @@ export default function InvisibleOnboarding() {
 function Hero({ isMobile }: { isMobile: boolean }) {
   const outcomes = [
     '50% increase in profile completion on mobile.',
-    '4x increase by removing the step causing the most friction.',
-    'Doubled overall conversion rate.',
+    '4× increase by removing the step causing the most friction.',
+    'Doubled the overall conversion rate.',
   ]
 
   return (
