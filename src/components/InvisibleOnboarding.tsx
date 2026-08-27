@@ -64,7 +64,7 @@ const bodyStyle: CSSProperties = {
   margin: 0,
   fontSize: type['body-l'].fontSize,
   fontWeight: type['body-l'].fontWeight,
-  lineHeight: '21px',
+  lineHeight: type['body-l'].lineHeight,
   letterSpacing: 'normal',
   color: color.text.secondary,
 }

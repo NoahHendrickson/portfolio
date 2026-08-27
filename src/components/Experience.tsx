@@ -198,7 +198,7 @@ const body: React.CSSProperties = {
   margin: 0,
   fontSize: '16px',
   fontWeight: 400,
-  lineHeight: 1.3,
+  lineHeight: 1.4,
   letterSpacing: '-0.2px',
   color: TEXT,
 }
@@ -351,7 +351,7 @@ export function LlmQuotes() {
           margin: 0,
           fontSize: '16px',
           fontWeight: 400,
-          lineHeight: 1.3,
+          lineHeight: 1.4,
           letterSpacing: '-0.2px',
           color: MUTED,
         }}

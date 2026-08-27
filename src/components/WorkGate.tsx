@@ -85,7 +85,7 @@ export default function WorkGate({ onUnlock }: { onUnlock: () => void }) {
             >
               Enter the password to view this case study
             </label>
-            <p style={{ margin: 0, fontSize: type['body-s'].fontSize, color: BODY }}>
+            <p style={{ margin: 0, fontSize: type['body-s'].fontSize, lineHeight: type['body-s'].lineHeight, color: BODY }}>
               Reach out on LinkedIn to get access.
             </p>
           </div>

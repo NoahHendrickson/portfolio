@@ -116,7 +116,7 @@ export default function ProjectLanding({ project }: { project: Project }) {
             maxWidth: '720px',
             fontSize: isMobile ? '16px' : '18px',
             fontWeight: 400,
-            lineHeight: 1.6,
+            lineHeight: 1.4,
             color: 'var(--color-ink-secondary)',
           }}
         >
@@ -410,7 +410,7 @@ function SectionBlock({ section, accent }: { section: Section; accent: string })
               maxWidth: '720px',
               fontSize: isMobile ? '16px' : '18px',
               fontWeight: 400,
-              lineHeight: 1.6,
+              lineHeight: 1.4,
             }}
           >
             {paragraph}
@@ -437,7 +437,7 @@ function SectionBlock({ section, accent }: { section: Section; accent: string })
                   alignItems: 'flex-start',
                   gap: 'var(--space-md)',
                   fontSize: isMobile ? '16px' : '18px',
-                  lineHeight: 1.5,
+                  lineHeight: 1.4,
                 }}
               >
                 <span

@@ -277,7 +277,7 @@ function WorkCardCell({ card }: { card: WorkCard }) {
               margin: 0,
               fontSize: '16px',
               fontWeight: 400,
-              lineHeight: 1.6,
+              lineHeight: 1.4,
               letterSpacing: '-0.16px',
               color: color.text.muted,
             }}

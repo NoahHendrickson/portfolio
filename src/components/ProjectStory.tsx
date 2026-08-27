@@ -89,7 +89,7 @@ const BODY_STYLE: React.CSSProperties = {
   margin: 0,
   fontSize: '16px',
   fontWeight: 400,
-  lineHeight: 'normal',
+  lineHeight: 1.4,
   color: BODY_TEXT,
 }
 
@@ -334,7 +334,7 @@ export default function ProjectStory({ project }: { project: Project }) {
           </h2>
 
           {landing.feedback.body && (
-            <p style={{ margin: 0, maxWidth: '720px', fontSize: isMobile ? '16px' : '18px', lineHeight: 'normal' }}>
+            <p style={{ margin: 0, maxWidth: '720px', fontSize: isMobile ? '16px' : '18px', lineHeight: 1.4 }}>
               {landing.feedback.body}
             </p>
           )}
@@ -899,7 +899,7 @@ function Caption({ text, maxWidth, large }: { text: string | string[]; maxWidth?
           key={paragraph}
           style={{
             margin: 0,
-            ...(large ? { fontSize: '18px', lineHeight: 'normal' } : type['body-l']),
+            ...(large ? { fontSize: '18px', lineHeight: 1.4 } : type['body-l']),
           }}
         >
           {paragraph}

@@ -18,7 +18,7 @@ export default function Hero() {
     maxWidth: '700px',
     fontSize: isMobile ? '17px' : '18px',
     fontWeight: 400,
-    lineHeight: 1.35,
+    lineHeight: 1.4,
     letterSpacing: '-0.2px',
   }
 
