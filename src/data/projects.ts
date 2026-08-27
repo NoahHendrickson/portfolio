@@ -429,11 +429,11 @@ export const projects: Record<string, Project> = {
         ],
         cta: { label: 'Check it out', href: STAT_BUILDER_SITE },
         shot: {
-          // Node 240:23742 — the browser frame and its desktop are one export,
-          // as the file draws the whole Chrome chrome inside the panel.
+          // Live capture of the builder in Chrome — window chrome is in the
+          // screenshot, so the frame stays plain.
           src: '/work/stat-builder/hero-panel.jpg',
           alt: 'The builder — armor summary, class tabs, six stat sliders, major mods and set bonuses on the left, ranked builds on the right',
-          aspect: '1272 / 862',
+          aspect: '3456 / 2168',
           frame: 'plain',
         },
         shotWidth: 1272,
