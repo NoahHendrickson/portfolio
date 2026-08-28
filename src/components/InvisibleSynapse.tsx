@@ -183,7 +183,7 @@ export default function InvisibleSynapse() {
           >
             <img
               src={media.blueprint}
-              alt="Two RLHF task windows side by side — one stepping through the instructions panel to the prompt composer, one annotating a pair of model responses"
+              alt="Two RLHF task windows side by side — a Step 1 tooltip on the prompt composer, a Step 2 tooltip on annotating a pair of model responses"
               style={{
                 display: 'block',
                 width: '100%',

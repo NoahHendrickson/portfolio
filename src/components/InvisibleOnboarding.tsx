@@ -223,13 +223,13 @@ export default function InvisibleOnboarding() {
                   design.
                 </p>
                 <p style={bodyStyle}>
-                  We chose a more directive, sequential flow: instead of dropping users on the
-                  homepage with “optional” setup steps, the new experience followed a standard
-                  onboarding wizard. We also identified the details required at each step and removed
-                  everything else.
+                  I designed a more directive, sequential flow: instead of dropping users on the
+                  homepage with “optional” setup steps, I put them through a standard onboarding
+                  wizard. At each step I identified the details that were actually required and
+                  stripped everything else.
                 </p>
                 <p style={bodyStyle}>
-                  Given the short timeline, the team tried a new workflow in which a vibe-coded
+                  Given the short timeline, I suggested a new workflow in which a vibe-coded
                   prototype served as the design source of truth. We could iterate quickly, then hand
                   engineers working frontend code to accelerate the build.
                 </p>
@@ -257,7 +257,7 @@ export default function InvisibleOnboarding() {
           </StoryRow>
 
           <StoryRow
-            heading="The experiment"
+            heading="Measureable outcomes"
             width={CHART_WIDTH}
             body={
               <Paragraphs>
