@@ -1,15 +1,17 @@
-import { type CSSProperties, type ReactNode, useState } from 'react'
+import { type CSSProperties, type ReactNode, useRef } from 'react'
 import { ArrowRight, ArrowSquareOut } from '@phosphor-icons/react'
 import AppLink from '../AppLink'
 import Button from '../design-system/Button'
 import { VARIANTS } from '../design-system/buttonStyles'
 import { NO3Y_CODE_DOWNLOAD, STAT_BUILDER_SITE, projects } from '../data/projects'
 import { color, control, radius, space, type } from '../design-system/tokens'
+import { useElementWidth } from '../hooks/useElementWidth'
 import { useIsMobile } from '../hooks/useIsMobile'
+import { WORK_FILTERS, type WorkFilter } from '../workFilter'
 
 /**
- * The home page's Work tab (Figma frame `320:30968`): a row of filter pills
- * over a two-column grid of cards. Each card is its art exported whole out of
+ * The home page's Work tab (Figma frame `365:6192`): a two-column grid of
+ * cards in a dark bento on the white sheet, sectioned by the second rail. Each card is its art exported whole out of
  * Figma (452.5 × 250 in the file, shipped at 2x), with the caption *below* the
  * art — title, muted subtitle, then a "Case study" pill and an optional
  * second action (an external link, or a plain employer label on the Invisible
@@ -45,6 +47,17 @@ const no3y: WorkCard = {
   },
   accent: '#6f5efb',
   extra: { label: 'Download from GitHub', href: NO3Y_CODE_DOWNLOAD },
+}
+
+const crisp: WorkCard = {
+  href: '/work/crisp',
+  title: projects.crisp.title,
+  subtitle: 'Zoom editor for screen recordings',
+  art: {
+    src: '/work/bento/card-crisp.png',
+    alt: 'Crisp — the circular mark and wordmark on magenta',
+  },
+  accent: '#ff2d57',
 }
 
 const statBuilder: WorkCard = {
@@ -121,29 +134,15 @@ const armory: WorkCard = {
   extra: { label: 'View the site', href: 'https://noeyarmory.vercel.app/' },
 }
 
-type Filter = {
-  id: string
-  label: string
-  cards: WorkCard[]
-}
-
-const FILTERS: Filter[] = [
-  { id: 'all', label: 'All', cards: [no3y, statBuilder, onboarding, synapse, nachoBox, howToPc, armory] },
-  { id: 'fun', label: 'Personal projects', cards: [no3y, statBuilder, armory] },
-  { id: 'career', label: 'Career', cards: [onboarding, synapse] },
-  { id: 'graphic', label: 'Graphic design', cards: [nachoBox, howToPc] },
-]
-
-/** Survives refresh — the whole home page lives on `/`, so the filter isn't in the path. */
-const FILTER_KEY = 'work-filter'
-
-function readFilter() {
-  const id = sessionStorage.getItem(FILTER_KEY)
-  return FILTERS.some((filter) => filter.id === id) ? id! : FILTERS[0].id
-}
-
-function writeFilter(id: string) {
-  sessionStorage.setItem(FILTER_KEY, id)
+/**
+ * The rows each section of the second rail shows (`src/workFilter.ts`). The
+ * frame draws the whole set under "Case studies", so that section is the full
+ * list and the other two narrow it.
+ */
+const CARDS: Record<WorkFilter, WorkCard[]> = {
+  studies: [crisp, no3y, statBuilder, onboarding, synapse, nachoBox, howToPc, armory],
+  personal: [crisp, no3y, statBuilder, armory],
+  graphic: [nachoBox, howToPc],
 }
 
 /**
@@ -152,14 +151,84 @@ function writeFilter(id: string) {
  */
 const CARD_CREAM = '#e6dfd2'
 
-export default function WorkList() {
-  const isMobile = useIsMobile()
-  const [activeId, setActiveId] = useState(readFilter)
-  const active = FILTERS.find((f) => f.id === activeId) ?? FILTERS[0]
+/**
+ * The grid on the white sheet (Figma `365:6291`). The frame draws it inside a
+ * dark bento; that read as a slab against the sheet, so the cards sit on the
+ * white directly at the bento's own 32px inset and take the ink palette. The
+ * cards are the file's 508 × 250 — a hair wider than the 452.5 × 250 exports,
+ * which `object-fit` crops by a few pixels top and bottom rather than
+ * letterboxing.
+ */
+const SHEET_PAD = 32
+const CARD_ASPECT = '508 / 250'
+/**
+ * How the grid takes a wide sheet. The frame's two 508px columns are the
+ * card's largest size — past that a card stops reading as a thumbnail — so
+ * the tracks cap at `CARD_MAX` and a third column opens once three fit at
+ * `CARD_MIN` (about a 1700px viewport), growing back up to 508 from there.
+ * `CARD_MIN` is set so the tablet band still lands two columns, and three is
+ * the most the sheet holds. The count is worked out from the measured sheet
+ * rather than `auto-fill`, which sizes its repetitions off the track *max*
+ * and so would drop to one column before the frame's own width.
+ */
+const CARD_MIN = 380
+const CARD_MAX = 508
+const CARD_COLUMNS_MAX = 3
+const COLUMN_GAP = 32
 
-  const selectFilter = (id: string) => {
-    setActiveId(id)
-    writeFilter(id)
+function columnsFor(width: number) {
+  if (width === 0) return 2
+  const fit = Math.floor((width + COLUMN_GAP) / (CARD_MIN + COLUMN_GAP))
+  return Math.min(CARD_COLUMNS_MAX, Math.max(1, fit))
+}
+const CARD_ASPECT_MOBILE = '905 / 500'
+
+export default function WorkList({
+  filter,
+  onSelectFilter,
+}: {
+  filter: WorkFilter
+  onSelectFilter: (filter: WorkFilter) => void
+}) {
+  const isMobile = useIsMobile()
+  const cards = CARDS[filter]
+  const sheetRef = useRef<HTMLDivElement>(null)
+  // `clientWidth` includes the sheet's own padding; the grid sits inside it.
+  const sheetWidth = useElementWidth(sheetRef)
+  const columns = columnsFor(sheetWidth === 0 ? 0 : sheetWidth - SHEET_PAD * 2)
+
+  const grid = (
+    <div
+      key={filter}
+      className="tab-content-in"
+      style={{
+        display: 'grid',
+        gridTemplateColumns: isMobile ? '1fr' : `repeat(${columns}, minmax(0, ${CARD_MAX}px))`,
+        justifyContent: 'start',
+        // The file's 32 between columns and 56 between rows.
+        columnGap: `${COLUMN_GAP}px`,
+        rowGap: isMobile ? space['3xl'] : '56px',
+      }}
+    >
+      {cards.map((card) => (
+        <WorkCardCell
+          key={card.href}
+          card={card}
+          aspect={isMobile ? CARD_ASPECT_MOBILE : CARD_ASPECT}
+          onSheet={!isMobile}
+        />
+      ))}
+    </div>
+  )
+
+  // Desktop's sections live on the second rail beside the sheet; the mobile
+  // page has no rail, so it keeps the pill row over the grid.
+  if (!isMobile) {
+    return (
+      <div ref={sheetRef} style={{ padding: SHEET_PAD }}>
+        {grid}
+      </div>
+    )
   }
 
   const pills = (
@@ -171,54 +240,41 @@ export default function WorkList() {
         gap: space.sm,
       }}
     >
-      {FILTERS.map((filter) => (
+      {WORK_FILTERS.map((entry) => (
         <Button
-          key={filter.id}
-          // `xs` is the file's 28px pill; mobile takes the 32 the header's own
-          // controls already run at.
-          size={isMobile ? 'sm' : 'xs'}
+          key={entry.id}
+          size="sm"
           // The active filter is the one filled pill in the row; the rest read as
           // plain labels until hovered, so the row stays quiet over the grid.
-          variant={filter.id === activeId ? 'secondary' : 'ghost'}
-          onClick={() => selectFilter(filter.id)}
-          aria-pressed={filter.id === activeId}
+          variant={entry.id === filter ? 'secondary' : 'ghost'}
+          onClick={() => onSelectFilter(entry.id)}
+          aria-pressed={entry.id === filter}
           style={
-            filter.id === activeId
+            entry.id === filter
               ? { background: CARD_CREAM, borderColor: CARD_CREAM, color: color.ink.default }
               : { borderColor: 'transparent' }
           }
         >
-          {filter.label}
+          {entry.label}
         </Button>
       ))}
     </div>
   )
 
   return (
-    // The file's 32 from the pill row down to the grid.
-    <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? space.xl : '32px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: space.xl }}>
       {pills}
-      <div
-        key={activeId}
-        className="tab-content-in"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, minmax(0, 1fr))',
-          // The file's 32 between columns and 56 between rows.
-          columnGap: '32px',
-          rowGap: isMobile ? space['3xl'] : '56px',
-        }}
-      >
-        {active.cards.map((card) => (
-          <WorkCardCell key={card.href} card={card} />
-        ))}
-      </div>
+      {grid}
     </div>
   )
 }
 
-/** One cell: the art box linking to the case study, caption and pills below. */
-function WorkCardCell({ card }: { card: WorkCard }) {
+/**
+ * One cell: the art box linking to the case study, caption and pills below.
+ * `onSheet` swaps the caption and pills onto the ink palette for the white
+ * sheet; mobile keeps the dark shell's.
+ */
+function WorkCardCell({ card, aspect, onSheet }: { card: WorkCard; aspect: string; onSheet: boolean }) {
   return (
     <article style={{ display: 'flex', flexDirection: 'column', gap: space.lg, minWidth: 0 }}>
       <AppLink
@@ -229,8 +285,7 @@ function WorkCardCell({ card }: { card: WorkCard }) {
           display: 'block',
           borderRadius: radius.md,
           overflow: 'hidden',
-          // The export's own box (452.5 × 250 at 2x), so the art never crops.
-          aspectRatio: '905 / 500',
+          aspectRatio: aspect,
           ['--bento-accent' as string]: card.accent,
         }}
       >
@@ -267,7 +322,7 @@ function WorkCardCell({ card }: { card: WorkCard }) {
               fontWeight: 500,
               lineHeight: 1.4,
               letterSpacing: '-0.16px',
-              color: color.text.primary,
+              color: onSheet ? color.ink.default : color.text.primary,
             }}
           >
             {card.title}
@@ -279,7 +334,7 @@ function WorkCardCell({ card }: { card: WorkCard }) {
               fontWeight: 400,
               lineHeight: 1.4,
               letterSpacing: '-0.16px',
-              color: color.text.muted,
+              color: onSheet ? color.ink.muted : color.text.muted,
             }}
           >
             {card.subtitle}
@@ -287,18 +342,20 @@ function WorkCardCell({ card }: { card: WorkCard }) {
         </div>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: space.sm }}>
-          <CardPill palette="secondary" href={card.href}>
+          <CardPill palette="secondary" href={card.href} onSheet={onSheet}>
             Case study
             <ArrowRight size={14} />
           </CardPill>
           {card.extra &&
             (card.extra.href ? (
-              <CardPill palette="ghost" href={card.extra.href} external>
+              <CardPill palette="ghost" href={card.extra.href} external onSheet={onSheet}>
                 {card.extra.label}
                 <ArrowSquareOut size={14} />
               </CardPill>
             ) : (
-              <CardPill palette="label">{card.extra.label}</CardPill>
+              <CardPill palette="label" onSheet={onSheet}>
+                {card.extra.label}
+              </CardPill>
             ))}
         </div>
       </div>
@@ -311,21 +368,32 @@ function WorkCardCell({ card }: { card: WorkCard }) {
  * these links pull their palette from `buttonStyles` instead of nesting one —
  * `secondary` is the file's cream "Case study" fill, `ghost` its bordered
  * external links, and `label` the borderless "@ Invisible Technologies" text
- * that keeps the pill metrics without being a control.
+ * that keeps the pill metrics without being a control. On the sheet the same
+ * three run on ink: a solid ink "Case study", an ink-bordered external link,
+ * and ink text for the label.
  */
+const SHEET_PILLS = {
+  secondary: { background: color.ink.default, borderColor: color.ink.default, color: color.bg.cream },
+  ghost: { background: 'transparent', borderColor: color.border.ink, color: color.ink.default },
+  label: { background: 'transparent', borderColor: 'transparent', color: color.ink.default },
+} as const
+
 function CardPill({
   palette,
   href,
   external,
+  onSheet,
   children,
 }: {
   palette: 'secondary' | 'ghost' | 'label'
   href?: string
   external?: boolean
+  onSheet: boolean
   children: ReactNode
 }) {
-  const colors =
-    palette === 'label'
+  const colors = onSheet
+    ? SHEET_PILLS[palette]
+    : palette === 'label'
       ? { background: 'transparent', borderColor: 'transparent', color: color.text.primary }
       : VARIANTS[palette].default
 

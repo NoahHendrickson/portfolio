@@ -228,6 +228,19 @@ export type StorySection =
   /** A centered 688px heading + body block, standing between shots — D2 Stat Builder. */
   | { kind: 'copy'; heading: string; body: Prose }
   /**
+   * Heading + body over a player shot, then a labelled row per timeline
+   * track — Crisp. Each row carries the track's Phosphor icon and bar colour.
+   */
+  | {
+      kind: 'tracks'
+      heading: string
+      body: Prose
+      copyWidth: number
+      gap: number
+      shot: LandingShot
+      items: TimelineTrack[]
+    }
+  /**
    * One screenshot on its own, optionally with a panel laid over it. The box is
    * the whole composition's footprint at the file's 1512 frame; the frame and
    * the overlay are placed inside it as shares, so the group scales as one.
@@ -262,6 +275,16 @@ export type StorySection =
       shotWidth: number
       shot: LandingShot
     }
+
+/** One labelled row in Crisp's timeline legend. */
+export type TimelineTrack = {
+  /** Phosphor slug matching the player's track icon. */
+  icon: 'video-camera' | 'magnifying-glass-plus' | 'mouse-middle-click' | 'scissors' | 'fast-forward'
+  /** The bar colour on that track — Crisp `Theme.swift`, light mode. */
+  color: string
+  heading: string
+  body: string
+}
 
 /** One chat screenshot in the community-feedback wall. */
 export type FeedbackShot = {
@@ -874,6 +897,160 @@ export const projects: Record<string, Project> = {
       label: 'See T3 Code',
       href: T3_CODE,
     },
+  },
+
+  crisp: {
+    slug: 'crisp',
+    title: 'Crisp',
+    eyebrow: ['Side project', '2026', 'Screen recording'],
+    tagline: 'A zoom editor for screen recordings — pin the viewport, speed up the boring bits, and let an AI subscription you already pay for polish the cut.',
+    bento: {
+      eyebrow: 'Zoom editor for screen recordings',
+      cover: '/work/crisp/pin-viewport-poster.jpg',
+    },
+    pageReady: true,
+    landing: {
+      // No frame yet — runs on no3y Code's stacked rhythm (centred 700 copy,
+      // 120 into the rows, 200 between them) so it lands where that page does.
+      eyebrow: ['Zoom editor for screen recordings'],
+      flow: 'continuous',
+      gap: 120,
+      rowGap: 200,
+      align: 'center',
+      copyWidth: 700,
+      titleRhythm: 'paired',
+      eyebrowPlacement: 'below',
+      hero: {
+        body: [
+          'I built Crisp because too many of the screen recordings for my website came out looking worse than what I saw on my screen. Smooth gradients and glass effects would develop visible bands or steps, making the visuals look unappealing.',
+          'Crisp captures a high-fidelity source recording at native Retina resolution with 10-bit color and a high bitrate. That preserves subtle gradients, transparency, and fine UI details before any zooms or effects are applied, so the finished video stays much closer to the original design.',
+        ],
+      },
+      sections: [
+        {
+          kind: 'tracks',
+          heading: 'The timeline',
+          body: 'The player stacks five tracks on every recording. Each one is a different kind of edit — the source stays untouched, and the camera moves, cuts, and speed-ups sit on the tracks below it.',
+          copyWidth: 700,
+          gap: 80,
+          shot: {
+            src: '/work/crisp/timeline.png',
+            alt: 'Crisp’s player: the toolbar above five coloured timeline tracks — playback, zoom, pan, clip, and fast-forward',
+            aspect: '1170 / 260',
+            frame: 'plain',
+          },
+          items: [
+            {
+              icon: 'video-camera',
+              color: '#33c27b',
+              heading: 'Playback',
+              body: 'The source recording. This is the high-fidelity capture — zooms, pans, clips, and speed-ups layer on top of it and never change the file.',
+            },
+            {
+              icon: 'magnifying-glass-plus',
+              color: '#47a6ff',
+              heading: 'Zoom',
+              body: 'When the camera pushes in, and how far. Each blue block is a zoom with its own level, so you can hold on a panel and ease back out without cutting the footage.',
+            },
+            {
+              icon: 'mouse-middle-click',
+              color: '#ff9a42',
+              heading: 'Pan',
+              body: 'Where the zoomed camera looks. Pin a region and the viewport holds still; leave it unpinned and the camera follows the cursor.',
+            },
+            {
+              icon: 'scissors',
+              color: '#a96cff',
+              heading: 'Clip',
+              body: 'The range that becomes its own export. Mark a start and end on this track to pull one moment out of a longer recording.',
+            },
+            {
+              icon: 'fast-forward',
+              color: '#14b8a6',
+              heading: 'Fast forward',
+              body: 'Stretches that play faster than the rest. Drop a rate on the dead air — loading, typing, waits — and the rest of the clip keeps its original pace.',
+            },
+          ],
+        },
+        {
+          kind: 'feature',
+          gap: 80,
+          heading: 'Use your AI subscriptions with Crisp',
+          body: [
+            'Crisp works with the AI subscriptions you already have. If Codex or Claude Code is installed and authenticated on your Mac, Crisp detects it automatically, no additional API keys, accounts, or integration setup required.',
+            'To help LLMs understand a recording, Crisp gives it more than a simple prompt. It provides the current editing plan, cursor movement, click timing, and annotated frames from important moments in the video. The agent can inspect additional frames and preview its own changes before returning an updated plan. It never alters the original recording—it only adjusts the timing and strength of the camera movements layered on top.',
+          ],
+          copyWidth: 700,
+          stack: true,
+          video: {
+            src: '/work/crisp/ai-polish.mp4',
+            hevc: '/work/crisp/ai-polish-hevc.mp4',
+            poster: '/work/crisp/ai-polish-poster.jpg',
+            alt: 'Crisp’s AI editor: a note describes the polish wanted and the zoom track is rewritten to match',
+            aspect: '16 / 9',
+          },
+        },
+        {
+          kind: 'feature',
+          gap: 80,
+          heading: 'Speed up segments',
+          body: 'Mark a stretch of the timeline to play faster so pauses, loading, and other dead air don’t hold the viewer. The rest of the recording keeps its original pace.',
+          copyWidth: 700,
+          stack: true,
+          video: {
+            src: '/work/crisp/speed-up.mp4',
+            hevc: '/work/crisp/speed-up-hevc.mp4',
+            poster: '/work/crisp/speed-up-poster.jpg',
+            alt: 'Crisp’s speed-up track: a segment of the timeline is marked to play at 2×',
+            aspect: '16 / 9',
+          },
+        },
+        {
+          kind: 'feature',
+          gap: 80,
+          heading: 'Pin the zoom’s viewport',
+          body: 'Lock a zoom onto one region of the screen so the camera holds still on what you want people to see, instead of following the cursor away from it.',
+          copyWidth: 700,
+          stack: true,
+          video: {
+            src: '/work/crisp/pin-viewport.mp4',
+            hevc: '/work/crisp/pin-viewport-hevc.mp4',
+            poster: '/work/crisp/pin-viewport-poster.jpg',
+            alt: 'Crisp’s pin viewport control: a zoom is pinned to one region of the recording at a timestamp',
+            aspect: '16 / 9',
+          },
+        },
+        {
+          kind: 'feature',
+          gap: 80,
+          heading: 'Make multiple clips from one recording',
+          body: 'Select a range of a longer recording and save it as its own clip, with its own zooms and export. Record once, then pull out each moment you want to show.',
+          copyWidth: 700,
+          stack: true,
+          video: {
+            src: '/work/crisp/making-clips.mp4',
+            hevc: '/work/crisp/making-clips-hevc.mp4',
+            poster: '/work/crisp/making-clips-poster.jpg',
+            alt: 'Crisp’s clip tool: a range of one recording is marked and saved as its own clip',
+            aspect: '16 / 9',
+          },
+        },
+      ],
+    },
+    /*
+      Everything below feeds the generic cream `ProjectLanding`, which this
+      project never renders because `landing` is set.
+    */
+    summary: 'A zoom editor for screen recordings.',
+    accent: PURPLE,
+    accentIsDark: true,
+    links: [],
+    stats: [],
+    heroShot: { label: 'The Crisp zoom editor with a recording on the timeline' },
+    sections: [],
+    stack: [],
+    status: [],
+    cta: { heading: 'Crisp', label: 'Back to work', href: '/work' },
   },
 
   'how-to-pc': {

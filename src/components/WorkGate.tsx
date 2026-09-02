@@ -47,7 +47,7 @@ export default function WorkGate({ onUnlock }: { onUnlock: () => void }) {
         showProfile={false}
         // Same 700 as the studies, so Back doesn't jump when the page unlocks.
         barInset={isMobile ? pad : copyPad(700)}
-        trailingInset={pad}
+        trailingInset={isMobile ? pad : copyPad(700)}
       />
 
       <div

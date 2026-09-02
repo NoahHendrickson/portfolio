@@ -97,6 +97,45 @@ html, body {
   animation: tab-content-in 300ms cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
+/* The rail's active pill. It is one arm on the spine, not a per-row fade: it
+   stretches toward the row it is going to (the leading edge moves first, so
+   the blob gets taller) and then the trailing edge catches up. `top` and
+   `bottom` are animated as separate insets so a same-height jump still
+   stretches — a `top`+`height` pair would not, because height does not change.
+
+   Lead overshoots a little so the blob squashes onto the target; the trail is
+   a plain decelerate, delayed, so it reads as follow-through rather than a
+   slide. Width grows with the lead (the destination label has to fit as soon
+   as the blob covers it) and shrinks with the trail (the origin label stays
+   covered until the blob has left). */
+.rail-pill {
+  --rail-dur: 240ms;
+  --rail-lead-ease: cubic-bezier(0.2, 1.2, 0.32, 1);
+  --rail-trail-ease: cubic-bezier(0.25, 0.8, 0, 1);
+}
+.rail-pill[data-animate='true'] {
+  transition:
+    top var(--rail-dur) var(--rail-top-ease) var(--rail-top-delay),
+    bottom var(--rail-dur) var(--rail-bottom-ease) var(--rail-bottom-delay),
+    width var(--rail-dur) var(--rail-width-ease) var(--rail-width-delay);
+}
+.rail-pill[data-animate='true'] .rail-pill-ink {
+  transition: top var(--rail-dur) var(--rail-top-ease) var(--rail-top-delay);
+}
+
+/* The spine's end caps square off when the first or last tab is active. */
+.rail-spine {
+  transition: border-radius 200ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rail-pill[data-animate='true'],
+  .rail-pill[data-animate='true'] .rail-pill-ink,
+  .rail-spine {
+    transition: none;
+  }
+}
+
 /* The home panel is the only scroller on desktop, and macOS blows its overlay
    scrollbar up into a light track the moment the pointer nears it — the one
    piece of chrome on the page, sitting right where the leaf field starts. It is

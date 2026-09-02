@@ -6,7 +6,7 @@
  */
 export type HomeTab = 'me' | 'work' | 'design' | 'been' | 'contact' | 'lols'
 
-export const HOME_TAB_IDS: HomeTab[] = ['me', 'work', 'design', 'been', 'contact', 'lols']
+export const HOME_TAB_IDS: HomeTab[] = ['me', 'work', 'been', 'design', 'contact', 'lols']
 
 const HOME_TAB_KEY = 'home-tab'
 
