@@ -40,8 +40,6 @@ export default function WorkList({
 
   const grid = (
     <div
-      key={active.id}
-      className="tab-content-in"
       style={{
         display: 'grid',
         gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, minmax(0, 1fr))',
@@ -114,7 +112,6 @@ function WorkCardCell({ card }: { card: WorkCard }) {
           overflow: 'hidden',
           // The export's own box (452.5 × 250 at 2x), so the art never crops.
           aspectRatio: '905 / 500',
-          ['--bento-accent' as string]: card.accent,
         }}
       >
         <img

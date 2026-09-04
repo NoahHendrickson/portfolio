@@ -159,19 +159,13 @@ html, body {
   transition: padding-top var(--rail-offset-dur) var(--rail-offset-ease);
 }
 
-/* The spine's end caps square off when the first or last tab is active. */
-.rail-spine {
-  transition: border-radius 200ms ease;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .rail-pill[data-animate='true'],
   .rail-pill[data-animate='true'] .rail-pill-ink,
   .rail-pill[data-animate='true'] .rail-pill-row,
   .rail-list[data-animate='true'],
   .rail-menu,
-  .rail-menu-card,
-  .rail-spine {
+  .rail-menu-card {
     transition: none;
   }
 }
@@ -192,9 +186,8 @@ html, body {
   height: 0;
 }
 
-/* Work-tab card art — hover lifts the card and nothing else; the accent stroke
-   is gone, so --bento-accent (still set per card) has no consumer for now. The
-   caption sits below the art, so there is no frost shim over it either. */
+/* Work-tab card art — hover lifts the card; the caption sits below, so there
+   is no frost shim over it. */
 .work-bento-card {
   position: relative;
   transition: transform 220ms ease, box-shadow 220ms ease;

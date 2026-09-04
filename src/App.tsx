@@ -330,8 +330,8 @@ export default function App() {
           zIndex: 2,
           display: 'flex',
           flexDirection: isMobile ? 'column' : 'row',
-          // The rails run the full height of the frame; the panel between
-          // them is what scrolls.
+          // The rail runs the full height of the frame; the panel beside
+          // it is what scrolls.
           alignItems: isMobile ? 'flex-start' : 'stretch',
           // The file's 56 from the rail to the content column.
           gap: isMobile ? '24px' : '56px',
@@ -369,10 +369,6 @@ export default function App() {
             maxWidth: isMobile ? `${panelMax}px` : `${panelMax + sideBleed * 2}px`,
             minWidth: 0,
             boxSizing: 'border-box',
-            // The file's 56 above the panel: `SCROLL_BLEED` of it is padding
-            // inside the scroller so a first-row hover lift isn't clipped, and
-            // the rest stays as margin so the copy still starts at 56.
-            marginTop: isMobile ? undefined : `${PANEL_TOP - SCROLL_BLEED}px`,
             // The only thing on the page that scrolls. `key={tab}` remounts it,
             // so a switch already starts the next panel at its top — the
             // `window.scrollTo` calls are for the project routes now.
@@ -384,6 +380,9 @@ export default function App() {
             // overhang inside the box in the first place.
             overflowX: isMobile ? undefined : 'hidden',
             padding: isMobile ? undefined : `${SCROLL_BLEED}px ${sideBleed}px 80px`,
+            // The file's 56 above the panel: `SCROLL_BLEED` of it is padding
+            // inside the scroller so a first-row hover lift isn't clipped, and
+            // the rest stays as margin so the copy still starts at 56.
             margin: isMobile ? undefined : `${PANEL_TOP - SCROLL_BLEED}px -${sideBleed}px 0`,
           }}
         >

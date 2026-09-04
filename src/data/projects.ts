@@ -942,7 +942,7 @@ export const projects: Record<string, Project> = {
         {
           kind: 'tracks',
           heading: 'The timeline',
-          body: 'I decided to break up the timeline into five tracks, one for each of the type of edits that you can make. This ended up being a lot simpler even though it added a few more elements in the UI. It was much easier to use and understand even for myself.',
+          body: 'I decided to break up the timeline into five tracks, one for each of the types of edits that you can make. This ended up being a lot simpler even though it added a few more elements in the UI. It was much easier to use and understand even for myself.',
           copyWidth: 700,
           gap: 80,
           shot: {

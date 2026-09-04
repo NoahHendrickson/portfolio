@@ -32,12 +32,6 @@ const MENU_INSET = 16
 const MENU_PAD = 8
 const MENU_GAP = 10
 
-/**
- * Two arrow presses this close together read as one gesture: skip past the
- * Work menu rather than step through it.
- */
-const DOUBLE_PRESS_MS = 300
-
 type RailItem<T extends string> = {
   id: T
   label: string
@@ -434,6 +428,7 @@ function FilterMenu({
           <button
             key={filter.id}
             type="button"
+            data-rail-filter={filter.id}
             onMouseEnter={() => hover.enter(filter.id)}
             onMouseLeave={hover.leave}
             onClick={() => hover.commit(filter.id)}
@@ -753,6 +748,7 @@ function RailList<T extends string>({
                   buttonsRef.current[index] = el
                 }}
                 type="button"
+                data-rail-tab={item.id}
                 onMouseEnter={() => hover.enter(item.id)}
                 onMouseLeave={hover.leave}
                 onClick={() => hover.commit(item.id)}
@@ -865,16 +861,31 @@ export default function HomeRail({
   isMobile: boolean
 }) {
   const [isOpen, setIsOpen] = useState(false)
-  const menuRef = useRef<HTMLDivElement>(null)
-  /** The previous arrow press, for telling a double press from a second step. */
-  const lastArrow = useRef<{ key: string; at: number; filterBefore: WorkFilter | null } | null>(null)
+  const railRef = useRef<HTMLElement | null>(null)
+  /** Set by the arrow walk so focus follows the row after React commits — hover must not steal it. */
+  const pendingFocus = useRef<'trigger' | { tab: HomeTab } | { filter: WorkFilter } | null>(null)
 
   const menuOpen = active === 'work' && !isMobile
+
+  useLayoutEffect(() => {
+    const pending = pendingFocus.current
+    pendingFocus.current = null
+    const root = railRef.current
+    if (!pending || !root) return
+    const sel =
+      pending === 'trigger'
+        ? '[data-rail-trigger]'
+        : 'filter' in pending
+          ? `[data-rail-filter="${pending.filter}"]`
+          : `[data-rail-tab="${pending.tab}"]`
+    const el = root.querySelector(sel)
+    if (el instanceof HTMLElement) el.focus({ preventScroll: true })
+  }, [active, filter])
 
   useEffect(() => {
     if (!isOpen) return
     const onClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setIsOpen(false)
+      if (railRef.current && !railRef.current.contains(e.target as Node)) setIsOpen(false)
     }
     const onEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setIsOpen(false)
@@ -888,55 +899,50 @@ export default function HomeRail({
   }, [isOpen])
 
   /*
-   * The arrow keys walk one list: the tabs, with the Work sections inlined
-   * under Work — Hi, Work/All, Work/Case studies, …, Work/Graphic design,
-   * Where I've been, and so on. Stepping onto Work from above lands on its
-   * first section and from below on its last, so the walk is linear; hover
-   * and click keep whatever section was set. Two presses of the same arrow
-   * inside `DOUBLE_PRESS_MS` are one gesture: skip past the menu to the
-   * neighbouring tab, and put the section back the way it was before the
-   * first press moved it.
+   * The arrow keys walk one list, and only while focus is in the rail — Hi,
+   * Work/All … Work/Graphic design, Where I've been, and so on. Stepping onto
+   * Work from above lands on its first section and from below on its last, so
+   * the walk is linear; hover and click keep whatever section was set. A press
+   * from the panel (or anywhere else) is left alone so the scroller can move.
    */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return
       if (isTypingTarget(e.target)) return
       if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return
+      if (!(e.target instanceof Node) || !railRef.current?.contains(e.target)) return
       e.preventDefault()
 
       const step = e.key === 'ArrowDown' ? 1 : -1
       const i = TABS.findIndex((tab) => tab.id === active)
       const neighbour = TABS[(i + step + TABS.length) % TABS.length].id
-      const last = lastArrow.current
-      const isDouble = last !== null && last.key === e.key && e.timeStamp - last.at < DOUBLE_PRESS_MS
       setIsOpen(false)
 
-      if (menuOpen) {
-        if (isDouble) {
-          if (last.filterBefore) onSelectFilter(last.filterBefore)
-          onSelect(neighbour)
-          lastArrow.current = null
-          return
-        }
-        const fi = WORK_FILTERS.findIndex((entry) => entry.id === filter)
-        const next = WORK_FILTERS[fi + step]
-        if (next) {
-          onSelectFilter(next.id)
-          lastArrow.current = { key: e.key, at: e.timeStamp, filterBefore: filter }
-          return
-        }
-        // Off the end of the menu: on to the neighbouring tab.
+      if (isMobile) {
+        pendingFocus.current = 'trigger'
         onSelect(neighbour)
-        lastArrow.current = { key: e.key, at: e.timeStamp, filterBefore: null }
         return
       }
 
-      if (neighbour === 'work' && !isMobile) {
+      if (menuOpen) {
+        const fi = WORK_FILTERS.findIndex((entry) => entry.id === filter)
+        const next = WORK_FILTERS[fi + step]
+        if (next) {
+          pendingFocus.current = { filter: next.id }
+          onSelectFilter(next.id)
+          return
+        }
+        pendingFocus.current = { tab: neighbour }
+        onSelect(neighbour)
+        return
+      }
+
+      if (neighbour === 'work') {
         const entry = step === 1 ? WORK_FILTERS[0] : WORK_FILTERS[WORK_FILTERS.length - 1]
+        pendingFocus.current = { filter: entry.id }
         onSelectFilter(entry.id)
-        lastArrow.current = { key: e.key, at: e.timeStamp, filterBefore: filter }
       } else {
-        lastArrow.current = { key: e.key, at: e.timeStamp, filterBefore: null }
+        pendingFocus.current = { tab: neighbour }
       }
       onSelect(neighbour)
     }
@@ -957,9 +963,15 @@ export default function HomeRail({
   if (isMobile) {
     const activeLabel = TABS.find((tab) => tab.id === active)?.label ?? TABS[0].label
     return (
-      <div ref={menuRef} style={{ position: 'relative', alignSelf: 'flex-start' }}>
+      <div
+        ref={(el) => {
+          railRef.current = el
+        }}
+        style={{ position: 'relative', alignSelf: 'flex-start' }}
+      >
         <button
           type="button"
+          data-rail-trigger
           onClick={() => setIsOpen((open) => !open)}
           aria-haspopup="menu"
           aria-expanded={isOpen}
@@ -1013,7 +1025,8 @@ export default function HomeRail({
 
   return (
     <nav
-      aria-label="Site sections. Up and down arrows to switch; press twice to skip the Work sections."
+      ref={railRef}
+      aria-label="Site sections. Up and down arrows to switch."
       style={{
         display: 'flex',
         alignItems: 'stretch',

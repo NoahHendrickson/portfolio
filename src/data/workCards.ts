@@ -16,8 +16,6 @@ export type WorkCard = {
   title: string
   subtitle: string
   art: { src: string; alt: string }
-  /** Hover colour for the art's outline, matched to each card's palette. */
-  accent: string
   /**
    * Art laid over the export. How to Build a PC's Figma card is a bare
    * gradient — the file never had its art — so the old thumbnail sits centred
@@ -37,7 +35,6 @@ const no3y: WorkCard = {
     src: '/work/bento/card-no3y.png',
     alt: 'no3y Code — the composer bar over a red-and-violet gradient',
   },
-  accent: '#6f5efb',
   extra: { label: 'Download from GitHub', href: NO3Y_CODE_DOWNLOAD },
 }
 
@@ -49,7 +46,6 @@ const crisp: WorkCard = {
     src: '/work/bento/card-crisp.png',
     alt: 'Crisp — the circular mark and wordmark on magenta',
   },
-  accent: '#ff2d57',
 }
 
 const statBuilder: WorkCard = {
@@ -60,7 +56,6 @@ const statBuilder: WorkCard = {
     src: '/work/bento/card-stat-builder.png',
     alt: 'D2 Stat Builder — the armor table in a dark window on yellow',
   },
-  accent: '#c56430',
   extra: { label: 'View the site', href: STAT_BUILDER_SITE },
 }
 
@@ -72,9 +67,6 @@ const onboarding: WorkCard = {
     src: '/work/bento/card-invisible-onboarding.png',
     alt: 'Meridial — the onboarding profile step in a browser, on mauve',
   },
-  // Hover follows the study magenta; the card field is the mauve from
-  // Figma `379:23394` (`#aa6aa4`).
-  accent: '#cb52b9',
   extra: { label: '@ Invisible Technologies' },
 }
 
@@ -86,7 +78,6 @@ const synapse: WorkCard = {
     src: '/work/bento/card-invisible-synapse.png',
     alt: 'Synapse — three model responses beside the task panel, on purple',
   },
-  accent: '#a06ff0',
   extra: { label: '@ Invisible Technologies' },
 }
 
@@ -98,7 +89,6 @@ const apply: WorkCard = {
     src: '/work/bento/card-invisible-apply.png',
     alt: 'Meridial — Explore split view in a browser, on a light-blue field',
   },
-  accent: '#d158b0',
   extra: { label: '@ Invisible Technologies' },
 }
 
@@ -110,7 +100,6 @@ const nachoBox: WorkCard = {
     src: '/work/nacho-box/thumbnail.png',
     alt: 'Nacho Box — the “Hint of Lime” lockup on a chip-pattern yellow',
   },
-  accent: '#6b9b2a',
 }
 
 const howToPc: WorkCard = {
@@ -121,7 +110,6 @@ const howToPc: WorkCard = {
     src: '/work/bento/card-how-to-pc.png',
     alt: 'How to Build a PC — the graphics-card illustration on magenta',
   },
-  accent: '#ff7eb6',
   // The old card's placement: the title art centred on a 76% measure.
   overlay: { src: '/work/how-to-pc/thumbnail.png', width: '76%' },
 }
@@ -134,7 +122,6 @@ const armory: WorkCard = {
     src: '/work/bento/card-armory.png',
     alt: 'Moonfang Armory — a pixel weapon sprite centered on a blue dither',
   },
-  accent: '#3a6df0',
   extra: { label: 'View the site', href: 'https://noeyarmory.vercel.app/' },
 }
 

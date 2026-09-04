@@ -314,8 +314,8 @@ function Hero({ isMobile }: { isMobile: boolean }) {
 
 /**
  * One stacked row: heading + copy on the centred 700 column, media below it at
- * `width`. `children` is optional — Users / Jobs and the Expert brief are copy
- * on their own. `lead` is the space above the row, as on the other studies.
+ * `width`. `children` is optional — Users / Jobs and My focus are copy on
+ * their own. `lead` is the space above the row, as on the other studies.
  */
 function StoryRow({
   heading,
