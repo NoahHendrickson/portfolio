@@ -25,7 +25,7 @@ import { projects } from './data/projects'
 import { useIsMobile } from './hooks/useIsMobile'
 import { useMediaQuery } from './hooks/useMediaQuery'
 import { getRoute, navigate, subscribeToRoute } from './navigation'
-import { pageGutter } from './layout'
+import { pageGutter, TABLET_MAX } from './layout'
 
 const BG = 'var(--color-bg-primary)'
 
@@ -45,6 +45,15 @@ const COLUMN_FILL = `linear-gradient(to right, ${BG} 0%, ${BG} calc(100% - ${LEA
  */
 const CONTENT_PCT = { default: 70, work: 84.4 }
 const PANEL_MAX = { default: 700, work: 937 }
+/**
+ * Extra column width below `TABLET_MAX`, so the leaf strip yields space to
+ * the copy instead of holding a 70/30 split on a ~1100px screen. Zero at
+ * tablet and up, so the 1512 frame does not move.
+ */
+const THIN_GROW = 0.37
+
+const contentWidth = (pct: number) =>
+  `calc(${pct}vw + max(0px, (${TABLET_MAX}px - 100vw) * ${THIN_GROW}))`
 
 /**
  * Breathing room each side of the scrolling panel, as padding paid back by an
@@ -103,7 +112,7 @@ function useWheelAnywhere(panel: React.RefObject<HTMLElement | null>, enabled: b
  * past `LEAF_STRIP_MAX` on a big screen.
  */
 const leafLeft = (pct: number) =>
-  `max(calc(${pct}vw - ${LEAF_TIP_INSET}px), calc(100vw - ${LEAF_STRIP_MAX}px))`
+  `max(calc(${contentWidth(pct)} - ${LEAF_TIP_INSET}px), calc(100vw - ${LEAF_STRIP_MAX}px))`
 
 /**
  * The Work tab pushes the field right by the extra width its column takes. The
@@ -230,10 +239,18 @@ export default function App() {
   // side stays on the plain gutter — the shared inset is centred against the
   // viewport, and mirroring it inside a column narrower than the viewport
   // would eat the content's width instead.
-  const rightInset = isMobile ? '20px' : pageGutter()
+  // 120 at tablet and up; on a thin desktop it gives up space so the copy
+  // is not left on a ~340px measure beside a third of the viewport of leaves.
+  const rightInset = isMobile
+    ? '20px'
+    : `max(24px, calc(${pageGutter()} - max(0px, (${TABLET_MAX}px - 100vw) * 0.24)))`
   const contentPct = tab === 'work' ? CONTENT_PCT.work : CONTENT_PCT.default
+  const columnWidth = contentWidth(contentPct)
   const panelMax = tab === 'work' ? PANEL_MAX.work : PANEL_MAX.default
   const leafShift = tab === 'work' ? LEAF_WORK_SHIFT : '0px'
+  // Work cards lift into this; the other tabs have no hover overhang, so a
+  // thinner bleed on them hands the squeezed column back to the copy.
+  const sideBleed = tab === 'work' ? SCROLL_BLEED : 16
 
   return (
     <div
@@ -298,7 +315,7 @@ export default function App() {
             top: 0,
             bottom: 0,
             left: 0,
-            width: `${contentPct}vw`,
+            width: columnWidth,
             background: COLUMN_FILL,
             transition: stillOnly ? undefined : `width ${SHIFT_MS}ms ${SHIFT_EASE}`,
             pointerEvents: 'none',
@@ -321,7 +338,7 @@ export default function App() {
           // Sized in `vw` rather than `%` so the split geometry doesn't shift by the
           // width of the page scrollbar. `overflow-x: hidden` on the body keeps the
           // shader's overhang from adding a horizontal scrollbar.
-          width: isMobile ? '100%' : `${contentPct}vw`,
+          width: isMobile ? '100%' : columnWidth,
           height: isMobile ? undefined : '100%',
           boxSizing: 'border-box',
           // The rail's spine is flush with the viewport's left edge, so the
@@ -347,9 +364,9 @@ export default function App() {
           ref={panelRef}
           className={isMobile ? 'tab-content-in' : 'tab-content-in panel-scroll'}
           style={{
-            flex: isMobile ? undefined : `0 1 ${panelMax + SCROLL_BLEED * 2}px`,
+            flex: isMobile ? undefined : `0 1 ${panelMax + sideBleed * 2}px`,
             width: isMobile ? '100%' : undefined,
-            maxWidth: isMobile ? `${panelMax}px` : `${panelMax + SCROLL_BLEED * 2}px`,
+            maxWidth: isMobile ? `${panelMax}px` : `${panelMax + sideBleed * 2}px`,
             minWidth: 0,
             boxSizing: 'border-box',
             // The file's 56 above the panel: `SCROLL_BLEED` of it is padding
@@ -366,8 +383,8 @@ export default function App() {
             // scales a card past the edge. `SCROLL_BLEED` is what keeps that
             // overhang inside the box in the first place.
             overflowX: isMobile ? undefined : 'hidden',
-            padding: isMobile ? undefined : `${SCROLL_BLEED}px ${SCROLL_BLEED}px 80px`,
-            margin: isMobile ? undefined : `${PANEL_TOP - SCROLL_BLEED}px -${SCROLL_BLEED}px 0`,
+            padding: isMobile ? undefined : `${SCROLL_BLEED}px ${sideBleed}px 80px`,
+            margin: isMobile ? undefined : `${PANEL_TOP - SCROLL_BLEED}px -${sideBleed}px 0`,
           }}
         >
           {panel}

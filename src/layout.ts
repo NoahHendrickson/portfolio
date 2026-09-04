@@ -14,7 +14,7 @@ export const PAGE_GUTTER = 120
  * where the desktop geometry has to survive on a screen a third narrower than
  * the frame it was drawn at.
  */
-const TABLET_MAX = 1366
+export const TABLET_MAX = 1366
 
 /**
  * The gutter, held flat at the file's 120 from tablet width up and scaled in
