@@ -1,5 +1,12 @@
-import { Fragment, useRef, useState } from 'react'
-import { ArrowSquareOut } from '@phosphor-icons/react'
+import { Fragment, useEffect, useRef, useState } from 'react'
+import {
+  ArrowSquareOut,
+  FastForward,
+  MagnifyingGlassPlus,
+  MouseMiddleClick,
+  Scissors,
+  VideoCamera,
+} from '@phosphor-icons/react'
 import Header from './Header'
 import { resolvePalette, HOVER_OPACITY } from '../design-system/buttonStyles'
 import type { ButtonVariant } from '../design-system/buttonStyles'
@@ -7,7 +14,7 @@ import { color, control, radius, radiusPx, space, type } from '../design-system/
 import { useIsMobile } from '../hooks/useIsMobile'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import AppLink from '../AppLink'
-import { copyPad, PAGE_GUTTER, PROJECT_MOBILE_PAD, shellPad } from '../layout'
+import { copyMeasure, copyPad, flushTrailingPad, PAGE_GUTTER, PROJECT_MOBILE_PAD, shellPad } from '../layout'
 import type {
   EyebrowEntry,
   FeedbackShot,
@@ -19,6 +26,7 @@ import type {
   StoryColumn,
   StorySection,
   TextRun,
+  TimelineTrack,
 } from '../data/projects'
 
 const PAGE_BG = 'var(--color-bg-primary)'
@@ -84,6 +92,11 @@ const heroWidth = (px: number) => `min(100%, max(${px}px, ${pct(px, CONTENT_WIDT
 
 const toParagraphs = (text: Prose): Paragraph[] => (typeof text === 'string' ? [text] : text)
 
+const flattenProse = (text: Prose) =>
+  toParagraphs(text)
+    .map((paragraph) => (typeof paragraph === 'string' ? paragraph : paragraph.map((run) => run.text).join('')))
+    .join(' ')
+
 /** Body copy on every story row — the file's 16px regular on the secondary ink. */
 const BODY_STYLE: React.CSSProperties = {
   margin: 0,
@@ -99,8 +112,16 @@ const ROW_HEADING: React.CSSProperties = {
   fontSize: '24px',
   fontWeight: 600,
   lineHeight: 'normal',
-  letterSpacing: '-0.067em',
+  letterSpacing: 0,
   color: TEXT,
+}
+
+/** Crisp's pin / speed-up / clips rows — same size as the row heading, medium. */
+const ROW_HEADLINE: React.CSSProperties = {
+  ...ROW_HEADING,
+  fontWeight: 500,
+  lineHeight: 1.3,
+  letterSpacing: 0,
 }
 
 /** The muted line(s) above a story title. */
@@ -129,6 +150,9 @@ export default function ProjectStory({ project }: { project: Project }) {
   if (!landing) return null
 
   const gutter = isMobile ? PROJECT_MOBILE_PAD : shellPad()
+  const copyW = landing.copyWidth ?? COPY_WIDTH
+  const flush = landing.align === 'start'
+  const headerTrailing = isMobile ? gutter : flush ? flushTrailingPad(copyW) : copyPad(copyW)
   const rowPad = isMobile ? '40px' : '80px'
   const heroBody = landing.hero.body ?? [project.summary]
   const eyebrow = Array.isArray(landing.eyebrow) ? landing.eyebrow : [landing.eyebrow]
@@ -138,7 +162,6 @@ export default function ProjectStory({ project }: { project: Project }) {
   // so this gap is what stops one section's screenshot sitting on the next
   // heading — 120 matches the page gutter rather than the old 32.
   const rowGap = isMobile ? '120px' : `${landing.rowGap ?? landing.gap ?? 80}px`
-  const flush = landing.align === 'start'
   const paired = landing.titleRhythm === 'paired'
   // Rows follow the title's alignment unless the frame splits them — no3y Code
   // left-aligns the title but centres its 1225-wide composer row.
@@ -167,7 +190,7 @@ export default function ProjectStory({ project }: { project: Project }) {
         fontSize: isMobile ? '34px' : 'clamp(40px, 4vw, 56px)',
         fontWeight: 600,
         lineHeight: 'normal',
-        letterSpacing: '-0.029em',
+        letterSpacing: 0,
       }}
     >
       {project.title}
@@ -178,7 +201,7 @@ export default function ProjectStory({ project }: { project: Project }) {
     <div
       style={{
         width: '100%',
-        maxWidth: `${landing.copyWidth ?? COPY_WIDTH}px`,
+        maxWidth: flush ? `${copyW}px` : copyMeasure(copyW),
         display: 'flex',
         flexDirection: 'column',
         gap: paired ? space.xl : space.lg,
@@ -250,8 +273,8 @@ export default function ProjectStory({ project }: { project: Project }) {
       <Header
         leading="back"
         showProfile={false}
-        barInset={isMobile || flush ? gutter : copyPad(landing.copyWidth ?? COPY_WIDTH)}
-        trailingInset={gutter}
+        barInset={isMobile || flush ? gutter : copyPad(copyW)}
+        trailingInset={headerTrailing}
       />
 
       {/*
@@ -393,6 +416,7 @@ export default function ProjectStory({ project }: { project: Project }) {
 function sectionKey(section: StorySection, i: number) {
   switch (section.kind) {
     case 'copy':
+    case 'tracks':
       return `${i}-${section.heading}`
     case 'columns':
       return section.columns[0].shot.src
@@ -421,12 +445,14 @@ function sectionKey(section: StorySection, i: number) {
 function SectionContent({ section }: { section: StorySection }) {
   const isMobile = useIsMobile()
 
+  if (section.kind === 'tracks') return <TrackLegend section={section} />
+
   if (section.kind === 'copy') {
     return (
       <div
         style={{
           width: '100%',
-          maxWidth: `${COPY_WIDTH}px`,
+          maxWidth: copyMeasure(COPY_WIDTH),
           display: 'flex',
           flexDirection: 'column',
           gap: space.lg,
@@ -458,12 +484,16 @@ function SectionContent({ section }: { section: StorySection }) {
           flexDirection: 'column',
           gap: space.xl,
           ...(section.stack
-            ? { width: '100%', maxWidth: `${section.copyWidth}px` }
+            ? { width: '100%', maxWidth: copyMeasure(section.copyWidth) }
             : null),
         }}
       >
-        <h2 style={ROW_HEADING}>{section.heading}</h2>
-        <Body body={section.body} lead={section.lead} />
+        <h2 style={section.headline ? ROW_HEADLINE : ROW_HEADING}>
+          {section.headline
+            ? `${section.heading.replace(/[.!?]$/, '')}. ${flattenProse(section.body)}`
+            : section.heading}
+        </h2>
+        {!section.headline && <Body body={section.body} lead={section.lead} />}
       </div>
     )
     const media = section.video ? (
@@ -591,6 +621,112 @@ function SectionContent({ section }: { section: StorySection }) {
   return _exhaustive
 }
 
+const TRACK_ICONS = {
+  'video-camera': VideoCamera,
+  'magnifying-glass-plus': MagnifyingGlassPlus,
+  'mouse-middle-click': MouseMiddleClick,
+  scissors: Scissors,
+  'fast-forward': FastForward,
+} as const
+
+/** Matches the 16×16 Phosphor glyphs on the player's track rail. */
+const TRACK_ICON_SIZE = 16
+
+/**
+ * Crisp's timeline legend — heading and first-player copy over that shot,
+ * final-player copy over the five-track shot, then a row per track.
+ */
+function TrackLegend({ section }: { section: Extract<StorySection, { kind: 'tracks' }> }) {
+  const isMobile = useIsMobile()
+  const stackGap = isMobile ? space['2xl'] : `${section.gap}px`
+  const copyStyle = {
+    display: 'flex' as const,
+    flexDirection: 'column' as const,
+    gap: space.xl,
+    width: '100%',
+    maxWidth: copyMeasure(section.copyWidth),
+  }
+  const shotStyle = {
+    width: '100%',
+    objectFit: 'cover' as const,
+    display: 'block',
+    borderRadius: MOCKUP_RADIUS,
+  }
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: stackGap,
+        width: '100%',
+      }}
+    >
+      <div style={copyStyle}>
+        <h2 style={ROW_HEADING}>{section.heading}</h2>
+        {section.attempt && <Body body={section.attempt.body} />}
+      </div>
+      {section.attempt && (
+        <img
+          src={section.attempt.shot.src}
+          alt={section.attempt.shot.alt}
+          style={{
+            ...shotStyle,
+            aspectRatio: section.attempt.shot.aspect.replace(/\s/g, ''),
+          }}
+        />
+      )}
+      <div style={copyStyle}>
+        <Body body={section.body} />
+      </div>
+      <img
+        src={section.shot.src}
+        alt={section.shot.alt}
+        style={{
+          ...shotStyle,
+          aspectRatio: section.shot.aspect.replace(/\s/g, ''),
+        }}
+      />
+      <div style={copyStyle}>
+        {section.items.map((item) => (
+          <TrackRow key={item.heading} item={item} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function TrackRow({ item }: { item: TimelineTrack }) {
+  const Icon = TRACK_ICONS[item.icon]
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: space.xs }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: space.md }}>
+        <Icon size={TRACK_ICON_SIZE} color={item.color} />
+        <h3
+          style={{
+            margin: 0,
+            ...type['label-l'],
+            fontWeight: 600,
+            color: item.color,
+          }}
+        >
+          {item.heading}
+        </h3>
+      </div>
+      <p
+        style={{
+          ...BODY_STYLE,
+          margin: 0,
+          paddingLeft: `calc(${TRACK_ICON_SIZE}px + ${space.md})`,
+        }}
+      >
+        {item.body}
+      </p>
+    </div>
+  )
+}
+
 /**
  * One entry in the hairline-split eyebrow row: plain copy, an outbound link with
  * its icon (The Forge's "Github"), or runs when only part of the entry links out
@@ -680,12 +816,39 @@ function Runs({ runs }: { runs: TextRun[] }) {
 }
 
 /**
+ * Play a muted loop only while the clip is on screen. Four HEVC files
+ * decoding at once on Crisp is wasteful, and a clip you haven't reached
+ * yet shouldn't be moving. `play()` is allowed without a gesture because
+ * the element stays muted + inline — the same pair that used to back
+ * `autoPlay`.
+ */
+function usePlayWhenVisible(ref: React.RefObject<HTMLVideoElement | null>) {
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) void el.play().catch(() => {})
+        else el.pause()
+      },
+      { threshold: 0.25 },
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [ref])
+}
+
+/**
  * A looping clip standing in for a feature-row still. Muted and inline so
- * mobile Safari will autoplay it; `prefers-reduced-motion` gets the poster.
- * Unlike `HeroVideo` it just fills the panel — no backdrop, no mid-clip zoom.
+ * mobile Safari will play it once it enters the viewport; `prefers-reduced-motion`
+ * gets the poster. Unlike `HeroVideo` it just fills the panel — no backdrop,
+ * no mid-clip zoom.
  */
 function StoryClip({ video }: { video: LandingVideo }) {
   const stillOnly = useMediaQuery('(prefers-reduced-motion: reduce)')
+  const clipRef = useRef<HTMLVideoElement>(null)
+  usePlayWhenVisible(clipRef)
   const fill: React.CSSProperties = {
     width: '100%',
     aspectRatio: video.aspect.replace(/\s/g, ''),
@@ -699,9 +862,9 @@ function StoryClip({ video }: { video: LandingVideo }) {
     <img src={video.poster} alt={video.alt} style={fill} />
   ) : (
     <video
+      ref={clipRef}
       poster={video.poster}
       aria-label={video.alt}
-      autoPlay
       loop
       muted
       playsInline
@@ -716,7 +879,7 @@ function StoryClip({ video }: { video: LandingVideo }) {
 
 /**
  * The hero as a looping clip rather than a still — Moonfang Armory. It plays
- * muted and inline so mobile Safari will autoplay it, and carries a `poster`
+ * muted and inline once it enters the viewport, and carries a `poster`
  * so the box shows the opening frame instead of black while the file loads.
  * The clip is cover-fit, so a source wider than the designed box is cropped
  * evenly rather than letterboxed. `prefers-reduced-motion` gets the poster
@@ -729,6 +892,7 @@ const ZOOM_OUT = 'transform 2s cubic-bezier(0.4, 0, 0.2, 1)'
 function HeroVideo({ video, maxWidth }: { video: LandingVideo; maxWidth: number }) {
   const stillOnly = useMediaQuery('(prefers-reduced-motion: reduce)')
   const clipRef = useRef<HTMLVideoElement>(null)
+  usePlayWhenVisible(clipRef)
   const [lateZoom, setLateZoom] = useState({ scale: 1, smooth: false, out: false })
 
   const { backdrop } = video
@@ -799,7 +963,6 @@ function HeroVideo({ video, maxWidth }: { video: LandingVideo; maxWidth: number 
       src={video.src}
       poster={video.poster}
       aria-label={video.alt}
-      autoPlay
       loop
       muted
       playsInline

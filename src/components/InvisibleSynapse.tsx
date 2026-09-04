@@ -3,7 +3,7 @@ import Header from './Header'
 import WorkGate from './WorkGate'
 import { color, radius, space, type } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
-import { copyPad, PROJECT_MOBILE_PAD, shellPad } from '../layout'
+import { copyMeasure, copyPad, PROJECT_MOBILE_PAD, shellPad } from '../layout'
 import { isUnlocked } from '../workGate'
 
 /*
@@ -70,7 +70,7 @@ const bodyStyle: CSSProperties = {
   fontSize: type['body-l'].fontSize,
   fontWeight: type['body-l'].fontWeight,
   lineHeight: type['body-l'].lineHeight,
-  letterSpacing: 'normal',
+  letterSpacing: 0,
   color: color.text.secondary,
 }
 
@@ -93,7 +93,7 @@ export default function InvisibleSynapse() {
         leading="back"
         showProfile={false}
         barInset={isMobile ? pad : copyPad(COPY_WIDTH)}
-        trailingInset={pad}
+        trailingInset={isMobile ? pad : copyPad(COPY_WIDTH)}
       />
 
       <main
@@ -224,7 +224,7 @@ function Hero({ isMobile }: { isMobile: boolean }) {
     <section
       style={{
         width: '100%',
-        maxWidth: `${COPY_WIDTH}px`,
+        maxWidth: copyMeasure(COPY_WIDTH),
         display: 'flex',
         flexDirection: 'column',
         gap: space.lg,
@@ -236,7 +236,7 @@ function Hero({ isMobile }: { isMobile: boolean }) {
           fontSize: isMobile ? '34px' : 'clamp(40px, 4vw, 56px)',
           fontWeight: 600,
           lineHeight: 'normal',
-          letterSpacing: '-0.029em',
+          letterSpacing: 0,
         }}
       >
         Launching New AI Training Interfaces
@@ -292,7 +292,7 @@ function StoryRow({
       <div
         style={{
           width: '100%',
-          maxWidth: `${COPY_WIDTH}px`,
+          maxWidth: copyMeasure(COPY_WIDTH),
           minWidth: 0,
           display: 'flex',
           flexDirection: 'column',
@@ -315,7 +315,7 @@ function SectionHeading({ children }: { children: ReactNode }) {
         fontSize: '24px',
         fontWeight: 600,
         lineHeight: 'normal',
-        letterSpacing: '-0.067em',
+        letterSpacing: 0,
         color: color.text.primary,
       }}
     >

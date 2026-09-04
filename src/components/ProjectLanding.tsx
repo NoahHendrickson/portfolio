@@ -91,7 +91,7 @@ export default function ProjectLanding({ project }: { project: Project }) {
             fontSize: 'clamp(28px, 8vw, 80px)',
             fontWeight: 600,
             lineHeight: 1.05,
-            letterSpacing: '-0.02em',
+            letterSpacing: 0,
           }}
         >
           {project.title}
@@ -178,7 +178,7 @@ export default function ProjectLanding({ project }: { project: Project }) {
                 fontSize: isMobile ? '32px' : 'clamp(32px, 4vw, 48px)',
                 fontWeight: 600,
                 lineHeight: 1,
-                letterSpacing: '-0.02em',
+                letterSpacing: 0,
                 color: project.accent,
               }}
             >
@@ -304,7 +304,7 @@ export default function ProjectLanding({ project }: { project: Project }) {
             fontSize: 'clamp(24px, 3vw, 40px)',
             fontWeight: 500,
             lineHeight: 1.15,
-            letterSpacing: '-0.01em',
+            letterSpacing: 0,
             color: '#ffffff',
             textWrap: 'balance',
           }}
@@ -394,7 +394,7 @@ function SectionBlock({ section, accent }: { section: Section; accent: string })
               fontSize: isMobile ? '22px' : 'clamp(24px, 2.6vw, 34px)',
               fontWeight: 500,
               lineHeight: 1.2,
-              letterSpacing: '-0.01em',
+              letterSpacing: 0,
               textWrap: 'balance',
             }}
           >

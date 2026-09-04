@@ -14,7 +14,7 @@ export const PAGE_GUTTER = 120
  * where the desktop geometry has to survive on a screen a third narrower than
  * the frame it was drawn at.
  */
-const TABLET_MAX = 1366
+export const TABLET_MAX = 1366
 
 /**
  * The gutter, held flat at the file's 120 from tablet width up and scaled in
@@ -59,13 +59,37 @@ export const shellPad = () =>
   `max(${pageGutter()}, calc((100vw - ${SHELL_MAX}px) / 2))`
 
 /**
- * Left edge of a centred copy column `width` px wide. Never tighter than
- * `shellPad()`, so on a narrow viewport the pill stays on the page gutter
- * with the copy (which then fills the column). Contact stays on `shellPad()`
- * via `trailingInset` — only Back walks in to meet the text.
+ * The widest the centred copy column grows on a large screen. 700 is the
+ * stacked-page measure at the 1512 frame; past that the text looked pinned
+ * in a widening column, so it follows the viewport a little, then stops.
  */
-export const copyPad = (width: number) =>
-  `max(${shellPad()}, calc((100vw - ${width}px) / 2))`
+export const COPY_MAX = 840
+
+/**
+ * The centred copy column. Holds `width` through the design width, then
+ * follows 45vw up to `COPY_MAX` so the measure opens a little on a big
+ * screen without running away.
+ */
+export const copyMeasure = (width: number, cap = COPY_MAX) =>
+  `min(${cap}px, max(${width}px, 45vw))`
+
+/**
+ * Inset to either edge of a centred copy column. Uses the same
+ * `copyMeasure` as the column itself, so Back and Contact stay on its
+ * edges as it grows. Never tighter than `shellPad()`, so on a narrow
+ * viewport they stay on the page gutter with the copy (which then fills
+ * the column).
+ */
+export const copyPad = (width: number, cap = COPY_MAX) =>
+  `max(${shellPad()}, calc((100vw - ${copyMeasure(width, cap)}) / 2))`
+
+/**
+ * Right inset of a left-aligned copy column that starts at `shellPad()`.
+ * Same floor as `copyPad`, so Contact sits on the text's right edge until
+ * the column fills and both sides collapse to the page gutter.
+ */
+export const flushTrailingPad = (width: number) =>
+  `max(${shellPad()}, calc(100vw - ${width}px - ${shellPad()}))`
 
 /**
  * Project-page gutter below 900. Display titles wrap against the glass on the

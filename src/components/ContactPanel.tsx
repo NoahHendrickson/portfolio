@@ -19,9 +19,9 @@ const rowStyle: React.CSSProperties = {
   fontSize: '16px',
   fontWeight: 400,
   lineHeight: '24px',
-  letterSpacing: '-0.2px',
+  letterSpacing: 0,
   cursor: 'pointer',
-  textDecoration: 'none',
+  textDecoration: 'underline',
 }
 
 /**

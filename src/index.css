@@ -97,6 +97,79 @@ html, body {
   animation: tab-content-in 300ms cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
+/* The rail's active pill. It is one arm on the spine, not a per-row fade: it
+   stretches toward the row it is going to (the leading edge moves first, so
+   the blob gets taller) and then the trailing edge catches up. `top` and
+   `bottom` are animated as separate insets so a same-height jump still
+   stretches — a `top`+`height` pair would not, because height does not change.
+
+   Lead overshoots a little so the blob squashes onto the target; the trail is
+   a plain decelerate, delayed, so it reads as follow-through rather than a
+   slide. Width grows with the lead (the destination label has to fit as soon
+   as the blob covers it) and shrinks with the trail (the origin label stays
+   covered until the blob has left). */
+.rail-list {
+  --rail-dur: 240ms;
+  --rail-lead-ease: cubic-bezier(0.2, 1.2, 0.32, 1);
+  --rail-trail-ease: cubic-bezier(0.25, 0.8, 0, 1);
+  /* Slide-home after leaving the rail: a little overshoot so it lands with a bounce. */
+  --rail-home-ease: cubic-bezier(0.22, 1.42, 0.34, 1);
+  --rail-home-dur: 320ms;
+  --rail-offset-dur: var(--rail-dur);
+  --rail-offset-ease: var(--rail-trail-ease);
+}
+.rail-list[data-homing='true'] {
+  --rail-offset-dur: var(--rail-home-dur);
+  --rail-offset-ease: var(--rail-home-ease);
+}
+.rail-pill[data-animate='true'] {
+  transition:
+    top var(--rail-offset-dur) var(--rail-top-ease) var(--rail-top-delay),
+    bottom var(--rail-offset-dur) var(--rail-bottom-ease) var(--rail-bottom-delay),
+    width var(--rail-offset-dur) var(--rail-width-ease) var(--rail-width-delay);
+}
+.rail-pill[data-animate='true'] .rail-pill-ink {
+  transition: top var(--rail-offset-dur) var(--rail-top-ease) var(--rail-top-delay);
+}
+
+/* The Work menu unfolds in the rail's flow: a grid row easing 0fr → 1fr on the
+   pill's trail curve, so the tabs below ride down (and back up) on the same
+   motion the pill uses to reach them. The card inside fades a beat quicker, so
+   it reads as revealed rather than squashed. The ink copies of the rows under
+   the menu take the same curve on `top`, which keeps them seated on their
+   moving buttons while the pill is stretched across one. */
+.rail-menu {
+  transition: grid-template-rows var(--rail-dur) var(--rail-trail-ease);
+}
+.rail-menu-card {
+  transition: opacity 160ms ease;
+}
+.rail-menu[data-open='false'] .rail-menu-card {
+  opacity: 0;
+}
+.rail-pill[data-animate='true'] .rail-pill-row {
+  transition: top var(--rail-offset-dur) var(--rail-offset-ease);
+}
+/* The list's top offset (see `RailList`'s `offset`) slides on the menu's own
+   curve, so a row under a closing menu is lifted and pushed down by the same
+   amount at every frame and holds still. Leaving the rail swaps these onto
+   `--rail-home-ease` so the slide back up can bounce without that close
+   bouncing the row out from under the pointer. */
+.rail-list[data-animate='true'] {
+  transition: padding-top var(--rail-offset-dur) var(--rail-offset-ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rail-pill[data-animate='true'],
+  .rail-pill[data-animate='true'] .rail-pill-ink,
+  .rail-pill[data-animate='true'] .rail-pill-row,
+  .rail-list[data-animate='true'],
+  .rail-menu,
+  .rail-menu-card {
+    transition: none;
+  }
+}
+
 /* The home panel is the only scroller on desktop, and macOS blows its overlay
    scrollbar up into a light track the moment the pointer nears it — the one
    piece of chrome on the page, sitting right where the leaf field starts. It is
@@ -113,9 +186,8 @@ html, body {
   height: 0;
 }
 
-/* Work-tab card art — hover lifts the card and nothing else; the accent stroke
-   is gone, so --bento-accent (still set per card) has no consumer for now. The
-   caption sits below the art, so there is no frost shim over it either. */
+/* Work-tab card art — hover lifts the card; the caption sits below, so there
+   is no frost shim over it. */
 .work-bento-card {
   position: relative;
   transition: transform 220ms ease, box-shadow 220ms ease;
