@@ -22,7 +22,7 @@ import InvisibleSynapse from './components/InvisibleSynapse'
 import ProjectLanding from './components/ProjectLanding'
 import ProjectStory from './components/ProjectStory'
 import { projects } from './data/projects'
-import { useIsMobile } from './hooks/useIsMobile'
+import { useIsMobile, useIsWide } from './hooks/useIsMobile'
 import { useMediaQuery } from './hooks/useMediaQuery'
 import { getRoute, navigate, subscribeToRoute } from './navigation'
 import { pageGutter, TABLET_MAX } from './layout'
@@ -39,12 +39,14 @@ const COLUMN_FILL = `linear-gradient(to right, ${BG} 0%, ${BG} calc(100% - ${LEA
  * Percentage of the viewport the content column takes, and the panel's width
  * cap, per tab. Work runs a 937px two-column grid against everything else's
  * 700 (Figma frames `320:30803` / `320:30968`), so its column reaches further
- * and the leaf field starts at the file's 1268 instead of ~1050. Both
- * percentages sit a touch past the content's edge so the leaf tips peek from
- * under the column rather than crowding the copy.
+ * and the leaf field starts at the file's 1268 instead of ~1050. Past
+ * `WIDE_MIN` that panel grows to 1420 so three columns can sit at the same
+ * card size as the two-column file. Both percentages sit a touch past the
+ * content's edge so the leaf tips peek from under the column rather than
+ * crowding the copy.
  */
 const CONTENT_PCT = { default: 70, work: 84.4 }
-const PANEL_MAX = { default: 700, work: 937 }
+const PANEL_MAX = { default: 700, work: 937, workWide: 1420 }
 /**
  * Extra column width below `TABLET_MAX`, so the leaf strip yields space to
  * the copy instead of holding a 70/30 split on a ~1100px screen. Zero at
@@ -141,6 +143,7 @@ function isLegacyWorkRoute(route: string) {
 export default function App() {
   const route = useSyncExternalStore(subscribeToRoute, getRoute)
   const isMobile = useIsMobile()
+  const isWide = useIsWide()
   const stillOnly = useMediaQuery('(prefers-reduced-motion: reduce)')
   const legacyWork = isLegacyWorkRoute(route)
   const [tab, setTab] = useState<HomeTab>(() => (legacyWork ? 'work' : readHomeTab()))
@@ -246,7 +249,8 @@ export default function App() {
     : `max(24px, calc(${pageGutter()} - max(0px, (${TABLET_MAX}px - 100vw) * 0.24)))`
   const contentPct = tab === 'work' ? CONTENT_PCT.work : CONTENT_PCT.default
   const columnWidth = contentWidth(contentPct)
-  const panelMax = tab === 'work' ? PANEL_MAX.work : PANEL_MAX.default
+  const panelMax =
+    tab === 'work' ? (isWide ? PANEL_MAX.workWide : PANEL_MAX.work) : PANEL_MAX.default
   const leafShift = tab === 'work' ? LEAF_WORK_SHIFT : '0px'
   // Work cards lift into this; the other tabs have no hover overhang, so a
   // thinner bleed on them hands the squeezed column back to the copy.

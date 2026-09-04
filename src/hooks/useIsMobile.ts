@@ -1,3 +1,4 @@
+import { WIDE_MIN } from '../layout'
 import { useMediaQuery } from './useMediaQuery'
 
 /**
@@ -7,7 +8,12 @@ import { useMediaQuery } from './useMediaQuery'
  */
 export const MOBILE_BREAKPOINT_PX = 900
 export const MOBILE_QUERY = `(max-width: ${MOBILE_BREAKPOINT_PX}px)`
+export const WIDE_QUERY = `(min-width: ${WIDE_MIN}px)`
 
 export function useIsMobile(): boolean {
   return useMediaQuery(MOBILE_QUERY)
+}
+
+export function useIsWide(): boolean {
+  return useMediaQuery(WIDE_QUERY)
 }

@@ -17,6 +17,13 @@ export const PAGE_GUTTER = 120
 export const TABLET_MAX = 1366
 
 /**
+ * Where the Work grid can run three columns. Below this the 14" / 1512 frame
+ * keeps the file's two-column 937 panel; from here the panel is allowed to
+ * grow and the extra column fills the empty band before the leaf strip.
+ */
+export const WIDE_MIN = 1680
+
+/**
  * The gutter, held flat at the file's 120 from tablet width up and scaled in
  * proportion below it.
  *

@@ -1,21 +1,22 @@
-import { type CSSProperties, type ReactNode } from 'react'
+import { useEffect, useRef, type CSSProperties, type ReactNode } from 'react'
 import { ArrowRight, ArrowSquareOut } from '@phosphor-icons/react'
 import AppLink from '../AppLink'
 import Button from '../design-system/Button'
 import { VARIANTS } from '../design-system/buttonStyles'
 import { WORK_FILTERS, type WorkCard, type WorkFilter } from '../data/workCards'
 import { color, control, radius, space, type } from '../design-system/tokens'
-import { useIsMobile } from '../hooks/useIsMobile'
+import { useIsMobile, useIsWide } from '../hooks/useIsMobile'
 
 /**
  * The home page's Work tab (Figma frame `320:30968`): a two-column grid of
- * cards, sectioned by the rail's Work menu on desktop and by a row of filter
- * pills over the grid on mobile, where the rail is a dropdown. The cards and
- * sections live in `src/data/workCards.ts`; each card shows its art with the
- * caption *below* — title, muted subtitle, then a pill to the page ("Case
- * study" on career cards, "View" on the rest) and an optional second action
- * (an external link, or a plain employer label on the Invisible work). The
- * art itself also links to the page.
+ * cards on the file's width, three columns past `WIDE_MIN`, sectioned by the
+ * rail's Work menu on desktop and by a row of filter pills over the grid on
+ * mobile, where the rail is a dropdown. The cards and sections live in
+ * `src/data/workCards.ts`; each card shows its art with the caption *below* —
+ * title, muted subtitle, then a pill to the page ("Case study" on career
+ * cards, "View" on the rest) and an optional second action (an external link,
+ * or a plain employer label on the Invisible work). The art itself also
+ * links to the page.
  */
 
 /**
@@ -36,13 +37,24 @@ export default function WorkList({
   onSelectFilter: (filter: WorkFilter) => void
 }) {
   const isMobile = useIsMobile()
+  const isWide = useIsWide()
   const active = WORK_FILTERS.find((f) => f.id === filter) ?? WORK_FILTERS[0]
+  const pillsRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const current = pillsRef.current?.querySelector('[aria-pressed="true"]')
+    if (current instanceof HTMLElement) {
+      current.scrollIntoView({ inline: 'nearest', block: 'nearest' })
+    }
+  }, [filter])
 
   const grid = (
     <div
       style={{
         display: 'grid',
-        gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, minmax(0, 1fr))',
+        gridTemplateColumns: isMobile
+          ? '1fr'
+          : `repeat(${isWide ? 3 : 2}, minmax(0, 1fr))`,
         // The file's 32 between columns and 56 between rows.
         columnGap: '32px',
         rowGap: isMobile ? space['3xl'] : '56px',
@@ -60,11 +72,19 @@ export default function WorkList({
 
   const pills = (
     <div
+      ref={pillsRef}
+      className="work-filter-row"
       style={{
         display: 'flex',
-        flexWrap: 'wrap',
-        alignItems: 'flex-start',
+        flexWrap: 'nowrap',
+        alignItems: 'center',
         gap: space.sm,
+        overflowX: 'auto',
+        // The page's 20 right pad is peek space, so Graphic design clips
+        // in-frame instead of wrapping onto a second line.
+        marginRight: -20,
+        paddingRight: 20,
+        WebkitOverflowScrolling: 'touch',
       }}
     >
       {WORK_FILTERS.map((entry) => (
@@ -79,8 +99,14 @@ export default function WorkList({
           aria-pressed={entry.id === active.id}
           style={
             entry.id === active.id
-              ? { background: CARD_CREAM, borderColor: CARD_CREAM, color: color.ink.default }
-              : { borderColor: 'transparent' }
+              ? {
+                  flexShrink: 0,
+                  paddingInline: space.md,
+                  background: CARD_CREAM,
+                  borderColor: CARD_CREAM,
+                  color: color.ink.default,
+                }
+              : { flexShrink: 0, paddingInline: space.md, borderColor: 'transparent' }
           }
         >
           {entry.label}

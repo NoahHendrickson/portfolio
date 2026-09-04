@@ -31,6 +31,8 @@ const RAIL_PAD = 48
 const MENU_INSET = 16
 const MENU_PAD = 8
 const MENU_GAP = 10
+/** Figma `373:12446` — the orange card sits 10 off the Work menu's right edge. */
+const ALERT_GAP = 10
 
 type RailItem<T extends string> = {
   id: T
@@ -124,6 +126,18 @@ const FACE_DOTS = {
     [4, 10],
     [2, 8],
   ],
+  /** `390:28031` — eyes up-right, mouth a flat line. */
+  eyeroll: [
+    [3, 3],
+    [5, 5],
+    [9, 3],
+    [11, 5],
+    [3, 10],
+    [5, 10],
+    [7, 10],
+    [9, 10],
+    [11, 10],
+  ],
 } satisfies Record<string, [number, number][]>
 
 const face = (name: keyof typeof FACE_DOTS) => (
@@ -216,6 +230,7 @@ const tabBase: CSSProperties = {
   // The file's 12 / 8, up from the 8 all round the earlier rail ran.
   padding: '8px 12px',
   border: 'none',
+  outline: 'none',
   borderRadius: '0 var(--radius-md) var(--radius-md) 0',
   cursor: 'pointer',
   fontFamily: 'inherit',
@@ -254,6 +269,52 @@ const slotStyle = <T extends string>(item: RailItem<T>): CSSProperties =>
  * across several rows doesn't leave the blob hanging.
  */
 const PILL_STAGGER = '70ms'
+
+/**
+ * The orange card from Figma `390:28030` — shown once the list has been
+ * pushed as far down as it can go, seated to the right of the Work menu
+ * (`373:12446`), not under the rail.
+ */
+function FloorToast({ top, left }: { top: number; left: number }) {
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        top,
+        // Bridge the 10px gap so crossing from the menu onto the card does
+        // not leave the rail and home the list.
+        left: left - ALERT_GAP,
+        paddingLeft: ALERT_GAP,
+        zIndex: 2,
+      }}
+    >
+      <div
+        role="status"
+        className="rail-toast"
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-start',
+          gap: '10px',
+          padding: 12,
+          background: ORANGE,
+          color: PILL,
+          borderRadius: radius.md,
+          fontFamily: 'inherit',
+          fontSize: '16px',
+          fontWeight: 500,
+          lineHeight: 'normal',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        <span style={{ color: PILL, display: 'flex' }}>
+          <PixelGlyph dots={FACE_DOTS.eyeroll} width={16} height={16} />
+        </span>
+        Seriously.. you got this thing to the bottom of the page??
+      </div>
+    </div>
+  )
+}
 
 /**
  * The join at the spine, which the file draws as a corner the page turns
@@ -428,7 +489,6 @@ function FilterMenu({
           <button
             key={filter.id}
             type="button"
-            data-rail-filter={filter.id}
             onMouseEnter={() => hover.enter(filter.id)}
             onMouseLeave={hover.leave}
             onClick={() => hover.commit(filter.id)}
@@ -440,6 +500,7 @@ function FilterMenu({
               gap: '16px',
               padding: '8px 12px',
               border: 'none',
+              outline: 'none',
               borderRadius: radius.md,
               background: isActive ? `color-mix(in srgb, ${color.ink.default} 8%, transparent)` : 'transparent',
               color: color.text.inverse,
@@ -484,6 +545,33 @@ function menuDelta(menu: MenuBox) {
 /** The list's top offset as it is painted right now — mid-slide, the interpolated value. */
 function renderedOffset(list: HTMLElement) {
   return parseFloat(getComputedStyle(list).paddingTop) - RAIL_PAD
+}
+
+function sameSeat(
+  a: { top: number; left: number } | null,
+  b: { top: number; left: number } | null,
+) {
+  if (a === b) return true
+  if (!a || !b) return false
+  return Math.abs(a.top - b.top) < 0.5 && Math.abs(a.left - b.left) < 0.5
+}
+
+/**
+ * Seat the floor alert on the cream card's live box. The card's layout size
+ * is stable mid-unfold, but the list may still be sliding off a clamped
+ * offset — so callers follow this every frame. Skip until the 0fr→1fr wrap
+ * has actually reached that size; measuring earlier parks the alert at the
+ * floor and it jumps once the menu arrives.
+ */
+function seatAlert(group: HTMLElement | null, cardWrap: HTMLElement | null, menuWrap: HTMLElement | null) {
+  const cream = cardWrap?.firstElementChild
+  if (!group || !cardWrap || !menuWrap || !(cream instanceof HTMLElement) || cream.offsetWidth < 8) {
+    return null
+  }
+  if (menuWrap.getBoundingClientRect().height < cardWrap.offsetHeight - 2) return null
+  const gr = group.getBoundingClientRect()
+  const cr = cream.getBoundingClientRect()
+  return { top: cr.top - gr.top, left: cr.right - gr.left + ALERT_GAP }
 }
 
 /**
@@ -577,6 +665,9 @@ function RailList<T extends string>({
   const [offset, setOffset] = useState(0)
   const offsetRef = useRef(0)
   const wasOpen = useRef(false)
+  const maxRef = useRef(0)
+  const groupRef = useRef<HTMLDivElement>(null)
+  const [alertSeat, setAlertSeat] = useState<{ top: number; left: number } | null>(null)
   /** The slide back to the top pad, after the pointer leaves the rail. */
   const [homing, setHoming] = useState(false)
   const [pill, setPill] = useState({
@@ -608,6 +699,8 @@ function RailList<T extends string>({
     let offsetDelta = 0
     if (list) {
       const rendered = renderedOffset(list)
+      const max = maxOffset(list, buttonsRef.current, menuBox)
+      maxRef.current = max
       let desired = offsetRef.current
       if (wasOpen.current && !menuOpen && activeIndex > menuIndex) {
         // Closing under a row below the menu: take up what the menu gives up.
@@ -617,7 +710,7 @@ function RailList<T extends string>({
         // mid-slide, hold it where it is so that row stops under the pointer.
         desired = rendered
       }
-      desired = Math.min(desired, maxOffset(list, buttonsRef.current, menuBox))
+      desired = Math.min(desired, max)
       offsetRef.current = desired
       setOffset(desired)
       setHoming(false)
@@ -674,6 +767,30 @@ function RailList<T extends string>({
   }, [reseat])
 
   /*
+   * Follow the cream card every frame while the floor alert can show. The
+   * list's padding and the menu unfold on the same curve, but the alert lives
+   * on the group (the list clips) so a one-shot seat from Work's pre-clamp
+   * box lands at the bottom and jumps once the menu arrives.
+   */
+  useEffect(() => {
+    if (!menuOpen) {
+      setAlertSeat(null)
+      return
+    }
+    let id = 0
+    const tick = () => {
+      const next =
+        maxRef.current > 0 && offsetRef.current >= maxRef.current
+          ? seatAlert(groupRef.current, menuCardRef.current, menuWrapRef.current)
+          : null
+      setAlertSeat((prev) => (sameSeat(prev, next) ? prev : next))
+      id = requestAnimationFrame(tick)
+    }
+    id = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(id)
+  }, [menuOpen])
+
+  /*
    * The offset exists so a closing menu doesn't pull the row out from under
    * the pointer. Once the pointer has left the rail, nothing is under it —
    * slide the list back to the top pad (a little springier than the close)
@@ -706,6 +823,7 @@ function RailList<T extends string>({
 
   return (
     <div
+      ref={groupRef}
       onMouseMove={hover.move}
       onMouseLeave={releaseOffset}
       role="group"
@@ -715,6 +833,7 @@ function RailList<T extends string>({
         alignItems: 'stretch',
         flexShrink: 0,
         height: '100%',
+        position: 'relative',
       }}
     >
       <div aria-hidden style={{ width: spine.width, flexShrink: 0, background: spine.background }} />
@@ -748,7 +867,6 @@ function RailList<T extends string>({
                   buttonsRef.current[index] = el
                 }}
                 type="button"
-                data-rail-tab={item.id}
                 onMouseEnter={() => hover.enter(item.id)}
                 onMouseLeave={hover.leave}
                 onClick={() => hover.commit(item.id)}
@@ -843,6 +961,9 @@ function RailList<T extends string>({
           </div>
         )}
       </div>
+      {maxRef.current > 0 && offset >= maxRef.current && menuOpen && alertSeat && (
+        <FloorToast top={alertSeat.top} left={alertSeat.left} />
+      )}
     </div>
   )
 }
@@ -862,25 +983,8 @@ export default function HomeRail({
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const railRef = useRef<HTMLElement | null>(null)
-  /** Set by the arrow walk so focus follows the row after React commits — hover must not steal it. */
-  const pendingFocus = useRef<'trigger' | { tab: HomeTab } | { filter: WorkFilter } | null>(null)
 
   const menuOpen = active === 'work' && !isMobile
-
-  useLayoutEffect(() => {
-    const pending = pendingFocus.current
-    pendingFocus.current = null
-    const root = railRef.current
-    if (!pending || !root) return
-    const sel =
-      pending === 'trigger'
-        ? '[data-rail-trigger]'
-        : 'filter' in pending
-          ? `[data-rail-filter="${pending.filter}"]`
-          : `[data-rail-tab="${pending.tab}"]`
-    const el = root.querySelector(sel)
-    if (el instanceof HTMLElement) el.focus({ preventScroll: true })
-  }, [active, filter])
 
   useEffect(() => {
     if (!isOpen) return
@@ -899,18 +1003,17 @@ export default function HomeRail({
   }, [isOpen])
 
   /*
-   * The arrow keys walk one list, and only while focus is in the rail — Hi,
-   * Work/All … Work/Graphic design, Where I've been, and so on. Stepping onto
-   * Work from above lands on its first section and from below on its last, so
-   * the walk is linear; hover and click keep whatever section was set. A press
-   * from the panel (or anywhere else) is left alone so the scroller can move.
+   * The arrow keys walk one list from anywhere on the page — Hi, Work/All …
+   * Work/Graphic design, Where I've been, and so on — so the rail does not
+   * have to be clicked first. Stepping onto Work from above lands on its
+   * first section and from below on its last, so the walk is linear; hover
+   * and click keep whatever section was set. Inputs are left alone.
    */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return
       if (isTypingTarget(e.target)) return
       if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return
-      if (!(e.target instanceof Node) || !railRef.current?.contains(e.target)) return
       e.preventDefault()
 
       const step = e.key === 'ArrowDown' ? 1 : -1
@@ -919,7 +1022,6 @@ export default function HomeRail({
       setIsOpen(false)
 
       if (isMobile) {
-        pendingFocus.current = 'trigger'
         onSelect(neighbour)
         return
       }
@@ -928,21 +1030,16 @@ export default function HomeRail({
         const fi = WORK_FILTERS.findIndex((entry) => entry.id === filter)
         const next = WORK_FILTERS[fi + step]
         if (next) {
-          pendingFocus.current = { filter: next.id }
           onSelectFilter(next.id)
           return
         }
-        pendingFocus.current = { tab: neighbour }
         onSelect(neighbour)
         return
       }
 
       if (neighbour === 'work') {
         const entry = step === 1 ? WORK_FILTERS[0] : WORK_FILTERS[WORK_FILTERS.length - 1]
-        pendingFocus.current = { filter: entry.id }
         onSelectFilter(entry.id)
-      } else {
-        pendingFocus.current = { tab: neighbour }
       }
       onSelect(neighbour)
     }
@@ -971,7 +1068,6 @@ export default function HomeRail({
       >
         <button
           type="button"
-          data-rail-trigger
           onClick={() => setIsOpen((open) => !open)}
           aria-haspopup="menu"
           aria-expanded={isOpen}
