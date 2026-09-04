@@ -17,6 +17,8 @@ const LIME = '#cef982'
 const T3_CODE = 'https://github.com/pingdotgg/t3code'
 /** Desktop builds — GitHub Releases on the fork. `WorkList`'s card links here too. */
 export const NO3Y_CODE_DOWNLOAD = 'https://github.com/NoahHendrickson/t3code/releases'
+/** Crisp’s GitHub Pages download. The case-study CTA points here. */
+export const CRISP_DOWNLOAD = 'https://noahhendrickson.github.io/crisp/'
 /** Live D2 Stat Builder. The Work card and the case-study CTA both point here. */
 export const STAT_BUILDER_SITE = 'https://d2-stat-builder-dusky.vercel.app/'
 
@@ -224,12 +226,18 @@ export type StorySection =
        * which is how the July D2 frame sets its one row.
        */
       lead?: boolean
+      /**
+       * Joins heading and body into one heading — Crisp's pin / speed-up /
+       * clips rows, which read as a single headline rather than a title over
+       * a caption.
+       */
+      headline?: boolean
     }
   /** A centered 688px heading + body block, standing between shots — D2 Stat Builder. */
   | { kind: 'copy'; heading: string; body: Prose }
   /**
-   * Heading + body over a player shot, then a labelled row per timeline
-   * track — Crisp. Each row carries the track's Phosphor icon and bar colour.
+   * Heading and first-player copy over that shot, final-player copy over
+   * the five-track shot, then a labelled row per timeline track — Crisp.
    */
   | {
       kind: 'tracks'
@@ -239,6 +247,8 @@ export type StorySection =
       gap: number
       shot: LandingShot
       items: TimelineTrack[]
+      /** The discarded one-bar player — copy and shot sit above the final one. */
+      attempt?: { body: Prose; shot: LandingShot }
     }
   /**
    * One screenshot on its own, optionally with a panel laid over it. The box is
@@ -922,20 +932,22 @@ export const projects: Record<string, Project> = {
       eyebrowPlacement: 'below',
       hero: {
         body: [
-          'I built Crisp because too many of the screen recordings for my website came out looking worse than what I saw on my screen. Smooth gradients and glass effects would develop visible bands or steps, making the visuals look unappealing.',
-          'Crisp captures a high-fidelity source recording at native Retina resolution with 10-bit color and a high bitrate. That preserves subtle gradients, transparency, and fine UI details before any zooms or effects are applied, so the finished video stays much closer to the original design.',
+          'I built Crisp because too many screen recordings for my website looked worse than they did on my screen. Smooth gradients and glass effects showed visible bands or steps that made the recordings look unappealing.',
+          'Crisp records at full Retina resolution with 10-bit color at a high bitrate. Gradients, glass, and small UI details stay intact with zooms or edits.',
+          'All clips used here were created with Crisp. :)',
         ],
+        cta: { label: 'GitHub', href: CRISP_DOWNLOAD },
       },
       sections: [
         {
           kind: 'tracks',
           heading: 'The timeline',
-          body: 'The player stacks five tracks on every recording. Each one is a different kind of edit — the source stays untouched, and the camera moves, cuts, and speed-ups sit on the tracks below it.',
+          body: 'I decided to break up the timeline into five tracks, one for each of the type of edits that you can make. This ended up being a lot simpler even though it added a few more elements in the UI. It was much easier to use and understand even for myself.',
           copyWidth: 700,
           gap: 80,
           shot: {
             src: '/work/crisp/timeline.png',
-            alt: 'Crisp’s player: the toolbar above five coloured timeline tracks — playback, zoom, pan, clip, and fast-forward',
+            alt: 'Crisp’s player: the toolbar above five colored timeline tracks: playback, zoom, pan, clip, and fast-forward',
             aspect: '1170 / 260',
             frame: 'plain',
           },
@@ -971,14 +983,23 @@ export const projects: Record<string, Project> = {
               body: 'Stretches that play faster than the rest. Drop a rate on the dead air — loading, typing, waits — and the rest of the clip keeps its original pace.',
             },
           ],
+          attempt: {
+            body: 'For the first version of the timeline, I wanted to keep it as just one strip and then showing the different kinds of edits, like Zooms and pans and fast forwards all on one and have it be layered on there. But that ended up being pretty terrible to use and was pretty confusing, so I needed to try something different.',
+            shot: {
+              src: '/work/crisp/timeline-combined.png',
+              alt: 'Crisp’s first player: one timeline bar with overlapping zoom, pan, and speed-up marks, and a stack of icons hanging under each collision',
+              aspect: '890 / 167',
+              frame: 'plain',
+            },
+          },
         },
         {
           kind: 'feature',
           gap: 80,
           heading: 'Use your AI subscriptions with Crisp',
           body: [
-            'Crisp works with the AI subscriptions you already have. If Codex or Claude Code is installed and authenticated on your Mac, Crisp detects it automatically, no additional API keys, accounts, or integration setup required.',
-            'To help LLMs understand a recording, Crisp gives it more than a simple prompt. It provides the current editing plan, cursor movement, click timing, and annotated frames from important moments in the video. The agent can inspect additional frames and preview its own changes before returning an updated plan. It never alters the original recording—it only adjusts the timing and strength of the camera movements layered on top.',
+            'Crisp works with the AI subscriptions you already have. If Codex or Claude Code is installed and authenticated on your Mac, Crisp detects it automatically, so no additional API keys, accounts, or integration setup are required.',
+            'To help an LLM understand a recording, Crisp gives it more than a simple prompt. Crisp provides the current editing plan, cursor movement, click timing, and annotated frames from important moments in the video. The agent can inspect additional frames and preview its own changes before returning an updated plan. It never alters the original recording; it only adjusts the timing and strength of the camera movements layered on top.',
           ],
           copyWidth: 700,
           stack: true,
@@ -986,7 +1007,7 @@ export const projects: Record<string, Project> = {
             src: '/work/crisp/ai-polish.mp4',
             hevc: '/work/crisp/ai-polish-hevc.mp4',
             poster: '/work/crisp/ai-polish-poster.jpg',
-            alt: 'Crisp’s AI editor: a note describes the polish wanted and the zoom track is rewritten to match',
+            alt: 'Crisp’s AI editor: a note describes the desired polish, and the zoom track is rewritten to match',
             aspect: '16 / 9',
           },
         },
@@ -994,6 +1015,7 @@ export const projects: Record<string, Project> = {
           kind: 'feature',
           gap: 80,
           heading: 'Speed up segments',
+          headline: true,
           body: 'Mark a stretch of the timeline to play faster so pauses, loading, and other dead air don’t hold the viewer. The rest of the recording keeps its original pace.',
           copyWidth: 700,
           stack: true,
@@ -1009,6 +1031,7 @@ export const projects: Record<string, Project> = {
           kind: 'feature',
           gap: 80,
           heading: 'Pin the zoom’s viewport',
+          headline: true,
           body: 'Lock a zoom onto one region of the screen so the camera holds still on what you want people to see, instead of following the cursor away from it.',
           copyWidth: 700,
           stack: true,
@@ -1024,6 +1047,7 @@ export const projects: Record<string, Project> = {
           kind: 'feature',
           gap: 80,
           heading: 'Make multiple clips from one recording',
+          headline: true,
           body: 'Select a range of a longer recording and save it as its own clip, with its own zooms and export. Record once, then pull out each moment you want to show.',
           copyWidth: 700,
           stack: true,

@@ -19,7 +19,7 @@ export default function Hero() {
     fontSize: isMobile ? '17px' : '18px',
     fontWeight: 400,
     lineHeight: 1.4,
-    letterSpacing: '-0.2px',
+    letterSpacing: 0,
   }
 
   const subtitle: React.CSSProperties = {
@@ -27,7 +27,7 @@ export default function Hero() {
     fontSize: '18px',
     fontWeight: 500,
     lineHeight: 1.3,
-    letterSpacing: '-0.2px',
+    letterSpacing: 0,
   }
 
   return (
@@ -38,8 +38,7 @@ export default function Hero() {
           fontSize: '24px',
           fontWeight: 500,
           lineHeight: 1.1,
-          // The file keeps the display tracking on the smaller title.
-          letterSpacing: '-1.6px',
+          letterSpacing: 0,
           color: TEXT,
         }}
       >

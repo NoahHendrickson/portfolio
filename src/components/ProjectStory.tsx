@@ -92,6 +92,11 @@ const heroWidth = (px: number) => `min(100%, max(${px}px, ${pct(px, CONTENT_WIDT
 
 const toParagraphs = (text: Prose): Paragraph[] => (typeof text === 'string' ? [text] : text)
 
+const flattenProse = (text: Prose) =>
+  toParagraphs(text)
+    .map((paragraph) => (typeof paragraph === 'string' ? paragraph : paragraph.map((run) => run.text).join('')))
+    .join(' ')
+
 /** Body copy on every story row — the file's 16px regular on the secondary ink. */
 const BODY_STYLE: React.CSSProperties = {
   margin: 0,
@@ -107,8 +112,16 @@ const ROW_HEADING: React.CSSProperties = {
   fontSize: '24px',
   fontWeight: 600,
   lineHeight: 'normal',
-  letterSpacing: '-0.067em',
+  letterSpacing: 0,
   color: TEXT,
+}
+
+/** Crisp's pin / speed-up / clips rows — same size as the row heading, medium. */
+const ROW_HEADLINE: React.CSSProperties = {
+  ...ROW_HEADING,
+  fontWeight: 500,
+  lineHeight: 1.3,
+  letterSpacing: 0,
 }
 
 /** The muted line(s) above a story title. */
@@ -177,7 +190,7 @@ export default function ProjectStory({ project }: { project: Project }) {
         fontSize: isMobile ? '34px' : 'clamp(40px, 4vw, 56px)',
         fontWeight: 600,
         lineHeight: 'normal',
-        letterSpacing: '-0.029em',
+        letterSpacing: 0,
       }}
     >
       {project.title}
@@ -475,8 +488,12 @@ function SectionContent({ section }: { section: StorySection }) {
             : null),
         }}
       >
-        <h2 style={ROW_HEADING}>{section.heading}</h2>
-        <Body body={section.body} lead={section.lead} />
+        <h2 style={section.headline ? ROW_HEADLINE : ROW_HEADING}>
+          {section.headline
+            ? `${section.heading.replace(/[.!?]$/, '')}. ${flattenProse(section.body)}`
+            : section.heading}
+        </h2>
+        {!section.headline && <Body body={section.body} lead={section.lead} />}
       </div>
     )
     const media = section.video ? (
@@ -616,11 +633,25 @@ const TRACK_ICONS = {
 const TRACK_ICON_SIZE = 16
 
 /**
- * Crisp's timeline legend — heading and intro, the player shot, then a
- * row per track with that track's icon and bar colour.
+ * Crisp's timeline legend — heading and first-player copy over that shot,
+ * final-player copy over the five-track shot, then a row per track.
  */
 function TrackLegend({ section }: { section: Extract<StorySection, { kind: 'tracks' }> }) {
   const isMobile = useIsMobile()
+  const stackGap = isMobile ? space['2xl'] : `${section.gap}px`
+  const copyStyle = {
+    display: 'flex' as const,
+    flexDirection: 'column' as const,
+    gap: space.xl,
+    width: '100%',
+    maxWidth: copyMeasure(section.copyWidth),
+  }
+  const shotStyle = {
+    width: '100%',
+    objectFit: 'cover' as const,
+    display: 'block',
+    borderRadius: MOCKUP_RADIUS,
+  }
 
   return (
     <div
@@ -628,42 +659,36 @@ function TrackLegend({ section }: { section: Extract<StorySection, { kind: 'trac
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: isMobile ? space['2xl'] : `${section.gap}px`,
+        gap: stackGap,
         width: '100%',
       }}
     >
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: space.xl,
-          width: '100%',
-          maxWidth: copyMeasure(section.copyWidth),
-        }}
-      >
+      <div style={copyStyle}>
         <h2 style={ROW_HEADING}>{section.heading}</h2>
+        {section.attempt && <Body body={section.attempt.body} />}
+      </div>
+      {section.attempt && (
+        <img
+          src={section.attempt.shot.src}
+          alt={section.attempt.shot.alt}
+          style={{
+            ...shotStyle,
+            aspectRatio: section.attempt.shot.aspect.replace(/\s/g, ''),
+          }}
+        />
+      )}
+      <div style={copyStyle}>
         <Body body={section.body} />
       </div>
       <img
         src={section.shot.src}
         alt={section.shot.alt}
         style={{
-          width: '100%',
+          ...shotStyle,
           aspectRatio: section.shot.aspect.replace(/\s/g, ''),
-          objectFit: 'cover',
-          display: 'block',
-          borderRadius: MOCKUP_RADIUS,
         }}
       />
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: space.xl,
-          width: '100%',
-          maxWidth: copyMeasure(section.copyWidth),
-        }}
-      >
+      <div style={copyStyle}>
         {section.items.map((item) => (
           <TrackRow key={item.heading} item={item} />
         ))}

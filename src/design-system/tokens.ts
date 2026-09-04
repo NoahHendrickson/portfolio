@@ -91,14 +91,14 @@ export type TypeStyle = {
 }
 
 export const type = {
-  'display-xl': { fontSize: 'clamp(28px, 8vw, 80px)', fontWeight: 500, lineHeight: 1.05, letterSpacing: '-0.029em' },
-  'display-l': { fontSize: '40px', fontWeight: 500, lineHeight: 1.1, letterSpacing: '-0.02em' },
-  'heading-l': { fontSize: '30px', fontWeight: 500, lineHeight: 1.2, letterSpacing: '-0.02em' },
-  'heading-m': { fontSize: '20px', fontWeight: 500, lineHeight: 1.3, letterSpacing: '-0.01em' },
-  'body-l': { fontSize: '16px', fontWeight: 400, lineHeight: 1.4, letterSpacing: '-0.01em' },
+  'display-xl': { fontSize: 'clamp(28px, 8vw, 80px)', fontWeight: 500, lineHeight: 1.05, letterSpacing: '0' },
+  'display-l': { fontSize: '40px', fontWeight: 500, lineHeight: 1.1, letterSpacing: '0' },
+  'heading-l': { fontSize: '30px', fontWeight: 500, lineHeight: 1.2, letterSpacing: '0' },
+  'heading-m': { fontSize: '20px', fontWeight: 500, lineHeight: 1.3, letterSpacing: '0' },
+  'body-l': { fontSize: '16px', fontWeight: 400, lineHeight: 1.4, letterSpacing: '0' },
   'body-m': { fontSize: '15px', fontWeight: 400, lineHeight: 1.4, letterSpacing: '0' },
   'body-s': { fontSize: '14px', fontWeight: 400, lineHeight: 1.4, letterSpacing: '0' },
-  'label-l': { fontSize: '16px', fontWeight: 500, lineHeight: 1.4, letterSpacing: '-0.01em' },
+  'label-l': { fontSize: '16px', fontWeight: 500, lineHeight: 1.4, letterSpacing: '0' },
   'label-m': { fontSize: '14px', fontWeight: 500, lineHeight: 1.4, letterSpacing: '0' },
   'label-s': { fontSize: '12px', fontWeight: 500, lineHeight: 1.4, letterSpacing: '0' },
   eyebrow: { fontSize: '12px', fontWeight: 600, lineHeight: 1.4, letterSpacing: '0.08em', textTransform: 'uppercase' },

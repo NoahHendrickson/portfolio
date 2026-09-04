@@ -168,7 +168,7 @@ export function SectionHeading({ title }: { title: string }) {
         fontSize: '20px',
         fontWeight: 600,
         lineHeight: 1.3,
-        letterSpacing: '-0.2px',
+        letterSpacing: 0,
         color: TEXT,
       }}
     >
@@ -182,7 +182,7 @@ const heading: React.CSSProperties = {
   fontSize: '20px',
   fontWeight: 600,
   lineHeight: 1.3,
-  letterSpacing: '-0.2px',
+  letterSpacing: 0,
 }
 
 // The role title pair matches the Hero's "Product Designer &" subtitle style.
@@ -191,7 +191,7 @@ const roleTitle: React.CSSProperties = {
   fontSize: '18px',
   fontWeight: 500,
   lineHeight: 1.3,
-  letterSpacing: '-0.2px',
+  letterSpacing: 0,
 }
 
 const body: React.CSSProperties = {
@@ -199,7 +199,7 @@ const body: React.CSSProperties = {
   fontSize: '16px',
   fontWeight: 400,
   lineHeight: 1.4,
-  letterSpacing: '-0.2px',
+  letterSpacing: 0,
   color: TEXT,
 }
 
@@ -352,7 +352,7 @@ export function LlmQuotes() {
           fontSize: '16px',
           fontWeight: 400,
           lineHeight: 1.4,
-          letterSpacing: '-0.2px',
+          letterSpacing: 0,
           color: MUTED,
         }}
       >

@@ -4,7 +4,7 @@ import { ProfileRow } from './components/Header'
 import Hero from './components/Hero'
 import HomeRail from './components/HomeRail'
 import { readHomeTab, writeHomeTab, type HomeTab } from './homeTab'
-import { readWorkFilter, writeWorkFilter, type WorkFilter } from './workFilter'
+import { readWorkFilter, writeWorkFilter, type WorkFilter } from './data/workCards'
 import WorkList from './components/WorkList'
 import ShaderPanel from './components/ShaderPanel'
 import {
@@ -16,6 +16,7 @@ import {
 } from './components/LeafPattern'
 import { DesigningNow, LlmQuotes, PreviousRoles } from './components/Experience'
 import ContactPanel from './components/ContactPanel'
+import InvisibleApply from './components/InvisibleApply'
 import InvisibleOnboarding from './components/InvisibleOnboarding'
 import InvisibleSynapse from './components/InvisibleSynapse'
 import ProjectLanding from './components/ProjectLanding'
@@ -50,24 +51,14 @@ const PANEL_MAX = { default: 700, work: 937 }
  * equal negative margin — the content box stays exactly `PANEL_MAX` wide and
  * lands where it always did, but the scroller's own box reaches past it.
  *
- * A scroll container clips, and the Work cards run flush to the panel's right
- * edge: their hover lift's shadow would have been cut off in a hard vertical
- * line down that edge. The slack it borrows is empty either side — the rail's
- * 56px gap on the left, the page gutter on the right.
+ * A scroll container clips, and the Work cards run flush to the panel's edges:
+ * their hover lift would be cut off in a hard line along any side they grow
+ * past. The slack it borrows is empty — the rail's 56px gap on the left, the
+ * same 56 above the panel, the page gutter on the right.
  */
 const SCROLL_BLEED = 40
-
-/**
- * The Work tab's sheet (Figma `365:6192`): the second rail's surface runs on
- * under the content to the viewport's right edge and bottom, with the card
- * grid on it at a 16px inset. The sheet is the scroller, so the grid slides
- * under its top edge while the rails hold still. The frame draws it pure
- * white; it runs on the system cream instead, which sits softer against the
- * dark shell, and `HomeRail`'s Work rail paints the same token so the two
- * read as one surface.
- */
-const SHEET = 'var(--color-bg-cream)'
-const SHEET_INSET = 16
+/** The file's gap from the frame's top edge to the panel copy. */
+const PANEL_TOP = 56
 
 /**
  * A wheel notch over the rail or the leaf field scrolls the panel between them.
@@ -144,6 +135,8 @@ export default function App() {
   const stillOnly = useMediaQuery('(prefers-reduced-motion: reduce)')
   const legacyWork = isLegacyWorkRoute(route)
   const [tab, setTab] = useState<HomeTab>(() => (legacyWork ? 'work' : readHomeTab()))
+  // The Work section, held here because the rail's Work menu and the grid both
+  // read it; sessionStorage like the tab, so it survives refresh.
   const [filter, setFilter] = useState<WorkFilter>(readWorkFilter)
 
   // Landing on a legacy work route mid-session (a project page's Back pill)
@@ -191,6 +184,10 @@ export default function App() {
     return <InvisibleSynapse />
   }
 
+  if (route === '/work/invisible/apply') {
+    return <InvisibleApply />
+  }
+
   // Routes are pathnames like '/work/no3y-code'.
   const project = route.startsWith('/work/')
     ? projects[route.slice('/work/'.length)]
@@ -234,8 +231,6 @@ export default function App() {
   // viewport, and mirroring it inside a column narrower than the viewport
   // would eat the content's width instead.
   const rightInset = isMobile ? '20px' : pageGutter()
-  // Desktop Work is the sheet layout: the rails and the sheet fill the frame.
-  const isSheet = tab === 'work' && !isMobile
   const contentPct = tab === 'work' ? CONTENT_PCT.work : CONTENT_PCT.default
   const panelMax = tab === 'work' ? PANEL_MAX.work : PANEL_MAX.default
   const leafShift = tab === 'work' ? LEAF_WORK_SHIFT : '0px'
@@ -321,20 +316,18 @@ export default function App() {
           // The rails run the full height of the frame; the panel between
           // them is what scrolls.
           alignItems: isMobile ? 'flex-start' : 'stretch',
-          // The file's 56 from the rail to the content column; on the sheet
-          // the second rail *is* the content's left margin.
-          gap: isMobile ? '24px' : isSheet ? 0 : '56px',
+          // The file's 56 from the rail to the content column.
+          gap: isMobile ? '24px' : '56px',
           // Sized in `vw` rather than `%` so the split geometry doesn't shift by the
           // width of the page scrollbar. `overflow-x: hidden` on the body keeps the
-          // shader's overhang from adding a horizontal scrollbar. The sheet
-          // takes the whole viewport, covering the leaf field.
-          width: isMobile ? '100%' : isSheet ? '100vw' : `${contentPct}vw`,
+          // shader's overhang from adding a horizontal scrollbar.
+          width: isMobile ? '100%' : `${contentPct}vw`,
           height: isMobile ? undefined : '100%',
           boxSizing: 'border-box',
           // The rail's spine is flush with the viewport's left edge, so the
           // shared `shellPad()` gutter no longer applies on home — the rail
           // pads its own rows 48 from the top instead.
-          padding: isMobile ? '20px 20px 60px' : isSheet ? 0 : `0 ${rightInset} 0 0`,
+          padding: isMobile ? '20px 20px 60px' : `0 ${rightInset} 0 0`,
           // Desktop's fill is the animated mask layer above; mobile has no leaf
           // field beside it and paints its own.
           background: isMobile ? BG : undefined,
@@ -349,54 +342,36 @@ export default function App() {
           onSelectFilter={selectFilter}
           isMobile={isMobile}
         />
-        {isSheet ? (
-          <main
-            ref={panelRef}
-            className="panel-scroll"
-            style={{
-              flex: '1 1 auto',
-              minWidth: 0,
-              height: '100%',
-              boxSizing: 'border-box',
-              overflowY: 'auto',
-              overflowX: 'hidden',
-              background: SHEET,
-              padding: `${SHEET_INSET}px`,
-            }}
-          >
-            {panel}
-          </main>
-        ) : (
-          <main
-            key={tab}
-            ref={panelRef}
-            className={isMobile ? 'tab-content-in' : 'tab-content-in panel-scroll'}
-            style={{
-              flex: isMobile ? undefined : `0 1 ${panelMax + SCROLL_BLEED * 2}px`,
-              width: isMobile ? '100%' : undefined,
-              maxWidth: isMobile ? `${panelMax}px` : `${panelMax + SCROLL_BLEED * 2}px`,
-              minWidth: 0,
-              boxSizing: 'border-box',
-              // The file's 56 above the panel, kept outside the scroller so
-              // the copy still stops short of the frame's top edge.
-              marginTop: isMobile ? undefined : '56px',
-              // The only thing on the page that scrolls. `key={tab}` remounts it,
-              // so a switch already starts the next panel at its top — the
-              // `window.scrollTo` calls are for the project routes now.
-              height: isMobile ? undefined : 'calc(100% - 56px)',
-              overflowY: isMobile ? undefined : 'auto',
-              // The other axis can't stay `visible` on a scroll container, so it
-              // is pinned rather than left to flash a scrollbar when a hover lift
-              // scales a card past the edge. `SCROLL_BLEED` is what keeps that
-              // overhang inside the box in the first place.
-              overflowX: isMobile ? undefined : 'hidden',
-              padding: isMobile ? undefined : `0 ${SCROLL_BLEED}px 80px`,
-              margin: isMobile ? undefined : `56px -${SCROLL_BLEED}px 0`,
-            }}
-          >
-            {panel}
-          </main>
-        )}
+        <main
+          key={tab}
+          ref={panelRef}
+          className={isMobile ? 'tab-content-in' : 'tab-content-in panel-scroll'}
+          style={{
+            flex: isMobile ? undefined : `0 1 ${panelMax + SCROLL_BLEED * 2}px`,
+            width: isMobile ? '100%' : undefined,
+            maxWidth: isMobile ? `${panelMax}px` : `${panelMax + SCROLL_BLEED * 2}px`,
+            minWidth: 0,
+            boxSizing: 'border-box',
+            // The file's 56 above the panel: `SCROLL_BLEED` of it is padding
+            // inside the scroller so a first-row hover lift isn't clipped, and
+            // the rest stays as margin so the copy still starts at 56.
+            marginTop: isMobile ? undefined : `${PANEL_TOP - SCROLL_BLEED}px`,
+            // The only thing on the page that scrolls. `key={tab}` remounts it,
+            // so a switch already starts the next panel at its top — the
+            // `window.scrollTo` calls are for the project routes now.
+            height: isMobile ? undefined : `calc(100% - ${PANEL_TOP - SCROLL_BLEED}px)`,
+            overflowY: isMobile ? undefined : 'auto',
+            // The other axis can't stay `visible` on a scroll container, so it
+            // is pinned rather than left to flash a scrollbar when a hover lift
+            // scales a card past the edge. `SCROLL_BLEED` is what keeps that
+            // overhang inside the box in the first place.
+            overflowX: isMobile ? undefined : 'hidden',
+            padding: isMobile ? undefined : `${SCROLL_BLEED}px ${SCROLL_BLEED}px 80px`,
+            margin: isMobile ? undefined : `${PANEL_TOP - SCROLL_BLEED}px -${SCROLL_BLEED}px 0`,
+          }}
+        >
+          {panel}
+        </main>
       </div>
     </div>
   )

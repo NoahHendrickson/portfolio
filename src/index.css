@@ -108,19 +108,55 @@ html, body {
    slide. Width grows with the lead (the destination label has to fit as soon
    as the blob covers it) and shrinks with the trail (the origin label stays
    covered until the blob has left). */
-.rail-pill {
+.rail-list {
   --rail-dur: 240ms;
   --rail-lead-ease: cubic-bezier(0.2, 1.2, 0.32, 1);
   --rail-trail-ease: cubic-bezier(0.25, 0.8, 0, 1);
+  /* Slide-home after leaving the rail: a little overshoot so it lands with a bounce. */
+  --rail-home-ease: cubic-bezier(0.22, 1.42, 0.34, 1);
+  --rail-home-dur: 320ms;
+  --rail-offset-dur: var(--rail-dur);
+  --rail-offset-ease: var(--rail-trail-ease);
+}
+.rail-list[data-homing='true'] {
+  --rail-offset-dur: var(--rail-home-dur);
+  --rail-offset-ease: var(--rail-home-ease);
 }
 .rail-pill[data-animate='true'] {
   transition:
-    top var(--rail-dur) var(--rail-top-ease) var(--rail-top-delay),
-    bottom var(--rail-dur) var(--rail-bottom-ease) var(--rail-bottom-delay),
-    width var(--rail-dur) var(--rail-width-ease) var(--rail-width-delay);
+    top var(--rail-offset-dur) var(--rail-top-ease) var(--rail-top-delay),
+    bottom var(--rail-offset-dur) var(--rail-bottom-ease) var(--rail-bottom-delay),
+    width var(--rail-offset-dur) var(--rail-width-ease) var(--rail-width-delay);
 }
 .rail-pill[data-animate='true'] .rail-pill-ink {
-  transition: top var(--rail-dur) var(--rail-top-ease) var(--rail-top-delay);
+  transition: top var(--rail-offset-dur) var(--rail-top-ease) var(--rail-top-delay);
+}
+
+/* The Work menu unfolds in the rail's flow: a grid row easing 0fr → 1fr on the
+   pill's trail curve, so the tabs below ride down (and back up) on the same
+   motion the pill uses to reach them. The card inside fades a beat quicker, so
+   it reads as revealed rather than squashed. The ink copies of the rows under
+   the menu take the same curve on `top`, which keeps them seated on their
+   moving buttons while the pill is stretched across one. */
+.rail-menu {
+  transition: grid-template-rows var(--rail-dur) var(--rail-trail-ease);
+}
+.rail-menu-card {
+  transition: opacity 160ms ease;
+}
+.rail-menu[data-open='false'] .rail-menu-card {
+  opacity: 0;
+}
+.rail-pill[data-animate='true'] .rail-pill-row {
+  transition: top var(--rail-offset-dur) var(--rail-offset-ease);
+}
+/* The list's top offset (see `RailList`'s `offset`) slides on the menu's own
+   curve, so a row under a closing menu is lifted and pushed down by the same
+   amount at every frame and holds still. Leaving the rail swaps these onto
+   `--rail-home-ease` so the slide back up can bounce without that close
+   bouncing the row out from under the pointer. */
+.rail-list[data-animate='true'] {
+  transition: padding-top var(--rail-offset-dur) var(--rail-offset-ease);
 }
 
 /* The spine's end caps square off when the first or last tab is active. */
@@ -131,6 +167,10 @@ html, body {
 @media (prefers-reduced-motion: reduce) {
   .rail-pill[data-animate='true'],
   .rail-pill[data-animate='true'] .rail-pill-ink,
+  .rail-pill[data-animate='true'] .rail-pill-row,
+  .rail-list[data-animate='true'],
+  .rail-menu,
+  .rail-menu-card,
   .rail-spine {
     transition: none;
   }

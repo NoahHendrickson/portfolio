@@ -70,7 +70,7 @@ const bodyStyle: CSSProperties = {
   fontSize: type['body-l'].fontSize,
   fontWeight: type['body-l'].fontWeight,
   lineHeight: type['body-l'].lineHeight,
-  letterSpacing: 'normal',
+  letterSpacing: 0,
   color: color.text.secondary,
 }
 
@@ -236,7 +236,7 @@ function Hero({ isMobile }: { isMobile: boolean }) {
           fontSize: isMobile ? '34px' : 'clamp(40px, 4vw, 56px)',
           fontWeight: 600,
           lineHeight: 'normal',
-          letterSpacing: '-0.029em',
+          letterSpacing: 0,
         }}
       >
         Launching New AI Training Interfaces
@@ -315,7 +315,7 @@ function SectionHeading({ children }: { children: ReactNode }) {
         fontSize: '24px',
         fontWeight: 600,
         lineHeight: 'normal',
-        letterSpacing: '-0.067em',
+        letterSpacing: 0,
         color: color.text.primary,
       }}
     >
