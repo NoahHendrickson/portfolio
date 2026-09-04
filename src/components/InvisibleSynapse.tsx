@@ -390,7 +390,7 @@ function LegacyDiagram() {
           width: pctX(137.631),
           height: pctY(139.269),
           borderRadius: radius.lg,
-          background: '#ffffff',
+          background: color.bg.cream,
         }}
       />
     </div>

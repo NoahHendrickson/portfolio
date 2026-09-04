@@ -553,7 +553,7 @@ function FunnelChart() {
               height: `${(357 / 430) * 100}%`,
               overflow: 'hidden',
               borderRadius: radius.md,
-              background: index === 0 ? '#ffffff' : 'rgba(255,255,255,0.3)',
+              background: index === 0 ? color.bg.cream : 'color-mix(in srgb, var(--color-bg-cream) 30%, transparent)',
             }}
           >
             {index > 0 && (
@@ -563,7 +563,7 @@ function FunnelChart() {
                   inset: 'auto 0 0',
                   height: `${(height / 357) * 100}%`,
                   borderRadius: radius.md,
-                  background: '#ffffff',
+                  background: color.bg.cream,
                 }}
               />
             )}
@@ -607,7 +607,7 @@ function ExperimentChart() {
           width: `${(80 / 766) * 100}%`,
           height: `${(288 / 430) * 100}%`,
           borderRadius: radius.md,
-          background: '#ffffff',
+          background: color.bg.cream,
         }}
       />
     </div>

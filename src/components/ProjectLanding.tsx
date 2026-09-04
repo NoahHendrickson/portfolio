@@ -10,7 +10,7 @@ const CREAM_BG = 'var(--color-bg-cream)'
 const TEXT_DARK = 'var(--color-ink)'
 const ORANGE = 'var(--color-orange)'
 const LIGHT_CARD_BG = '#e5e5e5'
-const BUTTON_LIGHT = 'var(--color-bg-inverse)'
+const BUTTON_LIGHT = 'var(--color-bg-cream)'
 const MUTED = 'var(--color-ink-muted)'
 const HAIRLINE = 'var(--color-border-ink)'
 

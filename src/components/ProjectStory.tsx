@@ -32,8 +32,8 @@ import type {
 const PAGE_BG = 'var(--color-bg-primary)'
 const TEXT = 'var(--color-text-primary)'
 const ORANGE = 'var(--color-orange)'
-/** The outro card is orange in both themes, so its pill stays light-on-orange. */
-const PILL_BG = 'var(--color-bg-inverse)'
+/** The outro card is orange in both themes, so its pill stays cream-on-orange. */
+const PILL_BG = 'var(--color-bg-cream)'
 const PILL_TEXT = 'var(--color-text-inverse)'
 const MUTED = 'var(--color-text-muted)'
 const BODY_TEXT = 'var(--color-text-secondary)'

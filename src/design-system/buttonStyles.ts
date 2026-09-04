@@ -15,8 +15,8 @@ export const VARIANTS = {
     hover: { background: color.accent.hover, borderColor: color.accent.hover, color: color.accent.onAccent },
   },
   secondary: {
-    default: { background: color.bg.inverse, borderColor: color.bg.inverse, color: color.text.inverse },
-    hover: { background: color.bg.inverse, borderColor: color.bg.inverse, color: color.text.inverse },
+    default: { background: color.bg.cream, borderColor: color.bg.cream, color: color.text.inverse },
+    hover: { background: color.bg.cream, borderColor: color.bg.cream, color: color.text.inverse },
   },
   ghost: {
     default: { background: 'transparent', borderColor: color.border.default, color: color.text.primary },

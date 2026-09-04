@@ -12,8 +12,8 @@ import type { HomeTab } from '../homeTab'
 import { WORK_FILTERS, type WorkFilter } from '../data/workCards'
 
 const ORANGE = color.accent.default
-/** The file paints the spine, the active pill and the Work card white, not `--color-bg-inverse`. */
-const PILL = '#ffffff'
+/** Spine, active pill and Work card — cream, same as the rest of the light surfaces. */
+const PILL = color.bg.cream
 /**
  * The spine runs the full height of the viewport, flush with its left edge,
  * at the file's 48 (Figma `365:6122`).
@@ -190,7 +190,7 @@ function PixelCaretPair() {
   return <PixelGlyph dots={CARET_PAIR_DOTS} width={10} height={16} />
 }
 
-/** The rail's colours: a white pill reaching off a white spine onto the dark page. */
+/** The rail's colours: a cream pill reaching off a cream spine onto the dark page. */
 type RailPalette = {
   pill: string
   ink: string
@@ -390,7 +390,7 @@ function useHoverIntent<T>(active: T, onEnter: (id: T) => void, onCommit: (id: T
 }
 
 /**
- * The Work menu (Figma `373:12447`): the white card that unfolds under the
+ * The Work menu (Figma `373:12447`): the cream card that unfolds under the
  * Work pill, its mark at the top and a row per section — label and count.
  * The active row is the file's 8% ink wash; hover and click select the way
  * the rail's own rows do.
@@ -1005,15 +1005,13 @@ export default function HomeRail({
                     ...(isActive ? pillStyle(MAIN_PALETTE) : idleStyle(MAIN_PALETTE)),
                     width: '100%',
                     justifyContent: 'space-between',
-                    borderRadius: 'var(--radius-sm)',
+                    // Menu is 2xl (24) with an 8 pad; 16 nests the highlight
+                    // in that curve instead of the rail's 6.
+                    borderRadius: 'var(--radius-xl)',
                   }}
                 >
                   {tab.label}
-                  {isActive && (
-                    <span style={{ color: ORANGE, display: 'flex' }}>
-                      <PixelArrow />
-                    </span>
-                  )}
+                  {tab.glyph}
                 </button>
               )
             })}
