@@ -936,7 +936,7 @@ export const projects: Record<string, Project> = {
           'Crisp records at full Retina resolution with 10-bit color at a high bitrate. Gradients, glass, and small UI details stay intact with zooms or edits.',
           'All clips used here were created with Crisp. :)',
         ],
-        cta: { label: 'GitHub', href: CRISP_DOWNLOAD },
+        cta: { label: 'Download Crisp', href: CRISP_DOWNLOAD },
       },
       sections: [
         {
