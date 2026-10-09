@@ -61,7 +61,7 @@ const statBuilder: WorkCard = {
   subtitle: 'Community tool for Destiny 2',
   art: {
     src: '/work/bento/card-stat-builder.png',
-    alt: 'D2 Stat Builder — the armor table in a dark window on yellow',
+    alt: 'D2 Conflux — the armor table in a dark window on yellow',
   },
   extra: { label: 'View the site', href: STAT_BUILDER_SITE },
 }

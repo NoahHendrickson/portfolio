@@ -19,8 +19,8 @@ const T3_CODE = 'https://github.com/pingdotgg/t3code'
 export const NO3Y_CODE_DOWNLOAD = 'https://github.com/NoahHendrickson/t3code/releases'
 /** Crisp’s GitHub Pages download. The case-study CTA points here. */
 export const CRISP_DOWNLOAD = 'https://noahhendrickson.github.io/crisp/'
-/** Live D2 Stat Builder. The Work card and the case-study CTA both point here. */
-export const STAT_BUILDER_SITE = 'https://d2-stat-builder-dusky.vercel.app/'
+/** Live D2 Conflux (formerly D2 Stat Builder). The Work card and the case-study CTA both point here. */
+export const STAT_BUILDER_SITE = 'https://d2conflux.com/'
 
 export type Shot = {
   /** Shown on the placeholder card until `src` is filled in. */
@@ -435,7 +435,7 @@ export type Project = {
 export const projects: Record<string, Project> = {
   'stat-builder': {
     slug: 'stat-builder',
-    title: 'D2 Stat Builder',
+    title: 'D2 Conflux',
     eyebrow: ['Side project', '2026', 'Destiny 2'],
     tagline:
       'Tell it the build you want. It searches the gear you actually own and tells you what to equip.',
@@ -462,10 +462,11 @@ export const projects: Record<string, Project> = {
         ],
         cta: { label: 'Check it out', href: STAT_BUILDER_SITE },
         shot: {
-          // Live capture of the builder, seated in the Figma export's
-          // window hole so the purple desktop still runs around it.
-          src: '/work/stat-builder/hero-panel.jpg',
-          alt: 'The builder — armor summary, class tabs, six stat sliders, major mods and set bonuses on the left, ranked builds on the right',
+          // Live capture of the stat optimizer (October 2026, the sidebar
+          // layout). Captured at 1680 × 1050 — at 1440 the build card's stat
+          // row wraps onto a second line — and framed at the same 2544 × 1724.
+          src: '/work/stat-builder/conflux-hero.jpg',
+          alt: 'The stat optimizer: class nameplates and six stat targets on the left, ranked builds on the right with the top one opened to its armor, mods, tuning and masterwork cost',
           aspect: '1272 / 862',
           frame: 'plain',
         },
@@ -478,14 +479,13 @@ export const projects: Record<string, Project> = {
           heading: 'Making armor easier to find',
           body: 'Destiny 2’s in-game vault and existing third-party tools made it difficult to search my armor inventory or identify which pieces to pursue. I went back to basics and designed a table with quick filters and custom sorting.',
           copyWidth: 700,
-          panelWidth: 668,
           stack: true,
           shot: {
-            // Node 241:23813 — the table's browser frame runs off the panel's
-            // right edge, so the crop is baked into the export.
-            src: '/work/stat-builder/table-panel.jpg',
-            alt: 'The armor table, filtered by class, archetype, tertiary stat and set bonus, with the custom sort menu open',
-            aspect: '668 / 526',
+            // Same 1680 × 1050 capture and frame as the hero, so it runs the
+            // hero's width.
+            src: '/work/stat-builder/conflux-armor-table.jpg',
+            alt: 'The armor table filtered to Warlock: name, archetype, tertiary and tuned stats, set bonus, the six stat columns, and Move and Equip on each row',
+            aspect: '1272 / 862',
             frame: 'plain',
           },
         },
