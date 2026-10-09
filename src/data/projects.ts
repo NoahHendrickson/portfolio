@@ -739,12 +739,12 @@ export const projects: Record<string, Project> = {
     title: 'no3y Code',
     eyebrow: ['Side project', '2026', 'Agent tooling'],
     tagline:
-      'My fork of T3 Code — the sidebar I actually wanted when multi-tasking across agents, plus a design mode built into the harness.',
+      'A fork of T3 Code with the sidebar I wanted for juggling several agents at once, and a design mode built right in.',
     bento: {
       eyebrow: 'Agent orchestration UI + Design mode (T3 Code fork)',
       cover: '/work/bento/no3y-code.png',
       tagline:
-        'My fork of T3 Code — the sidebar I actually wanted when multi-tasking across agents, plus a design mode built into the harness.',
+        'A fork of T3 Code with the sidebar I wanted for juggling several agents at once, and a design mode built right in.',
     },
     pageReady: true,
     landing: {

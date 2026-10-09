@@ -350,7 +350,26 @@ html, body {
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
   }
 }
+/* All's featured boxes lift whole, without the scale: the art sits on a 4px
+   border that a scaled art would spill over. */
+.work-featured-card {
+  transition: transform 220ms ease, box-shadow 220ms ease;
+}
+@media (hover: hover) {
+  .work-featured-card:hover,
+  .work-featured-card:focus-within {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+  }
+}
 @media (prefers-reduced-motion: reduce) {
+  .work-featured-card {
+    transition: none;
+  }
+  .work-featured-card:hover,
+  .work-featured-card:focus-within {
+    transform: none;
+  }
   .work-bento-card {
     transition: none;
   }

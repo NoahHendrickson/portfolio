@@ -25,6 +25,12 @@ export type WorkCard = {
   /** The pill beside the primary CTA: an external link, or an href-less label
    *  (the file's "@ Invisible Technologies"). */
   extra?: { label: string; href?: string }
+  /**
+   * What the card adds when it runs as one of All's featured rows — the
+   * larger cards over the grid. `results` are its outcomes, a short sentence
+   * each; a card without results carries a `blurb` instead.
+   */
+  feature?: { blurb?: string; results?: string[] }
 }
 
 const no3y: WorkCard = {
@@ -36,6 +42,7 @@ const no3y: WorkCard = {
     alt: 'no3y Code — the composer bar over a red-and-violet gradient',
   },
   extra: { label: 'Download from GitHub', href: NO3Y_CODE_DOWNLOAD },
+  feature: { blurb: projects['no3y-code'].tagline },
 }
 
 const crisp: WorkCard = {
@@ -61,13 +68,22 @@ const statBuilder: WorkCard = {
 
 const onboarding: WorkCard = {
   href: '/work/invisible/onboarding',
-  title: 'Revitalizing Meridial’s onboarding flow',
+  title: 'Meridial’s Onboarding Redesign',
   subtitle: 'Research & Product Design',
   art: {
     src: '/work/bento/card-invisible-onboarding.png',
     alt: 'Meridial — the onboarding profile step in a browser, on mauve',
   },
   extra: { label: '@ Invisible Technologies' },
+  // The study's "Measureable outcomes", from its 50/50 experiment.
+  feature: {
+    results: [
+      'Doubled overall funnel conversion',
+      // A non-breaking hyphen, so a narrow column doesn't split "drop-off".
+      'Increased conversion 4× at the biggest drop‑off',
+      'Lifted mobile profile completion by 50%',
+    ],
+  },
 }
 
 const synapse: WorkCard = {
@@ -143,6 +159,12 @@ export const WORK_FILTERS: { id: WorkFilter; label: string; cards: WorkCard[] }[
   { id: 'all', label: 'All', cards: SECTIONS.flatMap((section) => section.cards) },
   ...SECTIONS,
 ]
+
+/**
+ * The cards All opens on, larger and ahead of the grid (which then leaves
+ * them out). The other filters list them in their own sections as usual.
+ */
+export const FEATURED: WorkCard[] = [onboarding, no3y]
 
 /** Survives refresh — the whole home page lives on `/`, so the filter isn't in the path. */
 const WORK_FILTER_KEY = 'work-filter'
