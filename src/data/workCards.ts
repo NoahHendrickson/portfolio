@@ -88,8 +88,8 @@ const onboarding: WorkCard = {
 
 const synapse: WorkCard = {
   href: '/work/invisible/synapse',
-  title: 'Designing AI training interfaces for Synapse',
-  subtitle: 'Product design',
+  title: 'Launching Synapse',
+  subtitle: 'Annotation platform for AI training',
   art: {
     src: '/work/bento/card-invisible-synapse.png',
     alt: 'Synapse — three model responses beside the task panel, on purple',
@@ -99,8 +99,8 @@ const synapse: WorkCard = {
 
 const apply: WorkCard = {
   href: '/work/invisible/apply',
-  title: 'Users can apply to projects on Meridial',
-  subtitle: 'Product design',
+  title: 'Meridial’s Explore & Apply',
+  subtitle: 'Finding and applying to AI projects',
   art: {
     src: '/work/bento/card-invisible-apply.png',
     alt: 'Meridial — Explore split view in a browser, on a light-blue field',
