@@ -6,6 +6,7 @@ import { VARIANTS } from '../design-system/buttonStyles'
 import { FEATURED, WORK_FILTERS, type WorkCard, type WorkFilter } from '../data/workCards'
 import { color, control, radius, space, type } from '../design-system/tokens'
 import { useIsMobile, useIsWide } from '../hooks/useIsMobile'
+import { useMediaQuery } from '../hooks/useMediaQuery'
 
 /**
  * The home page's Work tab (Figma frame `320:30968`): a two-column grid of
@@ -31,6 +32,13 @@ const CARD_CREAM = '#e6dfd2'
  */
 const FEATURED_BG = color.bg.cream
 
+/**
+ * A real pointer that can hover. Only there do the grid cards hide their
+ * caption until hover; touch keeps it under the art, since nothing would ever
+ * reveal it.
+ */
+const HOVER_QUERY = '(hover: hover) and (pointer: fine)'
+
 const CASE_STUDY_CARDS = new Set(
   WORK_FILTERS.find((f) => f.id === 'career')?.cards ?? [],
 )
@@ -44,6 +52,9 @@ export default function WorkList({
 }) {
   const isMobile = useIsMobile()
   const isWide = useIsWide()
+  const canHover = useMediaQuery(HOVER_QUERY)
+  // Desktop with a mouse shows the grid as bare art, caption on hover.
+  const peek = canHover && !isMobile
   const active = WORK_FILTERS.find((f) => f.id === filter) ?? WORK_FILTERS[0]
   const pillsRef = useRef<HTMLDivElement>(null)
 
@@ -66,14 +77,16 @@ export default function WorkList({
         gridTemplateColumns: isMobile
           ? '1fr'
           : `repeat(${isWide ? 3 : 2}, minmax(0, 1fr))`,
-        // The file's 32 between columns and 56 between rows.
+        // The file's 32 between columns and 56 between rows — or 32 both
+        // ways when the captions only show on hover, so the bare art sits
+        // on an even grid.
         columnGap: '32px',
-        rowGap: isMobile ? space['3xl'] : '56px',
+        rowGap: isMobile ? space['3xl'] : peek ? '32px' : '56px',
       }}
     >
-      {rest.map((card) => (
-        <WorkCardCell key={card.href} card={card} />
-      ))}
+      {rest.map((card) =>
+        peek ? <PeekCardCell key={card.href} card={card} /> : <WorkCardCell key={card.href} card={card} />,
+      )}
     </div>
   )
 
@@ -153,6 +166,77 @@ export default function WorkList({
       {pills}
       {grid}
     </div>
+  )
+}
+
+/**
+ * A grid cell on a hover-capable screen: just the art, with the caption
+ * panel rising over its foot on hover or keyboard focus (`.work-peek-*` in
+ * `index.css`). The whole cell lifts rather than the art alone, so the panel
+ * rides with it. The panel lets clicks through to the art's link underneath —
+ * only its pills take the pointer, and only while it shows, so a hidden pill
+ * can't be clicked blind.
+ */
+function PeekCardCell({ card }: { card: WorkCard }) {
+  return (
+    <article
+      className="work-peek-card"
+      style={{ position: 'relative', minWidth: 0, borderRadius: radius.md, overflow: 'hidden' }}
+    >
+      <CardArt card={card} still />
+
+      <div
+        className="work-peek-caption"
+        style={{
+          position: 'absolute',
+          left: space.sm,
+          right: space.sm,
+          bottom: space.sm,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: space.md,
+          padding: space.md,
+          // The art's 8 less the 8 inset would square it off; 6 keeps a curve.
+          borderRadius: radius.sm,
+          background: `color-mix(in srgb, ${color.bg.primary} 80%, transparent)`,
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          pointerEvents: 'none',
+        }}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+          <h2
+            style={{
+              margin: 0,
+              fontSize: '16px',
+              fontWeight: 500,
+              lineHeight: 1.4,
+              letterSpacing: 0,
+              color: color.text.primary,
+            }}
+          >
+            {card.title}
+          </h2>
+          <p
+            style={{
+              margin: 0,
+              fontSize: '14px',
+              fontWeight: 400,
+              lineHeight: 1.4,
+              letterSpacing: 0,
+              // Secondary rather than the grid's muted: it sits on a scrim now.
+              color: color.text.secondary,
+            }}
+          >
+            {card.subtitle}
+          </p>
+        </div>
+
+        <div className="work-peek-actions">
+          <CardActions card={card} />
+        </div>
+      </div>
+    </article>
   )
 }
 

@@ -362,7 +362,45 @@ html, body {
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
   }
 }
+/* The grid's bare-art cells (`PeekCardCell`, mouse only): the cell lifts and
+   its caption panel rises over the art's foot on hover or keyboard focus. The
+   pills only take the pointer while the panel shows. */
+.work-peek-card {
+  transition: transform 220ms ease, box-shadow 220ms ease;
+}
+.work-peek-caption {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 180ms ease, transform 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.work-peek-actions {
+  pointer-events: none;
+}
+.work-peek-card:hover,
+.work-peek-card:focus-within {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+}
+.work-peek-card:hover .work-peek-caption,
+.work-peek-card:focus-within .work-peek-caption {
+  opacity: 1;
+  transform: none;
+}
+.work-peek-card:hover .work-peek-actions,
+.work-peek-card:focus-within .work-peek-actions {
+  pointer-events: auto;
+}
 @media (prefers-reduced-motion: reduce) {
+  .work-peek-card,
+  .work-peek-caption {
+    transition: opacity 180ms ease;
+  }
+  .work-peek-card:hover,
+  .work-peek-card:focus-within,
+  .work-peek-card:hover .work-peek-caption,
+  .work-peek-card:focus-within .work-peek-caption {
+    transform: none;
+  }
   .work-featured-card {
     transition: none;
   }
