@@ -105,14 +105,38 @@ type Entry = {
   bullets?: Bullet[]
 }
 
-const nowParagraphs = [
-  "I have been spending a lot of time in different AI coding and design tools, trying to suss out what works for me when it comes to building. This is the most fun I've had as a designer/builder in my whole life. As a kid, Legos were my go-to toy and pastime because I loved making my own things. 80% of the time I wasn't building from an instruction set — I was making my own creations. That's why I was drawn to Product Design later in life, and now building my own things and trying crazy ideas is suddenly possible.",
-  'The rise of AI slop has made designers even more important. Despite all the new tools, I still return to Figma to nail down precise design details. I move back and forth between Figma and Claude or Cursor while building. I’ve also been experimenting with design systems and Storybook and using AI to automate tedious work.',
+type DesignNote = {
+  title: string
+  paragraphs: string[]
+}
+
+const designNotes: DesignNote[] = [
+  {
+    title: 'Designing with AI',
+    paragraphs: [
+      'AI tools have become a core part of my design process. I use Claude Code, Cursor, Codex everyday when building and designing. Jumping between Figma and these AI coding tools allows me to iterate much faster. In the past, as a Designer you needed to make assumptions when designing in Figma. You couldn’t actually see or feel the designs in the environment that your users would experience them in.',
+      'Figma continues to be a staple for me as it is so useful across the different phases. Using low-fi design to test interactions to high fidelity mockups that an agent can implement. Beautiful design requires Figma (and a human) most of the time.',
+    ],
+  },
+  {
+    title: 'Orchestrating agents',
+    paragraphs: [
+      'Cursor is what really unlocked this idea for me. I was using composer 2 a lot for making UI changes because it was super fast and pretty good at following my Figma designs. I just started making multiple thread with different changes. There was some learning curve to this when agents would collide with each other and confuse eachother (this is kinda solved now with how smart these things are now.)',
+      'I’ve now extended this to being able to work on multiple projects and features at a time. The challenge is not doing too much, where basically anything is possible you don’t want to jump around too much and have 50 things started and 0 finished. I also don’t have unlimited tokens :(',
+    ],
+  },
+  {
+    title: 'Design engineering',
+    paragraphs: [
+      'I have had to do quite a bit of learning when it comes to git, PRs, and code reviews to try and have confidence in the code LLMs write, when I don’t have the expertise to surmise that on my own.',
+      'I looked to the labs and people who were building these models and harnesses to setup some automated PR reviews, adversarial code reviews etc.',
+    ],
+  },
 ]
 
 const entries: Entry[] = [
   {
-    role: 'Senior Product Designer @',
+    role: 'Product Designer @',
     detail: 'Invisible Technologies / Aug 2022 - July 2026',
     paragraphs: [
       'I joined Invisible as an Associate Product Designer, working across a range of surfaces and products with very different users. I grew into owning design for one of our core platforms, contributing to our design ops, driving adoption of new AI tools and workflows and serving as the connective tissue for 5+ teams.',
@@ -177,14 +201,6 @@ export function SectionHeading({ title }: { title: string }) {
   )
 }
 
-const heading: React.CSSProperties = {
-  margin: 0,
-  fontSize: '20px',
-  fontWeight: 600,
-  lineHeight: 1.3,
-  letterSpacing: 0,
-}
-
 // The role title pair matches the Hero's "Product Designer &" subtitle style.
 const roleTitle: React.CSSProperties = {
   margin: 0,
@@ -210,24 +226,36 @@ const body: React.CSSProperties = {
  * column supplying the width and padding they carried themselves before.
  */
 
-/** The "How I design" tab — drawn from the July 2026 file (node `265:33458`). */
+/**
+ * The "How I design" tab — plain article rhythm: a small heading over its
+ * paragraphs, then the next section. Same 700px measure and heading style as
+ * the Where I've been entries, so the two tabs read as one voice.
+ */
 export function DesigningNow() {
+  const isMobile = useIsMobile()
+
   return (
     <section
       style={{
         display: 'flex',
         flexDirection: 'column',
+        gap: isMobile ? space['2xl'] : space['3xl'],
         maxWidth: '700px',
+        width: '100%',
       }}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        <p style={{ ...heading, color: MUTED }}>Vibe coding, design engineering, agent orchestrating?</p>
-        {nowParagraphs.map((paragraph) => (
-          <p key={paragraph.slice(0, 40)} style={body}>
-            {paragraph}
-          </p>
-        ))}
-      </div>
+      {designNotes.map((note) => (
+        <article key={note.title} style={{ display: 'flex', flexDirection: 'column', gap: space.md }}>
+          <h2 style={{ ...roleTitle, color: TEXT }}>{note.title}</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: space.lg }}>
+            {note.paragraphs.map((paragraph) => (
+              <p key={paragraph.slice(0, 40)} style={body}>
+                {paragraph}
+              </p>
+            ))}
+          </div>
+        </article>
+      ))}
     </section>
   )
 }
