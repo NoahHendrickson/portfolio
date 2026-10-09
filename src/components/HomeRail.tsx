@@ -310,7 +310,7 @@ function FloorToast({ top, left }: { top: number; left: number }) {
         <span style={{ color: PILL, display: 'flex' }}>
           <PixelGlyph dots={FACE_DOTS.eyeroll} width={16} height={16} />
         </span>
-        Seriously.. you got this thing to the bottom of the page??
+        Ay, you got the menu to the bottom
       </div>
     </div>
   )
