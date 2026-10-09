@@ -3,6 +3,8 @@ import '@noey-17/yearn-ui/style.css'
 import { ProfileRow } from './components/Header'
 import Hero from './components/Hero'
 import HomeRail from './components/HomeRail'
+import IntroSplash from './components/IntroSplash'
+import { introConfigFromUrl, markIntroSeen, shouldPlayIntro } from './intro'
 import { readHomeTab, writeHomeTab, type HomeTab } from './homeTab'
 import { readWorkFilter, writeWorkFilter, type WorkFilter } from './data/workCards'
 import WorkList from './components/WorkList'
@@ -150,6 +152,30 @@ export default function App() {
   // The Work section, held here because the rail's Work menu and the grid both
   // read it; sessionStorage like the tab, so it survives refresh.
   const [filter, setFilter] = useState<WorkFilter>(readWorkFilter)
+  // The logo intro plays once, on a first visit that lands on home — a cold
+  // link to a project page goes straight to it, and a legacy `/work` redirect
+  // is someone coming Back. Reduced motion skips it outright.
+  const [intro, setIntro] = useState(() => route === '/' && !stillOnly && shouldPlayIntro())
+
+  // Marked in an effect rather than the initializer, which StrictMode runs
+  // twice — the second run would read its own mark and skip the intro.
+  useEffect(() => {
+    if (intro) markIntroSeen()
+  }, [intro])
+
+  const [introConfig] = useState(introConfigFromUrl)
+
+  // Dev only: Shift+I replays the intro over the page as it stands, so a
+  // variant can be watched again without a reload. While it is playing the
+  // same press is just a key, which skips it.
+  useEffect(() => {
+    if (!import.meta.env.DEV) return
+    const onKey = (event: KeyboardEvent) => {
+      if (event.shiftKey && event.code === 'KeyI') setIntro(true)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
   // Landing on a legacy work route mid-session (a project page's Back pill)
   // flips the tab during render, so the redirected-to home never paints the
@@ -393,6 +419,10 @@ export default function App() {
           {panel}
         </main>
       </div>
+
+      {intro && (
+        <IntroSplash isMobile={isMobile} config={introConfig} onDone={() => setIntro(false)} />
+      )}
     </div>
   )
 }

@@ -97,6 +97,130 @@ html, body {
   animation: tab-content-in 300ms cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
+/* First-visit logo intro (`IntroSplash`). Each square pops in on its own
+   delay; the cursor's blink runs with no fill, so it is hidden outside the
+   window its iteration count gives it. */
+@keyframes intro-square-in {
+  from {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.intro-square {
+  animation: intro-square-in 140ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+/* The `spin` draw: a whole leaf turns in from `--spin-from` and grows from
+   `--spin-scale`, both set inline per variant. The overshooting curve carries
+   it a few degrees past rest and back, so it lands rather than stops; opacity
+   is in by 30% so the leaf is solid for most of the turn. */
+@keyframes intro-leaf-in {
+  from {
+    opacity: 0;
+    transform: rotate(var(--spin-from)) scale(var(--spin-scale));
+  }
+  30% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.intro-leaf-spin {
+  animation: intro-leaf-in 900ms cubic-bezier(0.3, 1.25, 0.5, 1) both;
+}
+
+/* The `fan` draw. The front leaf fades in on its own; the other three start
+   stacked exactly behind it and turn out from there (see `buildIntro`). Depth
+   never changes — the leaves keep the file's paint order throughout. */
+@keyframes intro-leaf-appear {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.intro-leaf-anchor {
+  animation: intro-leaf-appear 200ms ease-out both;
+}
+
+/* Each swept leaf turns out from under the anchor at full size. It is hidden
+   until its own start (no backwards fill) and holds its resting place after. A
+   touch of overshoot so each one lands in its slot rather than stopping. */
+@keyframes intro-leaf-sweep {
+  from {
+    opacity: 1;
+    transform: rotate(var(--spin-from));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.intro-leaf-sweep {
+  opacity: 0;
+  animation: intro-leaf-sweep 1100ms cubic-bezier(0.25, 1.1, 0.4, 1) forwards;
+}
+
+/* The `reveal` label: the mark slides from the sheet's centre into the lockup
+   while the label slides out from behind it, inside a window whose left edge
+   rides the mark's right edge. Distances, timing and curve are inline, shared
+   by all three so they stay in step (see `IntroSplash`). */
+@keyframes intro-slide {
+  from {
+    transform: translateX(var(--slide-from));
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes intro-window {
+  from {
+    clip-path: inset(0 0 0 var(--slide-from));
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+.intro-slide {
+  animation-name: intro-slide;
+  animation-fill-mode: both;
+}
+
+.intro-window {
+  animation-name: intro-window;
+  animation-fill-mode: both;
+}
+
+@keyframes intro-blink {
+  0%,
+  49.9% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.intro-cursor {
+  opacity: 0;
+  animation-name: intro-blink;
+  animation-timing-function: linear;
+}
+
 /* The rail's active pill. It is one arm on the spine, not a per-row fade: it
    stretches toward the row it is going to (the leading edge moves first, so
    the blob gets taller) and then the trailing edge catches up. `top` and
