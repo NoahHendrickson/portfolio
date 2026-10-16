@@ -74,6 +74,43 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.showcase-image {
+  transition: transform 220ms ease, box-shadow 220ms ease;
+}
+
+.showcase-image:hover {
+  transform: translateY(-4px);
+}
+
+.showcase-image:focus-visible,
+.showcase-cta:focus-visible {
+  outline: 3px solid var(--color-bg-cream);
+  outline-offset: 6px;
+}
+
+.showcase-cta:hover {
+  opacity: 0.88;
+}
+
+.showcase-lightbox::backdrop {
+  background: rgba(15, 14, 14, 0.88);
+  backdrop-filter: blur(12px);
+}
+
+html:has(.showcase-lightbox[open]) {
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .showcase-image {
+    transition: none;
+  }
+
+  .showcase-image:hover {
+    transform: none;
+  }
+}
+
 /* Matches MOBILE_BREAKPOINT_PX in src/hooks/useIsMobile.ts. */
 @media (max-width: 900px) {
   html, body {
