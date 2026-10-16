@@ -130,6 +130,16 @@ const howToPc: WorkCard = {
   overlay: { src: '/work/how-to-pc/thumbnail.png', width: '76%' },
 }
 
+const pixelArt: WorkCard = {
+  href: '/work/pixel-art',
+  title: projects['pixel-art'].title,
+  subtitle: 'Destiny 2 gear, one pixel at a time',
+  art: {
+    src: '/work/pixel-art/cover.svg',
+    alt: 'A collection of colorful pixel art Destiny 2 inventory icons',
+  },
+}
+
 const armory: WorkCard = {
   href: '/work/armory',
   title: projects.armory.title,
@@ -152,7 +162,7 @@ export type WorkFilter = 'all' | 'fun' | 'career' | 'graphic'
 const SECTIONS: { id: Exclude<WorkFilter, 'all'>; label: string; cards: WorkCard[] }[] = [
   { id: 'career', label: 'Case studies', cards: [onboarding, synapse, apply] },
   { id: 'fun', label: 'Personal projects', cards: [crisp, no3y, statBuilder, armory] },
-  { id: 'graphic', label: 'Graphic design', cards: [nachoBox, howToPc] },
+  { id: 'graphic', label: 'Graphic design', cards: [pixelArt, nachoBox, howToPc] },
 ]
 
 export const WORK_FILTERS: { id: WorkFilter; label: string; cards: WorkCard[] }[] = [

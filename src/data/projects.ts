@@ -183,12 +183,23 @@ export type StoryColumn = {
   captionWidth?: number
 }
 
+export type GalleryArt = {
+  title: string
+  /** Rarity and slot, or for an ornament the exotic it dresses. */
+  category: string
+  src: string
+  alt: string
+  /** `hero` is 3×3 cells, `big` 2×2, otherwise 1×1. The array order is what tiles the grid. */
+  size?: 'hero' | 'big'
+}
+
 /**
  * A row between the hero and the closing card, centered as a group in the
  * content column. All widths and gaps are px at the file's 1272px content
  * width; the row scales proportionally below it.
  */
 export type StorySection =
+  | { kind: 'gallery'; heading: string; items: GalleryArt[] }
   /** Screenshots side by side, captions underneath — The Forge. */
   | { kind: 'columns'; gap: number; columns: StoryColumn[] }
   /** One screenshot beside its caption, vertically centered. */
@@ -433,6 +444,52 @@ export type Project = {
 }
 
 export const projects: Record<string, Project> = {
+  'pixel-art': {
+    slug: 'pixel-art',
+    title: 'Pixel art',
+    eyebrow: ['Illustration', 'Destiny 2'],
+    tagline: 'Destiny 2 gear, one pixel at a time.',
+    summary: 'A collection of my pixel art inspired by Destiny 2. Helmets, robes, boots, and a weapon, rebuilt as tiny inventory icons in Figma.',
+    bento: { eyebrow: 'Pixel art', cover: '/work/pixel-art/cover.svg' },
+    pageReady: true,
+    accent: 'var(--color-orange)',
+    landing: {
+      eyebrow: ['Illustration', 'Destiny 2'],
+      flow: 'continuous',
+      align: 'center',
+      copyWidth: 700,
+      titleRhythm: 'paired',
+      eyebrowPlacement: 'below',
+      gap: 120,
+      hero: {},
+      sections: [{
+        kind: 'gallery',
+        heading: 'The collection',
+        // Original exports from nMVYL4Vm7faLsYVF2vW4KP, section 226:390 — borders and
+        // backgrounds are part of the artwork. Order matters: it is what lets the grid's
+        // auto-placement tile the hero, the two bigs and seven smalls with no holes.
+        items: [
+          { title: 'Psychespeeders', category: 'Transversive Steps ornament', size: 'hero', src: '/work/pixel-art/psyche-speeders.png', alt: 'Psychespeeders in pixel art: white, black, and orange boots with blue details' },
+          { title: 'Kelvin Below', category: 'Rime-coat Raiment ornament', size: 'big', src: '/work/pixel-art/kelvin-below.png', alt: 'Kelvin Below in pixel art: a red and black coat with a bright blue diagonal sash' },
+          { title: 'Verity’s Brow', category: 'Exotic helmet', src: '/work/pixel-art/verity-s-brow.png', alt: 'Verity’s Brow in pixel art: a pink, bone-colored helmet on gold' },
+          { title: 'Cenotaph Mask', category: 'Exotic helmet', src: '/work/pixel-art/cenotaph.png', alt: 'Cenotaph Mask in pixel art: a long, angular helmet in black, brown, and silver' },
+          { title: 'Speaker’s Sight', category: 'Exotic helmet', size: 'big', src: '/work/pixel-art/speaker-s-sight.png', alt: 'Speaker’s Sight in pixel art: a white and red mask against a dark hood' },
+          { title: 'Sanguine Alchemy', category: 'Exotic chest armor', src: '/work/pixel-art/sanguine-alchemy.png', alt: 'Sanguine Alchemy in pixel art: red and silver robes on gold' },
+          { title: 'Mataiodoxía', category: 'Exotic chest armor', src: '/work/pixel-art/mataiodoxia.png', alt: 'Mataiodoxía in pixel art: robes with a teal and white geometric pattern' },
+          { title: 'Moonfang-X7 Robe', category: 'Legendary chest armor', src: '/work/pixel-art/moonfang-robes.png', alt: 'Moonfang-X7 Robe in pixel art: pale blue, white, and purple robes' },
+          { title: 'Mint Retrograde', category: 'Legendary pulse rifle', src: '/work/pixel-art/mint-retrograde.png', alt: 'Mint Retrograde in pixel art: a pulse rifle drawn diagonally in green, orange, and black on purple' },
+          { title: 'Ren 2.0', category: 'St0mp-EE5 ornament', src: '/work/pixel-art/stompees-ornament.png', alt: 'Ren 2.0 in pixel art: dark boots with cyan highlights and orange soles' },
+        ],
+      }],
+    },
+    links: [],
+    stats: [],
+    heroShot: { label: 'Pixel art collection', src: '/work/pixel-art/cover.svg' },
+    sections: [],
+    stack: ['Figma'],
+    status: [],
+    cta: { heading: 'More of my work', label: 'Back to work', href: '/work' },
+  },
   'stat-builder': {
     slug: 'stat-builder',
     title: 'D2 Conflux',
