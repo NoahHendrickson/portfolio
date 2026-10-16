@@ -28,6 +28,7 @@ Routes:
 | `/work` | Redirects to `/` with the Work tab pre-activated (old links and project Back pills point here) |
 | `/work/<slug>` | `ProjectStory` if `projects[slug].landing` is set, otherwise `ProjectLanding` (`src/data/projects.ts`) |
 | `/work/pixel-art` | `ProjectStory` with an `ArtGallery` bento of ten Destiny 2 pixel artworks |
+| `/work/stat-builder` | `D2Conflux` — hand-built in the app's own skin (`D2Conflux.css`: dark slate ground, browser-window mockups and slate "stages" for close-ups, tracked labels), so it skips the shared `MOCKUP_RADIUS`; its buttons are the site's own pills (`PillLink`, `resolvePalette`). The Dream build clip (`Clip`) plays only while on screen and falls back to its poster under reduced motion. Captures in `public/work/stat-builder/conflux/`; `projects['stat-builder'].landing` now only feeds its feedback shots |
 | `/work/invisible` | Redirects like `/work` (the old case-study index is gone) |
 | `/work/invisible/onboarding` | `InvisibleOnboarding` — the Meridial onboarding case study |
 | `/work/invisible/synapse` | `InvisibleSynapse` — the Synapse 0-1 launch case study |
