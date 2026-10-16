@@ -8,6 +8,7 @@ import {
   VideoCamera,
 } from '@phosphor-icons/react'
 import Header from './Header'
+import ArtGallery from './ArtGallery'
 import { resolvePalette, HOVER_OPACITY } from '../design-system/buttonStyles'
 import type { ButtonVariant } from '../design-system/buttonStyles'
 import { color, control, radius, radiusPx, space, type } from '../design-system/tokens'
@@ -417,6 +418,7 @@ function sectionKey(section: StorySection, i: number) {
   switch (section.kind) {
     case 'copy':
     case 'tracks':
+    case 'gallery':
       return `${i}-${section.heading}`
     case 'columns':
       return section.columns[0].shot.src
@@ -444,6 +446,8 @@ function sectionKey(section: StorySection, i: number) {
  */
 function SectionContent({ section }: { section: StorySection }) {
   const isMobile = useIsMobile()
+
+  if (section.kind === 'gallery') return <ArtGallery heading={section.heading} items={section.items} />
 
   if (section.kind === 'tracks') return <TrackLegend section={section} />
 
