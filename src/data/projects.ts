@@ -307,6 +307,9 @@ export type TimelineTrack = {
   body: string
 }
 
+/** A baked showcase image — `aspect` is its width / height as CSS. */
+export type ShowcaseImage = { src: string; alt: string; aspect: string }
+
 /** One chat screenshot in the community-feedback wall. */
 export type FeedbackShot = {
   src: string
@@ -401,10 +404,25 @@ export type Landing = {
    * 1225 of 1272. Defaults to `align`.
    */
   rowAlign?: 'center' | 'start'
+  /**
+   * The wide opener in place of the centred title block — no3y Code. The title
+   * and intro run on the content column's left edge, `shot` fills the column
+   * under them with `heading` + `body` laid over its open left side, then
+   * `grid` runs two images to a row. Below the overlay breakpoint the copy
+   * stacks above the shot; mobile stacks everything.
+   */
+  showcase?: {
+    heading: string
+    body: Prose
+    shot: ShowcaseImage
+    grid: ShowcaseImage[]
+  }
   /** Title block; every page runs it full width of its column. */
   hero: {
     /** Paragraphs under the title. Defaults to `[project.summary]`. */
     body?: string[]
+    /** A short bulleted list after the paragraphs — no3y Code's feature list. */
+    list?: string[]
     /** Outbound pills under the title — GitHub / live site, etc. */
     links?: { label: string; href: string }[]
     /**
@@ -836,15 +854,52 @@ export const projects: Record<string, Project> = {
       copyWidth: 700,
       titleRhythm: 'paired',
       eyebrowPlacement: 'below',
+      // Captures of the desktop app on the Glass theme, baked over the fluted
+      // wallpaper.
+      showcase: {
+        heading: 'All my agents, one screen',
+        body: [
+          'I don’t really have a favorite model. I bounce between Claude and Codex depending on the task, and whenever something new drops I want to try it and see how it stacks up. That usually means a bunch of agents running at once, so I wanted them all in one place.',
+          'So I forked T3 Code and made the UI my own. The sidebar got the most love: every thread shows its branch, PR, model, and status at a glance. Then I added the little things I use every day, like speech-to-text, a usage meter, and a model picker with reasoning built in.',
+        ],
+        shot: {
+          src: '/work/no3y-code/collage/window.png',
+          alt: 'no3y Code on the desktop, slid off the right edge: the thread sidebar with every status beside an agent working on a checkout migration',
+          aspect: '1272 / 820',
+        },
+        grid: [
+          {
+            src: '/work/no3y-code/collage/dictation.png',
+            alt: 'The composer while dictating, with a live level timeline beside cancel and confirm buttons',
+            aspect: '680 / 380',
+          },
+          {
+            src: '/work/no3y-code/collage/model.png',
+            alt: 'The model picker open above the composer, with Claude and Codex and a reasoning level control',
+            aspect: '680 / 380',
+          },
+          {
+            src: '/work/no3y-code/collage/usage.png',
+            alt: 'The usage popover opened from the composer’s meter, showing session and weekly limits for Codex and Claude',
+            aspect: '680 / 380',
+          },
+          {
+            src: '/work/no3y-code/collage/question.png',
+            alt: 'An agent’s question shown in place of the composer, with two options and a field for a custom answer',
+            aspect: '680 / 380',
+          },
+        ],
+      },
       hero: {
         body: [
-          'no3y Code brings together several projects and ideas. I wanted the precision of Figma’s design mode inside an agentic coding tool, along with a better sidebar for managing multiple agents. I forked T3 Code to improve the UX/UI, build a design mode, and add a few features I wanted. I’m not associated with T3 Code; I only work on my fork. :)',
+          'no3y Code is my redesigned fork of an open-source project called T3 Code. I wanted one surface where I could use multiple AI subscriptions that wasn’t a TUI.',
         ],
+        list: ['Glass theme', 'Sidebar and thread card layout', 'Local speech-to-text', 'Design mode'],
         cta: { label: 'GitHub', href: NO3Y_CODE_DOWNLOAD, gradient: true },
         shot: {
-          src: '/work/no3y-code/hero.png',
-          alt: 'no3y Code on the desktop — a new thread asking what we should build',
-          aspect: '1728 / 1089',
+          src: '/work/no3y-code/collage/new-agent.png',
+          alt: 'no3y Code on the desktop — a new agent on the Glass theme, a picture fading out just above the composer',
+          aspect: '1272 / 820',
           frame: 'plain',
         },
         shotWidth: 1272,
@@ -904,6 +959,20 @@ export const projects: Record<string, Project> = {
         {
           kind: 'feature',
           gap: 80,
+          heading: 'Scheduled tasks',
+          body: 'T3 Code already supported automations and scheduled tasks, and I wanted a simple UI to make them: name it, pick the project, write what the agent should do, and choose when it runs and with which model. All on one screen.',
+          copyWidth: 700,
+          stack: true,
+          shot: {
+            src: '/work/no3y-code/collage/scheduled.png',
+            alt: 'Creating a scheduled task: a title, the project, agent instructions with worktree and branch, a weekday schedule, and the model',
+            aspect: '1272 / 620',
+            frame: 'plain',
+          },
+        },
+        {
+          kind: 'feature',
+          gap: 80,
           heading: 'Design mode',
           body: [
             'I’ve long wanted a design mode that works alongside coding agents, regardless of which harness I’m using. The feature is still a work in progress, but I prioritized a functional version so I could test it in my own workflow.',
@@ -918,23 +987,6 @@ export const projects: Record<string, Project> = {
             poster: '/work/no3y-code/design-mode-poster.jpg',
             alt: 'Design mode in no3y Code: the preview opens beside the thread, then an element is selected and a gap change is queued to the agent',
             aspect: '16 / 9',
-          },
-        },
-        {
-          // Frame 287:6508 — BentoCard 1225×351, centred under 700-wide copy.
-          // The export is square-cornered — MOCKUP_RADIUS clips it in CSS.
-          kind: 'feature',
-          gap: 80,
-          heading: 'Message composer',
-          body: 'I prefer a compact message composer, so I broke it into three sections: branch information, the input, and model parameters.',
-          copyWidth: 700,
-          panelWidth: 1225,
-          stack: true,
-          shot: {
-            src: '/work/no3y-code/composer.png',
-            alt: 'The message composer on a gradient card — worktree and branch above the input, mode and model below it',
-            aspect: '1225 / 351',
-            frame: 'plain',
           },
         },
       ],

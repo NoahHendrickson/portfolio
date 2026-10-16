@@ -16,15 +16,17 @@ import { color, control, radius, radiusPx, space, type } from '../design-system/
 import { useIsMobile } from '../hooks/useIsMobile'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import AppLink from '../AppLink'
-import { copyMeasure, copyPad, flushTrailingPad, PAGE_GUTTER, PROJECT_MOBILE_PAD, shellPad } from '../layout'
+import { copyMeasure, copyPad, flushTrailingPad, PAGE_GUTTER, PROJECT_MOBILE_PAD, shellPad, TABLET_MAX } from '../layout'
 import type {
   EyebrowEntry,
   FeedbackShot,
+  Landing,
   LandingShot,
   LandingVideo,
   Paragraph,
   Project,
   Prose,
+  ShowcaseImage,
   StoryColumn,
   StorySection,
   TextRun,
@@ -78,6 +80,11 @@ const COPY_WIDTH = 720
 const MOCKUP_RADIUS = radius.xl
 /** A `framed` shot draws its border outside the clip, so it takes an optical +1. */
 const FRAMED_RADIUS = `${radiusPx.xl + 1}px`
+/** The showcase opener: the intro's measure, and where its copy sits over the shot (px at 1272). */
+const INTRO_WIDTH = 640
+const OVERLAY_COPY = { left: 56, width: 420 }
+/** Copy laid over the shot's wallpaper — part of the image, not a theme surface. */
+const ON_SHOT = '#ffffff'
 /** Gap between the feedback wall's cards, 9.588 in the file. */
 const WALL_GAP = 10
 
@@ -200,21 +207,13 @@ export default function ProjectStory({ project }: { project: Project }) {
     </h1>
   )
 
-  const titleBlock = (
-    <div
-      style={{
-        width: '100%',
-        maxWidth: flush ? `${copyW}px` : copyMeasure(copyW),
-        display: 'flex',
-        flexDirection: 'column',
-        gap: paired ? space.xl : space.lg,
-      }}
-    >
-      {/*
-        A `paired` frame groups the eyebrow with the title so the two sit flush;
-        an `even` one spaces them like everything else in the block. Moonfang
-        Armory is the one frame that seats the eyebrow under the title.
-      */}
+  /*
+    A `paired` frame groups the eyebrow with the title so the two sit flush;
+    an `even` one spaces them like everything else in the block. Moonfang
+    Armory is the one frame that seats the eyebrow under the title.
+  */
+  const titleGroup = (
+    <>
       {paired ? (
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           {landing.eyebrowPlacement === 'below' ? (
@@ -243,9 +242,21 @@ export default function ProjectStory({ project }: { project: Project }) {
           ))}
         </div>
       )}
+    </>
+  )
 
+  const intro = (
+    <>
       <div style={{ display: 'flex', flexDirection: 'column', gap: space.lg }}>
         <Body body={heroBody} />
+        {landing.hero.list && (
+          // Tailwind's preflight strips list markers, so the disc is restated.
+          <ul style={{ ...BODY_STYLE, listStyleType: 'disc', paddingLeft: '20px' }}>
+            {landing.hero.list.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        )}
       </div>
 
       {/* Wrapped so the pill sizes to its label instead of stretching the column. */}
@@ -259,8 +270,27 @@ export default function ProjectStory({ project }: { project: Project }) {
           />
         </div>
       )}
+    </>
+  )
+
+  const titleBlock = (
+    <div
+      style={{
+        width: '100%',
+        maxWidth: flush ? `${copyW}px` : copyMeasure(copyW),
+        display: 'flex',
+        flexDirection: 'column',
+        gap: paired ? space.xl : space.lg,
+      }}
+    >
+      {titleGroup}
+      {intro}
     </div>
   )
+
+  // A showcase page opens on the collage's full width, so the header pills
+  // line up with its edges rather than with the centred copy column.
+  const wide = !isMobile && !!landing.showcase
 
   return (
     <div
@@ -276,8 +306,8 @@ export default function ProjectStory({ project }: { project: Project }) {
       <Header
         leading="back"
         showProfile={false}
-        barInset={isMobile || flush ? gutter : copyPad(copyW)}
-        trailingInset={headerTrailing}
+        barInset={isMobile || flush || wide ? gutter : copyPad(copyW)}
+        trailingInset={wide ? gutter : headerTrailing}
       />
 
       {/*
@@ -297,7 +327,11 @@ export default function ProjectStory({ project }: { project: Project }) {
           gap: continuous ? continuousGap : isMobile ? space['2xl'] : space['5xl'],
         }}
       >
-        {titleBlock}
+        {landing.showcase ? (
+          <Showcase showcase={landing.showcase} title={titleGroup} intro={intro} />
+        ) : (
+          titleBlock
+        )}
 
         {landing.hero.shot && (
           <ShotFrame
@@ -411,6 +445,113 @@ export default function ProjectStory({ project }: { project: Project }) {
           </div>
         </section>
       )}
+    </div>
+  )
+}
+
+/**
+ * The page opener, in place of the centred title block: the title and intro on
+ * the column's left edge, then the shot with the showcase copy laid over its
+ * open left side, then the grid of feature images two to a row. Where the shot
+ * is too short to hold the copy, the copy stacks above it instead.
+ */
+function Showcase({
+  showcase,
+  title,
+  intro,
+}: {
+  showcase: NonNullable<Landing['showcase']>
+  /** The page's eyebrow + title group. */
+  title: React.ReactNode
+  /** The hero copy and call to action under the title. */
+  intro: React.ReactNode
+}) {
+  const isMobile = useIsMobile()
+  // The copy is fixed-size type over an image that scales with the viewport,
+  // so it only fits over the shot once the column is near its full width.
+  const overlay = useMediaQuery(`(min-width: ${TABLET_MAX}px)`)
+  const column: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: space.xl }
+  const image = (shot: ShowcaseImage) => (
+    <img
+      src={shot.src}
+      alt={shot.alt}
+      style={{
+        display: 'block',
+        width: '100%',
+        height: 'auto',
+        aspectRatio: shot.aspect,
+        borderRadius: MOCKUP_RADIUS,
+      }}
+    />
+  )
+  // Over the shot the copy sits on the wallpaper's purple whatever the theme,
+  // so it is white there rather than the theme's ink.
+  const copy = (onShot: boolean) => (
+    <div style={column}>
+      <h2 style={onShot ? { ...ROW_HEADING, color: ON_SHOT } : ROW_HEADING}>{showcase.heading}</h2>
+      {onShot ? (
+        toParagraphs(showcase.body).map((paragraph, i) => (
+          <p key={i} style={{ ...BODY_STYLE, fontWeight: 500, color: ON_SHOT }}>
+            {typeof paragraph === 'string' ? paragraph : <Runs runs={paragraph} />}
+          </p>
+        ))
+      ) : (
+        <Body body={showcase.body} />
+      )}
+    </div>
+  )
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: isMobile ? space['2xl'] : '80px',
+        width: heroWidth(CONTENT_WIDTH),
+      }}
+    >
+      <div style={{ ...column, gap: isMobile ? space['2xl'] : '40px' }}>
+        <div style={column}>{title}</div>
+        <div style={{ ...column, maxWidth: `${INTRO_WIDTH}px` }}>{intro}</div>
+      </div>
+
+      {overlay ? (
+        <div style={{ position: 'relative' }}>
+          {image(showcase.shot)}
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              bottom: 0,
+              left: pct(OVERLAY_COPY.left, CONTENT_WIDTH),
+              width: pct(OVERLAY_COPY.width, CONTENT_WIDTH),
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
+            {copy(true)}
+          </div>
+        </div>
+      ) : (
+        <>
+          <div style={{ maxWidth: `${INTRO_WIDTH}px` }}>{copy(false)}</div>
+          {image(showcase.shot)}
+        </>
+      )}
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+          gap: space.lg,
+          // Hero and grid share one 16px rhythm, so the five images read as one set.
+          marginTop: isMobile ? 0 : `calc(${space.lg} - 80px)`,
+        }}
+      >
+        {showcase.grid.map((shot) => (
+          <Fragment key={shot.src}>{image(shot)}</Fragment>
+        ))}
+      </div>
     </div>
   )
 }
