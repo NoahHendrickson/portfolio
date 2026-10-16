@@ -18,6 +18,7 @@ import {
 } from './components/LeafPattern'
 import { DesigningNow, LlmQuotes, PreviousRoles } from './components/Experience'
 import ContactPanel from './components/ContactPanel'
+import D2Conflux from './components/D2Conflux'
 import InvisibleApply from './components/InvisibleApply'
 import InvisibleOnboarding from './components/InvisibleOnboarding'
 import InvisibleSynapse from './components/InvisibleSynapse'
@@ -224,6 +225,11 @@ export default function App() {
 
   if (route === '/work/invisible/apply') {
     return <InvisibleApply />
+  }
+
+  // D2 Conflux wears the app's own skin rather than the story layout.
+  if (route === '/work/stat-builder') {
+    return <D2Conflux />
   }
 
   // Routes are pathnames like '/work/no3y-code'.
