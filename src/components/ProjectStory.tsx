@@ -9,6 +9,7 @@ import {
 } from '@phosphor-icons/react'
 import Header from './Header'
 import ArtGallery from './ArtGallery'
+import ProjectShowcase from './ProjectShowcase'
 import { resolvePalette, HOVER_OPACITY } from '../design-system/buttonStyles'
 import type { ButtonVariant } from '../design-system/buttonStyles'
 import { color, control, radius, radiusPx, space, type } from '../design-system/tokens'
@@ -149,6 +150,7 @@ export default function ProjectStory({ project }: { project: Project }) {
   const isMobile = useIsMobile()
   const landing = project.landing
   if (!landing) return null
+  if (landing.showcasePage) return <ProjectShowcase project={project} content={landing.showcasePage} />
 
   const gutter = isMobile ? PROJECT_MOBILE_PAD : shellPad()
   const copyW = landing.copyWidth ?? COPY_WIDTH
