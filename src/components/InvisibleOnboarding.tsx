@@ -99,9 +99,7 @@ const CHART_MAX = 760
 const PROTOTYPE_MAX = 960
 
 /** The study's sections, in order. */
-const STEPS = ['problem', 'process', 'design', 'outcomes', 'next'] as const
-
-type StepId = (typeof STEPS)[number]
+type StepId = 'problem' | 'process' | 'design' | 'outcomes' | 'next'
 
 const bodyStyle: CSSProperties = {
   margin: 0,
