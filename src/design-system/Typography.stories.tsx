@@ -10,6 +10,7 @@ const SAMPLES: Record<TypeName, string> = {
   'display-l': 'Design & build',
   'heading-l': 'Things I have shipped',
   'heading-m': 'Things I have shipped',
+  'body-xl': 'Our legacy platform was not designed for AI training tasks, so it was too rigid to support the range of client use cases we needed.',
   'body-l':
     'A product designer who writes the code. I care about the seams — the places where a design meets its implementation and usually loses something.',
   'body-m': 'A product designer who writes the code. I care about the seams.',
@@ -23,7 +24,7 @@ const SAMPLES: Record<TypeName, string> = {
 
 const ORDER: TypeName[] = [
   'display-xl', 'display-l', 'heading-l', 'heading-m',
-  'body-l', 'body-m', 'body-s',
+  'body-xl', 'body-l', 'body-m', 'body-s',
   'label-l', 'label-m', 'label-s',
   'eyebrow', 'caption',
 ]

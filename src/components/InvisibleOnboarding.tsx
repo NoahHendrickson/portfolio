@@ -1,18 +1,26 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { ChartLineUp, DeviceMobile, Lightning, type Icon } from '@phosphor-icons/react'
 import Header from './Header'
+import ProjectIntro, { SectionCopy, WideMedia } from './ProjectIntro'
 import WorkGate from './WorkGate'
-import { radius, space } from '../design-system/tokens'
+import { radius, space, type } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
-import { PROJECT_MOBILE_PAD } from '../layout'
+import {
+  PROJECT_COPY_MAX,
+  PROJECT_MAX,
+  PROJECT_MOBILE_PAD,
+  PROJECT_SECTION_GAP,
+  PROJECT_STACK_GAP,
+  PROJECT_WIDE_MAX,
+} from '../layout'
 import { isUnlocked } from '../workGate'
 
 /*
-  This study takes its colour from the product it describes rather than from
-  the dark shell — a white page, Meridial's pale-blue panel, soft greys and its
-  magenta — so the screenshots sit in their own light instead of being cut into
-  a different site. It borrows the palette, not the product's UI: the chrome,
-  type and layout are still the portfolio's.
+  The page sits on the site's dark shell like every other study, but what it
+  shows takes its colour from the product it describes — Meridial's pale-blue
+  panel, white cards, soft greys and its magenta — so the screenshots stand on
+  their own light rather than being cut into a different one. It borrows the
+  palette, not the product's UI: the chrome, type and layout are the portfolio's.
 
   The palette was read straight off the prototype captures (`prototype-*.png`),
   so like `ProjectStory`'s screenshot chrome it stays as hexes here rather than
@@ -22,7 +30,6 @@ const MERIDIAL = {
   canvas: '#ffffff',
   /** The product's left-hand info panel. */
   panel: '#dff2fe',
-  pill: '#f1f1f1',
   surface: '#f7f7f7',
   border: '#ececec',
   ink: '#141414',
@@ -39,40 +46,32 @@ const MERIDIAL = {
 const PLATE = `linear-gradient(135deg, ${MERIDIAL.panel} 0%, #eef2fd 50%, ${MERIDIAL.accentWash} 100%)`
 
 /**
- * The site's theme vars, re-pointed for this page. Everything that reads a
- * token — `Header`'s Back pill, `ContactMenu`'s button and dropdown, the
- * copied toast — picks up the palette without the shared components knowing.
+ * The site's accent, re-pointed to the product's magenta. The page keeps the
+ * shell's dark surfaces and text; only what reads the accent — `ContactMenu`'s
+ * button, the intro's links — picks up Meridial's colour.
  */
 const THEME = {
-  '--color-bg-primary': MERIDIAL.canvas,
-  '--color-bg-raised': MERIDIAL.canvas,
-  '--color-bg-inverse': MERIDIAL.ink,
-  '--color-text-primary': MERIDIAL.ink,
-  '--color-text-secondary': MERIDIAL.body,
-  '--color-text-muted': MERIDIAL.muted,
-  '--color-border-subtle': MERIDIAL.pill,
-  '--color-border-default': MERIDIAL.border,
   '--color-orange': MERIDIAL.accent,
   '--color-orange-hover': MERIDIAL.accentHover,
   '--color-on-accent': '#ffffff',
 } as CSSProperties
 
 /**
- * One capped column for the whole page — copy, charts and screenshots share
+ * One capped column for the whole page (the shared project frame, `layout.ts`) — copy, charts and screenshots share
  * its edges, so nothing runs out to the viewport on a big screen while the text
  * stays on a narrow measure.
  */
-const PAGE_MAX = 1160
+const PAGE_MAX = PROJECT_MAX
 /**
- * The measure for every block of copy. Each section stacks its number, heading
- * and copy flush left on this measure; anything visual spans the whole of
- * `PAGE_MAX` — a visual that would blow up at that width (the charts, the
+ * The measure for every block of copy. Each section stacks its heading and copy
+ * flush left on this measure; anything visual runs wider, on `WideMedia` (out
+ * to the hero's 1320) — a visual that would blow up at that width (the charts, the
  * research board) is centred on a full-width `Plate` instead, so every
  * visual block shares the same edges.
  */
-const COPY_MAX = 720
+const COPY_MAX = PROJECT_COPY_MAX
 /** The opening showcase runs wider than the column, up to this. */
-const SHOWCASE_MAX = 1320
+const SHOWCASE_MAX = PROJECT_WIDE_MAX
 const SHOWCASE_WIDTH = `min(${SHOWCASE_MAX}px, calc(100vw - 96px))`
 
 const MOCKUP_RADIUS = radius.xl
@@ -99,49 +98,33 @@ const RESEARCH_MAX = 871
 const CHART_MAX = 760
 const PROTOTYPE_MAX = 960
 
-/** The study's sections, in order — each one's number is its place here. */
+/** The study's sections, in order. */
 const STEPS = ['problem', 'process', 'design', 'outcomes', 'next'] as const
 
 type StepId = (typeof STEPS)[number]
 
 const bodyStyle: CSSProperties = {
   margin: 0,
-  fontSize: '18px',
-  fontWeight: 400,
-  lineHeight: 1.6,
-  color: MERIDIAL.body,
+  ...type['body-xl'],
+  color: 'var(--color-text-secondary)',
 }
 
 export default function InvisibleOnboarding() {
   const isMobile = useIsMobile()
   const [unlocked, setUnlocked] = useState(isUnlocked)
 
-  /*
-    The shell paints the body dark; on an overscroll bounce that would show
-    above and below a white page, so the body takes the canvas while it's up.
-  */
-  useEffect(() => {
-    if (!unlocked) return
-    const previous = document.body.style.backgroundColor
-    document.body.style.backgroundColor = MERIDIAL.canvas
-    return () => {
-      document.body.style.backgroundColor = previous
-    }
-  }, [unlocked])
-
-  if (!unlocked) return <WorkGate onUnlock={() => setUnlocked(true)} />
-
   const pad = isMobile ? PROJECT_MOBILE_PAD : '48px'
   /** Back and Contact sit on the column's edges rather than the viewport's. */
   const inset = isMobile ? pad : `max(${pad}, calc((100vw - ${PAGE_MAX}px) / 2))`
+
+  if (!unlocked) return <WorkGate onUnlock={() => setUnlocked(true)} barInset={inset} />
 
   return (
     <div
       style={{
         ...THEME,
         minHeight: '100vh',
-        background: MERIDIAL.canvas,
-        color: MERIDIAL.ink,
+        color: 'var(--color-text-primary)',
       }}
     >
       <Header leading="back" showProfile={false} barInset={inset} />
@@ -153,7 +136,7 @@ export default function InvisibleOnboarding() {
             margin: '0 auto',
             display: 'flex',
             flexDirection: 'column',
-            gap: isMobile ? '96px' : '160px',
+            gap: `${isMobile ? PROJECT_SECTION_GAP.mobile : PROJECT_SECTION_GAP.desktop}px`,
           }}
         >
           <Hero />
@@ -162,16 +145,18 @@ export default function InvisibleOnboarding() {
             id="problem"
             title="The problem"
             body={
-              <p style={{ ...bodyStyle, color: MERIDIAL.ink }}>
+              <p style={{ ...bodyStyle, color: 'var(--color-text-primary)' }}>
                 Meridial’s onboarding conversion rate was severely underperforming. Its many
                 high-friction steps caused significant drop-off. This strained operations as teams
                 tried to staff projects on time and deliver results to clients.
               </p>
             }
           >
-            <Plate maxWidth={CHART_MAX}>
-              <FunnelCard />
-            </Plate>
+            <WideMedia>
+              <Plate maxWidth={CHART_MAX}>
+                <FunnelCard />
+              </Plate>
+            </WideMedia>
           </Section>
 
           <Section
@@ -247,7 +232,9 @@ export default function InvisibleOnboarding() {
               </Paragraphs>
             }
           >
-            <PrototypeViewer />
+            <WideMedia>
+              <PrototypeViewer />
+            </WideMedia>
           </Section>
 
           <Section
@@ -268,9 +255,11 @@ export default function InvisibleOnboarding() {
             }
           >
             <Results />
-            <Plate maxWidth={CHART_MAX}>
-              <ExperimentCard />
-            </Plate>
+            <WideMedia>
+              <Plate maxWidth={CHART_MAX}>
+                <ExperimentCard />
+              </Plate>
+            </WideMedia>
           </Section>
 
           <Section
@@ -316,86 +305,32 @@ function Hero() {
   ]
 
   return (
-    <section
-      style={{
-        paddingTop: isMobile ? '48px' : '64px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: isMobile ? '24px' : '32px',
-      }}
-    >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '20px' : '28px' }}>
-        <span
-          style={{
-            alignSelf: 'flex-start',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: space.sm,
-            height: '30px',
-            padding: '0 12px',
-            borderRadius: radius.full,
-            background: MERIDIAL.pill,
-            fontSize: '13px',
-            fontWeight: 500,
-            color: MERIDIAL.ink,
-          }}
-        >
-          <span
-            aria-hidden
-            style={{ width: '6px', height: '6px', borderRadius: '50%', background: MERIDIAL.accent }}
-          />
-          Meridial by Invisible
-        </span>
-
-        <h1
-          style={{
-            margin: 0,
-            maxWidth: '12em',
-            fontSize: isMobile ? '40px' : 'clamp(48px, 5vw, 64px)',
-            fontWeight: 500,
-            lineHeight: 1.05,
-            letterSpacing: '-0.025em',
-            textWrap: 'balance',
-          }}
-        >
-          Revitalizing Meridial’s onboarding flow
-        </h1>
-      </div>
-
-      {/* Stacked flush left like every section below: the overview, then the facts. */}
-      <div
-        style={{
-          maxWidth: `${COPY_MAX}px`,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: isMobile ? '24px' : '32px',
-        }}
+    <section style={{ display: 'flex', flexDirection: 'column' }}>
+      <ProjectIntro
+        title="Revitalizing Meridial’s onboarding flow"
+        helper="Invisible Technologies"
+        description="Meridial is Invisible’s talent marketplace for AI training projects. It’s where users sign up and onboard and actually complete tasks. I led the research and redesign of this platform to improve our onboarding metrics as they were straining business and operational needs."
       >
-        <p style={{ ...bodyStyle, fontSize: isMobile ? '18px' : '20px', color: MERIDIAL.ink }}>
-          Meridial is where Invisible onboards the people behind its AI training work, and its
-          fragmented onboarding was losing most of them before they finished. I led the research
-          and design that turned a scatter of optional setup steps into one guided flow, and
-          doubled conversion.
-        </p>
         <dl
           style={{
             margin: 0,
             display: 'flex',
-            flexDirection: isMobile ? 'column' : 'row',
             flexWrap: 'wrap',
-            gap: isMobile ? '14px' : '14px 48px',
+            // A wrapping row on mobile too, so the list costs two lines rather
+            // than three and the hero still shows on landing.
+            gap: isMobile ? '14px 32px' : '14px 48px',
             fontSize: '14px',
             lineHeight: 1.4,
           }}
         >
           {meta.map(({ label, value }) => (
             <div key={label} style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-              <dt style={{ color: MERIDIAL.muted }}>{label}</dt>
-              <dd style={{ margin: 0, color: MERIDIAL.ink }}>{value}</dd>
+              <dt style={{ color: 'var(--color-text-muted)' }}>{label}</dt>
+              <dd style={{ margin: 0, color: 'var(--color-text-primary)' }}>{value}</dd>
             </div>
           ))}
         </dl>
-      </div>
+      </ProjectIntro>
 
       {/*
         The showcase breaks out of the text column: up to `SHOWCASE_MAX`,
@@ -403,7 +338,7 @@ function Hero() {
       */}
       <div
         style={{
-          marginTop: isMobile ? '16px' : '24px',
+          marginTop: isMobile ? space['3xl'] : space['5xl'],
           ...(isMobile
             ? {}
             : {
@@ -552,7 +487,7 @@ const SHOWCASE_ALT = {
  * The screenshot windows' lift: a tight contact shadow, a soft ambient one that
  * shows on every edge, and a deeper drop below, all tinted toward the plate's
  * blue rather than grey so they read as light on the plate, not dirt on it.
- * The hairline ring keeps a white window's edge off a white canvas.
+ * The hairline ring keeps a white window's edge off the pale plate.
  */
 const WINDOW_SHADOW = [
   '0 1px 3px rgba(20, 40, 60, 0.08)',
@@ -647,7 +582,7 @@ function Callout({
 }
 
 /**
- * One step of the study: its number, heading and copy stacked flush left on
+ * One step of the study: its heading and copy stacked flush left on
  * the copy measure, and whatever follows (`children`) underneath at full width.
  */
 function Section({
@@ -662,7 +597,6 @@ function Section({
   children?: ReactNode
 }) {
   const isMobile = useIsMobile()
-  const index = STEPS.indexOf(id)
 
   return (
     <section
@@ -670,40 +604,10 @@ function Section({
       style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: isMobile ? '40px' : '64px',
+        gap: `${isMobile ? PROJECT_STACK_GAP.mobile : PROJECT_STACK_GAP.desktop}px`,
       }}
     >
-      <div
-        style={{
-          maxWidth: `${COPY_MAX}px`,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '12px',
-        }}
-      >
-        <span
-          style={{
-            fontSize: '14px',
-            fontWeight: 500,
-            fontVariantNumeric: 'tabular-nums',
-            color: MERIDIAL.accent,
-          }}
-        >
-          {String(index + 1).padStart(2, '0')}
-        </span>
-        <h2
-          style={{
-            margin: 0,
-            fontSize: isMobile ? '28px' : '32px',
-            fontWeight: 500,
-            lineHeight: 1.15,
-            letterSpacing: '-0.015em',
-          }}
-        >
-          {title}
-        </h2>
-        <div style={{ marginTop: isMobile ? '8px' : '12px' }}>{body}</div>
-      </div>
+      <SectionCopy heading={title}>{body}</SectionCopy>
       {children}
     </section>
   )
@@ -741,7 +645,7 @@ function Paragraphs({ children }: { children: ReactNode }) {
 
 function Caption({ children }: { children: ReactNode }) {
   return (
-    <figcaption style={{ fontSize: '14px', lineHeight: 1.5, color: MERIDIAL.muted }}>
+    <figcaption style={{ fontSize: '14px', lineHeight: 1.5, color: 'var(--color-text-muted)' }}>
       {children}
     </figcaption>
   )
@@ -777,14 +681,16 @@ function Shot({
     />
   )
   return (
-    <figure style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: '14px' }}>
-      {plateWidth ? <Plate maxWidth={plateWidth}>{image}</Plate> : image}
-      {caption && <Caption>{caption}</Caption>}
-    </figure>
+    <WideMedia>
+      <figure style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        {plateWidth ? <Plate maxWidth={plateWidth}>{image}</Plate> : image}
+        {caption && <Caption>{caption}</Caption>}
+      </figure>
+    </WideMedia>
   )
 }
 
-/** A white card on the product's border — the charts' frame. */
+/** A white card on the product's border — the charts' frame. It sets its own ink, since the page's is light. */
 function Card({ children, style }: { children: ReactNode; style?: CSSProperties }) {
   return (
     <div
@@ -792,6 +698,7 @@ function Card({ children, style }: { children: ReactNode; style?: CSSProperties 
         border: `1px solid ${MERIDIAL.border}`,
         borderRadius: MOCKUP_RADIUS,
         background: MERIDIAL.canvas,
+        color: MERIDIAL.ink,
         ...style,
       }}
     >
@@ -808,22 +715,22 @@ function Findings() {
   const isMobile = useIsMobile()
   const findings = [
     {
-      title: 'Too much profile',
-      body: 'We asked for far more on the profile than our internal teams used. None of it played a major role in our sourcing tools.',
+      title: 'We asked for data no one used',
+      body: 'The profile asked for far more than our internal teams needed, and almost none of it fed into how we sourced people for projects.',
     },
     {
-      title: 'Under-explained verification',
-      body: 'ID and address verification weren’t explained, and some of the copy set a false expectation.',
+      title: 'Verification came out of nowhere',
+      body: 'We asked for ID and proof of address without explaining why, and some of the copy set the wrong expectation.',
     },
     {
-      title: 'A barrier, not a filter',
-      body: 'The initial assessment was the largest barrier and, like the profile details, barely useful to the business.',
+      title: 'The assessment lost the most people',
+      body: 'The initial assessment had the biggest drop-off in the flow, and like the profile details, teams barely used the results.',
     },
   ]
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      <p style={{ margin: 0, fontSize: '16px', color: MERIDIAL.muted }}>Key findings</p>
+      <p style={{ margin: 0, fontSize: '16px', color: 'var(--color-text-muted)' }}>Key findings</p>
       <ol
         style={{
           margin: 0,
@@ -841,6 +748,7 @@ function Findings() {
               padding: '28px',
               borderRadius: radius['2xl'],
               background: MERIDIAL.panel,
+              color: MERIDIAL.ink,
               display: 'flex',
               flexDirection: 'column',
               gap: '12px',
@@ -856,7 +764,7 @@ function Findings() {
                 placeItems: 'center',
                 fontSize: '13px',
                 fontWeight: 600,
-                color: MERIDIAL.accent,
+                color: MERIDIAL.ink,
               }}
             >
               {index + 1}

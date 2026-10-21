@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ComponentProps, type CSSProperties, type ReactNode } from 'react'
+import { useState, type ComponentProps, type CSSProperties, type ReactNode } from 'react'
 import {
   ArrowClockwise,
   ArrowLeft,
@@ -10,12 +10,15 @@ import {
   X,
 } from '@phosphor-icons/react'
 import AppLink from '../AppLink'
+import Header from './Header'
+import ProjectIntro, { OutLink } from './ProjectIntro'
+import ScrubbableClip from './ScrubbableClip'
 import { projects, STAT_BUILDER_SITE } from '../data/projects'
 import { resolvePalette, type ButtonVariant } from '../design-system/buttonStyles'
 import { control, radius, space, type } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
 import { useMediaQuery } from '../hooks/useMediaQuery'
-import { PROJECT_MOBILE_PAD, shellPad } from '../layout'
+import { PROJECT_MOBILE_PAD, projectPad, projectWide } from '../layout'
 import './D2Conflux.css'
 
 /*
@@ -30,94 +33,50 @@ const project = projects['stat-builder']
 const GITHUB = 'https://github.com/NoahHendrickson/d2-stat-builder'
 const ASSET = '/work/stat-builder/conflux'
 
-const THEMES = [
-  {
-    id: 'slate',
-    label: 'Slate',
-    src: `${ASSET}/loadouts.jpg`,
-    alt: 'Saved loadouts on the Slate theme: a blue-grey gradient behind square panels',
-  },
-  {
-    id: 'scene',
-    label: 'Scene',
-    src: `${ASSET}/theme-scene.jpg`,
-    alt: 'Saved loadouts on the Scene theme: frosted panes over blurred in-game key art',
-  },
-  {
-    id: 'normal',
-    label: 'Normal',
-    src: `${ASSET}/theme-normal.jpg`,
-    alt: 'Saved loadouts on the Normal theme: a flat dark page with rounded cards and solid borders',
-  },
-] as const
 
 export default function D2Conflux() {
   const isMobile = useIsMobile()
-  const style = { '--cfx-pad': isMobile ? PROJECT_MOBILE_PAD : shellPad() } as CSSProperties
+  const pad = isMobile ? PROJECT_MOBILE_PAD : projectPad()
+  const style = { '--cfx-pad': pad } as CSSProperties
 
   return (
     <div className="cfx" style={style}>
-      <header className="cfx-bar">
-        <div className="cfx-shell cfx-bar-row">
-          <PillLink href="/work" aria-label="Back to work">
-            <ArrowLeft size={16} aria-hidden />
-            Back
-          </PillLink>
-          <div className="cfx-brand">
-            <img src={`${ASSET}/site-icon.svg`} alt="" />
-            {project.title}
-          </div>
-          {/* Wrapped: the pill's inline display would beat the class that hides it on phones. */}
-          <span className="cfx-bar-open">
-            <PillLink href={STAT_BUILDER_SITE} variant="primary" external>
-              Open the app
-              <ArrowSquareOut size={16} aria-hidden />
-            </PillLink>
-          </span>
-        </div>
-      </header>
+      {/* The site's own Back and Contact, the same as every project page. */}
+      <Header leading="back" showProfile={false} barInset={pad} />
 
       <main className="cfx-shell">
         <Hero />
 
-        <Shot
-          src={`${ASSET}/optimizer.jpg`}
-          browser={{ path: '/', title: 'Optimizer' }}
-          alt="The stat optimizer: Warlock picked, Health, Grenade and Class targets set, Getaway Artist as the exotic, and the top build opened to its armor, mods, tuning and masterwork cost"
-          width={3200}
-          height={1800}
-          eager
-        />
-
-        <Section n="01" label="Stat optimizer">
-          <Intro heading="Set the stats you want">
-            <div className="cfx-copy">
-              <p className="cfx-body">
-                Build-crafting at the top end is a genuinely messy problem. Six stats, an exotic, set
-                bonuses, tuning, fragments, and a vault full of armor, all pulling against each other.
-                Most players know roughly what they want and not much more. The optimizer's whole job is
-                to take that fuzzy, complicated ask and turn it into a few sliders and picks anyone can
-                use.
-              </p>
-              <p className="cfx-body">
-                From there it works three ways. Build with the armor you already have. Find out which
-                pieces you'd need to farm for a build you can't make yet. Or switch to Theoretical Builds
-                and plan around armor you don't own at all, so you know exactly what to go chase.
-              </p>
-            </div>
-          </Intro>
+        {/* The hero breaks out of the column, as on every project page. */}
+        <div style={isMobile ? undefined : projectWide()}>
           <Shot
-            src={`${ASSET}/optimizer-columns.jpg`}
-            stage="Stat optimizer"
-            fade
-            alt="The optimizer's two columns: class nameplates, the six stat targets with Health 70, Grenade 150 and Class 100 set, major mods and the exotic grid with Getaway Artist picked on the left; the Builds and Theoretical Builds tabs and ranked build cards on the right, the top one open to its armor, mods, tuning and masterwork cost"
-            width={2856}
-            height={2400}
+            src={`${ASSET}/optimizer.jpg`}
+            browser={{ path: '/', title: 'Optimizer' }}
+            alt="The stat optimizer: Warlock picked, Health, Grenade and Class targets set, Getaway Artist as the exotic, and the top build opened to its armor, mods, tuning and masterwork cost"
+            width={3200}
+            height={1800}
+            eager
           />
+        </div>
+
+        {/*
+          The feature list sat in the intro, which pushed the hero shot below
+          the fold. It reads as the page's overview here, laid out like every
+          section under it.
+        */}
+        <Section label="Overview">
+          <Intro heading="D2 Conflux has several features that are difficult or impossible to do in-game">
+            {/* Tailwind's preflight strips list markers, so the numbering is set back on here. */}
+            <ol className="cfx-body cfx-list">
+              <li>Selecting stat targets and set bonuses and being given the exact armor pieces to use.</li>
+              <li>Thinking up stats and bonuses and being told what to farm.</li>
+              <li>Cleaning up your inventory and getting rid of duplicate items.</li>
+            </ol>
+          </Intro>
         </Section>
 
-        <Section n="02" label="Dream build">
-          <Intro heading="Find out what to farm">
+        <Section label="Optimizer">
+          <Intro heading="Find the stats you can reach or what armor pieces you should replace to reach them">
             <p className="cfx-body">
               Here is a quick video showing a build with stats you can reach with your current armor,
               then extending those stats to see what armor to farm to achieve them.
@@ -135,7 +94,42 @@ export default function D2Conflux() {
           </Browser>
         </Section>
 
-        <Section n="03" label="Loadouts">
+        <Section label="Armor table">
+          <Intro heading="Sort your armor">
+            <p className="cfx-body">
+              Armor 3.0 simplified how stats are distributed on a piece of armor, with finite
+              combinations. That changed how players thought about armor, but none of the previous armor
+              management tools accounted for it. A table view with quick filters that matched players'
+              mental model made it easy and intuitive to search, filter and delete the armor you own.
+            </p>
+          </Intro>
+          <Shot
+            src={`${ASSET}/armor-table.jpg`}
+            browser={{ path: '/armor', title: 'Armor' }}
+            alt="The armor table: 973 pieces with name, class, archetype, tertiary and tuned stats, set bonus, a Searches count, and the six stat columns, filters and Cleanup and Duplicates views along the top"
+            width={3200}
+            height={1800}
+          />
+        </Section>
+
+        <Section label="Weapon search">
+          <Intro heading="Find the roll">
+            <p className="cfx-body">
+              Every weapon in the game, filterable by trait, perk combo, barrel and magazine, or
+              champion. Click perks to build a roll and the stat bars move with it. Hover any perk for
+              community-tested numbers on what it really does.
+            </p>
+          </Intro>
+          <Shot
+            src={`${ASSET}/weapon-search.jpg`}
+            browser={{ path: '/weapons', title: 'Weapons' }}
+            alt="Weapon search: the full catalog of 1,335 weapons as coloured nameplates by element, and Fatebringer (Timelost) open on the right with a roll picked from its perk grid"
+            width={3200}
+            height={1800}
+          />
+        </Section>
+
+        <Section label="Loadouts">
           <Intro heading="Save it, then equip it in one click">
             <p className="cfx-body">
               Any build saves as a loadout with its subclass, mods, weapons and artifact. Equip pulls
@@ -159,8 +153,8 @@ export default function D2Conflux() {
           />
         </Section>
 
-        <Section n="04" label="Items">
-          <Intro heading="The vault, laid out like the game">
+        <Section label="Items">
+          <Intro heading="An item page that shows all your characters and items in a similar UX to in-game">
             <p className="cfx-body">
               Items puts each character beside the vault the way the in-game character screen does.
               Search with keywords, drag pieces between characters, and open anything to see its perks
@@ -185,55 +179,7 @@ export default function D2Conflux() {
           </div>
         </Section>
 
-        <Section n="05" label="Weapon search">
-          <Intro heading="Find the roll">
-            <p className="cfx-body">
-              Every weapon in the game, filterable by trait, perk combo, barrel and magazine, or
-              champion. Click perks to build a roll and the stat bars move with it. Hover any perk for
-              community-tested numbers on what it really does.
-            </p>
-          </Intro>
-          <div className="cfx-pair cfx-pair-2">
-            <Shot
-              src={`${ASSET}/weapon-search.jpg`}
-              browser={{ path: '/weapons', title: 'Weapons' }}
-              alt="Weapon search: the full catalog of 1,335 weapons as coloured nameplates by element, and Fatebringer (Timelost) open on the right with a roll picked from its perk grid"
-              width={3200}
-              height={1800}
-            />
-            <Shot
-              src={`${ASSET}/weapon-perk.jpg`}
-              stage="Perk tooltip"
-              alt="Fatebringer's perk grid with a tooltip for Explosive Payload: Bungie's description, the enhanced version, and community-tested damage numbers"
-              width={1312}
-              height={1104}
-            />
-          </div>
-        </Section>
-
-        <Section n="06" label="Armor table">
-          <Intro heading="Sort your armor">
-            <p className="cfx-body">
-              The in-game vault made it hard to search armor or see which pieces were worth chasing, so
-              I went back to basics: a table with quick filters and custom sorting. The Searches column
-              counts how often each piece made it into a build, which makes the ones that never do easy
-              to clean out.
-            </p>
-          </Intro>
-          <Shot
-            src={`${ASSET}/armor-table.jpg`}
-            browser={{ path: '/armor', title: 'Armor' }}
-            alt="The armor table: 973 pieces with name, class, archetype, tertiary and tuned stats, set bonus, a Searches count, and the six stat columns, filters and Cleanup and Duplicates views along the top"
-            width={3200}
-            height={1800}
-          />
-        </Section>
-
-        <Section n="07" label="Design">
-          <Themes />
-        </Section>
-
-        <Section n="08" label="Community feedback">
+        <Section label="Community feedback">
           <Intro heading="Built for one very picky player, then shared">
             <p className="cfx-body">
               I made it for myself and posted it to a Destiny community. These are some of the messages
@@ -270,86 +216,26 @@ export default function D2Conflux() {
 
 function Hero() {
   return (
-    <section className="cfx-hero">
-      <div className="cfx-copy cfx-hero-copy">
-        <div className="cfx-hero-meta">
-          <p className="cfx-label">Side project</p>
-          <p className="cfx-label">2026</p>
-          <p className="cfx-label">Destiny 2</p>
-        </div>
-        <h1 className="cfx-h1">{project.title}</h1>
-        <p className="cfx-lede">
-          Serious Destiny 2 players end up with a bunch of tools open at once: one to optimize stats
-          and plan builds, one to clean out their armor and free up vault space, one to look up weapon
-          rolls, one to manage loadouts. D2 Conflux pulls all of that into one place. Hence the name.
-        </p>
-        <p className="cfx-body">
-          It's built for power users and expert players, the people grinding the hardest stuff in the
-          game. What they need is usually pretty complex, and sometimes pretty vague, so the whole
-          thing is made to let them dig in as deep as they want.
-        </p>
-        <div className="cfx-actions">
-          <PillLink href={STAT_BUILDER_SITE} variant="primary" external>
-            Open D2 Conflux
-            <ArrowSquareOut size={16} aria-hidden />
-          </PillLink>
-          <PillLink href={GITHUB} external>
-            Source
-            <ArrowSquareOut size={16} aria-hidden />
-          </PillLink>
-        </div>
-      </div>
-    </section>
+    <div className="cfx-hero">
+      <ProjectIntro
+        title={project.title}
+        helper={project.eyebrow}
+        description="Hardcore Destiny 2 players rely heavily on third-party tools and websites while playing. Finding armor, finding weapons and build-crafting aren't supported well in-game."
+        actions={
+          <>
+            <OutLink href={STAT_BUILDER_SITE} label="Open D2 Conflux" variant="primary" />
+            <OutLink href={GITHUB} label="Source" />
+          </>
+        }
+      />
+    </div>
   )
 }
 
-function Themes() {
-  const [active, setActive] = useState<(typeof THEMES)[number]['id']>('slate')
-
-  return (
-    <>
-      <div className="cfx-intro">
-        <div className="cfx-copy">
-          <h2 className="cfx-h2">Made to look like the game</h2>
-          <div className="cfx-tabs" role="tablist" aria-label="Theme">
-            {THEMES.map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                role="tab"
-                id={`cfx-theme-${t.id}`}
-                aria-selected={active === t.id}
-                aria-controls="cfx-theme-panel"
-                className="cfx-tab"
-                onClick={() => setActive(t.id)}
-              >
-                {t.label}
-              </button>
-            ))}
-          </div>
-        </div>
-        <p className="cfx-body">
-          The UI borrows Destiny's own language: square panels, hairline frames, small tracked labels
-          and the green Equip button. Settings offer three looks. Slate is the default, Scene frosts the
-          panes over in-game key art, and Normal is a plain rounded UI for anyone who'd rather not.
-        </p>
-      </div>
-      <div className="cfx-themes" id="cfx-theme-panel" role="tabpanel" aria-labelledby={`cfx-theme-${active}`}>
-        {THEMES.map((t) => (
-          <Browser key={t.id} path="/loadouts" title="Loadouts" data-on={active === t.id} aria-hidden={active !== t.id}>
-            <img src={t.src} alt={t.alt} width={3200} height={1800} loading="lazy" />
-          </Browser>
-        ))}
-      </div>
-    </>
-  )
-}
-
-function Section({ n, label, children }: { n: string; label: string; children: ReactNode }) {
+function Section({ label, children }: { label: string; children: ReactNode }) {
   return (
     <section className="cfx-section" aria-label={label}>
       <p className="cfx-label cfx-rule">
-        <span className="cfx-num">{n}</span>
         {label}
       </p>
       {children}
@@ -517,7 +403,7 @@ function PillLink({
 }
 
 /**
- * A looping screen recording, after ProjectStory's StoryClip: muted and inline so mobile
+ * A looping screen recording with a seek bar (`ScrubbableClip`): muted and inline so mobile
  * Safari plays it, started only once it scrolls into view (and paused when it leaves), HEVC
  * first with H.264 behind it, and the poster alone under `prefers-reduced-motion`.
  */
@@ -537,27 +423,12 @@ function Clip({
   height: number
 }) {
   const stillOnly = useMediaQuery('(prefers-reduced-motion: reduce)')
-  const ref = useRef<HTMLVideoElement>(null)
-
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) el.play().catch(() => {})
-        else el.pause()
-      },
-      { threshold: 0.35 },
-    )
-    io.observe(el)
-    return () => io.disconnect()
-  }, [stillOnly])
 
   if (stillOnly) return <img src={poster} alt={alt} width={width} height={height} loading="lazy" />
   return (
-    <video ref={ref} poster={poster} aria-label={alt} width={width} height={height} loop muted playsInline preload="metadata">
+    <ScrubbableClip threshold={0.35} poster={poster} aria-label={alt} width={width} height={height}>
       <source src={hevc} type='video/mp4; codecs="hvc1"' />
       <source src={src} type="video/mp4" />
-    </video>
+    </ScrubbableClip>
   )
 }

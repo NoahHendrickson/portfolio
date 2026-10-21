@@ -55,7 +55,8 @@ export default function Header({
         }}
       >
         {leading === 'back' ? <BackLink /> : <TabBar active={active} />}
-        <div style={{ position: 'absolute', right: trailing, top: isMobile ? '10px' : '16px' }}>
+        {/* On the same top as the leading pill, so the two sit on one line. */}
+        <div style={{ position: 'absolute', right: trailing, top: isMobile ? '12px' : '16px' }}>
           <ContactMenu />
         </div>
       </div>

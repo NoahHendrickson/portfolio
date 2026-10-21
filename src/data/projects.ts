@@ -1,3 +1,5 @@
+import type { SidebarPlaygroundOption } from './no3ySidebar'
+
 /**
  * Content for the project landing pages rendered by `ProjectLanding.tsx`.
  * Routes live in `App.tsx` — keys here match the `/work/<slug>` path.
@@ -230,6 +232,11 @@ export type StorySection =
       shot?: LandingShot
       /** A looping clip in place of `shot` — no3y Code's design mode row. */
       video?: LandingVideo
+      /**
+       * no3y Code's sidebar running live on the page, with one control per
+       * setting under it (`No3ySidebar.tsx`). A `shot` alongside stands under it.
+       */
+      sidebarPlayground?: SidebarPlaygroundOption[]
       /** CSS clip around the media — background defaults to `--color-bg-tint`. */
       panel?: { background?: string }
       /**
@@ -330,20 +337,27 @@ export type FeedbackShot = {
 }
 
 /** A compact, screenshot-first alternative to the long-form story rows. */
+/** A still in the `showcasePage` gallery, at its native pixel size. */
+export type GalleryImage = { src: string; alt: string; width: number; height: number }
+
+/** A gallery card: a still that opens in the lightbox, or a looping clip that plays in place. */
+export type ShowcaseCard = {
+  heading: string
+  body: string
+  layout?: 'wide'
+} & ({ shot: GalleryImage; video?: never } | { video: LandingVideo; shot?: never })
+
 export type ProjectShowcaseContent = {
   meta: string
   heading: string
   body: string[]
-  hero: { src: string; alt: string; width: number; height: number }
-  cards: {
+  hero: GalleryImage
+  /** A design story told as steps, e.g. the timeline that was tried and the one that shipped. */
+  evolution?: {
     heading: string
-    body: string
-    src: string
-    alt: string
-    width: number
-    height: number
-    layout?: 'wide'
-  }[]
+    steps: { label: string; body: string; shot: GalleryImage }[]
+  }
+  cards: ShowcaseCard[]
 }
 
 /**
@@ -354,10 +368,11 @@ export type ProjectShowcaseContent = {
 export type Landing = {
   showcasePage?: ProjectShowcaseContent
   /**
-   * The muted line above the title. Several entries render as one row split by
-   * hairlines ("Vibe coded / Figma+Cursor+Claude"). An entry can be a link —
-   * The Forge's "Github" with an outbound icon — or runs, when only part of the
-   * entry is the link ("Fork of T3 Code" on no3y Code).
+   * The helper text under the title (`ProjectIntro`). Several entries render
+   * as one row split by hairlines ("Vibe coded / Figma+Cursor+Claude"). An
+   * entry can be a link — The Forge's "Github" with an outbound icon — or
+   * runs, when only part of the entry is the link ("Fork of T3 Code" on no3y
+   * Code).
    */
   eyebrow: string | EyebrowEntry[]
   /**
@@ -367,61 +382,20 @@ export type Landing = {
    * block with the bands below it butted straight up against it.
    */
   flow?: 'banded' | 'continuous'
+  // Gaps and alignment are the shared project frame's (`layout.ts`), not per page.
   /**
-   * Gap between the title block and each row inside a `continuous` page.
-   * Defaults to 80 (D2); Phanttom's frame runs 120.
-   */
-  gap?: number
-  /**
-   * Gap between the rows themselves, when the frame spaces them wider than it
-   * spaces the title block from the hero shot. Defaults to `gap` — no3y Code is
-   * the only frame that splits them (120 into the rows, then 200 between them).
-   */
-  rowGap?: number
-  /**
-   * Title + row alignment. `center` (the default) centres the title block and
-   * floats Back beside it. `start` stacks Back above the eyebrows and left-aligns
-   * the title with the rows — Phanttom.
-   */
-  align?: 'center' | 'start'
-  /**
-   * Title-block rhythm. `even` (the default) spaces Back, the eyebrow, the title
-   * and the body on one gap — Phanttom, The Forge and D2 all run 16. `paired` is
-   * no3y Code's frame: 24 between the blocks, with the eyebrow seated flush
-   * against the title as a group of its own (the file's Frame 465).
-   */
-  titleRhythm?: 'even' | 'paired'
-  /**
-   * Where the eyebrow sits relative to the title. `above` is every frame but
-   * Moonfang Armory, which seats it underneath. Only applies to `paired`.
-   */
-  eyebrowPlacement?: 'above' | 'below'
-  /** Title-block width. Defaults to 720; Moonfang Armory's paragraph runs 688. */
-  copyWidth?: number
-  /**
-   * Row alignment on its own, for a frame that left-aligns the title but still
-   * centres a row narrower than the content column — no3y Code's composer row is
-   * 1225 of 1272. Defaults to `align`.
-   */
-  rowAlign?: 'center' | 'start'
-  /**
-   * The wide opener in place of the centred title block — no3y Code. The title
-   * and intro run on the content column's left edge, `shot` fills the column
-   * under them with `heading` + `body` laid over its open left side, then
-   * `grid` runs two images to a row. Below the overlay breakpoint the copy
-   * stacks above the shot; mobile stacks everything.
+   * The wide opener under the intro — no3y Code. `shot` runs the hero
+   * breakout, then `grid` runs two images to a row under it.
    */
   showcase?: {
-    heading: string
-    body: Prose
     shot: ShowcaseImage
     grid: ShowcaseImage[]
   }
-  /** Title block; every page runs it full width of its column. */
+  /** The intro's copy and actions, then the hero media under it. */
   hero: {
     /** Paragraphs under the title. Defaults to `[project.summary]`. */
     body?: string[]
-    /** A short bulleted list after the paragraphs — no3y Code's feature list. */
+    /** A short list after the paragraphs, one row split by hairlines — no3y Code's features. */
     list?: string[]
     /** Outbound pills under the title — GitHub / live site, etc. */
     links?: { label: string; href: string }[]
@@ -486,17 +460,12 @@ export const projects: Record<string, Project> = {
     eyebrow: ['Illustration', 'Destiny 2'],
     tagline: 'Destiny 2 gear, one pixel at a time.',
     summary: 'A collection of my pixel art inspired by Destiny 2. Helmets, robes, boots, and a weapon, rebuilt as tiny inventory icons in Figma.',
-    bento: { eyebrow: 'Pixel art', cover: '/work/pixel-art/cover.svg' },
+    bento: { eyebrow: 'Pixel art', cover: '/work/bento/card-pixel-art.png' },
     pageReady: true,
     accent: 'var(--color-orange)',
     landing: {
       eyebrow: ['Illustration', 'Destiny 2'],
       flow: 'continuous',
-      align: 'center',
-      copyWidth: 700,
-      titleRhythm: 'paired',
-      eyebrowPlacement: 'below',
-      gap: 120,
       hero: {},
       sections: [{
         kind: 'gallery',
@@ -520,7 +489,7 @@ export const projects: Record<string, Project> = {
     },
     links: [],
     stats: [],
-    heroShot: { label: 'Pixel art collection', src: '/work/pixel-art/cover.svg' },
+    heroShot: { label: 'Pixel art collection', src: '/work/bento/card-pixel-art.png' },
     sections: [],
     stack: ['Figma'],
     status: [],
@@ -543,11 +512,6 @@ export const projects: Record<string, Project> = {
       // holds 668 — its export is 1336 wide, so that's the last clean 2×.
       eyebrow: ['Third-party tool for the Destiny 2 community.'],
       flow: 'continuous',
-      gap: 120,
-      align: 'center',
-      titleRhythm: 'paired',
-      eyebrowPlacement: 'below',
-      copyWidth: 700,
       hero: {
         body: [
           'Destiny 2 is my favorite game, and I built this tool for power users and nerds like me. Players can create countless builds across different characters and stat combinations; this app helps them find the right gear for a specific build.',
@@ -623,6 +587,27 @@ export const projects: Record<string, Project> = {
             alt: '“Hey dude, I really love your app, its so good and quick — easily the best one out there”',
             width: 283,
             aspect: '996 / 251',
+            pad: 6,
+          },
+          {
+            src: '/work/stat-builder/feedback-theoretical-button.jpg',
+            alt: '“bro theoretical build button is blowing my mind”',
+            width: 230,
+            aspect: '666 / 66',
+            pad: 6,
+          },
+          {
+            src: '/work/stat-builder/feedback-thinks-of-everything.jpg',
+            alt: '“BRO” over a screenshot of the Theoretical Builds tab and its “When should I use this?” note, then “this guy thinks of everything”',
+            width: 342,
+            aspect: '1141 / 594',
+            pad: 6,
+          },
+          {
+            src: '/work/stat-builder/feedback-dream-build.jpg',
+            alt: '“dream build is goated, great site cheers”',
+            width: 200,
+            aspect: '554 / 78',
             pad: 6,
           },
         ],
@@ -721,11 +706,6 @@ export const projects: Record<string, Project> = {
       // looping capture of the command palette where the other frames put a shot.
       eyebrow: ['Third-party tool for the Destiny 2 community.'],
       flow: 'continuous',
-      gap: 80,
-      align: 'start',
-      titleRhythm: 'paired',
-      eyebrowPlacement: 'below',
-      copyWidth: 688,
       hero: {
         body: [
           'Moonfang Armory takes its name from a popular armor set in Destiny 2. The site lets players search for weapons by perks, traits, and other attributes through a command-palette interface that supports chained filters.',
@@ -841,30 +821,21 @@ export const projects: Record<string, Project> = {
     },
     pageReady: true,
     landing: {
-      // Frame 287:5099 — stacked sections, copy centred at 700. Title block
-      // runs 120 into the hero, rows sit 200 apart.
+      // Frame 287:5099 — stacked sections, copy centred at 700. The hero blocks
+      // and the rows run 120 apart, rows 200 from each other. (The frame also
+      // runs the title block 120 into the hero; every page now holds that at
+      // 80 so the hero shows on landing.)
       eyebrow: [
         [{ text: 'Fork of ' }, { text: 'T3 Code', href: T3_CODE }],
         'Agent orchestration + Design mode',
       ],
       flow: 'continuous',
-      gap: 120,
-      rowGap: 200,
-      align: 'center',
-      copyWidth: 700,
-      titleRhythm: 'paired',
-      eyebrowPlacement: 'below',
       // Captures of the desktop app on the Glass theme, baked over the fluted
       // wallpaper.
       showcase: {
-        heading: 'All my agents, one screen',
-        body: [
-          'I don’t really have a favorite model. I bounce between Claude and Codex depending on the task, and whenever something new drops I want to try it and see how it stacks up. That usually means a bunch of agents running at once, so I wanted them all in one place.',
-          'So I forked T3 Code and made the UI my own. The sidebar got the most love: every thread shows its branch, PR, model, and status at a glance. Then I added the little things I use every day, like speech-to-text, a usage meter, and a model picker with reasoning built in.',
-        ],
         shot: {
-          src: '/work/no3y-code/collage/window.png',
-          alt: 'no3y Code on the desktop, slid off the right edge: the thread sidebar with every status beside an agent working on a checkout migration',
+          src: '/work/no3y-code/collage/new-agent.png',
+          alt: 'no3y Code on the desktop — a new agent on the Glass theme, a picture fading out just above the composer',
           aspect: '1272 / 820',
         },
         grid: [
@@ -892,19 +863,51 @@ export const projects: Record<string, Project> = {
       },
       hero: {
         body: [
-          'no3y Code is my redesigned fork of an open-source project called T3 Code. I wanted one surface where I could use multiple AI subscriptions that wasn’t a TUI.',
+          'This is my fork of an open source project called T3 Code. I have multiple AI subscriptions and like to use different models for different things, but I was getting annoyed with needing to have multiple apps open to use them or to be using my terminal, which was cool at first, but not a great way to actually work. I completely redesigned the UI, added some of my own features, and improved the UX from a designer’s perspective.',
         ],
         list: ['Glass theme', 'Sidebar and thread card layout', 'Local speech-to-text', 'Design mode'],
         cta: { label: 'GitHub', href: NO3Y_CODE_DOWNLOAD, gradient: true },
-        shot: {
-          src: '/work/no3y-code/collage/new-agent.png',
-          alt: 'no3y Code on the desktop — a new agent on the Glass theme, a picture fading out just above the composer',
-          aspect: '1272 / 820',
-          frame: 'plain',
-        },
-        shotWidth: 1272,
       },
       sections: [
+        {
+          kind: 'feature',
+          gap: 80,
+          heading: 'Customize your sidebar',
+          body: 'There’s a few good layouts for sidebars in agent orchestration apps. The original was group by project, which is the most obvious way to stay organized with lots of agents. One new way emerging is no grouping at all, which focuses attention on what needs your attention by the state of the thread. The most recent UX I’m trying out is more ticket style: grouping by status.',
+          copyWidth: 700,
+          stack: true,
+          // The sidebar itself, live: switch the grouping, toggle compact cards,
+          // hover and open threads. Each control sets what the panel's gear does.
+          sidebarPlayground: [
+            {
+              label: 'By project',
+              caption: 'Each repo gets its own header, so the cards drop the project name.',
+              grouping: 'project',
+            },
+            {
+              label: 'No grouping',
+              caption: 'One list in activity order, with the project on every card.',
+              grouping: 'none',
+            },
+            {
+              label: 'By status',
+              caption: 'Pinned, Needs input, Completed and Working, each with a count.',
+              grouping: 'status',
+            },
+            {
+              label: 'Compact cards',
+              caption: 'One line per thread. Hover a card for its project, branch, and model.',
+              compact: true,
+            },
+          ],
+          // Under the sidebar: the card states board from the old Thread cards row.
+          shot: {
+            src: '/work/no3y-code/sidebar.jpg',
+            alt: 'Thread sidebar beside a board of thread card states — default, hover, selected, and status variants',
+            aspect: '4703 / 3048',
+            frame: 'plain',
+          },
+        },
         {
           kind: 'feature',
           gap: 80,
@@ -939,20 +942,6 @@ export const projects: Record<string, Project> = {
             src: '/work/no3y-code/idea.png',
             alt: 'no3y Code’s thread sidebar beside the design mode properties panel, over a fluted gradient',
             aspect: '3090 / 1499',
-            frame: 'plain',
-          },
-        },
-        {
-          kind: 'feature',
-          gap: 80,
-          heading: 'Thread cards',
-          body: 'A single line didn’t provide enough context. While multitasking across projects and models, I needed to see each thread’s project, branch, and model immediately. T3 Code provided a strong foundation, and I designed the interface around that information.',
-          copyWidth: 700,
-          stack: true,
-          shot: {
-            src: '/work/no3y-code/sidebar.jpg',
-            alt: 'Thread sidebar beside a board of thread card states — default, hover, selected, and status variants',
-            aspect: '4703 / 3048',
             frame: 'plain',
           },
         },
@@ -1062,47 +1051,79 @@ export const projects: Record<string, Project> = {
           width: 2200,
           height: 1380,
         },
+        evolution: {
+          heading: 'The timeline',
+          steps: [
+            {
+              label: 'First pass',
+              body: 'For the first version I kept the timeline as one strip, with every kind of edit (zooms, pans, fast-forwards) layered on top of it. It ended up being pretty terrible to use. Edits piled into each other, and the icons hanging under each collision were confusing, so I needed to try something different.',
+              shot: {
+                src: '/work/crisp/timeline-combined.png',
+                alt: 'Crisp’s first player: one timeline bar with overlapping zoom, pan, and speed-up marks, and a stack of icons hanging under each collision',
+                width: 1728,
+                height: 334,
+              },
+            },
+            {
+              label: 'V2',
+              body: 'So I broke the timeline into five tracks, one for each type of edit: playback, zoom, pan, clip, and fast-forward. It added a few more elements to the UI, but it was much simpler, and far easier to use and understand, even for me.',
+              shot: {
+                src: '/work/crisp/timeline.png',
+                alt: 'Crisp’s player: the toolbar above five colored timeline tracks: playback, zoom, pan, clip, and fast-forward',
+                width: 2340,
+                height: 520,
+              },
+            },
+          ],
+        },
         cards: [
           {
-            heading: 'An edit you can read at a glance.',
-            body: 'Separate tracks for playback, zoom, pan, clips, and speed. Every change has its own place.',
-            src: '/work/crisp/editor-tracks.jpg',
-            alt: 'A close-up of Crisp’s timeline with green playback, blue zoom, orange pan, and teal speed-up tracks',
-            width: 2180,
-            height: 390,
-          },
-          {
             heading: 'A little help with the finishing touches.',
-            body: 'Describe the polish you want. Crisp works with the Claude Code or Codex subscription you already use.',
-            src: '/work/crisp/ai-models.jpg',
-            alt: 'Crisp’s AI composer with a note about subtle zooms, a timestamp attachment, and the model picker open',
-            width: 850,
-            height: 400,
+            body: 'Describe the polish you want and the AI editor rewrites the zooms to match. Crisp works with the Claude Code or Codex subscription you already have, and never touches the original recording.',
+            layout: 'wide',
+            video: {
+              src: '/work/crisp/ai-polish.mp4',
+              hevc: '/work/crisp/ai-polish-hevc.mp4',
+              poster: '/work/crisp/ai-polish-poster.jpg',
+              alt: 'Crisp’s AI editor: a note describes the desired polish, and the zoom track is rewritten to match',
+              aspect: '16 / 9',
+            },
           },
           {
             heading: 'Put the focus exactly where it belongs.',
-            body: 'Zoom into the details and pin the viewport. The camera stays on your work, even when the cursor moves away.',
-            src: '/work/crisp/editor-framing.jpg',
-            alt: 'Crisp’s dark editor with a blue camera-framing box over the recording and a pinned region on the orange pan track',
-            width: 2400,
-            height: 1506,
+            body: 'Pin a zoom to one region and the camera holds still on your work, even when the cursor wanders off.',
             layout: 'wide',
-          },
-          {
-            heading: 'Keep the detail. Keep the color.',
-            body: 'Retina capture, 10-bit HEVC, and ProRes options for gradients and UI that hold up to a closer look.',
-            src: '/work/crisp/capture-quality.jpg',
-            alt: 'Crisp’s recording quality menu offering HEVC 10-bit, ProRes 422, and ProRes 4444',
-            width: 668,
-            height: 300,
+            video: {
+              src: '/work/crisp/pin-viewport.mp4',
+              hevc: '/work/crisp/pin-viewport-hevc.mp4',
+              poster: '/work/crisp/pin-viewport-poster.jpg',
+              alt: 'Crisp’s pin viewport control: a zoom is pinned to one region of the recording at a timestamp',
+              aspect: '16 / 9',
+            },
           },
           {
             heading: 'Skip the wait, keep the moment.',
             body: 'Speed through loading, typing, and dead air. Everything around it keeps its original pace.',
-            src: '/work/crisp/speed-controls.jpg',
-            alt: 'Crisp’s speed-up menu with 2×, 3×, 4×, and 8× playback options and an optional video badge',
-            width: 1248,
-            height: 356,
+            layout: 'wide',
+            video: {
+              src: '/work/crisp/speed-up.mp4',
+              hevc: '/work/crisp/speed-up-hevc.mp4',
+              poster: '/work/crisp/speed-up-poster.jpg',
+              alt: 'Crisp’s speed-up track: a segment of the timeline is marked to play at 8×',
+              aspect: '16 / 9',
+            },
+          },
+          {
+            heading: 'Record once, cut as many clips as you need.',
+            body: 'Mark a range of a longer recording and save it as its own clip, with its own zooms and export.',
+            layout: 'wide',
+            video: {
+              src: '/work/crisp/making-clips.mp4',
+              hevc: '/work/crisp/making-clips-hevc.mp4',
+              poster: '/work/crisp/making-clips-poster.jpg',
+              alt: 'Crisp’s clip tool: a range of one recording is marked and saved as its own clip',
+              aspect: '16 / 9',
+            },
           },
         ],
       },
@@ -1139,10 +1160,6 @@ export const projects: Record<string, Project> = {
       // one — it reuses the story shell so it sits on the same dark theme.
       eyebrow: ['Graphic Design', '2019'],
       flow: 'continuous',
-      gap: 120,
-      align: 'start',
-      titleRhythm: 'paired',
-      eyebrowPlacement: 'below',
       hero: {
         body: [
           'As a tech enthusiast who builds my own computers, I wanted to create a supplemental infographic for assembling a custom PC. Rather than explain every step in detail, the guide gives an overview of the parts and suggests a build order that makes the process easier.',
@@ -1211,10 +1228,6 @@ export const projects: Record<string, Project> = {
       // for the two dielines — rather than floating on the dark shell.
       eyebrow: ['Graphic Design', '2019'],
       flow: 'continuous',
-      gap: 120,
-      align: 'start',
-      titleRhythm: 'paired',
-      eyebrowPlacement: 'below',
       hero: {
         body: [
           'A packaging project I made in college. The goal was to design a convenient chips-and-salsa container for parties and get-togethers—one box, three salsas, and four flavors. I like to showcase this mostly for the graphics and illustrations, as I am really proud of the style I captured.',

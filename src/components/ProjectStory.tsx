@@ -1,24 +1,25 @@
-import { Fragment, useEffect, useRef, useState } from 'react'
-import {
-  ArrowSquareOut,
-  FastForward,
-  MagnifyingGlassPlus,
-  MouseMiddleClick,
-  Scissors,
-  VideoCamera,
-} from '@phosphor-icons/react'
+import { Fragment, useRef, useState } from 'react'
+import { FastForward, MagnifyingGlassPlus, MouseMiddleClick, Scissors, VideoCamera } from '@phosphor-icons/react'
 import Header from './Header'
+import ProjectIntro, { IntroList, OutLink, Runs, SectionCopy, SectionHeading, WideMedia } from './ProjectIntro'
 import ArtGallery from './ArtGallery'
 import ProjectShowcase from './ProjectShowcase'
-import { resolvePalette, HOVER_OPACITY } from '../design-system/buttonStyles'
-import type { ButtonVariant } from '../design-system/buttonStyles'
-import { color, control, radius, radiusPx, space, type } from '../design-system/tokens'
+import SidebarPlayground from './No3ySidebar'
+import { radius, radiusPx, space, type } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
 import { useMediaQuery } from '../hooks/useMediaQuery'
-import AppLink from '../AppLink'
-import { copyMeasure, copyPad, flushTrailingPad, PAGE_GUTTER, PROJECT_MOBILE_PAD, shellPad, TABLET_MAX } from '../layout'
+import { usePlayWhenVisible } from '../hooks/usePlayWhenVisible'
+import {
+  copyMeasure,
+  PAGE_GUTTER,
+  PROJECT_COPY_MAX,
+  PROJECT_MOBILE_PAD,
+  PROJECT_SECTION_GAP,
+  PROJECT_STACK_GAP,
+  projectPad,
+  projectWide,
+} from '../layout'
 import type {
-  EyebrowEntry,
   FeedbackShot,
   Landing,
   LandingShot,
@@ -29,7 +30,6 @@ import type {
   ShowcaseImage,
   StoryColumn,
   StorySection,
-  TextRun,
   TimelineTrack,
 } from '../data/projects'
 
@@ -39,7 +39,6 @@ const ORANGE = 'var(--color-orange)'
 /** The outro card is orange in both themes, so its pill stays cream-on-orange. */
 const PILL_BG = 'var(--color-bg-cream)'
 const PILL_TEXT = 'var(--color-text-inverse)'
-const MUTED = 'var(--color-text-muted)'
 const BODY_TEXT = 'var(--color-text-secondary)'
 /**
  * The feedback band and the wall inside it are both a translucent lift, so they
@@ -51,13 +50,6 @@ const FRAME_BORDER = '#373737'
 const FRAME_BG = '#202124'
 const CARD_BG = '#1a191e'
 const OVERLAY_BORDER = '#3358c1'
-/**
- * no3y Code's Github pill — the file's purple → pink → peach wash, not the
- * orange accent. Stops measured off node 317:25669.
- */
-const NO3Y_CTA =
-  'linear-gradient(to right, rgba(131,113,255,0.8) 0%, rgba(255,139,219,0.8) 53.365%, rgba(247,187,163,0.8) 100%)'
-
 /** The content width inside the page gutters, which every row width is measured against. */
 const CONTENT_WIDTH = 1512 - PAGE_GUTTER * 2
 
@@ -67,8 +59,6 @@ const CONTENT_WIDTH = 1512 - PAGE_GUTTER * 2
 // `SHELL_MAX` (measured off this page, the site's widest) and takes the slack
 // past it. It stays horizontal padding rather than a capped wrapper because
 // the feedback band's tint has to keep running edge to edge.
-/** The centered copy column — the title block and the `copy` rows both run on it. */
-const COPY_WIDTH = 720
 /**
  * Outer clip on every mockup across the project pages — hero shots, feature
  * stills, looping clips, the hero video's wallpaper box and the closing band.
@@ -80,11 +70,6 @@ const COPY_WIDTH = 720
 const MOCKUP_RADIUS = radius.xl
 /** A `framed` shot draws its border outside the clip, so it takes an optical +1. */
 const FRAMED_RADIUS = `${radiusPx.xl + 1}px`
-/** The showcase opener: the intro's measure, and where its copy sits over the shot (px at 1272). */
-const INTRO_WIDTH = 640
-const OVERLAY_COPY = { left: 56, width: 420 }
-/** Copy laid over the shot's wallpaper — part of the image, not a theme surface. */
-const ON_SHOT = '#ffffff'
 /** Gap between the feedback wall's cards, 9.588 in the file. */
 const WALL_GAP = 10
 
@@ -106,16 +91,14 @@ const flattenProse = (text: Prose) =>
     .map((paragraph) => (typeof paragraph === 'string' ? paragraph : paragraph.map((run) => run.text).join('')))
     .join(' ')
 
-/** Body copy on every story row — the file's 16px regular on the secondary ink. */
+/** Body copy on every story row — the intro description's size, on the secondary ink. */
 const BODY_STYLE: React.CSSProperties = {
   margin: 0,
-  fontSize: '16px',
-  fontWeight: 400,
-  lineHeight: 1.4,
+  ...type['body-xl'],
   color: BODY_TEXT,
 }
 
-/** The heading over a row's copy — `feature` rows and the closing band. */
+/** The heading over copy laid on a shot — the showcase overlay and the closing band. Section rows use `SectionHeading`. */
 const ROW_HEADING: React.CSSProperties = {
   margin: 0,
   fontSize: '24px',
@@ -131,15 +114,6 @@ const ROW_HEADLINE: React.CSSProperties = {
   fontWeight: 500,
   lineHeight: 1.3,
   letterSpacing: 0,
-}
-
-/** The muted line(s) above a story title. */
-const EYEBROW_STYLE: React.CSSProperties = {
-  margin: 0,
-  fontSize: '16px',
-  fontWeight: 500,
-  lineHeight: '24px',
-  color: MUTED,
 }
 
 /**
@@ -159,138 +133,52 @@ export default function ProjectStory({ project }: { project: Project }) {
   if (!landing) return null
   if (landing.showcasePage) return <ProjectShowcase project={project} content={landing.showcasePage} />
 
-  const gutter = isMobile ? PROJECT_MOBILE_PAD : shellPad()
-  const copyW = landing.copyWidth ?? COPY_WIDTH
-  const flush = landing.align === 'start'
-  const headerTrailing = isMobile ? gutter : flush ? flushTrailingPad(copyW) : copyPad(copyW)
+  const gutter = isMobile ? PROJECT_MOBILE_PAD : projectPad()
   const rowPad = isMobile ? '40px' : '80px'
   const heroBody = landing.hero.body ?? [project.summary]
-  const eyebrow = Array.isArray(landing.eyebrow) ? landing.eyebrow : [landing.eyebrow]
   const continuous = landing.flow === 'continuous'
-  const continuousGap = isMobile ? space['2xl'] : `${landing.gap ?? 80}px`
-  // Desktop rows sit 80–200 apart. Mobile keeps heading+copy above the shot,
-  // so this gap is what stops one section's screenshot sitting on the next
-  // heading — 120 matches the page gutter rather than the old 32.
-  const rowGap = isMobile ? '120px' : `${landing.rowGap ?? landing.gap ?? 80}px`
-  const paired = landing.titleRhythm === 'paired'
-  // Rows follow the title's alignment unless the frame splits them — no3y Code
-  // left-aligns the title but centres its 1225-wide composer row.
-  const rowsFlush = (landing.rowAlign ?? landing.align) === 'start'
-
-  const rows = landing.sections.map((section, i) => (
-    <SectionContent key={sectionKey(section, i)} section={section} />
-  ))
-
-  /* Several entries read as one row split by hairlines. */
-  const eyebrowRow = (
-    <div style={{ display: 'flex', alignItems: 'stretch', gap: space.lg }}>
-      {eyebrow.map((entry, i) => (
-        <Fragment key={i}>
-          {i > 0 && <div style={{ width: '1px', background: color.border.subtle }} />}
-          <Eyebrow entry={entry} />
-        </Fragment>
-      ))}
-    </div>
-  )
-
-  const heading = (
-    <h1
-      style={{
-        margin: 0,
-        fontSize: isMobile ? '34px' : 'clamp(40px, 4vw, 56px)',
-        fontWeight: 600,
-        lineHeight: 'normal',
-        letterSpacing: 0,
-      }}
-    >
-      {project.title}
-    </h1>
-  )
+  // The shared project frame's section rhythm, from the hero down through every row.
+  const sectionGap = `${isMobile ? PROJECT_SECTION_GAP.mobile : PROJECT_SECTION_GAP.desktop}px`
+  // A hero drawn the column's full width breaks out of it, as on every project page.
+  const wide = (px: number) => (!isMobile && px >= CONTENT_WIDTH ? projectWide() : { width: heroWidth(px) })
 
   /*
-    A `paired` frame groups the eyebrow with the title so the two sit flush;
-    an `even` one spaces them like everything else in the block. Moonfang
-    Armory is the one frame that seats the eyebrow under the title.
+    Whatever opens the page under the intro — the showcase, the hero shot or
+    clip, or on a `continuous` page the first row. It always sits the Meridial
+    onboarding study's 80 (48 on mobile) under the intro, whatever `gap` the
+    frame runs between the blocks after it, so the hero shows on landing.
   */
-  const titleGroup = (
-    <>
-      {paired ? (
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          {landing.eyebrowPlacement === 'below' ? (
-            <>
-              {heading}
-              {eyebrowRow}
-            </>
-          ) : (
-            <>
-              {eyebrowRow}
-              {heading}
-            </>
-          )}
-        </div>
-      ) : (
-        <>
-          {eyebrowRow}
-          {heading}
-        </>
-      )}
+  const hasBody = !!landing.showcase || !!landing.hero.shot || !!landing.hero.video || continuous
 
-      {landing.hero.links && landing.hero.links.length > 0 && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: space.sm }}>
-          {landing.hero.links.map((link) => (
-            <OutLink key={link.href} href={link.href} label={link.label} />
-          ))}
-        </div>
-      )}
-    </>
-  )
+  const rows = landing.sections.map((section, i) => <SectionContent key={sectionKey(section, i)} section={section} />)
 
+  // Every project page opens on the same block — see `ProjectIntro`.
   const intro = (
-    <>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: space.lg }}>
-        <Body body={heroBody} />
-        {landing.hero.list && (
-          // Tailwind's preflight strips list markers, so the disc is restated.
-          <ul style={{ ...BODY_STYLE, listStyleType: 'disc', paddingLeft: '20px' }}>
-            {landing.hero.list.map((item) => (
-              <li key={item}>{item}</li>
+    <ProjectIntro
+      title={project.title}
+      helper={landing.eyebrow}
+      description={heroBody}
+      actions={
+        (landing.hero.cta || !!landing.hero.links?.length) && (
+          <>
+            {landing.hero.cta && (
+              <OutLink
+                href={landing.hero.cta.href}
+                label={landing.hero.cta.label}
+                variant="primary"
+                gradient={landing.hero.cta.gradient}
+              />
+            )}
+            {landing.hero.links?.map((link) => (
+              <OutLink key={link.href} href={link.href} label={link.label} />
             ))}
-          </ul>
-        )}
-      </div>
-
-      {/* Wrapped so the pill sizes to its label instead of stretching the column. */}
-      {landing.hero.cta && (
-        <div style={{ display: 'flex' }}>
-          <OutLink
-            href={landing.hero.cta.href}
-            label={landing.hero.cta.label}
-            variant="primary"
-            gradient={landing.hero.cta.gradient}
-          />
-        </div>
-      )}
-    </>
-  )
-
-  const titleBlock = (
-    <div
-      style={{
-        width: '100%',
-        maxWidth: flush ? `${copyW}px` : copyMeasure(copyW),
-        display: 'flex',
-        flexDirection: 'column',
-        gap: paired ? space.xl : space.lg,
-      }}
+          </>
+        )
+      }
     >
-      {titleGroup}
-      {intro}
-    </div>
+      {landing.hero.list && <IntroList items={landing.hero.list} />}
+    </ProjectIntro>
   )
-
-  // A showcase page opens on the collage's full width, so the header pills
-  // line up with its edges rather than with the centred copy column.
-  const wide = !isMobile && !!landing.showcase
 
   return (
     <div
@@ -303,12 +191,7 @@ export default function ProjectStory({ project }: { project: Project }) {
         gap: continuous ? '0' : space.xl,
       }}
     >
-      <Header
-        leading="back"
-        showProfile={false}
-        barInset={isMobile || flush || wide ? gutter : copyPad(copyW)}
-        trailingInset={wide ? gutter : headerTrailing}
-      />
+      <Header leading="back" showProfile={false} barInset={gutter} />
 
       {/*
         Hero — title block. On a `continuous` page the rest of the rows run in
@@ -318,47 +201,54 @@ export default function ProjectStory({ project }: { project: Project }) {
       <section
         style={{
           position: 'relative',
-          // Top pad stays tight under the header Back row; bottom keeps the
-          // file's 80px so the next band / page end still breathe.
-          padding: `${isMobile ? '24px' : '32px'} ${gutter} ${rowPad}`,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: flush ? 'flex-start' : 'center',
-          gap: continuous ? continuousGap : isMobile ? space['2xl'] : space['5xl'],
+          // The intro pads its own top; the bottom keeps the file's 80px so
+          // the next band / page end still breathe.
+          padding: `0 ${gutter} ${rowPad}`,
         }}
       >
-        {landing.showcase ? (
-          <Showcase showcase={landing.showcase} title={titleGroup} intro={intro} />
-        ) : (
-          titleBlock
-        )}
+        {intro}
 
-        {landing.hero.shot && (
-          <ShotFrame
-            shot={landing.hero.shot}
-            style={{ width: heroWidth(landing.hero.shotWidth ?? 718) }}
-          />
-        )}
-
-        {landing.hero.video && (
-          <HeroVideo video={landing.hero.video} maxWidth={landing.hero.shotWidth ?? 718} />
-        )}
-
-        {/*
-          The rows get their own track so a frame can space them wider than it
-          spaces the title block from the hero shot, and align them separately.
-        */}
-        {continuous && (
+        {hasBody && (
           <div
             style={{
+              marginTop: isMobile ? space['3xl'] : space['5xl'],
               display: 'flex',
               flexDirection: 'column',
-              alignItems: rowsFlush ? 'flex-start' : 'center',
-              gap: rowGap,
-              width: '100%',
+              alignItems: 'flex-start',
+              gap: continuous ? sectionGap : isMobile ? space['2xl'] : space['5xl'],
             }}
           >
-            {rows}
+            {landing.showcase && <Showcase showcase={landing.showcase} style={wide(CONTENT_WIDTH)} />}
+
+            {landing.hero.shot && (
+              <ShotFrame shot={landing.hero.shot} style={wide(landing.hero.shotWidth ?? 718)} />
+            )}
+
+            {landing.hero.video && (
+              <HeroVideo
+                video={landing.hero.video}
+                maxWidth={landing.hero.shotWidth ?? 718}
+                style={wide(landing.hero.shotWidth ?? 718)}
+              />
+            )}
+
+            {/*
+              The rows get their own track, flush left on the column like every
+              project page's sections.
+            */}
+            {continuous && (
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'flex-start',
+                  gap: sectionGap,
+                  width: '100%',
+                }}
+              >
+                {rows}
+              </div>
+            )}
           </div>
         )}
       </section>
@@ -367,7 +257,11 @@ export default function ProjectStory({ project }: { project: Project }) {
         landing.sections.map((section, i) => (
           <section
             key={sectionKey(section, i)}
-            style={{ padding: `${rowPad} ${gutter}`, display: 'flex', justifyContent: 'center' }}
+            style={{
+              padding: `${rowPad} ${gutter}`,
+              display: 'flex',
+              justifyContent: 'center',
+            }}
           >
             {rows[i]}
           </section>
@@ -383,20 +277,10 @@ export default function ProjectStory({ project }: { project: Project }) {
             gap: '40px',
           }}
         >
-          <h2
-            style={{
-              margin: 0,
-              ...type['heading-l'],
-              fontSize: isMobile ? '24px' : type['heading-l'].fontSize,
-            }}
-          >
-            {landing.feedback.heading}
-          </h2>
+          <SectionHeading>{landing.feedback.heading}</SectionHeading>
 
           {landing.feedback.body && (
-            <p style={{ margin: 0, maxWidth: '720px', fontSize: isMobile ? '16px' : '18px', lineHeight: 1.4 }}>
-              {landing.feedback.body}
-            </p>
+            <p style={{ margin: 0, maxWidth: `${PROJECT_COPY_MAX}px`, ...type['body-xl'] }}>{landing.feedback.body}</p>
           )}
 
           <FeedbackWall shots={landing.feedback.shots} />
@@ -405,7 +289,12 @@ export default function ProjectStory({ project }: { project: Project }) {
 
       {/* Closing card — the file drops it to the bottom of a taller frame */}
       {landing.outro && (
-        <section style={{ padding: `0 ${gutter}`, paddingTop: isMobile ? '24px' : '77px' }}>
+        <section
+          style={{
+            padding: `0 ${gutter}`,
+            paddingTop: isMobile ? '24px' : '77px',
+          }}
+        >
           <div
             style={{
               background: ORANGE,
@@ -433,7 +322,14 @@ export default function ProjectStory({ project }: { project: Project }) {
               {landing.outro.heading}
             </h2>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: space.sm, flexWrap: 'wrap' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: space.sm,
+                flexWrap: 'wrap',
+              }}
+            >
               {landing.outro.command && <Pill>{landing.outro.command}</Pill>}
 
               {landing.outro.links?.map((link) => (
@@ -450,27 +346,19 @@ export default function ProjectStory({ project }: { project: Project }) {
 }
 
 /**
- * The page opener, in place of the centred title block: the title and intro on
- * the column's left edge, then the shot with the showcase copy laid over its
- * open left side, then the grid of feature images two to a row. Where the shot
- * is too short to hold the copy, the copy stacks above it instead.
+ * The wide opener under the page's `ProjectIntro`: the shot across the hero
+ * breakout, then the grid of feature images two to a row on the same 16px
+ * rhythm, so the five read as one set.
  */
 function Showcase({
   showcase,
-  title,
-  intro,
+  style,
 }: {
   showcase: NonNullable<Landing['showcase']>
-  /** The page's eyebrow + title group. */
-  title: React.ReactNode
-  /** The hero copy and call to action under the title. */
-  intro: React.ReactNode
+  /** Its width — the hero breakout on desktop. */
+  style: React.CSSProperties
 }) {
   const isMobile = useIsMobile()
-  // The copy is fixed-size type over an image that scales with the viewport,
-  // so it only fits over the shot once the column is near its full width.
-  const overlay = useMediaQuery(`(min-width: ${TABLET_MAX}px)`)
-  const column: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: space.xl }
   const image = (shot: ShowcaseImage) => (
     <img
       src={shot.src}
@@ -484,70 +372,11 @@ function Showcase({
       }}
     />
   )
-  // Over the shot the copy sits on the wallpaper's purple whatever the theme,
-  // so it is white there rather than the theme's ink.
-  const copy = (onShot: boolean) => (
-    <div style={column}>
-      <h2 style={onShot ? { ...ROW_HEADING, color: ON_SHOT } : ROW_HEADING}>{showcase.heading}</h2>
-      {onShot ? (
-        toParagraphs(showcase.body).map((paragraph, i) => (
-          <p key={i} style={{ ...BODY_STYLE, fontWeight: 500, color: ON_SHOT }}>
-            {typeof paragraph === 'string' ? paragraph : <Runs runs={paragraph} />}
-          </p>
-        ))
-      ) : (
-        <Body body={showcase.body} />
-      )}
-    </div>
-  )
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: isMobile ? space['2xl'] : '80px',
-        width: heroWidth(CONTENT_WIDTH),
-      }}
-    >
-      <div style={{ ...column, gap: isMobile ? space['2xl'] : '40px' }}>
-        <div style={column}>{title}</div>
-        <div style={{ ...column, maxWidth: `${INTRO_WIDTH}px` }}>{intro}</div>
-      </div>
-
-      {overlay ? (
-        <div style={{ position: 'relative' }}>
-          {image(showcase.shot)}
-          <div
-            style={{
-              position: 'absolute',
-              top: 0,
-              bottom: 0,
-              left: pct(OVERLAY_COPY.left, CONTENT_WIDTH),
-              width: pct(OVERLAY_COPY.width, CONTENT_WIDTH),
-              display: 'flex',
-              alignItems: 'center',
-            }}
-          >
-            {copy(true)}
-          </div>
-        </div>
-      ) : (
-        <>
-          <div style={{ maxWidth: `${INTRO_WIDTH}px` }}>{copy(false)}</div>
-          {image(showcase.shot)}
-        </>
-      )}
-
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
-          gap: space.lg,
-          // Hero and grid share one 16px rhythm, so the five images read as one set.
-          marginTop: isMobile ? 0 : `calc(${space.lg} - 80px)`,
-        }}
-      >
+    <div style={{ display: 'flex', flexDirection: 'column', gap: space.lg, ...style }}>
+      {image(showcase.shot)}
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: space.lg }}>
         {showcase.grid.map((shot) => (
           <Fragment key={shot.src}>{image(shot)}</Fragment>
         ))}
@@ -590,41 +419,37 @@ function sectionKey(section: StorySection, i: number) {
 function SectionContent({ section }: { section: StorySection }) {
   const isMobile = useIsMobile()
 
-  if (section.kind === 'gallery') return <ArtGallery heading={section.heading} items={section.items} />
+  // Media runs wider than the copy column, out to the hero's width (`WideMedia`).
+  if (section.kind === 'gallery') {
+    return (
+      <WideMedia>
+        <ArtGallery heading={section.heading} items={section.items} />
+      </WideMedia>
+    )
+  }
 
   if (section.kind === 'tracks') return <TrackLegend section={section} />
 
   if (section.kind === 'copy') {
     return (
-      <div
-        style={{
-          width: '100%',
-          maxWidth: copyMeasure(COPY_WIDTH),
-          display: 'flex',
-          flexDirection: 'column',
-          gap: space.lg,
-        }}
-      >
-        <h2
-          style={{
-            margin: 0,
-            ...type['heading-l'],
-            fontSize: isMobile ? '24px' : type['heading-l'].fontSize,
-          }}
-        >
-          {section.heading}
-        </h2>
+      <SectionCopy heading={section.heading}>
         <Body body={section.body} />
-      </div>
+      </SectionCopy>
     )
   }
 
-  if (section.kind === 'shot') return <Composition section={section} />
+  if (section.kind === 'shot') {
+    return (
+      <WideMedia>
+        <Composition section={section} />
+      </WideMedia>
+    )
+  }
 
   if (section.kind === 'band') return <Band section={section} />
 
   if (section.kind === 'feature') {
-    const copy = (
+    const copy = section.headline ? (
       <div
         style={{
           display: 'flex',
@@ -635,53 +460,79 @@ function SectionContent({ section }: { section: StorySection }) {
             : null),
         }}
       >
-        <h2 style={section.headline ? ROW_HEADLINE : ROW_HEADING}>
-          {section.headline
-            ? `${section.heading.replace(/[.!?]$/, '')}. ${flattenProse(section.body)}`
-            : section.heading}
+        <h2 style={ROW_HEADLINE}>
+          {`${section.heading.replace(/[.!?]$/, '')}. ${flattenProse(section.body)}`}
         </h2>
-        {!section.headline && <Body body={section.body} lead={section.lead} />}
       </div>
+    ) : (
+      <SectionCopy heading={section.heading}>
+        <Body body={section.body} lead={section.lead} />
+      </SectionCopy>
     )
-    const media = section.video ? (
-      <StoryClip video={section.video} />
-    ) : section.panel && section.shot ? (
-      /*
+    const shotMedia =
+      section.panel && section.shot ? (
+        /*
         CSS clip around the media. D2 uses it to tint a raw screenshot.
       */
-      <div
-        style={{
-          width: '100%',
-          aspectRatio: section.shot.aspect.replace(/\s/g, ''),
-          background: section.panel.background ?? TINT,
-          overflow: 'hidden',
-          borderRadius: MOCKUP_RADIUS,
-        }}
-      >
+        <div
+          style={{
+            width: '100%',
+            aspectRatio: section.shot.aspect.replace(/\s/g, ''),
+            background: section.panel.background ?? TINT,
+            overflow: 'hidden',
+            borderRadius: MOCKUP_RADIUS,
+          }}
+        >
+          <img
+            src={section.shot.src}
+            alt={section.shot.alt}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              objectPosition: section.shot.position ?? 'center',
+              display: 'block',
+            }}
+          />
+        </div>
+      ) : section.shot ? (
         <img
           src={section.shot.src}
           alt={section.shot.alt}
           style={{
             width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            objectPosition: section.shot.position ?? 'center',
+            height: 'auto',
             display: 'block',
+            borderRadius: MOCKUP_RADIUS,
           }}
         />
-      </div>
-    ) : section.shot ? (
-      <img
-        src={section.shot.src}
-        alt={section.shot.alt}
-        style={{
-          width: '100%',
-          height: 'auto',
-          display: 'block',
-          borderRadius: MOCKUP_RADIUS,
-        }}
-      />
-    ) : null
+      ) : null
+
+    // The live sidebar takes the copy into its own layout — heading and
+    // controls beside the stage — and any shot stands under it (no3y Code's
+    // card states board).
+    if (section.sidebarPlayground) {
+      return (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: isMobile ? space['2xl'] : space['4xl'],
+            width: '100%',
+          }}
+        >
+          <SidebarPlayground
+            options={section.sidebarPlayground}
+            copy={copy}
+            radius={MOCKUP_RADIUS}
+            isMobile={isMobile}
+          />
+          {shotMedia && <WideMedia>{shotMedia}</WideMedia>}
+        </div>
+      )
+    }
+
+    const media = section.video ? <StoryClip video={section.video} /> : shotMedia
 
     if (section.stack) {
       return (
@@ -689,21 +540,18 @@ function SectionContent({ section }: { section: StorySection }) {
           style={{
             display: 'flex',
             flexDirection: 'column',
-            alignItems: 'center',
-            gap: isMobile ? space['2xl'] : `${section.gap}px`,
+            alignItems: 'flex-start',
+            gap: `${isMobile ? PROJECT_STACK_GAP.mobile : PROJECT_STACK_GAP.desktop}px`,
             width: '100%',
           }}
         >
           {copy}
-          {media && (
-            <div
-              style={{
-                width: section.panelWidth ? heroWidth(section.panelWidth) : '100%',
-              }}
-            >
-              {media}
-            </div>
-          )}
+          {media &&
+            (section.panelWidth ? (
+              <div style={{ width: heroWidth(section.panelWidth) }}>{media}</div>
+            ) : (
+              <WideMedia>{media}</WideMedia>
+            ))}
         </div>
       )
     }
@@ -713,7 +561,12 @@ function SectionContent({ section }: { section: StorySection }) {
       <div
         style={
           isMobile
-            ? { display: 'flex', flexDirection: 'column', gap: space['2xl'], width: '100%' }
+            ? {
+                display: 'flex',
+                flexDirection: 'column',
+                gap: space['2xl'],
+                width: '100%',
+              }
             : {
                 display: 'grid',
                 gridTemplateColumns: `${section.copyWidth}fr ${section.panelWidth}fr`,
@@ -736,31 +589,38 @@ function SectionContent({ section }: { section: StorySection }) {
         : section.shotWidth + section.gap + section.captionWidth
 
     return (
-      <div
-        style={
-          isMobile
-            ? { display: 'flex', flexDirection: 'column', gap: space['2xl'], width: '100%' }
-            : {
-                display: 'grid',
-                gridTemplateColumns:
-                  section.kind === 'columns'
-                    ? section.columns.map((c) => `${c.width}fr`).join(' ')
-                    : `${section.shotWidth}fr ${section.captionWidth}fr`,
-                columnGap: pct(section.gap, total),
-                width: pct(total, CONTENT_WIDTH),
-                alignItems: section.kind === 'columns' ? 'start' : 'center',
-              }
-        }
-      >
-        {section.kind === 'columns' ? (
-          section.columns.map((column) => <ShotColumn key={column.shot.src} column={column} />)
-        ) : (
-          <>
-            <ShotFrame shot={section.shot} />
-            <Caption text={section.caption} large />
-          </>
-        )}
-      </div>
+      <WideMedia>
+        <div
+          style={
+            isMobile
+              ? {
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: space['2xl'],
+                  width: '100%',
+                }
+              : {
+                  display: 'grid',
+                  gridTemplateColumns:
+                    section.kind === 'columns'
+                      ? section.columns.map((c) => `${c.width}fr`).join(' ')
+                      : `${section.shotWidth}fr ${section.captionWidth}fr`,
+                  columnGap: pct(section.gap, total),
+                  width: pct(total, CONTENT_WIDTH),
+                  alignItems: section.kind === 'columns' ? 'start' : 'center',
+                }
+          }
+        >
+          {section.kind === 'columns' ? (
+            section.columns.map((column) => <ShotColumn key={column.shot.src} column={column} />)
+          ) : (
+            <>
+              <ShotFrame shot={section.shot} />
+              <Caption text={section.caption} />
+            </>
+          )}
+        </div>
+      </WideMedia>
     )
   }
 
@@ -785,13 +645,13 @@ const TRACK_ICON_SIZE = 16
  */
 function TrackLegend({ section }: { section: Extract<StorySection, { kind: 'tracks' }> }) {
   const isMobile = useIsMobile()
-  const stackGap = isMobile ? space['2xl'] : `${section.gap}px`
+  const stackGap = `${isMobile ? PROJECT_STACK_GAP.mobile : PROJECT_STACK_GAP.desktop}px`
   const copyStyle = {
     display: 'flex' as const,
     flexDirection: 'column' as const,
     gap: space.xl,
     width: '100%',
-    maxWidth: copyMeasure(section.copyWidth),
+    maxWidth: `${PROJECT_COPY_MAX}px`,
   }
   const shotStyle = {
     width: '100%',
@@ -805,13 +665,13 @@ function TrackLegend({ section }: { section: Extract<StorySection, { kind: 'trac
       style={{
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         gap: stackGap,
         width: '100%',
       }}
     >
       <div style={copyStyle}>
-        <h2 style={ROW_HEADING}>{section.heading}</h2>
+        <SectionHeading>{section.heading}</SectionHeading>
         {section.attempt && <Body body={section.attempt.body} />}
       </div>
       {section.attempt && (
@@ -874,44 +734,9 @@ function TrackRow({ item }: { item: TimelineTrack }) {
   )
 }
 
-/**
- * One entry in the hairline-split eyebrow row: plain copy, an outbound link with
- * its icon (The Forge's "Github"), or runs when only part of the entry links out
- * (no3y Code's "Fork of T3 Code").
- */
-function Eyebrow({ entry }: { entry: EyebrowEntry }) {
-  if (Array.isArray(entry)) {
-    return (
-      <p style={EYEBROW_STYLE}>
-        <Runs runs={entry} />
-      </p>
-    )
-  }
-
-  if (typeof entry === 'string') return <p style={EYEBROW_STYLE}>{entry}</p>
-
-  return (
-    <a
-      href={entry.href}
-      target="_blank"
-      rel="noopener noreferrer"
-      style={{
-        ...EYEBROW_STYLE,
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: space.xs,
-        textDecoration: 'none',
-      }}
-    >
-      {entry.label}
-      <ArrowSquareOut size={16} />
-    </a>
-  )
-}
-
 /** Body copy — one `<p>` per paragraph, with inline runs where the file styles part of one. */
 function Body({ body, lead }: { body: Prose; lead?: boolean }) {
-  const style = lead ? { ...BODY_STYLE, fontSize: '18px', color: TEXT } : BODY_STYLE
+  const style = lead ? { ...BODY_STYLE, color: TEXT } : BODY_STYLE
 
   return (
     <>
@@ -922,68 +747,6 @@ function Body({ body, lead }: { body: Prose; lead?: boolean }) {
       ))}
     </>
   )
-}
-
-/**
- * The parts of a paragraph the file styles on their own — a semibold, underlined
- * project name and the muted clause after it. A run with an `href` underlines
- * too, routing in-app for a `/work/…` target and opening a tab otherwise; links
- * inherit their colour so they read as emphasis rather than as browser blue.
- */
-function Runs({ runs }: { runs: TextRun[] }) {
-  return (
-    <>
-      {runs.map((run, i) => {
-        const style: React.CSSProperties = {
-          color: run.muted ? MUTED : 'inherit',
-          fontWeight: run.strong ? 600 : undefined,
-          textDecoration: run.strong || run.href ? 'underline' : undefined,
-        }
-
-        if (!run.href) {
-          return (
-            <span key={i} style={style}>
-              {run.text}
-            </span>
-          )
-        }
-
-        return run.href.startsWith('/') ? (
-          <AppLink key={i} href={run.href} style={style}>
-            {run.text}
-          </AppLink>
-        ) : (
-          <a key={i} href={run.href} target="_blank" rel="noopener noreferrer" style={style}>
-            {run.text}
-          </a>
-        )
-      })}
-    </>
-  )
-}
-
-/**
- * Play a muted loop only while the clip is on screen. Four HEVC files
- * decoding at once on Crisp is wasteful, and a clip you haven't reached
- * yet shouldn't be moving. `play()` is allowed without a gesture because
- * the element stays muted + inline — the same pair that used to back
- * `autoPlay`.
- */
-function usePlayWhenVisible(ref: React.RefObject<HTMLVideoElement | null>) {
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) void el.play().catch(() => {})
-        else el.pause()
-      },
-      { threshold: 0.25 },
-    )
-    io.observe(el)
-    return () => io.disconnect()
-  }, [ref])
 }
 
 /**
@@ -1036,17 +799,30 @@ function StoryClip({ video }: { video: LandingVideo }) {
 const ZOOM_IN = 'transform 1.35s cubic-bezier(0.4, 0, 0.2, 1)'
 const ZOOM_OUT = 'transform 2s cubic-bezier(0.4, 0, 0.2, 1)'
 
-function HeroVideo({ video, maxWidth }: { video: LandingVideo; maxWidth: number }) {
+function HeroVideo({
+  video,
+  maxWidth,
+  style,
+}: {
+  video: LandingVideo
+  /** The width the file draws it at, which the backdrop window is placed against. */
+  maxWidth: number
+  style: React.CSSProperties
+}) {
   const stillOnly = useMediaQuery('(prefers-reduced-motion: reduce)')
   const clipRef = useRef<HTMLVideoElement>(null)
   usePlayWhenVisible(clipRef)
-  const [lateZoom, setLateZoom] = useState({ scale: 1, smooth: false, out: false })
+  const [lateZoom, setLateZoom] = useState({
+    scale: 1,
+    smooth: false,
+    out: false,
+  })
 
   const { backdrop } = video
 
   const box: React.CSSProperties = {
     position: 'relative',
-    width: heroWidth(maxWidth),
+    ...style,
     aspectRatio: video.aspect.replace(/\s/g, ''),
     borderRadius: MOCKUP_RADIUS,
     overflow: 'hidden',
@@ -1075,7 +851,11 @@ function HeroVideo({ video, maxWidth }: { video: LandingVideo; maxWidth: number 
   const clip: React.CSSProperties = !video.zoom
     ? fill
     : video.zoomAfter == null
-      ? { ...fill, transform: `scale(${video.zoom})`, transformOrigin: video.focus ?? 'center' }
+      ? {
+          ...fill,
+          transform: `scale(${video.zoom})`,
+          transformOrigin: video.focus ?? 'center',
+        }
       : {
           ...fill,
           transform: `scale(${lateZoom.scale})`,
@@ -1138,61 +918,8 @@ function ShotColumn({ column }: { column: StoryColumn }) {
   )
 }
 
-/**
- * Outbound hero pill — ghost Button chrome on an `<a>` (`Button` is a
- * <button>). Hover uses `resolvePalette` so it can't drift from Button.
- */
-function OutLink({
-  href,
-  label,
-  variant = 'ghost',
-  gradient,
-}: {
-  href: string
-  label: string
-  /** `primary` for the hero CTA; the link rows stay on the ghost pill. */
-  variant?: ButtonVariant
-  /** no3y Code's purple–pink wash in place of the orange accent. */
-  gradient?: boolean
-}) {
-  const [hovered, setHovered] = useState(false)
-  const palette = resolvePalette(variant, hovered ? 'hover' : 'default')
-
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: space.sm,
-        height: control.sm,
-        boxSizing: 'border-box',
-        padding: `0 ${space.lg}`,
-        borderRadius: radius.full,
-        border: gradient ? 'none' : `1px solid ${palette.borderColor}`,
-        background: gradient ? NO3Y_CTA : palette.background,
-        color: gradient ? color.accent.onAccent : palette.color,
-        opacity: hovered && gradient ? HOVER_OPACITY : 1,
-        fontSize: type['label-m'].fontSize,
-        fontWeight: type['label-m'].fontWeight,
-        lineHeight: type['label-m'].lineHeight,
-        textDecoration: 'none',
-        whiteSpace: 'nowrap',
-        transition: 'background 150ms ease, border-color 150ms ease, opacity 150ms ease',
-      }}
-    >
-      {label}
-      <ArrowSquareOut size={16} />
-    </a>
-  )
-}
-
-/** Caption copy — Body/L under the shot columns, the file's 18px beside a row shot. */
-function Caption({ text, maxWidth, large }: { text: string | string[]; maxWidth?: number; large?: boolean }) {
+/** Caption copy under a shot column or beside a row shot — the rows' body size. */
+function Caption({ text, maxWidth }: { text: string | string[]; maxWidth?: number }) {
   const paragraphs = Array.isArray(text) ? text : [text]
 
   return (
@@ -1209,7 +936,7 @@ function Caption({ text, maxWidth, large }: { text: string | string[]; maxWidth?
           key={paragraph}
           style={{
             margin: 0,
-            ...(large ? { fontSize: '18px', lineHeight: 1.4 } : type['body-l']),
+            ...type['body-xl'],
           }}
         >
           {paragraph}
@@ -1244,7 +971,12 @@ function Composition({ section }: { section: Extract<StorySection, { kind: 'shot
           <img
             src={overlay.src}
             alt={overlay.alt}
-            style={{ ...OVERLAY_STYLE, width: '55%', marginTop: '-40px', marginLeft: 'auto' }}
+            style={{
+              ...OVERLAY_STYLE,
+              width: '55%',
+              marginTop: '-40px',
+              marginLeft: 'auto',
+            }}
           />
         )}
       </div>
@@ -1329,7 +1061,12 @@ function Band({ section }: { section: Extract<StorySection, { kind: 'band' }> })
         borderRadius: MOCKUP_RADIUS,
         overflow: 'hidden',
         ...(isMobile
-          ? { display: 'flex', flexDirection: 'column', gap: space.xl, padding: space.xl }
+          ? {
+              display: 'flex',
+              flexDirection: 'column',
+              gap: space.xl,
+              padding: space.xl,
+            }
           : {
               display: 'grid',
               gridTemplateColumns: `${copyWidth}fr ${shotWidth}fr`,
@@ -1515,7 +1252,14 @@ function FeedbackCard({ shot }: { shot: FeedbackShot }) {
       }}
     >
       {/* 3px against the card's 6px — an optical inset, as in the browser frame */}
-      <div style={{ width: '100%', aspectRatio: shot.aspect, borderRadius: '3px', overflow: 'hidden' }}>
+      <div
+        style={{
+          width: '100%',
+          aspectRatio: shot.aspect,
+          borderRadius: '3px',
+          overflow: 'hidden',
+        }}
+      >
         <img
           src={shot.src}
           alt={shot.alt}
