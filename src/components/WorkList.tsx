@@ -66,9 +66,11 @@ export default function WorkList({
   }, [filter])
 
   // All opens on the featured work, two boxes side by side ahead of the grid,
-  // and the grid leaves those cards out so nothing shows twice.
-  const featured = active.id === 'all' ? FEATURED : []
-  const rest = active.cards.filter((card) => !featured.includes(card))
+  // and the grid leaves those cards out so nothing shows twice. Mobile keeps
+  // them first but as ordinary cards, so the list reads as one style.
+  const leading = active.id === 'all' ? FEATURED : []
+  const featured = isMobile ? [] : leading
+  const rest = [...(isMobile ? leading : []), ...active.cards.filter((card) => !leading.includes(card))]
 
   const cards = (
     <div
@@ -306,11 +308,24 @@ function FeaturedCell({ card, beside }: { card: WorkCard; beside: boolean }) {
         gridTemplateRows: beside ? undefined : 'auto 1fr',
         gap: space.xl,
         minWidth: 0,
+        // The anchor for the stretched link below.
+        position: 'relative',
         padding: space.xs,
         borderRadius: radius.xl,
         background: FEATURED_BG,
       }}
     >
+      {/* The whole box opens the page, not just the art: a link stretched
+          over it, under everything positioned (the art's own link, the
+          pills). It is a pointer target only — the art's link already gives
+          keyboards and screen readers the same destination. */}
+      <AppLink
+        href={card.href}
+        tabIndex={-1}
+        aria-hidden
+        style={{ position: 'absolute', inset: 0, borderRadius: 'inherit' }}
+      />
+
       {/* The box's 16 less its 4 pad, so the corners run concentric. */}
       <CardArt card={card} radius={radius.lg} still />
 
@@ -383,7 +398,9 @@ function FeaturedCell({ card, beside }: { card: WorkCard; beside: boolean }) {
         )}
 
         {/* No employer label here: the box already has enough going on. */}
-        <div style={{ marginTop: 'auto' }}>
+        {/* Positioned, so the pills sit over the stretched link, and shrunk to
+            them, so the floor beside them still opens the page. */}
+        <div style={{ marginTop: 'auto', alignSelf: 'flex-start', position: 'relative' }}>
           <CardActions card={card} links light />
         </div>
       </div>

@@ -95,6 +95,8 @@ export const type = {
   'display-l': { fontSize: '40px', fontWeight: 500, lineHeight: 1.1, letterSpacing: '0' },
   'heading-l': { fontSize: '30px', fontWeight: 500, lineHeight: 1.2, letterSpacing: '0' },
   'heading-m': { fontSize: '20px', fontWeight: 500, lineHeight: 1.3, letterSpacing: '0' },
+  /** Project-page body copy: 20px, 18 on mobile (`--text-body-xl` steps down in the media query). */
+  'body-xl': { fontSize: 'var(--text-body-xl)', fontWeight: 400, lineHeight: 1.5, letterSpacing: '0' },
   'body-l': { fontSize: '16px', fontWeight: 400, lineHeight: 1.4, letterSpacing: '0' },
   'body-m': { fontSize: '15px', fontWeight: 400, lineHeight: 1.4, letterSpacing: '0' },
   'body-s': { fontSize: '14px', fontWeight: 400, lineHeight: 1.4, letterSpacing: '0' },

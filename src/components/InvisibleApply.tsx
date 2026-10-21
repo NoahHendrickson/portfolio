@@ -1,25 +1,31 @@
 import { useState, type CSSProperties, type ReactNode } from 'react'
 import Header from './Header'
+import ProjectIntro, { SectionCopy, WideMedia } from './ProjectIntro'
 import WorkGate from './WorkGate'
 import { color, radius, space, spacePx, type } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
-import { copyMeasure, copyPad, PROJECT_MOBILE_PAD, shellPad } from '../layout'
+import {
+  PROJECT_COPY_MAX,
+  PROJECT_MAX,
+  PROJECT_MOBILE_PAD,
+  PROJECT_SECTION_GAP,
+  PROJECT_STACK_GAP,
+  projectPad,
+  projectWide,
+} from '../layout'
 import { isUnlocked } from '../workGate'
 
 /*
-  The page runs no3y Code's stacked rhythm, the same as the other Invisible
-  studies: a centred 700px copy column with the media below it rather than the
-  copy-left / media-right 1225 grid the frame draws (`331:50280`).
+  The page sits on the shared project frame (`layout.ts`), like the other
+  Invisible studies: each row's copy flush left on the copy measure under the
+  shared `ProjectIntro`, with the media below it,
+  rather than the copy-left / media-right 1225 grid the frame draws (`331:50280`).
 */
-/** The content column at the 1512 frame, which every media width is a share of. */
-const CONTENT_WIDTH = 1272
-/** The centred copy column — the title block and every row's heading + body. */
-const COPY_WIDTH = 700
-/** Copy to media inside one row. */
-const STACK_GAP = 80
+/** The content column, which every media width is a share of. */
+const CONTENT_WIDTH = PROJECT_MAX
 /** The space above a row — see `InvisibleOnboarding`'s `LEAD`. */
-const LEAD = { title: 120, section: 200, tight: 120, close: spacePx['3xl'] } as const
-const LEAD_MOBILE = { title: 64, section: 120, tight: 64, close: spacePx['2xl'] } as const
+const LEAD = { section: PROJECT_SECTION_GAP.desktop, tight: 120, close: spacePx['3xl'] } as const
+const LEAD_MOBILE = { section: PROJECT_SECTION_GAP.mobile, tight: 64, close: spacePx['2xl'] } as const
 
 /** Outer clip on the mockups — `ProjectStory`'s `MOCKUP_RADIUS`. */
 const MOCKUP_RADIUS = radius.xl
@@ -52,12 +58,40 @@ const MEDIA_ASPECT = {
 
 const INVITATIONS_WIDTH = 948
 
+/** Intro to hero — the Meridial onboarding study's. */
+const HERO_GAP = { desktop: space['5xl'], mobile: space['3xl'] } as const
+
+/*
+  The hero stage borrows the onboarding study's: the same Meridial plate (its
+  info panel's blue easing into the magenta's wash) and the same lift on the
+  windows. It is the same product, so it takes the same colour.
+*/
+const PLATE = 'linear-gradient(135deg, #dff2fe 0%, #eef2fd 50%, #f9ecf7 100%)'
+const WINDOW_SHADOW = [
+  '0 1px 3px rgba(20, 40, 60, 0.08)',
+  '0 8px 24px -4px rgba(30, 70, 100, 0.14)',
+  '0 28px 56px -16px rgba(30, 70, 100, 0.22)',
+].join(', ')
+/** The stage the windows are placed on, as on the onboarding study. */
+const STAGE = { width: 1160, height: 660 } as const
+/**
+ * The browser shots bake their window edge in: a 2px grey stroke round a 16px
+ * corner, with the dark shell outside it (at the 2456 export). On the light
+ * plate the baked corner shows as a dark wedge, so each shot is cropped
+ * `SHOT_INSET` px in and rounded at `SHOT_RADIUS` — concentric with the baked
+ * curve and clear of its stroke — and `SHOT_STROKE`, the baked stroke's own
+ * grey, is drawn back on at 1px (the 2px export stroke at the shot's size on
+ * the page). Inset and radius are export px, written as shares so they scale.
+ */
+const SHOT_INSET = 4
+const SHOT_RADIUS = 12
+const SHOT_STROKE = '#8b8b8a'
+/** How far a row's plate reaches past its media slot on each side (`MediaPanel`). */
+const PLATE_BLEED = 48
+
 const bodyStyle: CSSProperties = {
   margin: 0,
-  fontSize: type['body-l'].fontSize,
-  fontWeight: type['body-l'].fontWeight,
-  lineHeight: type['body-l'].lineHeight,
-  letterSpacing: 0,
+  ...type['body-xl'],
   color: color.text.secondary,
 }
 
@@ -74,9 +108,9 @@ const listStyle: CSSProperties = {
 export default function InvisibleApply() {
   const isMobile = useIsMobile()
   const [unlocked, setUnlocked] = useState(isUnlocked)
-  const pad = isMobile ? PROJECT_MOBILE_PAD : shellPad()
+  const pad = isMobile ? PROJECT_MOBILE_PAD : projectPad()
 
-  if (!unlocked) return <WorkGate onUnlock={() => setUnlocked(true)} />
+  if (!unlocked) return <WorkGate onUnlock={() => setUnlocked(true)} barInset={pad} />
 
   return (
     <div
@@ -89,14 +123,13 @@ export default function InvisibleApply() {
       <Header
         leading="back"
         showProfile={false}
-        barInset={isMobile ? pad : copyPad(COPY_WIDTH)}
-        trailingInset={isMobile ? pad : copyPad(COPY_WIDTH)}
+        barInset={pad}
       />
 
       <main
         style={{
           boxSizing: 'border-box',
-          padding: isMobile ? `24px ${pad} 64px` : `32px ${pad} 80px`,
+          padding: isMobile ? `0 ${pad} 64px` : `0 ${pad} 80px`,
         }}
       >
         <div
@@ -104,13 +137,12 @@ export default function InvisibleApply() {
             width: '100%',
             display: 'flex',
             flexDirection: 'column',
-            alignItems: 'center',
+            alignItems: 'flex-start',
           }}
         >
-          <Hero isMobile={isMobile} />
+          <Hero />
 
           <StoryRow
-            lead="title"
             heading="The problem"
             width={INVITATIONS_WIDTH}
             body={
@@ -129,7 +161,7 @@ export default function InvisibleApply() {
               src={media.invitations}
               alt="The old invitations tool — a table of project invites with status, dates and a search field"
               aspect={MEDIA_ASPECT.invitations}
-              radius
+              bare
             />
           </StoryRow>
 
@@ -286,34 +318,141 @@ export default function InvisibleApply() {
   )
 }
 
-function Hero({ isMobile }: { isMobile: boolean }) {
+/**
+ * The opening, laid out like the Meridial onboarding study's: the intro, then a
+ * hero stage straight under it across the full column.
+ */
+function Hero() {
+  const isMobile = useIsMobile()
+
   return (
-    <section
-      style={{
-        width: '100%',
-        maxWidth: copyMeasure(COPY_WIDTH),
-        display: 'flex',
-        flexDirection: 'column',
-        gap: space.lg,
-      }}
-    >
-      <h1
+    <section style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
+      <ProjectIntro
+        title="Users can apply to projects on Meridial"
+        helper="Invisible Technologies"
+        description="Experts on Meridial had no way to find more work on the platform, so staffing every AI training project ran through Greenhouse and external job boards. I designed how experts explore and apply to projects inside Meridial."
+      />
+      <div
         style={{
-          margin: 0,
-          fontSize: isMobile ? '34px' : 'clamp(40px, 4vw, 56px)',
-          fontWeight: 600,
-          lineHeight: 'normal',
-          letterSpacing: 0,
+          marginTop: isMobile ? HERO_GAP.mobile : HERO_GAP.desktop,
+          ...(isMobile ? null : projectWide()),
         }}
       >
-        Users can apply to projects on Meridial
-      </h1>
+        <Showcase />
+      </div>
     </section>
   )
 }
 
 /**
- * One stacked row: heading + copy on the centred 700 column, media below it at
+ * Explore in front and the split view behind it, on the Meridial plate. As on
+ * the onboarding study, positions are shares of a 1160 × 660 stage and both
+ * windows run off it — the front one past the foot, the back one past the
+ * right — so no window shows its lower corners floating short of the edge.
+ * Mobile keeps the front window alone.
+ */
+function Showcase() {
+  const isMobile = useIsMobile()
+
+  const front = (
+    <ShowcaseWindow
+      src={media.explore}
+      alt="Meridial Explore in a browser — a grid of project cards with Best match, Language and Expertise filters"
+      aspect={MEDIA_ASPECT.explore}
+    />
+  )
+
+  if (isMobile) {
+    return (
+      <div
+        style={{
+          overflow: 'hidden',
+          borderRadius: radius['2xl'],
+          background: PLATE,
+          padding: '24px 16px 0',
+        }}
+      >
+        <div style={{ marginBottom: '-12%' }}>{front}</div>
+      </div>
+    )
+  }
+
+  const at = (left: number, top: number, width: number): CSSProperties => ({
+    position: 'absolute',
+    left: `${(left / STAGE.width) * 100}%`,
+    top: `${(top / STAGE.height) * 100}%`,
+    width: `${(width / STAGE.width) * 100}%`,
+  })
+
+  return (
+    <div
+      style={{
+        position: 'relative',
+        aspectRatio: `${STAGE.width} / ${STAGE.height}`,
+        overflow: 'hidden',
+        borderRadius: radius['2xl'],
+        background: PLATE,
+      }}
+    >
+      <div style={at(540, 52, 700)}>
+        <ShowcaseWindow
+          src={media.detail}
+          alt="Explore split view in a browser — project list on the left, application progress and job details on the right"
+          aspect={MEDIA_ASPECT.detail}
+        />
+      </div>
+      <div style={at(40, 120, 880)}>{front}</div>
+    </div>
+  )
+}
+
+function ShowcaseWindow({ src, alt, aspect }: { src: string; alt: string; aspect: string }) {
+  const [w, h] = aspect.split('/').map(Number)
+  const cropW = w - 2 * SHOT_INSET
+  const cropH = h - 2 * SHOT_INSET
+  const share = (px: number, of: number) => `${(px / of) * 100}%`
+
+  // The wrapper is the cropped window, so its corner and shadow land inside the baked edge.
+  return (
+    <div
+      style={{
+        position: 'relative',
+        aspectRatio: `${cropW} / ${cropH}`,
+        overflow: 'hidden',
+        borderRadius: `${share(SHOT_RADIUS, cropW)} / ${share(SHOT_RADIUS, cropH)}`,
+        boxShadow: WINDOW_SHADOW,
+      }}
+    >
+      <img
+        src={src}
+        alt={alt}
+        style={{
+          position: 'absolute',
+          left: `-${share(SHOT_INSET, cropW)}`,
+          top: `-${share(SHOT_INSET, cropH)}`,
+          width: share(w, cropW),
+          height: share(h, cropH),
+          maxWidth: 'none',
+          display: 'block',
+        }}
+      />
+      {/* The stroke rides over the shot, on the same corner. */}
+      <div
+        aria-hidden
+        style={{
+          position: 'absolute',
+          inset: 0,
+          borderRadius: 'inherit',
+          boxShadow: `inset 0 0 0 1px ${SHOT_STROKE}`,
+          pointerEvents: 'none',
+        }}
+      />
+    </div>
+  )
+}
+
+/**
+ * One stacked row: heading + copy on the copy measure, flush left, media below it at
  * `width`. `children` is optional — Users / Jobs and My focus are copy on
  * their own. `lead` is the space above the row, as on the other studies.
  */
@@ -339,37 +478,21 @@ function StoryRow({
         marginTop: `${(isMobile ? LEAD_MOBILE : LEAD)[lead]}px`,
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center',
-        gap: isMobile ? space['2xl'] : `${STACK_GAP}px`,
+        alignItems: 'flex-start',
+        gap: `${isMobile ? PROJECT_STACK_GAP.mobile : PROJECT_STACK_GAP.desktop}px`,
       }}
     >
-      <div
-        style={{
-          width: '100%',
-          maxWidth: copyMeasure(COPY_WIDTH),
-          minWidth: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: space.xl,
-        }}
-      >
-        {heading && (
-          <h2
-            style={{
-              margin: 0,
-              fontSize: '24px',
-              fontWeight: 600,
-              lineHeight: 'normal',
-              letterSpacing: 0,
-              color: color.text.primary,
-            }}
-          >
-            {heading}
-          </h2>
-        )}
-        {body}
-      </div>
-      {children && <div style={{ width: width ? mediaWidth(width) : '100%' }}>{children}</div>}
+      {heading ? (
+        <SectionCopy heading={heading}>{body}</SectionCopy>
+      ) : (
+        <div style={{ width: '100%', maxWidth: `${PROJECT_COPY_MAX}px` }}>{body}</div>
+      )}
+      {children &&
+        (width ? (
+          <div style={{ width: mediaWidth(width) }}>{children}</div>
+        ) : (
+          <WideMedia>{children}</WideMedia>
+        ))}
     </section>
   )
 }
@@ -378,28 +501,61 @@ function Paragraphs({ children }: { children: ReactNode }) {
   return <div style={{ display: 'flex', flexDirection: 'column', gap: space.lg }}>{children}</div>
 }
 
+/**
+ * A row's media. The browser shots stand on the hero's Meridial plate with the
+ * same window shadow, as onboarding's shots do, rather than floating bare on the
+ * dark shell — a light browser window straight on the dark page read as a
+ * cut-out. The invitations shot is already a rounded plate in the file, so it
+ * stands on its own (`bare`).
+ */
 function MediaPanel({
   src,
   alt,
   aspect,
-  radius,
+  bare,
 }: {
   src: string
   alt: string
   aspect: string
-  /** The invitations plate is a rounded rect in the file; the browser shots already carry their own chrome. */
-  radius?: boolean
+  bare?: boolean
 }) {
+  const isMobile = useIsMobile()
+
+  if (bare) {
+    return (
+      <img
+        src={src}
+        alt={alt}
+        style={{ display: 'block', width: '100%', aspectRatio: aspect, borderRadius: MOCKUP_RADIUS }}
+      />
+    )
+  }
+
+  if (isMobile) {
+    return (
+      <div style={{ borderRadius: radius['2xl'], background: PLATE, padding: '16px' }}>
+        <ShowcaseWindow src={src} alt={alt} aspect={aspect} />
+      </div>
+    )
+  }
+
+  /*
+    The plate runs wider than the media slot it sits in — up to `PLATE_BLEED` a
+    side, never closer than 24 to the viewport — and takes the same amount back
+    as padding, so the window keeps its size and only the plate grows. `100%`
+    here is the `WideMedia` slot.
+  */
+  const bleed = `max(0px, min(${PLATE_BLEED}px, calc((100vw - 100%) / 2 - 24px)))`
   return (
-    <img
-      src={src}
-      alt={alt}
+    <div
       style={{
-        display: 'block',
-        width: '100%',
-        aspectRatio: aspect,
-        ...(radius ? { borderRadius: MOCKUP_RADIUS } : null),
+        borderRadius: radius['2xl'],
+        background: PLATE,
+        margin: `0 calc(-1 * ${bleed})`,
+        padding: `48px calc(48px + ${bleed})`,
       }}
-    />
+    >
+      <ShowcaseWindow src={src} alt={alt} aspect={aspect} />
+    </div>
   )
 }

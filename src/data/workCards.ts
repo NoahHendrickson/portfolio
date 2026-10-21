@@ -17,9 +17,9 @@ export type WorkCard = {
   subtitle: string
   art: { src: string; alt: string }
   /**
-   * Art laid over the export. How to Build a PC's Figma card is a bare
-   * gradient — the file never had its art — so the old thumbnail sits centred
-   * at `width`.
+   * Art laid over the export. How to Build a PC's card is a bare field — the
+   * Figma file never had its art — so the old thumbnail sits centred at
+   * `width`.
    */
   overlay?: { src: string; width?: string }
   /** The pill beside the primary CTA: an external link, or an href-less label
@@ -37,9 +37,11 @@ const no3y: WorkCard = {
   href: '/work/no3y-code',
   title: projects['no3y-code'].title,
   subtitle: 'Agent orchestration tool',
+  // Not a Figma export: the page's new-agent capture (`collage/new-agent.png`)
+  // cropped from the top to the card's box, so the window clips at the foot.
   art: {
-    src: '/work/bento/card-no3y.png',
-    alt: 'no3y Code — the composer bar over a red-and-violet gradient',
+    src: '/work/bento/card-no3y-agent.jpg',
+    alt: 'no3y Code — the new-agent screen on the Glass theme, over a fluted gradient',
   },
   extra: { label: 'Download from GitHub', href: NO3Y_CODE_DOWNLOAD },
   feature: { blurb: projects['no3y-code'].tagline },
@@ -59,9 +61,16 @@ const statBuilder: WorkCard = {
   href: '/work/stat-builder',
   title: projects['stat-builder'].title,
   subtitle: 'Community tool for Destiny 2',
+  // Not a Figma export: the optimizer's builds column alone, every card
+  // collapsed, captured at 3x in a 2560-wide window (narrower and the column
+  // drops under its 649px max and the card headers wrap) from the app's
+  // verify-d2 harness (stubbed backend, its fixture reshaped to 550-power
+  // Armor 3.0 so the masterwork costs resolve) and laid on the old
+  // card's yellow, clipped at the foot like no3y Code's. Baked at 2x with
+  // headless Chrome, JPEG 4:4:4 so the small UI type holds.
   art: {
-    src: '/work/bento/card-stat-builder.png',
-    alt: 'D2 Conflux — the armor table in a dark window on yellow',
+    src: '/work/bento/card-d2-builds.jpg',
+    alt: 'D2 Conflux — the builds column, a list of stat builds, on yellow',
   },
   extra: { label: 'View the site', href: STAT_BUILDER_SITE },
 }
@@ -114,7 +123,7 @@ const nachoBox: WorkCard = {
   subtitle: 'Packaging and graphic design project',
   art: {
     src: '/work/nacho-box/thumbnail.png',
-    alt: 'Nacho Box — the “Hint of Lime” lockup on a chip-pattern yellow',
+    alt: 'Nacho Box — the “Lime” lockup on a chip-pattern yellow',
   },
 }
 
@@ -124,9 +133,11 @@ const howToPc: WorkCard = {
   subtitle: 'Graphic design project',
   art: {
     src: '/work/bento/card-how-to-pc.png',
-    alt: 'How to Build a PC — the graphics-card illustration on magenta',
+    alt: 'How to Build a PC — the title and graphics-card illustration on teal',
   },
-  // The old card's placement: the title art centred on a 76% measure.
+  // A flat field in the infographic's own teal (#00A5A5), not the Figma
+  // card's magenta gradient. The old card's placement: the title art centred
+  // on a 76% measure.
   overlay: { src: '/work/how-to-pc/thumbnail.png', width: '76%' },
 }
 
@@ -135,20 +146,9 @@ const pixelArt: WorkCard = {
   title: projects['pixel-art'].title,
   subtitle: 'Destiny 2 gear, one pixel at a time',
   art: {
-    src: '/work/pixel-art/cover.svg',
-    alt: 'A collection of colorful pixel art Destiny 2 inventory icons',
+    src: '/work/bento/card-pixel-art.png',
+    alt: 'All ten pixel art Destiny 2 inventory icons in two rows on charcoal',
   },
-}
-
-const armory: WorkCard = {
-  href: '/work/armory',
-  title: projects.armory.title,
-  subtitle: 'Community tool for Destiny 2',
-  art: {
-    src: '/work/bento/card-armory.png',
-    alt: 'Moonfang Armory — a pixel weapon sprite centered on a blue dither',
-  },
-  extra: { label: 'View the site', href: 'https://noeyarmory.vercel.app/' },
 }
 
 /**
@@ -161,7 +161,7 @@ export type WorkFilter = 'all' | 'fun' | 'career' | 'graphic'
 
 const SECTIONS: { id: Exclude<WorkFilter, 'all'>; label: string; cards: WorkCard[] }[] = [
   { id: 'career', label: 'Case studies', cards: [onboarding, synapse, apply] },
-  { id: 'fun', label: 'Personal projects', cards: [crisp, no3y, statBuilder, armory] },
+  { id: 'fun', label: 'Personal projects', cards: [crisp, no3y, statBuilder] },
   { id: 'graphic', label: 'Graphic design', cards: [pixelArt, nachoBox, howToPc] },
 ]
 

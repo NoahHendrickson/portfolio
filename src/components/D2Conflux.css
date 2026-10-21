@@ -12,7 +12,9 @@
   --cfx-line: rgb(252 252 245 / 0.15);
   --cfx-lift: rgb(255 255 255 / 0.04);
   --cfx-green: #378b3f;
+  /* The shared project frame's rhythm (`layout.ts`): between sections, copy to media. */
   --cfx-gap: 160px;
+  --cfx-stack: 64px;
 
   min-height: 100vh;
   color: var(--cfx-fg);
@@ -31,55 +33,13 @@
 .cfx *::before,
 .cfx *::after { box-sizing: border-box; }
 
+/* `--cfx-pad` is the shared `projectPad()`, which centres the project column. */
 .cfx-shell {
   width: 100%;
-  max-width: calc(1600px + 2 * var(--cfx-pad));
-  margin: 0 auto;
-  padding: 0 var(--cfx-pad);
+  /* The page's floor is padding, not the closing card's margin: a margin would
+     collapse out through `main` and `.cfx` and show the body under the page. */
+  padding: 0 var(--cfx-pad) 96px;
 }
-
-/* ── Top bar ─────────────────────────────────────────────────────────────── */
-
-.cfx-bar {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: rgb(16 19 23 / 0.8);
-  backdrop-filter: blur(20px) saturate(1.1);
-  border-bottom: 1px solid var(--cfx-line);
-}
-
-.cfx-bar-row {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  height: 64px;
-}
-
-.cfx-brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-right: auto;
-  font-size: 15px;
-  font-weight: 500;
-}
-
-.cfx-brand img {
-  width: 28px;
-  height: 28px;
-  image-rendering: pixelated;
-}
-
-/* ── Controls ────────────────────────────────────────────────────────────── */
-
-/* Buttons are the site's own pills (PillLink in D2Conflux.tsx). Only the theme tabs,
-   which show off the app's look, keep the game's hover frame: a 1px ring 2px off. */
-@media (hover: hover) and (pointer: fine) {
-  .cfx-tab:hover { outline: 1px solid rgb(252 252 245 / 0.55); outline-offset: 2px; }
-}
-
-.cfx-tab:focus-visible { outline: 1px solid var(--cfx-fg); outline-offset: 2px; }
 
 /* ── Type ────────────────────────────────────────────────────────────────── */
 
@@ -107,47 +67,38 @@
   background: linear-gradient(to right, rgb(252 252 245 / 0.22), rgb(252 252 245 / 0.06) 60%, transparent);
 }
 
-.cfx-rule .cfx-num { color: var(--cfx-fg); }
-
-.cfx-h1 {
-  margin: 0;
-  font-size: clamp(44px, 6vw, 80px);
-  line-height: 1;
-  font-weight: 500;
-  letter-spacing: -0.02em;
-}
-
+/* The shared project section heading (`SectionHeading`). */
 .cfx-h2 {
   margin: 0;
-  font-size: clamp(28px, 3vw, 36px);
+  font-size: 32px;
   line-height: 1.15;
   font-weight: 500;
-  letter-spacing: -0.01em;
-}
-
-.cfx-lede {
-  margin: 0;
-  font-size: 20px;
-  line-height: 1.45;
-  color: var(--cfx-fg);
+  letter-spacing: -0.015em;
+  text-wrap: balance;
 }
 
 .cfx-body {
   margin: 0;
-  font-size: 16px;
-  line-height: 1.6;
+  font-size: var(--text-body-xl);
+  line-height: 1.5;
   color: var(--cfx-muted);
 }
 
 .cfx-copy { display: flex; flex-direction: column; gap: 20px; }
 
+.cfx-list {
+  margin: 0;
+  padding-left: 1.25em;
+  list-style-type: decimal;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 /* ── Hero ────────────────────────────────────────────────────────────────── */
 
-.cfx-hero { padding: 96px 0 56px; }
-
-.cfx-hero-copy { max-width: 760px; }
-
-.cfx-hero-meta { display: flex; flex-wrap: wrap; gap: 8px 20px; }
+/* The opener is the site's shared `ProjectIntro`; this only spaces it from the first shot. */
+.cfx-hero { padding-bottom: 80px; }
 
 .cfx-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
 
@@ -264,7 +215,7 @@
 }
 
 .cfx-browser > img,
-.cfx-browser > video { display: block; width: 100%; height: auto; }
+.cfx-browser video { display: block; width: 100%; height: auto; }
 
 .cfx-browser-chrome {
   font-size: calc(12px * var(--chrome-scale));
@@ -374,20 +325,30 @@
 .cfx-section {
   display: flex;
   flex-direction: column;
-  gap: 40px;
+  gap: var(--cfx-stack);
   padding-top: var(--cfx-gap);
 }
 
-.cfx-intro {
-  display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-  gap: 24px 80px;
-  align-items: start;
+/* The label rides 24 over its heading rather than a full copy-to-media step. */
+.cfx-section > .cfx-rule { margin-bottom: calc(24px - var(--cfx-stack)); }
+
+/* A section's media runs wider than its copy, out to the hero's 1320 (`WideMedia`),
+   centred on the column. Desktop only; mobile keeps the column. */
+@media (min-width: 901px) {
+  .cfx-section > :not(.cfx-rule, .cfx-intro) {
+    width: min(1320px, calc(100vw - 96px));
+    max-width: none;
+    margin-left: calc((100% - min(1320px, calc(100vw - 96px))) / 2);
+  }
 }
 
-/* Sits the body's first line on the heading's. */
-.cfx-intro > .cfx-body,
-.cfx-intro > .cfx-copy { padding-top: 6px; }
+/* Heading over copy, flush left on the shared measure (`PROJECT_COPY_MAX`). */
+.cfx-intro {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 880px;
+}
 
 .cfx-pair {
   display: grid;
@@ -395,49 +356,6 @@
   gap: 24px;
   align-items: stretch;
 }
-
-.cfx-pair-2 { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
-
-/* ── Theme tabs ──────────────────────────────────────────────────────────── */
-
-.cfx-tabs {
-  display: inline-flex;
-  padding: 3px;
-  gap: 3px;
-  border: 1px solid var(--cfx-line);
-  background: var(--cfx-lift);
-  align-self: flex-start;
-}
-
-.cfx-tab {
-  height: 32px;
-  padding: 0 16px;
-  border: 1px solid transparent;
-  background: transparent;
-  color: var(--cfx-muted);
-  font: inherit;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  outline: none;
-}
-
-.cfx-tab[aria-selected='true'] {
-  color: var(--cfx-fg);
-  border-color: transparent;
-  background:
-    linear-gradient(var(--cfx-green), var(--cfx-green)) padding-box,
-    linear-gradient(to right, rgb(255 255 255 / 0.26), rgb(255 255 255 / 0.6) 50%, rgb(255 255 255 / 0.26)) border-box;
-}
-
-.cfx-themes { display: grid; }
-
-.cfx-themes > figure {
-  grid-area: 1 / 1;
-  transition: opacity 260ms ease;
-}
-
-.cfx-themes > figure[data-on='false'] { opacity: 0; pointer-events: none; }
 
 /* ── Feedback wall ───────────────────────────────────────────────────────── */
 
@@ -463,7 +381,6 @@
   justify-content: space-between;
   gap: 24px 48px;
   margin-top: var(--cfx-gap);
-  margin-bottom: 96px;
   padding: 40px;
 }
 
@@ -471,23 +388,18 @@
 
 /* ── Narrow screens ──────────────────────────────────────────────────────── */
 
-@media (max-width: 1100px) {
-  .cfx { --cfx-gap: 112px; }
-  .cfx-intro { grid-template-columns: minmax(0, 1fr); }
-  .cfx-hero { padding-top: 56px; }
+/* The site's mobile breakpoint (`useIsMobile`). */
+@media (max-width: 900px) {
+  .cfx { --cfx-gap: 96px; --cfx-stack: 40px; }
+  .cfx-h2 { font-size: 28px; }
+  .cfx-intro { gap: 20px; }
+  .cfx-hero { padding-bottom: 48px; }
 }
 
 @media (max-width: 640px) {
-  .cfx { --cfx-gap: 88px; }
-  .cfx-pair,
-  .cfx-pair-2 { grid-template-columns: minmax(0, 1fr); }
-  .cfx-bar-open { display: none; }
+  .cfx-pair { grid-template-columns: minmax(0, 1fr); }
   .cfx-close { padding: 24px; }
   .cfx-browser,
   .cfx-pair .cfx-browser { --chrome-scale: 0.7; border-radius: 8px; }
   .cfx-browser-lights { display: none; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .cfx-themes > figure { transition: none; }
 }

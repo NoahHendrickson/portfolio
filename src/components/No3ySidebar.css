@@ -1,0 +1,809 @@
+/*
+  The no3y Code sidebar replica (No3ySidebar.tsx). Layout and colour ride
+  inline styles like the rest of the site; this sheet holds only what inline
+  styles cannot say — hover and focus states, the reveal of a card's hover
+  actions, and the status marks' keyframes. Every value is read off the
+  running app (cool-darker palette, sidebar vibrancy on) rather than chosen:
+  the row hover is white 5%, the open thread white 8%, a receded title comes
+  forward on hover, and the hover actions open from zero width.
+
+  Resting colours ride the elements' inline styles, so the hover states below
+  are `!important` — an inline style outranks any selector otherwise.
+
+  `@media (hover: hover)` is Tailwind v4's own gate on `hover:` and the app's
+  `group-any-hover`, so a touch tap never strands a row in its hover state.
+*/
+
+.n3sb-card,
+.n3sb-chrome,
+.n3sb-icon-button,
+.n3sb-action,
+.n3sb-header-pill,
+.n3sb-menu-item {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.n3sb-card:focus-visible,
+.n3sb-chrome:focus-visible,
+.n3sb-icon-button:focus-visible,
+.n3sb-header-pill:focus-visible,
+.n3sb-menu-item:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px rgb(255 255 255 / 30%);
+}
+
+/* The hover actions hold no width at rest, so the title runs the card's full
+   width, and open to their natural width while the row is pointed at or one
+   of them has focus. Only the opacity eases (the app's transition-opacity);
+   the width snaps, and the title re-truncates with it. */
+.n3sb-actions {
+  width: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.n3sb-actions:focus-within {
+  width: auto;
+  overflow: visible;
+  opacity: 1;
+}
+
+.n3sb-timer {
+  transition: opacity 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.n3sb-action {
+  transition-property: color, background-color;
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* A project header's ellipsis and plus — hidden until the header, or a card
+   under it, is pointed at. The `:has()` pair is the app's own rule: a card's
+   hover reveals its own section's header, not every header above it. */
+.n3sb-section-actions {
+  opacity: 0;
+  transition: opacity 120ms ease-out;
+}
+
+.n3sb-project-header:is(:hover, :has(:focus-visible)) .n3sb-section-actions,
+.n3sb-project-header:has(~ li[data-n3sb-section]:hover):not(
+    :has(~ li[data-n3sb-header] ~ li[data-n3sb-section]:hover)
+  )
+  .n3sb-section-actions {
+  opacity: 1;
+}
+
+.n3sb-header-mark .n3sb-chevron {
+  visibility: hidden;
+}
+
+@media (pointer: coarse) {
+  .n3sb-section-actions {
+    opacity: 1;
+  }
+}
+
+@media (hover: hover) {
+  .n3sb-card:not([data-active]):hover {
+    background-color: rgb(255 255 255 / 5%) !important;
+    color: #e8e8e8 !important;
+  }
+
+  .n3sb-card:hover .n3sb-title[data-recedes] {
+    color: oklab(0.930993 0.0000424981 0.0000185966) !important;
+  }
+
+  .n3sb-card:hover .n3sb-actions {
+    width: auto;
+    overflow: visible;
+    opacity: 1;
+  }
+
+  .n3sb-card:hover .n3sb-timer {
+    opacity: 0;
+  }
+
+  .n3sb-action:hover {
+    background-color: oklab(0.930993 0.0000424981 0.0000185966 / 0.1) !important;
+    color: oklab(0.930993 0.0000424981 0.0000185966) !important;
+  }
+
+  .n3sb-pr:hover {
+    text-decoration-line: underline !important;
+  }
+
+  .n3sb-chrome:hover,
+  .n3sb-header-pill:hover {
+    background-color: rgb(255 255 255 / 5%) !important;
+  }
+
+  .n3sb-icon-button:hover {
+    background-color: rgb(255 255 255 / 5%) !important;
+    color: #e8e8e8 !important;
+  }
+
+  .n3sb-icon-button:hover svg {
+    color: #e8e8e8 !important;
+  }
+
+  .n3sb-project-header:hover .n3sb-header-mark,
+  .n3sb-project-header:hover .n3sb-header-label {
+    color: #e8e8e8 !important;
+  }
+
+  .n3sb-project-header:hover .n3sb-header-mark .n3sb-folder {
+    visibility: hidden;
+  }
+
+  .n3sb-project-header:hover .n3sb-header-mark .n3sb-chevron {
+    visibility: visible;
+  }
+
+  .n3sb-menu-item:hover {
+    background-color: oklab(0.930993 0.0000424981 0.0000185966 / 0.08) !important;
+  }
+}
+
+/* The waiting mark's breath: 50% → 20% white, stepped so it does not wake the
+   compositor every frame. */
+.n3sb-pulse {
+  background-color: #ffffff;
+  opacity: 0.5;
+  contain: paint;
+  animation: n3sb-monitoring-pulse 4s infinite;
+}
+
+@keyframes n3sb-monitoring-pulse {
+  0%,
+  42% {
+    opacity: 0.5;
+    animation-timing-function: steps(4);
+  }
+  50%,
+  92% {
+    opacity: 0.2;
+    animation-timing-function: steps(4);
+  }
+  100% {
+    opacity: 0.5;
+  }
+}
+
+/* The working rain's cells. Duration and delay ride inline per cell; the name
+   stays in a class so reduced motion can still win. */
+.n3sb-rain-0 { animation: n3sb-rain-0 linear infinite; }
+.n3sb-rain-1 { animation: n3sb-rain-1 linear infinite; }
+.n3sb-rain-2 { animation: n3sb-rain-2 linear infinite; }
+.n3sb-rain-3 { animation: n3sb-rain-3 linear infinite; }
+.n3sb-rain-4 { animation: n3sb-rain-4 linear infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .n3sb-pulse,
+  .n3sb-rain-0,
+  .n3sb-rain-1,
+  .n3sb-rain-2,
+  .n3sb-rain-3,
+  .n3sb-rain-4 {
+    animation: none;
+  }
+}
+
+/* The list scrolls under the chrome without a visible bar, as the app's
+   scroll area does at rest, and fades its cut edge over 12px. */
+.n3sb-scroll {
+  scrollbar-width: none;
+}
+
+.n3sb-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Pixel rain keyframes, copied verbatim from the app's theme.custom.css
+   (generated there from the phanttom Swift constants — do not hand-edit). */
+@keyframes n3sb-rain-0 {
+  0% {
+    opacity: 0;
+  }
+  4% {
+    opacity: 0;
+  }
+  7.5% {
+    opacity: 0.001;
+  }
+  8% {
+    opacity: 0.001;
+  }
+  8.44% {
+    opacity: 0.001;
+  }
+  9.37% {
+    opacity: 0.002;
+  }
+  10.31% {
+    opacity: 0.005;
+  }
+  11.25% {
+    opacity: 0.008;
+  }
+  12% {
+    opacity: 0.013;
+  }
+  12.19% {
+    opacity: 0.015;
+  }
+  13.12% {
+    opacity: 0.027;
+  }
+  14.06% {
+    opacity: 0.05;
+  }
+  15% {
+    opacity: 0.091;
+  }
+  15.94% {
+    opacity: 0.166;
+  }
+  16% {
+    opacity: 0.172;
+  }
+  16.87% {
+    opacity: 0.3;
+  }
+  17.81% {
+    opacity: 0.548;
+  }
+  18.75% {
+    opacity: 1;
+  }
+  19.69% {
+    opacity: 0.942;
+  }
+  20% {
+    opacity: 0.923;
+  }
+  20.62% {
+    opacity: 0.887;
+  }
+  21.56% {
+    opacity: 0.835;
+  }
+  22.5% {
+    opacity: 0.787;
+  }
+  24% {
+    opacity: 0.715;
+  }
+  28% {
+    opacity: 0.553;
+  }
+  32% {
+    opacity: 0.428;
+  }
+  36% {
+    opacity: 0.332;
+  }
+  40% {
+    opacity: 0.257;
+  }
+  44% {
+    opacity: 0.199;
+  }
+  48% {
+    opacity: 0.154;
+  }
+  52% {
+    opacity: 0.119;
+  }
+  56% {
+    opacity: 0.092;
+  }
+  60% {
+    opacity: 0.071;
+  }
+  64% {
+    opacity: 0.055;
+  }
+  68% {
+    opacity: 0.043;
+  }
+  72% {
+    opacity: 0.033;
+  }
+  76% {
+    opacity: 0.026;
+  }
+  80% {
+    opacity: 0.02;
+  }
+  84% {
+    opacity: 0.015;
+  }
+  88% {
+    opacity: 0.012;
+  }
+  92% {
+    opacity: 0.009;
+  }
+  96% {
+    opacity: 0.007;
+  }
+  100% {
+    opacity: 0.006;
+  }
+}
+@keyframes n3sb-rain-1 {
+  0% {
+    opacity: 0;
+  }
+  16% {
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.001;
+  }
+  20.94% {
+    opacity: 0.001;
+  }
+  21.88% {
+    opacity: 0.002;
+  }
+  22.81% {
+    opacity: 0.005;
+  }
+  23.75% {
+    opacity: 0.008;
+  }
+  24% {
+    opacity: 0.01;
+  }
+  24.69% {
+    opacity: 0.015;
+  }
+  25.62% {
+    opacity: 0.027;
+  }
+  26.56% {
+    opacity: 0.05;
+  }
+  27.5% {
+    opacity: 0.091;
+  }
+  28% {
+    opacity: 0.125;
+  }
+  28.44% {
+    opacity: 0.166;
+  }
+  29.37% {
+    opacity: 0.3;
+  }
+  30.31% {
+    opacity: 0.548;
+  }
+  31.25% {
+    opacity: 1;
+  }
+  32% {
+    opacity: 0.953;
+  }
+  32.19% {
+    opacity: 0.942;
+  }
+  33.12% {
+    opacity: 0.887;
+  }
+  34.06% {
+    opacity: 0.835;
+  }
+  35% {
+    opacity: 0.787;
+  }
+  36% {
+    opacity: 0.738;
+  }
+  40% {
+    opacity: 0.571;
+  }
+  44% {
+    opacity: 0.442;
+  }
+  48% {
+    opacity: 0.342;
+  }
+  52% {
+    opacity: 0.265;
+  }
+  56% {
+    opacity: 0.205;
+  }
+  60% {
+    opacity: 0.159;
+  }
+  64% {
+    opacity: 0.123;
+  }
+  68% {
+    opacity: 0.095;
+  }
+  72% {
+    opacity: 0.074;
+  }
+  76% {
+    opacity: 0.057;
+  }
+  80% {
+    opacity: 0.044;
+  }
+  84% {
+    opacity: 0.034;
+  }
+  88% {
+    opacity: 0.026;
+  }
+  92% {
+    opacity: 0.02;
+  }
+  96% {
+    opacity: 0.016;
+  }
+  100% {
+    opacity: 0.012;
+  }
+}
+@keyframes n3sb-rain-2 {
+  0% {
+    opacity: 0;
+  }
+  28% {
+    opacity: 0;
+  }
+  32% {
+    opacity: 0.001;
+  }
+  32.5% {
+    opacity: 0.001;
+  }
+  33.44% {
+    opacity: 0.001;
+  }
+  34.38% {
+    opacity: 0.002;
+  }
+  35.31% {
+    opacity: 0.005;
+  }
+  36% {
+    opacity: 0.007;
+  }
+  36.25% {
+    opacity: 0.008;
+  }
+  37.19% {
+    opacity: 0.015;
+  }
+  38.12% {
+    opacity: 0.027;
+  }
+  39.06% {
+    opacity: 0.05;
+  }
+  40% {
+    opacity: 0.091;
+  }
+  40.94% {
+    opacity: 0.166;
+  }
+  41.87% {
+    opacity: 0.3;
+  }
+  42.81% {
+    opacity: 0.548;
+  }
+  43.75% {
+    opacity: 1;
+  }
+  44% {
+    opacity: 0.984;
+  }
+  44.69% {
+    opacity: 0.942;
+  }
+  45.62% {
+    opacity: 0.887;
+  }
+  46.56% {
+    opacity: 0.835;
+  }
+  47.5% {
+    opacity: 0.787;
+  }
+  48% {
+    opacity: 0.762;
+  }
+  52% {
+    opacity: 0.59;
+  }
+  56% {
+    opacity: 0.457;
+  }
+  60% {
+    opacity: 0.353;
+  }
+  64% {
+    opacity: 0.274;
+  }
+  68% {
+    opacity: 0.212;
+  }
+  72% {
+    opacity: 0.164;
+  }
+  76% {
+    opacity: 0.127;
+  }
+  80% {
+    opacity: 0.098;
+  }
+  84% {
+    opacity: 0.076;
+  }
+  88% {
+    opacity: 0.059;
+  }
+  92% {
+    opacity: 0.046;
+  }
+  96% {
+    opacity: 0.035;
+  }
+  100% {
+    opacity: 0.027;
+  }
+}
+@keyframes n3sb-rain-3 {
+  0% {
+    opacity: 0;
+  }
+  44% {
+    opacity: 0;
+  }
+  45% {
+    opacity: 0.001;
+  }
+  45.94% {
+    opacity: 0.001;
+  }
+  46.88% {
+    opacity: 0.002;
+  }
+  47.81% {
+    opacity: 0.005;
+  }
+  48% {
+    opacity: 0.005;
+  }
+  48.75% {
+    opacity: 0.008;
+  }
+  49.69% {
+    opacity: 0.015;
+  }
+  50.62% {
+    opacity: 0.027;
+  }
+  51.56% {
+    opacity: 0.05;
+  }
+  52% {
+    opacity: 0.066;
+  }
+  52.5% {
+    opacity: 0.091;
+  }
+  53.44% {
+    opacity: 0.166;
+  }
+  54.37% {
+    opacity: 0.3;
+  }
+  55.31% {
+    opacity: 0.548;
+  }
+  56% {
+    opacity: 0.852;
+  }
+  56.25% {
+    opacity: 1;
+  }
+  57.19% {
+    opacity: 0.942;
+  }
+  58.13% {
+    opacity: 0.887;
+  }
+  59.06% {
+    opacity: 0.835;
+  }
+  60% {
+    opacity: 0.787;
+  }
+  64% {
+    opacity: 0.609;
+  }
+  68% {
+    opacity: 0.471;
+  }
+  72% {
+    opacity: 0.365;
+  }
+  76% {
+    opacity: 0.283;
+  }
+  80% {
+    opacity: 0.219;
+  }
+  84% {
+    opacity: 0.169;
+  }
+  88% {
+    opacity: 0.131;
+  }
+  92% {
+    opacity: 0.101;
+  }
+  96% {
+    opacity: 0.079;
+  }
+  100% {
+    opacity: 0.061;
+  }
+}
+@keyframes n3sb-rain-4 {
+  0% {
+    opacity: 0;
+  }
+  56% {
+    opacity: 0;
+  }
+  57.5% {
+    opacity: 0.001;
+  }
+  58.44% {
+    opacity: 0.001;
+  }
+  59.38% {
+    opacity: 0.002;
+  }
+  60% {
+    opacity: 0.004;
+  }
+  60.31% {
+    opacity: 0.005;
+  }
+  61.25% {
+    opacity: 0.008;
+  }
+  62.19% {
+    opacity: 0.015;
+  }
+  63.12% {
+    opacity: 0.027;
+  }
+  64% {
+    opacity: 0.048;
+  }
+  64.06% {
+    opacity: 0.05;
+  }
+  65% {
+    opacity: 0.091;
+  }
+  65.94% {
+    opacity: 0.166;
+  }
+  66.87% {
+    opacity: 0.3;
+  }
+  67.81% {
+    opacity: 0.548;
+  }
+  68% {
+    opacity: 0.619;
+  }
+  68.75% {
+    opacity: 1;
+  }
+  69.69% {
+    opacity: 0.942;
+  }
+  70.63% {
+    opacity: 0.887;
+  }
+  71.56% {
+    opacity: 0.835;
+  }
+  72% {
+    opacity: 0.812;
+  }
+  72.5% {
+    opacity: 0.787;
+  }
+  76% {
+    opacity: 0.629;
+  }
+  80% {
+    opacity: 0.487;
+  }
+  84% {
+    opacity: 0.377;
+  }
+  88% {
+    opacity: 0.292;
+  }
+  92% {
+    opacity: 0.226;
+  }
+  96% {
+    opacity: 0.175;
+  }
+  100% {
+    opacity: 0.135;
+  }
+}
+
+/* The page's controls under the copy: whichever ones the sidebar is showing
+   read bright, the rest sit dim until they're hovered or chosen. */
+.n3sb-option .n3sb-option-label,
+.n3sb-option .n3sb-option-caption {
+  color: var(--color-text-muted);
+  transition: color 150ms ease-out;
+}
+.n3sb-option[aria-pressed='true'] .n3sb-option-label {
+  color: var(--color-text-primary);
+}
+.n3sb-option[aria-pressed='true'] .n3sb-option-caption {
+  color: var(--color-text-secondary);
+}
+@media (hover: hover) {
+  .n3sb-option[aria-pressed='false']:hover .n3sb-option-label,
+  .n3sb-option[aria-pressed='false']:hover .n3sb-option-caption {
+    color: var(--color-text-secondary);
+  }
+}
+
+/* The gear's nudge until it's first opened: two white rings radiating off
+   the icon, staggered, so the panel's own menu reads as live. */
+.n3sb-gear-pulse {
+  position: absolute;
+  inset: 4px;
+  border-radius: 8px;
+  border: 1.5px solid rgba(255, 255, 255, 0.9);
+  pointer-events: none;
+  opacity: 0;
+  animation: n3sb-gear-pulse 2.4s cubic-bezier(0.2, 0.6, 0.35, 1) infinite;
+}
+.n3sb-gear-pulse-late {
+  animation-delay: 1.2s;
+}
+@keyframes n3sb-gear-pulse {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.9;
+  }
+  70%,
+  100% {
+    transform: scale(1.7);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .n3sb-gear-pulse {
+    animation: none;
+    opacity: 0.8;
+  }
+  .n3sb-gear-pulse-late {
+    display: none;
+  }
+}

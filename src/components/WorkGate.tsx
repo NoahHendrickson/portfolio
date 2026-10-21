@@ -3,7 +3,7 @@ import Header from './Header'
 import Button from '../design-system/Button'
 import { color, radius, space, type } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
-import { copyPad, PROJECT_MOBILE_PAD, shellPad } from '../layout'
+import { PROJECT_MOBILE_PAD, shellPad } from '../layout'
 import { unlock } from '../workGate'
 
 const TEXT = color.text.primary
@@ -13,7 +13,17 @@ const ORANGE = color.accent.default
 const WORK_PASSWORD = 'noah2026'
 
 /** Password form shown in place of a locked Invisible case study. */
-export default function WorkGate({ onUnlock }: { onUnlock: () => void }) {
+export default function WorkGate({
+  onUnlock,
+  barInset,
+}: {
+  onUnlock: () => void
+  /**
+   * Where the study it guards puts Back and Contact, so they don't jump when
+   * the page unlocks. Defaults to the shared gutter, which Synapse and Apply use.
+   */
+  barInset?: string
+}) {
   const isMobile = useIsMobile()
   const [input, setInput] = useState('')
   const [error, setError] = useState(false)
@@ -42,13 +52,7 @@ export default function WorkGate({ onUnlock }: { onUnlock: () => void }) {
         overflowX: 'clip',
       }}
     >
-      <Header
-        leading="back"
-        showProfile={false}
-        // Same 700 as the studies, so Back doesn't jump when the page unlocks.
-        barInset={isMobile ? pad : copyPad(700)}
-        trailingInset={isMobile ? pad : copyPad(700)}
-      />
+      <Header leading="back" showProfile={false} barInset={barInset ?? pad} />
 
       <div
         style={{

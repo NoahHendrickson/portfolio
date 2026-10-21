@@ -98,6 +98,45 @@ export const copyPad = (width: number, cap = COPY_MAX) =>
 export const flushTrailingPad = (width: number) =>
   `max(${shellPad()}, calc(100vw - ${width}px - ${shellPad()}))`
 
+/*
+  The project pages' frame — the Meridial onboarding study's, shared so every
+  project page lines up with every other: one capped column centred on a 48px
+  pad (Back, Contact, the intro and every section on its edges), the hero
+  breaking out of it, and each section's heading and copy flush left on a
+  880 measure.
+*/
+/** The project pages' column. */
+export const PROJECT_MAX = 1160
+/** The measure for a project page's copy — every section's heading and body. */
+export const PROJECT_COPY_MAX = 880
+/** How wide a hero runs past the column. */
+export const PROJECT_WIDE_MAX = 1320
+/** Between a project page's sections, and from a section's copy to its media. */
+export const PROJECT_SECTION_GAP = { desktop: 160, mobile: 96 } as const
+export const PROJECT_STACK_GAP = { desktop: 64, mobile: 40 } as const
+
+/**
+ * A project page's horizontal padding on desktop: 48, or whatever centres
+ * `PROJECT_MAX`. Mobile pages use `PROJECT_MOBILE_PAD`.
+ */
+export const projectPad = () => `max(48px, calc((100vw - ${PROJECT_MAX}px) / 2))`
+
+/**
+ * A hero that breaks out of the column to `PROJECT_WIDE_MAX`, centred on it and
+ * never closer than 48 to the viewport. Spread onto a block that is a direct
+ * child of the column (so `100%` is the column). Preflight caps an `img` at its
+ * container, hence `maxWidth: 'none'`.
+ */
+export const projectWide = () => {
+  const width = `min(${PROJECT_WIDE_MAX}px, calc(100vw - 96px))`
+  return {
+    width,
+    maxWidth: 'none',
+    marginLeft: `calc((100% - ${width}) / 2)`,
+    alignSelf: 'flex-start',
+  } as const
+}
+
 /**
  * Project-page gutter below 900. Display titles wrap against the glass on the
  * 20px the tabs use, so these full-bleed pages take a step up. Header reads
