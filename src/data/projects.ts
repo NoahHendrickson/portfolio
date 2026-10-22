@@ -835,7 +835,7 @@ export const projects: Record<string, Project> = {
       showcase: {
         shot: {
           src: '/work/no3y-code/collage/new-agent.webp',
-          alt: 'no3y Code on the desktop — a new agent on the Glass theme, a picture fading out just above the composer',
+          alt: 'no3y Code on the desktop — the new agent screen on the Glass theme, the thread sidebar beside an empty composer',
           aspect: '1272 / 820',
         },
         grid: [
@@ -845,8 +845,8 @@ export const projects: Record<string, Project> = {
             aspect: '680 / 380',
           },
           {
-            src: '/work/no3y-code/collage/model.webp',
-            alt: 'The model picker open above the composer, with Claude and Codex and a reasoning level control',
+            src: '/work/no3y-code/collage/queue.webp',
+            alt: 'A follow-up message queued above the composer while the agent works, with edit, Steer and remove controls',
             aspect: '680 / 380',
           },
           {
