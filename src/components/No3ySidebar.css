@@ -2,10 +2,11 @@
   The no3y Code sidebar replica (No3ySidebar.tsx). Layout and colour ride
   inline styles like the rest of the site; this sheet holds only what inline
   styles cannot say — hover and focus states, the reveal of a card's hover
-  actions, and the status marks' keyframes. Every value is read off the
-  running app (cool-darker palette, sidebar vibrancy on) rather than chosen:
-  the row hover is white 5%, the open thread white 8%, a receded title comes
-  forward on hover, and the hover actions open from zero width.
+  actions, the open thread's glass and the status marks' keyframes. Every
+  value is read off the running app (cool-darker palette, sidebar vibrancy
+  on) rather than chosen: the row hover is white 5%, the open thread a pane of
+  white-6% glass, a receded title comes forward on hover, and the hover
+  actions open from zero width.
 
   Resting colours ride the elements' inline styles, so the hover states below
   are `!important` — an inline style outranks any selector otherwise.
@@ -30,6 +31,68 @@
 .n3sb-menu-item:focus-visible {
   outline: none;
   box-shadow: inset 0 0 0 2px rgb(255 255 255 / 30%);
+}
+
+/* The open thread as a pane of glass (the fork's theme.custom.glass-surfaces.css,
+   Figma t3-fork 532:6527). Its fill, halo and inner glows ride the card's
+   inline style; the rest needs pseudo-elements. The glint: two inset hairlines
+   nudged 1px in, each a crescent that thins to nothing round the corners. It
+   sits over the reflection band, which would otherwise blur it away. */
+.n3sb-card[data-active]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 12;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 1px 1px -0.5px rgb(255 255 255 / 34%),
+    inset 0 -1px 1px -0.5px rgb(255 255 255 / 16%);
+  pointer-events: none;
+}
+
+/* The reflection band: it blurs and saturates the card's own contents, so the
+   project icon and status mark tint the glass near them. Masked to the top and
+   bottom 4px, short of the content's padding, so no text is under the blur.
+   Above the content's z-10 layer, or its backdrop would hold only the fill. */
+.n3sb-card[data-active]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 11;
+  border-radius: inherit;
+  -webkit-backdrop-filter: blur(12px) saturate(6) brightness(1.5);
+  backdrop-filter: blur(12px) saturate(6) brightness(1.5);
+  mask: linear-gradient(rgb(0 0 0 / 40%), #0000 4px calc(100% - 4px), rgb(0 0 0 / 30%));
+  pointer-events: none;
+}
+
+/* The dark edge, the glint's complement: darkest at the middle of each end and
+   easing out toward the top and bottom. The card clips past its edge and both
+   its pseudo-elements are taken, so its li draws it, 1px proud of the card. */
+li:has(> .n3sb-card[data-active])::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  padding: 1px;
+  border-radius: 21px;
+  background: linear-gradient(
+    to bottom,
+    rgb(0 0 0 / 0%),
+    rgb(0 0 0 / 18%) 12%,
+    rgb(0 0 0 / 32%) 30%,
+    rgb(0 0 0 / 35%) 50%,
+    rgb(0 0 0 / 32%) 70%,
+    rgb(0 0 0 / 18%) 88%,
+    rgb(0 0 0 / 0%)
+  );
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+  pointer-events: none;
+}
+
+li:has(> .n3sb-card[data-active][data-compact])::before {
+  border-radius: 13px;
 }
 
 /* The hover actions hold no width at rest, so the title runs the card's full

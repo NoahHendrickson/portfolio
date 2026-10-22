@@ -113,7 +113,33 @@ const QUIET_BUTTON = 'oklab(0.867412 -0.00337383 -0.00388575 / 0.8)'
  * the same weight and lets the wallpaper through like the panel's other lines.
  */
 const RULE = 'rgba(255, 255, 255, 0.08)'
-const ROW_ACTIVE = 'rgba(255, 255, 255, 0.08)'
+/** The open thread's fill: the app's 6% white, under the panel's glass only. */
+const ROW_ACTIVE = 'rgba(255, 255, 255, 0.06)'
+/**
+ * The open thread as a pane of glass (`--fork-glass-selected-shadow`): a dark
+ * 1px halo, a tight sheen inside the top and bottom runs, and two soft inner
+ * glows. Its glint, reflection band and dark edge ring are the sheet's
+ * (`.n3sb-card[data-active]`), since they ride pseudo-elements.
+ */
+const ROW_ACTIVE_SHADOW = [
+  '0 0 2px 1px rgb(0 0 0 / 25%)',
+  'inset 0 2px 3px -2px rgb(255 255 255 / 6%)',
+  'inset 0 -2px 3px -2px rgb(255 255 255 / 4%)',
+  'inset 0 5px 14px rgb(255 255 255 / 4%)',
+  'inset 0 -5px 14px rgb(255 255 255 / 4%)',
+].join(', ')
+/** A glass popup's drop shadow and halo (the app's `--fork-glass-halo` on `.dropdown-glass`). */
+const POPUP_SHADOW = '0 2px 16px rgb(0 0 0 / 25%), 0 0 2px 1px rgb(0 0 0 / 25%)'
+/**
+ * Its sheens (`--fork-glass-sheen`). The app insets them on the popup itself;
+ * here the glass fill would cover an inset shadow, so they ride a layer over it.
+ */
+const POPUP_SHEEN = [
+  'inset 0 3px 4px -3px rgb(255 255 255 / 6%)',
+  'inset 0 -3px 4px -3px rgb(255 255 255 / 4%)',
+  'inset 0 14px 16px -8px rgb(255 255 255 / 3%)',
+  'inset 0 -14px 16px -8px rgb(255 255 255 / 3%)',
+].join(', ')
 
 const STATUS = {
   working: '#24fe8a',
@@ -648,6 +674,7 @@ function ThreadCard({ thread, compact, projectTitleHidden, active, recedes, star
       aria-current={active ? 'page' : undefined}
       className="n3sb-card"
       data-active={active || undefined}
+      data-compact={compact || undefined}
       onClick={() => onOpen(thread.id)}
       onKeyDown={onKeyDown}
       onPointerEnter={(event) => onHover(thread.id, event.currentTarget)}
@@ -659,9 +686,10 @@ function ThreadCard({ thread, compact, projectTitleHidden, active, recedes, star
         overflow: 'hidden',
         textAlign: 'left',
         userSelect: 'none',
-        borderRadius: 16,
+        borderRadius: compact ? 12 : 20,
         outline: 'none',
         background: active ? ROW_ACTIVE : 'transparent',
+        boxShadow: active ? ROW_ACTIVE_SHADOW : undefined,
         color: active ? SIDEBAR_FG : recedes ? RECEDED_ROW : SIDEBAR_FG,
       }}
     >
@@ -879,14 +907,12 @@ function ProjectHeader({
 function StatusHeader({
   label,
   count,
-  projectCount,
   first,
   collapsed,
   onToggle,
 }: {
   label: string
   count: number
-  projectCount: number
   first: boolean
   collapsed: boolean
   onToggle: () => void
@@ -913,19 +939,6 @@ function StatusHeader({
       <span style={{ flexShrink: 0, fontWeight: 600, color: mutedGreyA(0.6), fontVariantNumeric: 'tabular-nums' }}>
         {count}
       </span>
-      {projectCount > 0 && (
-        <span
-          style={{
-            marginLeft: 'auto',
-            flexShrink: 0,
-            fontWeight: 600,
-            color: mutedGreyA(0.6),
-            fontVariantNumeric: 'tabular-nums',
-          }}
-        >
-          {projectCount === 1 ? '1 project' : `${projectCount} projects`}
-        </span>
-      )}
     </button>
   )
 }
@@ -960,7 +973,7 @@ type ListItem =
   | { key: string; kind: 'pinned'; threads: SidebarThread[] }
   | { key: string; kind: 'divider' }
   | { key: string; kind: 'project'; project: SidebarProjectId; first: boolean; afterOpenSection: boolean }
-  | { key: string; kind: 'status'; section: SidebarStatusSection; label: string; count: number; projects: number; first: boolean }
+  | { key: string; kind: 'status'; section: SidebarStatusSection; label: string; count: number; first: boolean }
   | { key: string; kind: 'card'; thread: SidebarThread; section?: SidebarStatusSection; underProject?: SidebarProjectId }
 
 /**
@@ -989,7 +1002,6 @@ function buildList(
         section: key,
         label,
         count: members.length,
-        projects: new Set(members.map((thread) => thread.project)).size,
         first,
       })
       first = false
@@ -1089,7 +1101,7 @@ const MENU_ITEM: CSSProperties = {
   justifyContent: 'space-between',
   gap: 16,
   padding: '0 6px 0 8px',
-  borderRadius: 6,
+  borderRadius: 8,
   fontSize: 14,
   fontWeight: 500,
   lineHeight: '20px',
@@ -1163,15 +1175,15 @@ function GearMenu({
         zIndex: 30,
         width: 224,
         boxSizing: 'border-box',
-        borderRadius: 10,
-        border: '1px solid rgba(255, 255, 255, 0.08)',
-        boxShadow: 'rgba(0, 0, 0, 0.25) 0px 2px 16px 0px',
+        borderRadius: 12,
+        boxShadow: POPUP_SHADOW,
         color: SIDEBAR_FG,
         fontSize: 16,
         lineHeight: '24px',
       }}
     >
       <GlassFill tint={POPUP_TINT} />
+      <div aria-hidden style={{ position: 'absolute', inset: 0, borderRadius: 'inherit', boxShadow: POPUP_SHEEN, pointerEvents: 'none' }} />
       <div style={{ position: 'relative', padding: 4 }}>
         {groupings.map((option) => (
           <button
@@ -1689,7 +1701,7 @@ function SidebarPanel({ settings, onSettingsChange, width, height, hoverCards, o
                     padding: '6px 12px',
                     height: 32,
                     boxSizing: 'border-box',
-                    borderRadius: 10,
+                    borderRadius: 12,
                     fontSize: 14,
                     lineHeight: '20px',
                     color: SIDEBAR_FG,
@@ -1756,7 +1768,7 @@ function SidebarPanel({ settings, onSettingsChange, width, height, hoverCards, o
                         <li key={item.key} style={{ listStyle: 'none' }}>
                           <ul style={{ display: 'flex', flexDirection: 'column', gap: 2, margin: 0, padding: 0, listStyle: 'none' }}>
                             {item.threads.map((thread) => (
-                              <li key={thread.id} style={{ listStyle: 'none' }}>
+                              <li key={thread.id} style={{ position: 'relative', listStyle: 'none' }}>
                                 {/* The pinned block keeps the plain recede rule, even under status headers. */}
                                 {card(thread)}
                               </li>
@@ -1790,7 +1802,6 @@ function SidebarPanel({ settings, onSettingsChange, width, height, hoverCards, o
                           <StatusHeader
                             label={item.label}
                             count={item.count}
-                            projectCount={item.projects}
                             first={item.first}
                             collapsed={collapsedSections.has(item.section)}
                             onToggle={() => toggleSection(item.section)}
@@ -1813,7 +1824,11 @@ function SidebarPanel({ settings, onSettingsChange, width, height, hoverCards, o
                   <Shelf label="Snoozed" count={SIDEBAR_SHELVES.snoozed} tone="snoozed" />
                 </li>
                 <li key="shelf:settled" style={{ listStyle: 'none' }}>
-                  <Shelf label="Settled" count={SIDEBAR_SHELVES.settled} tone="settled" />
+                  {settings.grouping === 'status' ? (
+                    <StatusHeader label="Settled" count={SIDEBAR_SHELVES.settled} first={false} collapsed onToggle={() => {}} />
+                  ) : (
+                    <Shelf label="Settled" count={SIDEBAR_SHELVES.settled} tone="settled" />
+                  )}
                 </li>
               </ul>
             </div>
