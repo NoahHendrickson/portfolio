@@ -145,6 +145,8 @@ const apply: WorkCard = {
   href: '/work/invisible/apply',
   title: 'Meridial’s Explore & Apply',
   subtitle: 'Finding and applying to AI projects',
+  // The whole window, not zoomed, but its 900 and 1300 cuts are sharpened
+  // after the resize like the zoomed cards', so its small UI type holds up.
   art: {
     src: '/work/bento/card-invisible-apply.webp',
     srcSet: cuts('/work/bento/card-invisible-apply.webp'),
