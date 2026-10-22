@@ -37,7 +37,7 @@ const no3y: WorkCard = {
   href: '/work/no3y-code',
   title: projects['no3y-code'].title,
   subtitle: 'Agent orchestration tool',
-  // Not a Figma export: the page's new-agent capture (`collage/new-agent.png`)
+  // Not a Figma export: the page's new-agent capture (`collage/new-agent.webp`)
   // cropped from the top to the card's box, so the window clips at the foot.
   art: {
     src: '/work/bento/card-no3y-agent.jpg',
@@ -52,7 +52,7 @@ const crisp: WorkCard = {
   title: projects.crisp.title,
   subtitle: 'Zoom editor for screen recordings',
   art: {
-    src: '/work/bento/card-crisp.png',
+    src: '/work/bento/card-crisp.webp',
     alt: 'Crisp — the circular mark and wordmark on magenta',
   },
 }
@@ -80,7 +80,7 @@ const onboarding: WorkCard = {
   title: 'Meridial’s Onboarding Redesign',
   subtitle: 'Research & Product Design',
   art: {
-    src: '/work/bento/card-invisible-onboarding.png',
+    src: '/work/bento/card-invisible-onboarding.webp',
     alt: 'Meridial — the onboarding profile step in a browser, on mauve',
   },
   extra: { label: '@ Invisible Technologies' },
@@ -100,7 +100,7 @@ const synapse: WorkCard = {
   title: 'Launching Synapse',
   subtitle: 'Annotation platform for AI training',
   art: {
-    src: '/work/bento/card-invisible-synapse.png',
+    src: '/work/bento/card-invisible-synapse.webp',
     alt: 'Synapse — three model responses beside the task panel, on purple',
   },
   extra: { label: '@ Invisible Technologies' },
@@ -111,7 +111,7 @@ const apply: WorkCard = {
   title: 'Meridial’s Explore & Apply',
   subtitle: 'Finding and applying to AI projects',
   art: {
-    src: '/work/bento/card-invisible-apply.png',
+    src: '/work/bento/card-invisible-apply.webp',
     alt: 'Meridial — Explore split view in a browser, on a light-blue field',
   },
   extra: { label: '@ Invisible Technologies' },
@@ -122,7 +122,7 @@ const nachoBox: WorkCard = {
   title: projects['nacho-box'].title,
   subtitle: 'Packaging and graphic design project',
   art: {
-    src: '/work/nacho-box/thumbnail.png',
+    src: '/work/nacho-box/thumbnail.webp',
     alt: 'Nacho Box — the “Lime” lockup on a chip-pattern yellow',
   },
 }
@@ -132,13 +132,13 @@ const howToPc: WorkCard = {
   title: projects['how-to-pc'].title,
   subtitle: 'Graphic design project',
   art: {
-    src: '/work/bento/card-how-to-pc.png',
+    src: '/work/bento/card-how-to-pc.webp',
     alt: 'How to Build a PC — the title and graphics-card illustration on teal',
   },
   // A flat field in the infographic's own teal (#00A5A5), not the Figma
   // card's magenta gradient. The old card's placement: the title art centred
   // on a 76% measure.
-  overlay: { src: '/work/how-to-pc/thumbnail.png', width: '76%' },
+  overlay: { src: '/work/how-to-pc/thumbnail.webp', width: '76%' },
 }
 
 const pixelArt: WorkCard = {
@@ -146,15 +146,15 @@ const pixelArt: WorkCard = {
   title: projects['pixel-art'].title,
   subtitle: 'Destiny 2 gear, one pixel at a time',
   art: {
-    src: '/work/bento/card-pixel-art.png',
+    src: '/work/bento/card-pixel-art.webp',
     alt: 'All ten pixel art Destiny 2 inventory icons in two rows on charcoal',
   },
 }
 
 /**
  * The sections, in the order the rail's Work menu lists them (Figma
- * `373:12447`). "All" concatenates the same sections so the grid matches
- * the menu; the ids are the ones the old filter pills wrote to
+ * `373:12447`). "All" runs the same sections in that order, except that it
+ * leads with `ALL_LEAD`; the ids are the ones the old filter pills wrote to
  * sessionStorage, so a stored value stays valid.
  */
 export type WorkFilter = 'all' | 'fun' | 'career' | 'graphic'

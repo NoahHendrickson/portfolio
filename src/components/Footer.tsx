@@ -39,12 +39,12 @@ const JUMP_TO: { label: string; href: string; logo: Logo }[] = [
   {
     label: 'D2 Stat Builder',
     href: '/work/stat-builder',
-    logo: { src: '/work/logos/stat-builder.png', width: 16, height: 16 },
+    logo: { src: '/work/logos/stat-builder.webp', width: 16, height: 16 },
   },
   {
     label: 'Moonfang Armory',
     href: 'https://noeyarmory.vercel.app/',
-    logo: { src: '/work/logos/armory.png', width: 16, height: 16 },
+    logo: { src: '/work/logos/armory.webp', width: 16, height: 16 },
   },
 ]
 

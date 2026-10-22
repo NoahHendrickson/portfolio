@@ -22,7 +22,7 @@ import { isUnlocked } from '../workGate'
   their own light rather than being cut into a different one. It borrows the
   palette, not the product's UI: the chrome, type and layout are the portfolio's.
 
-  The palette was read straight off the prototype captures (`prototype-*.png`),
+  The palette was read straight off the prototype captures (`prototype-*.webp`),
   so like `ProjectStory`'s screenshot chrome it stays as hexes here rather than
   theme tokens — it is this page's colour, not the site's.
 */
@@ -77,11 +77,11 @@ const SHOWCASE_WIDTH = `min(${SHOWCASE_MAX}px, calc(100vw - 96px))`
 const MOCKUP_RADIUS = radius.xl
 
 const media = {
-  research: '/work/invisible/onboarding/research.png',
-  journey: '/work/invisible/onboarding/journey.png',
-  prototypeProfile: '/work/invisible/onboarding/prototype-profile.png',
-  prototypeAddress: '/work/invisible/onboarding/prototype-address.png',
-  next: '/work/invisible/onboarding/next.png',
+  research: '/work/invisible/onboarding/research.webp',
+  journey: '/work/invisible/onboarding/journey.webp',
+  prototypeProfile: '/work/invisible/onboarding/prototype-profile.webp',
+  prototypeAddress: '/work/invisible/onboarding/prototype-address.webp',
+  next: '/work/invisible/onboarding/next.webp',
 } as const
 
 /** The exports' own ratios. */
@@ -873,6 +873,8 @@ function PrototypeViewer() {
               key={screen.src}
               src={screen.src}
               alt={screen.alt}
+              loading="lazy"
+              decoding="async"
               aria-hidden={current !== index}
               style={{
                 gridArea: '1 / 1',
