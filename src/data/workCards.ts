@@ -153,8 +153,8 @@ const pixelArt: WorkCard = {
 
 /**
  * The sections, in the order the rail's Work menu lists them (Figma
- * `373:12447`). "All" concatenates the same sections so the grid matches
- * the menu; the ids are the ones the old filter pills wrote to
+ * `373:12447`). "All" runs the same sections in that order, except that it
+ * leads with `ALL_LEAD`; the ids are the ones the old filter pills wrote to
  * sessionStorage, so a stored value stays valid.
  */
 export type WorkFilter = 'all' | 'fun' | 'career' | 'graphic'
@@ -165,16 +165,26 @@ const SECTIONS: { id: Exclude<WorkFilter, 'all'>; label: string; cards: WorkCard
   { id: 'graphic', label: 'Graphic design', cards: [pixelArt, nachoBox, howToPc] },
 ]
 
-export const WORK_FILTERS: { id: WorkFilter; label: string; cards: WorkCard[] }[] = [
-  { id: 'all', label: 'All', cards: SECTIONS.flatMap((section) => section.cards) },
-  ...SECTIONS,
-]
-
 /**
  * The cards All opens on, larger and ahead of the grid (which then leaves
  * them out). The other filters list them in their own sections as usual.
  */
 export const FEATURED: WorkCard[] = [onboarding, no3y]
+
+/** All's opening run: the featured pair, then D2 Conflux heading the grid. */
+const ALL_LEAD: WorkCard[] = [...FEATURED, statBuilder]
+
+export const WORK_FILTERS: { id: WorkFilter; label: string; cards: WorkCard[] }[] = [
+  {
+    id: 'all',
+    label: 'All',
+    cards: [
+      ...ALL_LEAD,
+      ...SECTIONS.flatMap((section) => section.cards).filter((card) => !ALL_LEAD.includes(card)),
+    ],
+  },
+  ...SECTIONS,
+]
 
 /** Survives refresh — the whole home page lives on `/`, so the filter isn't in the path. */
 const WORK_FILTER_KEY = 'work-filter'
