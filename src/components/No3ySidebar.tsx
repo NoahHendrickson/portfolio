@@ -115,19 +115,6 @@ const QUIET_BUTTON = 'oklab(0.867412 -0.00337383 -0.00388575 / 0.8)'
 const RULE = 'rgba(255, 255, 255, 0.08)'
 /** The open thread's fill: the app's 6% white, under the panel's glass only. */
 const ROW_ACTIVE = 'rgba(255, 255, 255, 0.06)'
-/**
- * The open thread as a pane of glass (`--fork-glass-selected-shadow`): a dark
- * 1px halo, a tight sheen inside the top and bottom runs, and two soft inner
- * glows. Its glint, reflection band and dark edge ring are the sheet's
- * (`.n3sb-card[data-active]`), since they ride pseudo-elements.
- */
-const ROW_ACTIVE_SHADOW = [
-  '0 0 2px 1px rgb(0 0 0 / 25%)',
-  'inset 0 2px 3px -2px rgb(255 255 255 / 6%)',
-  'inset 0 -2px 3px -2px rgb(255 255 255 / 4%)',
-  'inset 0 5px 14px rgb(255 255 255 / 4%)',
-  'inset 0 -5px 14px rgb(255 255 255 / 4%)',
-].join(', ')
 /** A glass popup's drop shadow and halo (the app's `--fork-glass-halo` on `.dropdown-glass`). */
 const POPUP_SHADOW = '0 2px 16px rgb(0 0 0 / 25%), 0 0 2px 1px rgb(0 0 0 / 25%)'
 /**
@@ -689,7 +676,6 @@ function ThreadCard({ thread, compact, projectTitleHidden, active, recedes, star
         borderRadius: compact ? 12 : 20,
         outline: 'none',
         background: active ? ROW_ACTIVE : 'transparent',
-        boxShadow: active ? ROW_ACTIVE_SHADOW : undefined,
         color: active ? SIDEBAR_FG : recedes ? RECEDED_ROW : SIDEBAR_FG,
       }}
     >

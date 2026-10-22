@@ -34,10 +34,35 @@
 }
 
 /* The open thread as a pane of glass (the fork's theme.custom.glass-surfaces.css,
-   Figma t3-fork 532:6527). Its fill, halo and inner glows ride the card's
-   inline style; the rest needs pseudo-elements. The glint: two inset hairlines
-   nudged 1px in, each a crescent that thins to nothing round the corners. It
-   sits over the reflection band, which would otherwise blur it away. */
+   Figma t3-fork 532:6527). Its fill rides the card's inline style; its shadow
+   lives here rather than inline, so the focus rule below can lay the ring over
+   it — an inline shadow would outrank it and leave the open card with no
+   visible keyboard focus. The shadow is a dark 1px halo, a tight sheen inside
+   the top and bottom runs and two soft inner glows. */
+.n3sb-card[data-active] {
+  box-shadow:
+    0 0 2px 1px rgb(0 0 0 / 25%),
+    inset 0 2px 3px -2px rgb(255 255 255 / 6%),
+    inset 0 -2px 3px -2px rgb(255 255 255 / 4%),
+    inset 0 5px 14px rgb(255 255 255 / 4%),
+    inset 0 -5px 14px rgb(255 255 255 / 4%);
+}
+
+/* Focused while open: the same ring every row takes, first in the list so it
+   draws over the glass, as the app keeps Tailwind's ring ahead of its glass. */
+.n3sb-card[data-active]:focus-visible {
+  box-shadow:
+    inset 0 0 0 2px rgb(255 255 255 / 30%),
+    0 0 2px 1px rgb(0 0 0 / 25%),
+    inset 0 2px 3px -2px rgb(255 255 255 / 6%),
+    inset 0 -2px 3px -2px rgb(255 255 255 / 4%),
+    inset 0 5px 14px rgb(255 255 255 / 4%),
+    inset 0 -5px 14px rgb(255 255 255 / 4%);
+}
+
+/* The rest needs pseudo-elements. The glint: two inset hairlines nudged 1px
+   in, each a crescent that thins to nothing round the corners. It sits over
+   the reflection band, which would otherwise blur it away. */
 .n3sb-card[data-active]::before {
   content: '';
   position: absolute;
