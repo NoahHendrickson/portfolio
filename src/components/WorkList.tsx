@@ -5,7 +5,7 @@ import Button from '../design-system/Button'
 import { VARIANTS } from '../design-system/buttonStyles'
 import { FEATURED, WORK_FILTERS, type WorkCard, type WorkFilter } from '../data/workCards'
 import { color, control, radius, space, type } from '../design-system/tokens'
-import { useIsMobile, useIsWide } from '../hooks/useIsMobile'
+import { MOBILE_QUERY, useIsMobile, useIsWide } from '../hooks/useIsMobile'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 
 /**
@@ -39,6 +39,14 @@ const FEATURED_BG = color.bg.cream
  */
 const HOVER_QUERY = '(hover: hover) and (pointer: fine)'
 
+/**
+ * Where a featured box can seat its caption beside the art. Beside, the
+ * caption runs taller than the art's ratio and the art stretches to meet it,
+ * cropping its sides — under 10% from 1512 up, but about 20% at 1400 and 45%
+ * at 1000, where it eats into the window. Below this the box stacks instead.
+ */
+const BESIDE_QUERY = '(min-width: 1440px)'
+
 const CASE_STUDY_CARDS = new Set(
   WORK_FILTERS.find((f) => f.id === 'career')?.cards ?? [],
 )
@@ -53,6 +61,7 @@ export default function WorkList({
   const isMobile = useIsMobile()
   const isWide = useIsWide()
   const canHover = useMediaQuery(HOVER_QUERY)
+  const roomBeside = useMediaQuery(BESIDE_QUERY)
   // Desktop with a mouse shows the grid as bare art, caption on hover.
   const peek = canHover && !isMobile
   const active = WORK_FILTERS.find((f) => f.id === filter) ?? WORK_FILTERS[0]
@@ -101,13 +110,14 @@ export default function WorkList({
           style={{
             display: 'grid',
             // Two up only past `WIDE_MIN`; below it a half-width box is too
-            // narrow for the stats, so the boxes stack and lay out sideways.
+            // narrow for the stats, so the boxes stack and lay out sideways —
+            // until `BESIDE_QUERY`, under which each box stacks too.
             gridTemplateColumns: isWide ? 'repeat(2, minmax(0, 1fr))' : '1fr',
             gap: isMobile ? space.xl : '32px',
           }}
         >
           {featured.map((card) => (
-            <FeaturedCell key={card.href} card={card} beside={!isWide && !isMobile} />
+            <FeaturedCell key={card.href} card={card} beside={!isWide && !isMobile && roomBeside} />
           ))}
         </div>
         {cards}
@@ -327,7 +337,11 @@ function FeaturedCell({ card, beside }: { card: WorkCard; beside: boolean }) {
       />
 
       {/* The box's 16 less its 4 pad, so the corners run concentric. */}
-      <CardArt card={card} radius={radius.lg} still />
+      {/* Beside, the caption can run taller than the art's own ratio (the
+          results wrap as the column narrows), so the art stretches to the
+          box's height and crops its backdrop rather than stopping short;
+          `BESIDE_QUERY` keeps that crop to the backdrop. */}
+      <CardArt card={card} radius={radius.lg} still fill={beside} />
 
       <div
         style={{
@@ -413,11 +427,14 @@ function CardArt({
   card,
   radius: corner = radius.md,
   still = false,
+  fill = false,
 }: {
   card: WorkCard
   radius?: string
   /** Drop the art's own hover lift, for a box that lifts as a whole. */
   still?: boolean
+  /** Stretch to the grid row's height, the ratio only a floor. */
+  fill?: boolean
 }) {
   return (
     <AppLink
@@ -432,10 +449,20 @@ function CardArt({
         overflow: 'hidden',
         // The export's own box (452.5 × 250 at 2x), so the art never crops.
         aspectRatio: '905 / 500',
+        // Stretched both ways, the ratio only sizes the row; the art then
+        // takes the row's height. Height alone would drive the width through
+        // the ratio and run the art over the caption.
+        alignSelf: fill ? 'stretch' : undefined,
+        justifySelf: fill ? 'stretch' : undefined,
       }}
     >
       <img
         src={card.art.src}
+        srcSet={card.art.srcSet}
+        // `auto` is the box's laid-out width (lazy images only); a browser
+        // without it takes the fallback — the full column on mobile, about a
+        // featured box (the widest desktop cell) otherwise.
+        sizes={card.art.srcSet ? `auto, ${MOBILE_QUERY} 100vw, 460px` : undefined}
         alt={card.art.alt}
         loading="lazy"
         style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover' }}

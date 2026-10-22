@@ -5,9 +5,8 @@ import { NO3Y_CODE_DOWNLOAD, STAT_BUILDER_SITE, projects } from './projects'
  * than in `WorkList` because the rail's Work menu (`HomeRail`) reads the same
  * sections for its labels and counts, and a component file should export
  * only components. Each card is its art exported whole out of Figma (452.5 ×
- * 250 in the file, shipped at 2x — the Invisible apply and onboarding cards
- * at 4x so the UI type stays sharp) plus the caption copy that has no home
- * in the `Project` type.
+ * 250 in the file, shipped at 2x — the Invisible cards at 4x so the UI type
+ * stays sharp) plus the caption copy that has no home in the `Project` type.
  */
 
 export type WorkCard = {
@@ -15,7 +14,11 @@ export type WorkCard = {
   href: string
   title: string
   subtitle: string
-  art: { src: string; alt: string }
+  /**
+   * `srcSet` lists smaller cuts of a 4x export (see `cuts`), so the browser
+   * scales from the nearest one rather than halving the 1810 itself.
+   */
+  art: { src: string; alt: string; srcSet?: string }
   /**
    * Art laid over the export. How to Build a PC's card is a bare field — the
    * Figma file never had its art — so the old thumbnail sits centred at
@@ -33,6 +36,32 @@ export type WorkCard = {
   feature?: { blurb?: string; results?: string[] }
 }
 
+/**
+ * A 4x export (1810 wide) with its 900 and 1300 cuts beside it, as
+ * `<name>-900.<ext>` / `<name>-1300.<ext>`, Lanczos-resized from the export.
+ * Left to itself the browser draws an 1810 card into a ~440 box by more than
+ * halving it, which crunches the UI type and turns no3y Code's halftone
+ * wallpaper into moiré; with the cuts no downscale runs past ~1.5×. Re-cut
+ * all three if the export changes. `width` is the master's own width.
+ */
+function cuts(src: string, width = 1810) {
+  const dot = src.lastIndexOf('.')
+  const [base, ext] = [src.slice(0, dot), src.slice(dot)]
+  return `${base}-900${ext} 900w, ${base}-1300${ext} 1300w, ${src} ${width}w`
+}
+
+/**
+ * The zoomed cut of a card (`<name>-zoom.<ext>`, 1392 × 769): the export
+ * cropped 1.3× in from the window's top-left, so the UI type reads 30%
+ * larger in the box and the window runs off the right edge. Its 900 and 1300
+ * cuts are lightly sharpened after the resize.
+ */
+function zoomed(src: string, alt: string) {
+  const dot = src.lastIndexOf('.')
+  const zoom = `${src.slice(0, dot)}-zoom${src.slice(dot)}`
+  return { src: zoom, srcSet: cuts(zoom, 1392), alt }
+}
+
 const no3y: WorkCard = {
   href: '/work/no3y-code',
   title: projects['no3y-code'].title,
@@ -41,6 +70,7 @@ const no3y: WorkCard = {
   // cropped from the top to the card's box, so the window clips at the foot.
   art: {
     src: '/work/bento/card-no3y-agent.jpg',
+    srcSet: cuts('/work/bento/card-no3y-agent.jpg'),
     alt: 'no3y Code — the new-agent screen on the Glass theme, over a fluted gradient',
   },
   extra: { label: 'Download from GitHub', href: NO3Y_CODE_DOWNLOAD },
@@ -68,10 +98,10 @@ const statBuilder: WorkCard = {
   // Armor 3.0 so the masterwork costs resolve) and laid on the old
   // card's yellow, clipped at the foot like no3y Code's. Baked at 2x with
   // headless Chrome, JPEG 4:4:4 so the small UI type holds.
-  art: {
-    src: '/work/bento/card-d2-builds.jpg',
-    alt: 'D2 Conflux — the builds column, a list of stat builds, on yellow',
-  },
+  art: zoomed(
+    '/work/bento/card-d2-builds.jpg',
+    'D2 Conflux — the builds column, a list of stat builds, on yellow',
+  ),
   extra: { label: 'View the site', href: STAT_BUILDER_SITE },
 }
 
@@ -81,6 +111,7 @@ const onboarding: WorkCard = {
   subtitle: 'Research & Product Design',
   art: {
     src: '/work/bento/card-invisible-onboarding.webp',
+    srcSet: cuts('/work/bento/card-invisible-onboarding.webp'),
     alt: 'Meridial — the onboarding profile step in a browser, on mauve',
   },
   extra: { label: '@ Invisible Technologies' },
@@ -99,10 +130,14 @@ const synapse: WorkCard = {
   href: '/work/invisible/synapse',
   title: 'Launching Synapse',
   subtitle: 'Annotation platform for AI training',
-  art: {
-    src: '/work/bento/card-invisible-synapse.webp',
-    alt: 'Synapse — three model responses beside the task panel, on purple',
-  },
+  // The file's card only ever came out at 2x, so it was rebuilt at 4x: the
+  // task window from its vector frame (`293:18293`, the annotations platform
+  // page) laid on the old card's purple, upscaled, at the old card's
+  // placement to the pixel.
+  art: zoomed(
+    '/work/bento/card-invisible-synapse.webp',
+    'Synapse — three model responses beside the task panel, on purple',
+  ),
   extra: { label: '@ Invisible Technologies' },
 }
 
@@ -112,6 +147,7 @@ const apply: WorkCard = {
   subtitle: 'Finding and applying to AI projects',
   art: {
     src: '/work/bento/card-invisible-apply.webp',
+    srcSet: cuts('/work/bento/card-invisible-apply.webp'),
     alt: 'Meridial — Explore split view in a browser, on a light-blue field',
   },
   extra: { label: '@ Invisible Technologies' },
@@ -165,16 +201,26 @@ const SECTIONS: { id: Exclude<WorkFilter, 'all'>; label: string; cards: WorkCard
   { id: 'graphic', label: 'Graphic design', cards: [pixelArt, nachoBox, howToPc] },
 ]
 
-export const WORK_FILTERS: { id: WorkFilter; label: string; cards: WorkCard[] }[] = [
-  { id: 'all', label: 'All', cards: SECTIONS.flatMap((section) => section.cards) },
-  ...SECTIONS,
-]
-
 /**
  * The cards All opens on, larger and ahead of the grid (which then leaves
  * them out). The other filters list them in their own sections as usual.
  */
 export const FEATURED: WorkCard[] = [onboarding, no3y]
+
+/** All's opening run: the featured pair, then D2 Conflux heading the grid. */
+const ALL_LEAD: WorkCard[] = [...FEATURED, statBuilder]
+
+export const WORK_FILTERS: { id: WorkFilter; label: string; cards: WorkCard[] }[] = [
+  {
+    id: 'all',
+    label: 'All',
+    cards: [
+      ...ALL_LEAD,
+      ...SECTIONS.flatMap((section) => section.cards).filter((card) => !ALL_LEAD.includes(card)),
+    ],
+  },
+  ...SECTIONS,
+]
 
 /** Survives refresh — the whole home page lives on `/`, so the filter isn't in the path. */
 const WORK_FILTER_KEY = 'work-filter'
