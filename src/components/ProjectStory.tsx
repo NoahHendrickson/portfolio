@@ -221,7 +221,7 @@ export default function ProjectStory({ project }: { project: Project }) {
             {landing.showcase && <Showcase showcase={landing.showcase} style={wide(CONTENT_WIDTH)} />}
 
             {landing.hero.shot && (
-              <ShotFrame shot={landing.hero.shot} style={wide(landing.hero.shotWidth ?? 718)} />
+              <ShotFrame shot={landing.hero.shot} style={wide(landing.hero.shotWidth ?? 718)} priority />
             )}
 
             {landing.hero.video && (
@@ -359,10 +359,14 @@ function Showcase({
   style: React.CSSProperties
 }) {
   const isMobile = useIsMobile()
-  const image = (shot: ShowcaseImage) => (
+  // The wide shot is the page's hero; the grid under it can wait its turn.
+  const image = (shot: ShowcaseImage, hero = false) => (
     <img
       src={shot.src}
       alt={shot.alt}
+      loading={hero ? 'eager' : 'lazy'}
+      fetchPriority={hero ? 'high' : 'auto'}
+      decoding="async"
       style={{
         display: 'block',
         width: '100%',
@@ -375,7 +379,7 @@ function Showcase({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: space.lg, ...style }}>
-      {image(showcase.shot)}
+      {image(showcase.shot, true)}
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: space.lg }}>
         {showcase.grid.map((shot) => (
           <Fragment key={shot.src}>{image(shot)}</Fragment>
@@ -486,6 +490,8 @@ function SectionContent({ section }: { section: StorySection }) {
           <img
             src={section.shot.src}
             alt={section.shot.alt}
+            loading="lazy"
+            decoding="async"
             style={{
               width: '100%',
               height: '100%',
@@ -499,6 +505,8 @@ function SectionContent({ section }: { section: StorySection }) {
         <img
           src={section.shot.src}
           alt={section.shot.alt}
+          loading="lazy"
+          decoding="async"
           style={{
             width: '100%',
             height: 'auto',
@@ -678,6 +686,8 @@ function TrackLegend({ section }: { section: Extract<StorySection, { kind: 'trac
         <img
           src={section.attempt.shot.src}
           alt={section.attempt.shot.alt}
+          loading="lazy"
+          decoding="async"
           style={{
             ...shotStyle,
             aspectRatio: section.attempt.shot.aspect.replace(/\s/g, ''),
@@ -690,6 +700,8 @@ function TrackLegend({ section }: { section: Extract<StorySection, { kind: 'trac
       <img
         src={section.shot.src}
         alt={section.shot.alt}
+        loading="lazy"
+        decoding="async"
         style={{
           ...shotStyle,
           aspectRatio: section.shot.aspect.replace(/\s/g, ''),
@@ -769,7 +781,7 @@ function StoryClip({ video }: { video: LandingVideo }) {
   }
 
   return stillOnly ? (
-    <img src={video.poster} alt={video.alt} style={fill} />
+    <img src={video.poster} alt={video.alt} loading="lazy" decoding="async" style={fill} />
   ) : (
     <video
       ref={clipRef}
@@ -971,6 +983,8 @@ function Composition({ section }: { section: Extract<StorySection, { kind: 'shot
           <img
             src={overlay.src}
             alt={overlay.alt}
+            loading="lazy"
+            decoding="async"
             style={{
               ...OVERLAY_STYLE,
               width: '55%',
@@ -1004,6 +1018,8 @@ function Composition({ section }: { section: Extract<StorySection, { kind: 'shot
         <img
           src={overlay.src}
           alt={overlay.alt}
+          loading="lazy"
+          decoding="async"
           style={{
             ...OVERLAY_STYLE,
             position: 'absolute',
@@ -1044,6 +1060,8 @@ function Band({ section }: { section: Extract<StorySection, { kind: 'band' }> })
     <img
       src={shot.src}
       alt={shot.alt}
+      loading="lazy"
+      decoding="async"
       style={{
         width: '100%',
         aspectRatio: shot.aspect.replace(/\s/g, ''),
@@ -1079,6 +1097,8 @@ function Band({ section }: { section: Extract<StorySection, { kind: 'band' }> })
       <img
         src={section.background}
         alt=""
+        loading="lazy"
+        decoding="async"
         style={{
           position: 'absolute',
           inset: 0,
@@ -1133,7 +1153,16 @@ function Band({ section }: { section: Extract<StorySection, { kind: 'band' }> })
  * (or `zoom` times it) pinned top-left and is clipped by the aspect box, so a
  * full-page capture shows its top and a zoomed one shows its corner.
  */
-function ShotFrame({ shot, style }: { shot: LandingShot; style?: React.CSSProperties }) {
+function ShotFrame({
+  shot,
+  style,
+  priority,
+}: {
+  shot: LandingShot
+  style?: React.CSSProperties
+  /** The hero: fetched first rather than when it nears the viewport. */
+  priority?: boolean
+}) {
   const framed = shot.frame === 'chrome' || shot.frame === 'border'
   const plain = shot.frame === 'plain'
 
@@ -1153,7 +1182,7 @@ function ShotFrame({ shot, style }: { shot: LandingShot; style?: React.CSSProper
     >
       {shot.frame === 'chrome' && (
         <img
-          src="/work/browser-bar.png"
+          src="/work/browser-bar.webp"
           alt=""
           style={{ width: '100%', height: 'auto', display: 'block' }}
         />
@@ -1162,6 +1191,9 @@ function ShotFrame({ shot, style }: { shot: LandingShot; style?: React.CSSProper
         <img
           src={shot.src}
           alt={shot.alt}
+          loading={priority ? 'eager' : 'lazy'}
+          fetchPriority={priority ? 'high' : 'auto'}
+          decoding="async"
           style={{
             width: shot.zoom ? `${shot.zoom * 100}%` : '100%',
             maxWidth: 'none',
@@ -1263,6 +1295,8 @@ function FeedbackCard({ shot }: { shot: FeedbackShot }) {
         <img
           src={shot.src}
           alt={shot.alt}
+          loading="lazy"
+          decoding="async"
           style={{
             width: '100%',
             height: '100%',

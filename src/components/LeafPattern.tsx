@@ -9,10 +9,10 @@ import { useMediaQuery } from '../hooks/useMediaQuery'
  */
 const LEAF_ASSET_V = '10'
 const LEAVES = [
-  `/leaves/leaf-00.png?v=${LEAF_ASSET_V}`, // orange
-  `/leaves/leaf-01.png?v=${LEAF_ASSET_V}`, // amber
-  `/leaves/leaf-02.png?v=${LEAF_ASSET_V}`, // dark green
-  `/leaves/leaf-03.png?v=${LEAF_ASSET_V}`, // green
+  `/leaves/leaf-00.webp?v=${LEAF_ASSET_V}`, // orange
+  `/leaves/leaf-01.webp?v=${LEAF_ASSET_V}`, // amber
+  `/leaves/leaf-02.webp?v=${LEAF_ASSET_V}`, // dark green
+  `/leaves/leaf-03.webp?v=${LEAF_ASSET_V}`, // green
 ]
 
 /**

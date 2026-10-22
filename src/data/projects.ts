@@ -51,7 +51,7 @@ export type Section = {
 export type BentoCopy = {
   /** Muted line above the title, e.g. `Destiny 2 - 3rd party tool`. */
   eyebrow: string
-  /** Card screenshot, e.g. `/work/stat-builder/hero.png`. */
+  /** Card screenshot, e.g. `/work/stat-builder/hero.webp`. */
   cover: string
   /** Wide and tall cards only — the two compact cards are eyebrow + title. */
   tagline?: string
@@ -64,7 +64,7 @@ export type BentoCopy = {
  * clipped by it, so `src` can be a full-page capture that runs longer than the box.
  *
  * `frame` picks the treatment used in the Figma file:
- * - `chrome` — Chrome browser bar (`/work/browser-bar.png`) above a hairline frame
+ * - `chrome` — Chrome browser bar (`/work/browser-bar.webp`) above a hairline frame
  * - `border` — the same frame, no bar
  * - `plain` — the rounded image on its own (default)
  */
@@ -460,7 +460,7 @@ export const projects: Record<string, Project> = {
     eyebrow: ['Illustration', 'Destiny 2'],
     tagline: 'Destiny 2 gear, one pixel at a time.',
     summary: 'A collection of my pixel art inspired by Destiny 2. Helmets, robes, boots, and a weapon, rebuilt as tiny inventory icons in Figma.',
-    bento: { eyebrow: 'Pixel art', cover: '/work/bento/card-pixel-art.png' },
+    bento: { eyebrow: 'Pixel art', cover: '/work/bento/card-pixel-art.webp' },
     pageReady: true,
     accent: 'var(--color-orange)',
     landing: {
@@ -474,22 +474,22 @@ export const projects: Record<string, Project> = {
         // backgrounds are part of the artwork. Order matters: it is what lets the grid's
         // auto-placement tile the hero, the two bigs and seven smalls with no holes.
         items: [
-          { title: 'Psychespeeders', category: 'Transversive Steps ornament', size: 'hero', src: '/work/pixel-art/psyche-speeders.png', alt: 'Psychespeeders in pixel art: white, black, and orange boots with blue details' },
-          { title: 'Kelvin Below', category: 'Rime-coat Raiment ornament', size: 'big', src: '/work/pixel-art/kelvin-below.png', alt: 'Kelvin Below in pixel art: a red and black coat with a bright blue diagonal sash' },
-          { title: 'Verity’s Brow', category: 'Exotic helmet', src: '/work/pixel-art/verity-s-brow.png', alt: 'Verity’s Brow in pixel art: a pink, bone-colored helmet on gold' },
-          { title: 'Cenotaph Mask', category: 'Exotic helmet', src: '/work/pixel-art/cenotaph.png', alt: 'Cenotaph Mask in pixel art: a long, angular helmet in black, brown, and silver' },
-          { title: 'Speaker’s Sight', category: 'Exotic helmet', size: 'big', src: '/work/pixel-art/speaker-s-sight.png', alt: 'Speaker’s Sight in pixel art: a white and red mask against a dark hood' },
-          { title: 'Sanguine Alchemy', category: 'Exotic chest armor', src: '/work/pixel-art/sanguine-alchemy.png', alt: 'Sanguine Alchemy in pixel art: red and silver robes on gold' },
-          { title: 'Mataiodoxía', category: 'Exotic chest armor', src: '/work/pixel-art/mataiodoxia.png', alt: 'Mataiodoxía in pixel art: robes with a teal and white geometric pattern' },
-          { title: 'Moonfang-X7 Robe', category: 'Legendary chest armor', src: '/work/pixel-art/moonfang-robes.png', alt: 'Moonfang-X7 Robe in pixel art: pale blue, white, and purple robes' },
-          { title: 'Mint Retrograde', category: 'Legendary pulse rifle', src: '/work/pixel-art/mint-retrograde.png', alt: 'Mint Retrograde in pixel art: a pulse rifle drawn diagonally in green, orange, and black on purple' },
-          { title: 'Ren 2.0', category: 'St0mp-EE5 ornament', src: '/work/pixel-art/stompees-ornament.png', alt: 'Ren 2.0 in pixel art: dark boots with cyan highlights and orange soles' },
+          { title: 'Psychespeeders', category: 'Transversive Steps ornament', size: 'hero', src: '/work/pixel-art/psyche-speeders.webp', alt: 'Psychespeeders in pixel art: white, black, and orange boots with blue details' },
+          { title: 'Kelvin Below', category: 'Rime-coat Raiment ornament', size: 'big', src: '/work/pixel-art/kelvin-below.webp', alt: 'Kelvin Below in pixel art: a red and black coat with a bright blue diagonal sash' },
+          { title: 'Verity’s Brow', category: 'Exotic helmet', src: '/work/pixel-art/verity-s-brow.webp', alt: 'Verity’s Brow in pixel art: a pink, bone-colored helmet on gold' },
+          { title: 'Cenotaph Mask', category: 'Exotic helmet', src: '/work/pixel-art/cenotaph.webp', alt: 'Cenotaph Mask in pixel art: a long, angular helmet in black, brown, and silver' },
+          { title: 'Speaker’s Sight', category: 'Exotic helmet', size: 'big', src: '/work/pixel-art/speaker-s-sight.webp', alt: 'Speaker’s Sight in pixel art: a white and red mask against a dark hood' },
+          { title: 'Sanguine Alchemy', category: 'Exotic chest armor', src: '/work/pixel-art/sanguine-alchemy.webp', alt: 'Sanguine Alchemy in pixel art: red and silver robes on gold' },
+          { title: 'Mataiodoxía', category: 'Exotic chest armor', src: '/work/pixel-art/mataiodoxia.webp', alt: 'Mataiodoxía in pixel art: robes with a teal and white geometric pattern' },
+          { title: 'Moonfang-X7 Robe', category: 'Legendary chest armor', src: '/work/pixel-art/moonfang-robes.webp', alt: 'Moonfang-X7 Robe in pixel art: pale blue, white, and purple robes' },
+          { title: 'Mint Retrograde', category: 'Legendary pulse rifle', src: '/work/pixel-art/mint-retrograde.webp', alt: 'Mint Retrograde in pixel art: a pulse rifle drawn diagonally in green, orange, and black on purple' },
+          { title: 'Ren 2.0', category: 'St0mp-EE5 ornament', src: '/work/pixel-art/stompees-ornament.webp', alt: 'Ren 2.0 in pixel art: dark boots with cyan highlights and orange soles' },
         ],
       }],
     },
     links: [],
     stats: [],
-    heroShot: { label: 'Pixel art collection', src: '/work/bento/card-pixel-art.png' },
+    heroShot: { label: 'Pixel art collection', src: '/work/bento/card-pixel-art.webp' },
     sections: [],
     stack: ['Figma'],
     status: [],
@@ -503,7 +503,7 @@ export const projects: Record<string, Project> = {
       'Tell it the build you want. It searches the gear you actually own and tells you what to equip.',
     bento: {
       eyebrow: 'Destiny 2 - 3rd party tool',
-      cover: '/work/stat-builder/hero.png',
+      cover: '/work/stat-builder/hero.webp',
     },
     pageReady: true,
     landing: {
@@ -698,7 +698,7 @@ export const projects: Record<string, Project> = {
     tagline: 'A command-palette-style filter and search for Destiny 2 weapons.',
     bento: {
       eyebrow: 'Destiny 2 - 3rd party tool',
-      cover: '/work/armory/hero.png',
+      cover: '/work/armory/hero.webp',
     },
     pageReady: true,
     landing: {
@@ -815,7 +815,7 @@ export const projects: Record<string, Project> = {
       'A fork of T3 Code with the sidebar I wanted for juggling several agents at once, and a design mode built right in.',
     bento: {
       eyebrow: 'Agent orchestration UI + Design mode (T3 Code fork)',
-      cover: '/work/bento/no3y-code.png',
+      cover: '/work/bento/no3y-code.webp',
       tagline:
         'A fork of T3 Code with the sidebar I wanted for juggling several agents at once, and a design mode built right in.',
     },
@@ -834,28 +834,28 @@ export const projects: Record<string, Project> = {
       // wallpaper.
       showcase: {
         shot: {
-          src: '/work/no3y-code/collage/new-agent.png',
+          src: '/work/no3y-code/collage/new-agent.webp',
           alt: 'no3y Code on the desktop — a new agent on the Glass theme, a picture fading out just above the composer',
           aspect: '1272 / 820',
         },
         grid: [
           {
-            src: '/work/no3y-code/collage/dictation.png',
+            src: '/work/no3y-code/collage/dictation.webp',
             alt: 'The composer while dictating, with a live level timeline beside cancel and confirm buttons',
             aspect: '680 / 380',
           },
           {
-            src: '/work/no3y-code/collage/model.png',
+            src: '/work/no3y-code/collage/model.webp',
             alt: 'The model picker open above the composer, with Claude and Codex and a reasoning level control',
             aspect: '680 / 380',
           },
           {
-            src: '/work/no3y-code/collage/usage.png',
+            src: '/work/no3y-code/collage/usage.webp',
             alt: 'The usage popover opened from the composer’s meter, showing session and weekly limits for Codex and Claude',
             aspect: '680 / 380',
           },
           {
-            src: '/work/no3y-code/collage/question.png',
+            src: '/work/no3y-code/collage/question.webp',
             alt: 'An agent’s question shown in place of the composer, with two options and a field for a custom answer',
             aspect: '680 / 380',
           },
@@ -939,7 +939,7 @@ export const projects: Record<string, Project> = {
           copyWidth: 700,
           stack: true,
           shot: {
-            src: '/work/no3y-code/idea.png',
+            src: '/work/no3y-code/idea.webp',
             alt: 'no3y Code’s thread sidebar beside the design mode properties panel, over a fluted gradient',
             aspect: '3090 / 1499',
             frame: 'plain',
@@ -953,7 +953,7 @@ export const projects: Record<string, Project> = {
           copyWidth: 700,
           stack: true,
           shot: {
-            src: '/work/no3y-code/collage/scheduled.png',
+            src: '/work/no3y-code/collage/scheduled.webp',
             alt: 'Creating a scheduled task: a title, the project, agent instructions with worktree and branch, a weekday schedule, and the model',
             aspect: '1272 / 620',
             frame: 'plain',
@@ -1058,7 +1058,7 @@ export const projects: Record<string, Project> = {
               label: 'First pass',
               body: 'For the first version I kept the timeline as one strip, with every kind of edit (zooms, pans, fast-forwards) layered on top of it. It ended up being pretty terrible to use. Edits piled into each other, and the icons hanging under each collision were confusing, so I needed to try something different.',
               shot: {
-                src: '/work/crisp/timeline-combined.png',
+                src: '/work/crisp/timeline-combined.webp',
                 alt: 'Crisp’s first player: one timeline bar with overlapping zoom, pan, and speed-up marks, and a stack of icons hanging under each collision',
                 width: 1728,
                 height: 334,
@@ -1068,7 +1068,7 @@ export const projects: Record<string, Project> = {
               label: 'V2',
               body: 'So I broke the timeline into five tracks, one for each type of edit: playback, zoom, pan, clip, and fast-forward. It added a few more elements to the UI, but it was much simpler, and far easier to use and understand, even for me.',
               shot: {
-                src: '/work/crisp/timeline.png',
+                src: '/work/crisp/timeline.webp',
                 alt: 'Crisp’s player: the toolbar above five colored timeline tracks: playback, zoom, pan, clip, and fast-forward',
                 width: 2340,
                 height: 520,
@@ -1152,7 +1152,7 @@ export const projects: Record<string, Project> = {
       'A supplemental infographic for building a custom PC — an overview of the parts and the order to install them in.',
     bento: {
       eyebrow: 'Graphic Design',
-      cover: '/work/how-to-pc/thumbnail.png',
+      cover: '/work/how-to-pc/thumbnail.webp',
     },
     pageReady: true,
     landing: {
@@ -1218,7 +1218,7 @@ export const projects: Record<string, Project> = {
       'A chips-and-salsa box for parties — hand-drawn lettering, icons and patterns, carried through to the dieline.',
     bento: {
       eyebrow: 'Graphic Design',
-      cover: '/work/nacho-box/thumbnail.png',
+      cover: '/work/nacho-box/thumbnail.webp',
     },
     pageReady: true,
     landing: {

@@ -24,14 +24,14 @@ const clippings: Clipping[] = [
     crop: { width: '110.46%', left: '-10.46%', height: '130.43%', top: '-30.43%' },
   },
   {
-    src: '/work/llm-wall-protected-by-luck.png',
+    src: '/work/llm-wall-protected-by-luck.webp',
     alt: 'An LLM declaring “You were protected by luck:”',
     width: 240,
     aspect: '636 / 92',
     crop: { width: '100%', left: '0%', height: '100%', top: '0%' },
   },
   {
-    src: '/work/llm-wall-close-to-fatal.png',
+    src: '/work/llm-wall-close-to-fatal.webp',
     alt: 'An LLM saying “The review was right about the thing that mattered, and it was close to fatal.”',
     width: 360,
     aspect: '914 / 118',

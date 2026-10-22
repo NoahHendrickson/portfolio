@@ -41,11 +41,11 @@ const mediaWidth = (px: number) => `min(100%, max(${px}px, ${(px / CONTENT_WIDTH
   The invitations shot is node `338:7979` as drawn (948 × 839, shipped at 2×).
 */
 const media = {
-  invitations: '/work/invisible/apply/invitations.png',
-  home: '/work/invisible/apply/home.png',
-  explore: '/work/invisible/apply/explore.png',
-  detail: '/work/invisible/apply/detail.png',
-  apply: '/work/invisible/apply/apply.png',
+  invitations: '/work/invisible/apply/invitations.webp',
+  home: '/work/invisible/apply/home.webp',
+  explore: '/work/invisible/apply/explore.webp',
+  detail: '/work/invisible/apply/detail.webp',
+  apply: '/work/invisible/apply/apply.webp',
 } as const
 
 const MEDIA_ASPECT = {
@@ -406,7 +406,18 @@ function Showcase() {
   )
 }
 
-function ShowcaseWindow({ src, alt, aspect }: { src: string; alt: string; aspect: string }) {
+function ShowcaseWindow({
+  src,
+  alt,
+  aspect,
+  lazy,
+}: {
+  src: string
+  alt: string
+  aspect: string
+  /** A row's shot, below the fold: fetched as it nears the viewport. */
+  lazy?: boolean
+}) {
   const [w, h] = aspect.split('/').map(Number)
   const cropW = w - 2 * SHOT_INSET
   const cropH = h - 2 * SHOT_INSET
@@ -426,6 +437,8 @@ function ShowcaseWindow({ src, alt, aspect }: { src: string; alt: string; aspect
       <img
         src={src}
         alt={alt}
+        loading={lazy ? 'lazy' : 'eager'}
+        decoding="async"
         style={{
           position: 'absolute',
           left: `-${share(SHOT_INSET, cropW)}`,
@@ -526,6 +539,8 @@ function MediaPanel({
       <img
         src={src}
         alt={alt}
+        loading="lazy"
+        decoding="async"
         style={{ display: 'block', width: '100%', aspectRatio: aspect, borderRadius: MOCKUP_RADIUS }}
       />
     )
@@ -534,7 +549,7 @@ function MediaPanel({
   if (isMobile) {
     return (
       <div style={{ borderRadius: radius['2xl'], background: PLATE, padding: '16px' }}>
-        <ShowcaseWindow src={src} alt={alt} aspect={aspect} />
+        <ShowcaseWindow src={src} alt={alt} aspect={aspect} lazy />
       </div>
     )
   }
@@ -555,7 +570,7 @@ function MediaPanel({
         padding: `48px calc(48px + ${bleed})`,
       }}
     >
-      <ShowcaseWindow src={src} alt={alt} aspect={aspect} />
+      <ShowcaseWindow src={src} alt={alt} aspect={aspect} lazy />
     </div>
   )
 }
