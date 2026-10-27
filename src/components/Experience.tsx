@@ -132,6 +132,13 @@ const designNotes: DesignNote[] = [
       'I looked to the labs and people who were building these models and harnesses to setup some automated PR reviews, adversarial code reviews etc.',
     ],
   },
+  {
+    title: 'Designing the system under the screens',
+    paragraphs: [
+      'A lot of my work at Invisible went into the model underneath our internal management tool: who can see what, who can do what, and how that changes as people move between teams, projects and roles. Permission structures, user management, user groups.',
+      'I start that work before Figma, mapping out the users, roles and groups and how they relate, then testing the model against the weird cases. Getting the UI right is a lot easier when the foundation underneath it is as clear and simple as it can be.',
+    ],
+  },
 ]
 
 const entries: Entry[] = [
@@ -156,6 +163,7 @@ const entries: Entry[] = [
         text: 'Redesigned the mobile experience for onboarding',
         result: '50% increase in profile completion on mobile',
       },
+      'Designed the permission structures and user group models behind our internal management tool, mapping roles, access and inheritance across teams before any UI was drawn.',
     ],
   },
   {
@@ -333,8 +341,12 @@ export function PreviousRoles() {
                             // between them so each result groups with its own
                             // bullet — as a margin rather than the list turning
                             // into a flex column, which would blockify the items
-                            // and drop their markers.
-                            ...(i > 0 && typeof item !== 'string' ? { marginTop: space.md } : null),
+                            // and drop their markers. A plain line in a list of
+                            // outcomes keeps the same air, so it doesn't butt up
+                            // against the result above it.
+                            ...(i > 0 && entry.bullets!.some((b) => typeof b !== 'string')
+                              ? { marginTop: space.md }
+                              : null),
                           }}
                         >
                           {text}
