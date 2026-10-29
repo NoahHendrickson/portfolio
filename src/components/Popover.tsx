@@ -1,7 +1,7 @@
 import { useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { color, radius, radiusPx } from '../design-system/tokens'
 import { useMediaQuery } from '../hooks/useMediaQuery'
-import { visibleSpan } from '../visibleSpan'
+import { visibleBox } from '../visibleBox'
 
 const FILL = color.bg.cream
 const INK = color.ink.default
@@ -22,6 +22,9 @@ const PANEL_PAD = 4
 const PANEL_RADIUS = radiusPx.lg
 /** The least room the panel keeps from the viewport's edge. */
 const EDGE = 8
+
+/** The room a `bare` popover's content has past each side of the tab, as it opens. */
+export type PopoverRoom = { left: number; right: number; tab: number }
 /**
  * How far the panel has to run past the tab on a side for that side to turn
  * up into it: the fillet, then the panel's own top corner.
@@ -64,7 +67,10 @@ const LABEL: CSSProperties = {
  * (or the edge of a scroller that would clip it) the panel slides over to
  * stay in view; if that leaves a side too little
  * room to turn up into the tab, that side goes flush with the tab's edge
- * instead, square at that corner. The fill is laid behind the trigger rather
+ * instead, square at that corner. With too little room under the trigger
+ * for the panel (the foot of a page, or a phone's screen) and more over it,
+ * the whole shape flips: the panel hangs over the trigger and the tab rounds
+ * at its foot instead. The fill is laid behind the trigger rather
  * than padding it, so the line doesn't shift when it opens.
  *
  * Open, the trigger reads at medium weight. Medium runs wider than regular,
@@ -82,6 +88,7 @@ export default function Popover({
   iconAlign = 'center',
   leadRadius,
   bare = false,
+  onOpen,
 }: {
   children: ReactNode
   content: ReactNode
@@ -106,31 +113,51 @@ export default function Popover({
    * but doesn't slide, since the pieces set their own shape.
    */
   bare?: boolean
+  /**
+   * Called as a `bare` popover opens, with the room its content has past
+   * each side of the tab before the viewport's edge, so content that sets its
+   * own shape can fit itself in.
+   */
+  onOpen?: (room: PopoverRoom) => void
 }) {
   const [open, setOpen] = useState(false)
   const still = useMediaQuery('(prefers-reduced-motion: reduce)')
   /**
    * Where the panel sits, measured from the face's left edge, which sides
-   * turn up into the tab (the rest are flush), and the tab's centre on the
-   * panel, for the grow to come out of.
+   * turn up into the tab (the rest are flush), whether it hangs over the
+   * trigger rather than under it, and the tab's centre on the panel, for the
+   * grow to come out of.
    */
-  const [place, setPlace] = useState({ x: -PAD_X, left: false, right: true, origin: 0 })
+  const [place, setPlace] = useState({ x: -PAD_X, left: false, right: true, up: false, origin: 0 })
   const faceRef = useRef<HTMLSpanElement>(null)
   const panelRef = useRef<HTMLSpanElement>(null)
 
   // Measured as it opens, so it never paints in the wrong place. The panel is
   // always laid out (only faded), so its width is there to read.
   const show = () => {
-    if (faceRef.current && panelRef.current && !bare) {
+    if (faceRef.current && bare) {
+      const box = faceRef.current.getBoundingClientRect()
+      const view = visibleBox(faceRef.current)
+      onOpen?.({
+        left: box.left - PAD_X - view.left - EDGE,
+        right: view.right - EDGE - (box.right + PAD_X),
+        tab: box.width + PAD_X * 2,
+      })
+    } else if (faceRef.current && panelRef.current) {
       const box = faceRef.current.getBoundingClientRect()
       const width = panelRef.current.offsetWidth
+      const height = panelRef.current.offsetHeight
       const tabLeft = -PAD_X
       const tabRight = box.width + PAD_X
-      const [minX, maxX] = visibleSpan(faceRef.current)
+      const view = visibleBox(faceRef.current)
+      // Under the trigger unless it doesn't fit there and has more room over it.
+      const below = view.bottom - EDGE - (box.bottom + PAD_Y)
+      const above = box.top - PAD_Y - (view.top + EDGE)
+      const up = below < height && above > below
       // Centred, then slid to stay inside what can show it.
       let x = (box.width - width) / 2
-      x = Math.min(x, maxX - EDGE - box.left - width)
-      x = Math.max(x, minX + EDGE - box.left)
+      x = Math.min(x, view.right - EDGE - box.left - width)
+      x = Math.max(x, view.left + EDGE - box.left)
       // A side left too little room to turn up goes flush with the tab. The
       // panel clears the tab by two shoulders, so only one side ever can.
       if (tabLeft - x < SHOULDER) x = tabLeft
@@ -139,6 +166,7 @@ export default function Popover({
         x,
         left: x < tabLeft,
         right: x + width > tabRight,
+        up,
         origin: box.width / 2 - x,
       })
     }
@@ -146,6 +174,8 @@ export default function Popover({
   }
 
   const r = `${PANEL_RADIUS}px`
+  const up = place.up && !bare
+  const lead = leadRadius === undefined ? radius.md : `${leadRadius}px`
 
   return (
     <span
@@ -193,20 +223,21 @@ export default function Popover({
           aria-hidden
           style={{
             position: 'absolute',
-            top: -PAD_Y,
-            bottom: -(PAD_Y + 1),
+            top: up ? -(PAD_Y + 1) : -PAD_Y,
+            bottom: up ? -PAD_Y : -(PAD_Y + 1),
             left: -PAD_X,
             right: -PAD_X,
             zIndex: 1,
             background: FILL,
-            borderRadius: `${leadRadius === undefined ? radius.md : `${leadRadius}px`} ${radius.md} 0 0`,
+            // Rounded on the side away from the panel.
+            borderRadius: up ? `0 0 ${radius.md} ${lead}` : `${lead} ${radius.md} 0 0`,
             opacity: open ? 1 : 0,
             transition: FADE,
             pointerEvents: open ? 'auto' : 'none',
           }}
         >
-          {(bare || place.left) && <Fillet side="left" drop={bare ? BARE_DROP : 0} />}
-          {(bare || place.right) && <Fillet side="right" drop={bare ? BARE_DROP : 0} />}
+          {(bare || place.left) && <Fillet side="left" up={up} drop={bare ? BARE_DROP : 0} />}
+          {(bare || place.right) && <Fillet side="right" up={up} drop={bare ? BARE_DROP : 0} />}
         </span>
 
         <span
@@ -233,7 +264,7 @@ export default function Popover({
             position: 'absolute',
             // Under the tab, which is drawn over it.
             zIndex: 0,
-            top: `calc(100% + ${PAD_Y}px)`,
+            ...(up ? { bottom: `calc(100% + ${PAD_Y}px)` } : { top: `calc(100% + ${PAD_Y}px)` }),
             color: INK,
             ...(bare
               ? { left: -PAD_X, width: `calc(100% + ${PAD_X * 2}px)` }
@@ -244,7 +275,9 @@ export default function Popover({
                   padding: PANEL_PAD,
                   background: FILL,
                   // Square only where a side runs flush into the tab.
-                  borderRadius: `${place.left ? r : 0} ${place.right ? r : 0} ${r} ${r}`,
+                  borderRadius: up
+                    ? `${r} ${r} ${place.right ? r : 0} ${place.left ? r : 0}`
+                    : `${place.left ? r : 0} ${place.right ? r : 0} ${r} ${r}`,
                 }),
             // The panel sets its own type rather than taking the trigger's,
             // which may be a heading.
@@ -252,9 +285,9 @@ export default function Popover({
             fontWeight: 400,
             lineHeight: 1.4,
             opacity: open ? 1 : 0,
-            // Grows out of the tab's foot, so the join holds still.
+            // Grows out of the tab, so the join holds still.
             transform: open || still ? 'scale(1)' : `scale(${GROW_FROM})`,
-            transformOrigin: bare ? '50% 0' : `${place.origin}px 0`,
+            transformOrigin: bare ? '50% 0' : `${place.origin}px ${up ? '100%' : '0'}`,
             transition: still ? FADE : `${FADE}, ${open ? GROW : SHRINK}`,
             pointerEvents: open ? 'auto' : 'none',
           }}
@@ -270,19 +303,21 @@ export default function Popover({
  * A concave join where the tab meets the panel: a square of the fill beside
  * the tab's foot with a quarter-disk knocked out of its far top corner, the
  * inverse of a border-radius (as the rail's `Fillet`). It sits 1px up, level
- * with the panel's top, since the tab runs 1px into the panel.
+ * with the panel's top, since the tab runs 1px into the panel. Flipped
+ * (`up`), it sits beside the tab's top with the disk out of its far bottom
+ * corner.
  */
-function Fillet({ side, drop = 0 }: { side: 'left' | 'right'; drop?: number }) {
+function Fillet({ side, up = false, drop = 0 }: { side: 'left' | 'right'; up?: boolean; drop?: number }) {
   const left = side === 'left'
   return (
     <span
       style={{
         position: 'absolute',
-        bottom: 1 - drop,
+        ...(up ? { top: 1 - drop } : { bottom: 1 - drop }),
         width: FILLET,
         height: FILLET + drop,
         ...(left ? { right: '100%' } : { left: '100%' }),
-        background: `radial-gradient(circle ${FILLET}px at ${left ? '0' : '100%'} 0, transparent ${FILLET}px, ${FILL} ${FILLET + 0.5}px)`,
+        background: `radial-gradient(circle ${FILLET}px at ${left ? '0' : '100%'} ${up ? '100%' : '0'}, transparent ${FILLET}px, ${FILL} ${FILLET + 0.5}px)`,
       }}
     />
   )

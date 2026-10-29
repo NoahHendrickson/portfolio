@@ -1,4 +1,5 @@
-import { useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
+import { Check, Copy, LinkedinLogo } from '@phosphor-icons/react'
 import { color, control, radius, space, type } from '../design-system/tokens'
 import AppLink from '../AppLink'
 import {
@@ -10,7 +11,10 @@ import {
 } from '../data/workCards'
 import { useIsMobile } from '../hooks/useIsMobile'
 import LeafMark from './LeafMark'
-import Popover from './Popover'
+import Popover, { type PopoverRoom } from './Popover'
+
+const EMAIL = 'noahjames017@gmail.com'
+const LINKEDIN_URL = 'https://www.linkedin.com/in/noah-hendrickson-808959192/'
 
 const TEXT = color.text.primary
 const MUTED = color.text.muted
@@ -56,6 +60,13 @@ const FAN_TILT = 5
 const FAN_PAD = 4
 /** As wide as the other card popovers: their thumbnail and its cream either side. */
 const FAN_CARD_W = THUMB + FAN_PAD * 2
+/**
+ * Where the screen is too narrow for the full fan (a phone, where the tab
+ * runs nearly the column's width), each side reaches only as far as the
+ * room past the tab, and the cards narrow to this share of the whole span,
+ * so they still cross under its middle rather than running off the screen.
+ */
+const FAN_SHARE = 0.64
 const CARD_ASPECT = 1392 / 769
 /** D2 Conflux's card is a zoomed cut as well, shown whole. */
 const STAT_BUILDER_CROP: Crop = { size: [1392, 769], x: 0, y: 0, w: 1392, h: 769 }
@@ -129,7 +140,67 @@ function PixelHeart() {
   )
 }
 
-/** The avatar and the name in the title, opening a larger copy of the photo and a line about me. */
+const CONTACT_ROW: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: space.sm,
+  padding: 0,
+  border: 'none',
+  background: 'none',
+  color: color.ink.secondary,
+  fontFamily: 'inherit',
+  ...type['body-s'],
+  whiteSpace: 'nowrap',
+  textDecoration: 'underline',
+  textUnderlineOffset: '3px',
+  cursor: 'pointer',
+}
+
+/**
+ * The name popover's contact rows, under a hairline: the email copies and
+ * confirms with a check, as the Contact tab's does, and LinkedIn opens a tab.
+ */
+function ContactRows() {
+  const [copied, setCopied] = useState(false)
+
+  useEffect(() => {
+    if (!copied) return
+    const timeout = setTimeout(() => setCopied(false), 1500)
+    return () => clearTimeout(timeout)
+  }, [copied])
+
+  return (
+    <span
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'flex-start',
+        gap: space.sm,
+        margin: '0 4px',
+        padding: '8px 0 4px',
+        borderTop: `1px solid ${color.border.ink}`,
+      }}
+    >
+      <button
+        type="button"
+        style={CONTACT_ROW}
+        onClick={() => {
+          navigator.clipboard?.writeText(EMAIL)
+          setCopied(true)
+        }}
+      >
+        {copied ? <Check size={16} color={color.accent.default} /> : <Copy size={16} />}
+        <span>{copied ? 'Copied!' : EMAIL}</span>
+      </button>
+      <a href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer" style={CONTACT_ROW}>
+        <LinkedinLogo size={16} />
+        <span>LinkedIn</span>
+      </a>
+    </span>
+  )
+}
+
+/** The avatar and the name in the title, opening a larger copy of the photo, a line about me and how to reach me. */
 function NameTag() {
   return (
     <Popover
@@ -151,9 +222,10 @@ function NameTag() {
               objectFit: 'cover',
             }}
           />
-          <span style={{ ...type['body-m'], padding: '0 4px 4px' }}>
+          <span style={{ ...type['body-m'], padding: '0 4px' }}>
             I&rsquo;m a gamer, athlete, and listen to the same song on repeat for weeks.
           </span>
+          <ContactRows />
         </span>
       }
     >
@@ -327,20 +399,25 @@ function CardTag({
 function FanCard({
   card,
   side,
+  width,
+  reach,
   front,
   onRaise,
 }: {
   card: WorkCard
   side: 'left' | 'right'
+  width: number
+  /** How far the card runs past the tab's corner on its side. */
+  reach: number
   /** On top of the other card. */
   front: boolean
   /** Brings this card in front, on hover or when its View takes focus. */
   onRaise: () => void
 }) {
   const left = side === 'left'
-  // The pivot, on the card's top edge, is the tab's corner, `FAN_REACH` in
-  // from the card's outer side.
-  const pivot = left ? FAN_REACH : FAN_CARD_W - FAN_REACH
+  // The pivot, on the card's top edge, is the tab's corner, `reach` in from
+  // the card's outer side.
+  const pivot = left ? reach : width - reach
   return (
     <span
       onMouseEnter={onRaise}
@@ -348,14 +425,14 @@ function FanCard({
       style={{
         position: 'absolute',
         top: 0,
-        ...(left ? { left: -FAN_REACH } : { right: -FAN_REACH }),
+        ...(left ? { left: -reach } : { right: -reach }),
         // The front card's shadow is what parts it from the other where they
         // cross; under the tab it is covered.
         zIndex: front ? 2 : 1,
         display: 'flex',
         flexDirection: 'column',
         gap: CAPTION_GAP,
-        width: FAN_CARD_W,
+        width,
         boxSizing: 'border-box',
         padding: FAN_PAD,
         background: color.bg.cream,
@@ -382,7 +459,7 @@ function FanCard({
         <img
           src={card.art.src}
           srcSet={card.art.srcSet}
-          sizes={`${FAN_CARD_W - FAN_PAD * 2}px`}
+          sizes={`${width - FAN_PAD * 2}px`}
           alt={card.art.alt}
           width={1392}
           height={769}
@@ -403,26 +480,39 @@ function FanTag({ children }: { children: ReactNode }) {
   // no3y Code leads; hovering a card brings it in front until the other is
   // hovered.
   const [front, setFront] = useState<'left' | 'right'>('left')
+  // The full fan until an open measures less room than it needs.
+  const [fit, setFit] = useState({ left: FAN_REACH, right: FAN_REACH, width: FAN_CARD_W })
+  const measure = ({ left, right, tab }: PopoverRoom) => {
+    const reachL = Math.max(0, Math.min(FAN_REACH, left))
+    const reachR = Math.max(0, Math.min(FAN_REACH, right))
+    const width = Math.min(FAN_CARD_W, Math.round((tab + reachL + reachR) * FAN_SHARE))
+    setFit({ left: reachL, right: reachR, width })
+  }
   // A card's height, and how far below the tab its outer corner drops once
   // tipped, so the hover area under the tab reaches its foot.
-  const cardH = FAN_PAD * 2 + (FAN_CARD_W - FAN_PAD * 2) / CARD_ASPECT + CAPTION_GAP + CAPTION_H
+  const cardH = FAN_PAD * 2 + (fit.width - FAN_PAD * 2) / CARD_ASPECT + CAPTION_GAP + CAPTION_H
   const tilt = (FAN_TILT * Math.PI) / 180
-  const depth = FAN_REACH * Math.sin(tilt) + cardH * Math.cos(tilt)
+  const depth = Math.max(fit.left, fit.right) * Math.sin(tilt) + cardH * Math.cos(tilt)
 
   return (
     <Popover
       bare
+      onOpen={measure}
       content={
         <span style={{ position: 'relative', display: 'block', height: Math.ceil(depth) }}>
           <FanCard
             card={CRISP_CARD}
             side="right"
+            width={fit.width}
+            reach={fit.right}
             front={front === 'right'}
             onRaise={() => setFront('right')}
           />
           <FanCard
             card={NO3Y_CARD}
             side="left"
+            width={fit.width}
+            reach={fit.left}
             front={front === 'left'}
             onRaise={() => setFront('left')}
           />
