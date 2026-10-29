@@ -91,7 +91,6 @@ export default function Popover({
   content,
   gap = 8,
   iconAlign = 'center',
-  leadRadius,
   bare = false,
   onOpen,
 }: {
@@ -104,11 +103,6 @@ export default function Popover({
    * on the text's baseline, the way a glyph would sit.
    */
   iconAlign?: 'center' | 'baseline'
-  /**
-   * The tab's top-left corner, for a trigger led by something round (an
-   * avatar) that the default corner would sit awkwardly against.
-   */
-  leadRadius?: number
   /**
    * No panel of its own: the content is laid exactly under the tab, as wide
    * as it, and draws its own surfaces — for content that hangs several
@@ -183,7 +177,6 @@ export default function Popover({
 
   const r = `${PANEL_RADIUS}px`
   const up = place.up && !bare
-  const lead = leadRadius === undefined ? radius.md : `${leadRadius}px`
 
   return (
     <span
@@ -238,7 +231,7 @@ export default function Popover({
             zIndex: 1,
             background: FILL,
             // Rounded on the side away from the panel.
-            borderRadius: up ? `0 0 ${radius.md} ${lead}` : `${lead} ${radius.md} 0 0`,
+            borderRadius: up ? `0 0 ${radius.md} ${radius.md}` : `${radius.md} ${radius.md} 0 0`,
             opacity: open ? 1 : 0,
             transition: FADE,
             pointerEvents: open ? 'auto' : 'none',

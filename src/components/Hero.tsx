@@ -176,8 +176,8 @@ function ContactRows() {
         flexDirection: 'column',
         alignItems: 'flex-start',
         gap: space.sm,
-        margin: '0 4px',
-        padding: '8px 0 4px',
+        margin: '0 8px',
+        padding: '12px 0 8px',
         borderTop: `1px solid ${color.border.ink}`,
       }}
     >
@@ -204,9 +204,6 @@ function ContactRows() {
 function NameTag() {
   return (
     <Popover
-      // Fully round over the avatar: half the tab's height (the avatar plus
-      // the tab's 4 above and below), so the curve keeps an even 4 off it.
-      leadRadius={AVATAR / 2 + 4}
       content={
         <span style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: `${PREVIEW}px` }}>
           <img
@@ -222,7 +219,10 @@ function NameTag() {
               objectFit: 'cover',
             }}
           />
-          <span style={{ ...type['body-m'], padding: '0 4px' }}>
+          {/* The copy sits 12 in from the panel's edge (its own 8 and the
+              panel's 4) and 12 under the photo, a step looser than the
+              photo's thin 4 of cream. */}
+          <span style={{ ...type['body-m'], padding: '4px 8px 0' }}>
             I&rsquo;m a gamer, athlete, and listen to the same song on repeat for weeks.
           </span>
           <ContactRows />
