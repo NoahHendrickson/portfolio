@@ -108,18 +108,11 @@ type Entry = {
 type DesignNote = {
   title: string
   paragraphs: string[]
-  /**
-   * The paragraphs drop to 65%, for a note whose title is the opening
-   * sentence of its copy rather than a label, so the title leads and the
-   * rest reads as what follows from it.
-   */
-  quiet?: boolean
 }
 
 const designNotes: DesignNote[] = [
   {
     title: 'AI tools have become a core part of my design process. I use Claude Code, Cursor, Codex everyday when building and designing.',
-    quiet: true,
     paragraphs: [
       'Jumping between Figma and these AI coding tools allows me to iterate much faster. In the past, as a Designer you needed to make assumptions when designing in Figma. You couldn’t actually see or feel the designs in the environment that your users would experience them in.',
       'Figma continues to be a staple for me as it is so useful across the different phases. Using low-fi design to test interactions to high fidelity mockups that an agent can implement. Beautiful design requires Figma (and a human) most of the time.',
@@ -267,7 +260,9 @@ export function DesigningNow() {
               display: 'flex',
               flexDirection: 'column',
               gap: space.lg,
-              opacity: note.quiet ? 0.65 : undefined,
+              // The title leads at full strength; the copy under it is what
+              // follows from it.
+              opacity: 0.65,
             }}
           >
             {note.paragraphs.map((paragraph) => (
