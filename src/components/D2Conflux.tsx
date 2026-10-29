@@ -117,16 +117,33 @@ export default function D2Conflux() {
             <p className="cfx-body">
               Every weapon in the game, filterable by trait, perk combo, barrel and magazine, or
               champion. Click perks to build a roll and the stat bars move with it. Hover any perk for
-              community-tested numbers on what it really does.
+              community-tested numbers on what it really does. The popularity card shows how often
+              players run each perk and combo, and one click tries the most popular roll.
             </p>
           </Intro>
-          <Shot
-            src={`${ASSET}/weapon-search.jpg`}
-            browser={{ path: '/weapons', title: 'Weapons' }}
-            alt="Weapon search: the full catalog of 1,335 weapons as coloured nameplates by element, and Fatebringer (Timelost) open on the right with a roll picked from its perk grid"
-            width={3200}
-            height={1800}
-          />
+          {/*
+            Recaptured Oct 28 2026 after the details pane split into Stats / Perks / Popularity
+            cards: the app's own verify-d2 harness (stubbed sign-in, its full fixture vault), the
+            same 2560 × 1440 window at 2×, with Fatebringer (Timelost) on its most popular roll.
+            The close-up is the Popularity card cut from that capture.
+          */}
+          <div className="cfx-pair">
+            <Shot
+              src={`${ASSET}/weapon-search.jpg`}
+              browser={{ path: '/weapons', title: 'Weapons' }}
+              alt="Weapon search: the full catalog of 1,335 weapons as coloured nameplates by element, and Fatebringer (Timelost) open in three cards: its stats, its perk grid with the most popular roll picked, and how popular each perk and combo is"
+              width={3200}
+              height={1800}
+            />
+            <Shot
+              src={`${ASSET}/weapon-popularity.jpg`}
+              stage="Perk popularity"
+              fade
+              alt="Fatebringer (Timelost)'s Popularity card: Explosive Payload with Firefly is the top combo at 17%, and every perk shows its share, with the most popular roll picked"
+              width={764}
+              height={1528}
+            />
+          </div>
         </Section>
 
         <Section label="Loadouts">
