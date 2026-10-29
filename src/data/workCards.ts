@@ -66,13 +66,14 @@ const no3y: WorkCard = {
   href: '/work/no3y-code',
   title: projects['no3y-code'].title,
   subtitle: 'Agent orchestration tool',
-  // Not a Figma export: the page's new-agent capture (`collage/new-agent.webp`)
-  // cropped from the top to the card's box, so the window clips at the foot.
-  art: {
-    src: '/work/bento/card-no3y-agent.jpg',
-    srcSet: cuts('/work/bento/card-no3y-agent.jpg'),
-    alt: 'no3y Code — the new-agent screen on the Glass theme, over a fluted gradient',
-  },
+  // Not a Figma export: the page's hero shot (`collage/new-agent.webp`, the
+  // Oct 22 capture) zoomed in like D2's and Synapse's — 1944 × 1074 of the
+  // 2544 capture from (102, 15), 72 off the window's top-left corner — so the
+  // window runs off the right and the foot.
+  art: zoomed(
+    '/work/bento/card-no3y-agent.jpg',
+    'no3y Code — the new-agent screen on the Glass theme, over a fluted gradient',
+  ),
   extra: { label: 'Download from GitHub', href: NO3Y_CODE_DOWNLOAD },
   feature: { blurb: projects['no3y-code'].tagline },
 }
@@ -206,6 +207,18 @@ const SECTIONS: { id: Exclude<WorkFilter, 'all'>; label: string; cards: WorkCard
  * them out). The other filters list them in their own sections as usual.
  */
 export const FEATURED: WorkCard[] = [onboarding, no3y]
+
+/** The Meridial onboarding study, which a popover in the Me tab's copy links to. */
+export const ONBOARDING_CARD: WorkCard = onboarding
+
+/** no3y Code, which another popover in the Me tab's copy links to. */
+export const NO3Y_CARD: WorkCard = no3y
+
+/** D2 Conflux, which the Me tab's "built a tool" popover links to. */
+export const STAT_BUILDER_CARD: WorkCard = statBuilder
+
+/** Crisp, fanned behind no3y Code in the Me tab's "explore, design…" popover. */
+export const CRISP_CARD: WorkCard = crisp
 
 /** All's opening run: the featured pair, then D2 Conflux heading the grid. */
 const ALL_LEAD: WorkCard[] = [...FEATURED, statBuilder]

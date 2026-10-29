@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import '@noey-17/yearn-ui/style.css'
-import { ProfileRow } from './components/Header'
 import Hero from './components/Hero'
 import HomeRail from './components/HomeRail'
 import IntroSplash from './components/IntroSplash'
@@ -73,6 +72,8 @@ const contentWidth = (pct: number) =>
 const SCROLL_BLEED = 40
 /** The file's gap from the frame's top edge to the panel copy. */
 const PANEL_TOP = 56
+/** The file's 56 from the rail to the content column. */
+const RAIL_GAP = 56
 
 /**
  * A wheel notch over the rail or the leaf field scrolls the panel between them.
@@ -263,9 +264,19 @@ export default function App() {
     ) : tab === 'lols' ? (
       <LlmQuotes />
     ) : (
-      // The Me tab: the profile row over the hero copy, on the file's 32.
+      // The Me tab: the TLDR note over the hero copy, on the file's 32.
       <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-        <ProfileRow />
+        <p
+          style={{
+            margin: 0,
+            fontSize: '28px',
+            fontWeight: 500,
+            lineHeight: 1.1,
+            color: 'var(--color-text-primary)',
+          }}
+        >
+          Here&rsquo;s the tl;dr
+        </p>
         <Hero />
       </div>
     )
@@ -285,8 +296,12 @@ export default function App() {
     tab === 'work' ? (isWide ? PANEL_MAX.workWide : PANEL_MAX.work) : PANEL_MAX.default
   const leafShift = tab === 'work' ? LEAF_WORK_SHIFT : '0px'
   // Work cards lift into this; the other tabs have no hover overhang, so a
-  // thinner bleed on them hands the squeezed column back to the copy.
-  const sideBleed = tab === 'work' ? SCROLL_BLEED : 16
+  // thinner bleed on them hands the squeezed column back to the copy. Their
+  // left bleed takes the rail's whole gap instead: the copy's popovers
+  // (`Popover`) open centred under a phrase and run ~48 past it each side,
+  // so one near the start of a line needs that room to keep its left curve.
+  const bleedLeft = tab === 'work' ? SCROLL_BLEED : RAIL_GAP
+  const bleedRight = tab === 'work' ? SCROLL_BLEED : 16
 
   return (
     <div
@@ -370,7 +385,7 @@ export default function App() {
           // it is what scrolls.
           alignItems: isMobile ? 'flex-start' : 'stretch',
           // The file's 56 from the rail to the content column.
-          gap: isMobile ? '24px' : '56px',
+          gap: isMobile ? '24px' : `${RAIL_GAP}px`,
           // Sized in `vw` rather than `%` so the split geometry doesn't shift by the
           // width of the page scrollbar. `overflow-x: hidden` on the body keeps the
           // shader's overhang from adding a horizontal scrollbar.
@@ -400,9 +415,9 @@ export default function App() {
           ref={panelRef}
           className={isMobile ? 'tab-content-in' : 'tab-content-in panel-scroll'}
           style={{
-            flex: isMobile ? undefined : `0 1 ${panelMax + sideBleed * 2}px`,
+            flex: isMobile ? undefined : `0 1 ${panelMax + bleedLeft + bleedRight}px`,
             width: isMobile ? '100%' : undefined,
-            maxWidth: isMobile ? `${panelMax}px` : `${panelMax + sideBleed * 2}px`,
+            maxWidth: isMobile ? `${panelMax}px` : `${panelMax + bleedLeft + bleedRight}px`,
             minWidth: 0,
             boxSizing: 'border-box',
             // The only thing on the page that scrolls. `key={tab}` remounts it,
@@ -415,11 +430,13 @@ export default function App() {
             // scales a card past the edge. `SCROLL_BLEED` is what keeps that
             // overhang inside the box in the first place.
             overflowX: isMobile ? undefined : 'hidden',
-            padding: isMobile ? undefined : `${SCROLL_BLEED}px ${sideBleed}px 80px`,
+            padding: isMobile ? undefined : `${SCROLL_BLEED}px ${bleedRight}px 80px ${bleedLeft}px`,
             // The file's 56 above the panel: `SCROLL_BLEED` of it is padding
             // inside the scroller so a first-row hover lift isn't clipped, and
             // the rest stays as margin so the copy still starts at 56.
-            margin: isMobile ? undefined : `${PANEL_TOP - SCROLL_BLEED}px -${sideBleed}px 0`,
+            margin: isMobile
+              ? undefined
+              : `${PANEL_TOP - SCROLL_BLEED}px -${bleedRight}px 0 -${bleedLeft}px`,
           }}
         >
           {panel}
