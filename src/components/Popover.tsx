@@ -23,7 +23,12 @@ const PANEL_RADIUS = radiusPx.lg
 /** The least room the panel keeps from the viewport's edge. */
 const EDGE = 8
 
-/** The room a `bare` popover's content has past each side of the tab, as it opens. */
+/**
+ * The room a `bare` popover's content has past each side of the tab, as it
+ * opens. A side too tight to turn up into the tab through its fillet comes
+ * back 0: the content should sit flush with the tab's edge there, square at
+ * that corner, and no fillet is drawn.
+ */
 export type PopoverRoom = { left: number; right: number; tab: number }
 /**
  * How far the panel has to run past the tab on a side for that side to turn
@@ -109,8 +114,8 @@ export default function Popover({
    * as it, and draws its own surfaces — for content that hangs several
    * cream pieces off the tab rather than one. The tab is drawn over the
    * content, so anything that rises into it tucks underneath. It keeps a
-   * fillet each side, for pieces whose top edge leaves the tab's foot there,
-   * but doesn't slide, since the pieces set their own shape.
+   * fillet each side with room for one, for pieces whose top edge leaves the
+   * tab's foot there, but doesn't slide, since the pieces set their own shape.
    */
   bare?: boolean
   /**
@@ -138,9 +143,12 @@ export default function Popover({
     if (faceRef.current && bare) {
       const box = faceRef.current.getBoundingClientRect()
       const view = visibleBox(faceRef.current)
+      const left = box.left - PAD_X - view.left - EDGE
+      const right = view.right - EDGE - (box.right + PAD_X)
+      setPlace((p) => ({ ...p, left: left >= SHOULDER, right: right >= SHOULDER }))
       onOpen?.({
-        left: box.left - PAD_X - view.left - EDGE,
-        right: view.right - EDGE - (box.right + PAD_X),
+        left: left >= SHOULDER ? left : 0,
+        right: right >= SHOULDER ? right : 0,
         tab: box.width + PAD_X * 2,
       })
     } else if (faceRef.current && panelRef.current) {
@@ -236,8 +244,8 @@ export default function Popover({
             pointerEvents: open ? 'auto' : 'none',
           }}
         >
-          {(bare || place.left) && <Fillet side="left" up={up} drop={bare ? BARE_DROP : 0} />}
-          {(bare || place.right) && <Fillet side="right" up={up} drop={bare ? BARE_DROP : 0} />}
+          {place.left && <Fillet side="left" up={up} drop={bare ? BARE_DROP : 0} />}
+          {place.right && <Fillet side="right" up={up} drop={bare ? BARE_DROP : 0} />}
         </span>
 
         <span

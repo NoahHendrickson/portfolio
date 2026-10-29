@@ -407,7 +407,10 @@ function FanCard({
   card: WorkCard
   side: 'left' | 'right'
   width: number
-  /** How far the card runs past the tab's corner on its side. */
+  /**
+   * How far the card runs past the tab's corner on its side. At 0 it sits
+   * flush with the tab's edge, square at that corner, so the two read as one.
+   */
   reach: number
   /** On top of the other card. */
   front: boolean
@@ -436,7 +439,11 @@ function FanCard({
         boxSizing: 'border-box',
         padding: FAN_PAD,
         background: color.bg.cream,
-        borderRadius: radius.lg,
+        borderRadius: reach
+          ? radius.lg
+          : left
+            ? `0 ${radius.lg} ${radius.lg} ${radius.lg}`
+            : `${radius.lg} 0 ${radius.lg} ${radius.lg}`,
         boxShadow: front ? '0 10px 28px rgba(15, 14, 14, 0.28)' : undefined,
         // Left side down is a turn anticlockwise; right side down, clockwise.
         transform: `rotate(${left ? -FAN_TILT : FAN_TILT}deg)`,
