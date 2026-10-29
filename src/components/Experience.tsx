@@ -121,8 +121,7 @@ const designNotes: DesignNote[] = [
   {
     title: 'Sending off multiple agents to update, test and implement my Figma designs is the best kind of addiction',
     paragraphs: [
-      'Cursor is what really unlocked this idea for me. I was using composer 2 a lot for making UI changes because it was super fast and pretty good at following my Figma designs. I just started making multiple thread with different changes. There was some learning curve to this when agents would collide with each other and confuse eachother (this is kinda solved now with how smart these things are now.)',
-      'I’ve now extended this to being able to work on multiple projects and features at a time. The challenge is not doing too much, where basically anything is possible you don’t want to jump around too much and have 50 things started and 0 finished. I also don’t have unlimited tokens :(',
+      'I’m regularly working in multiple threads and multiple projects. To some extent I can design as fast as I can think of what I want. I can test multiple variations nearly as fast as I can think of them. Once I build out my taste/style, shared taxonomy, design language, design system I can literally just watch what’s in my head appear on my screen after some words and mockups.',
     ],
   },
   {
