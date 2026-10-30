@@ -181,8 +181,8 @@ html:has(.showcase-lightbox[open]) {
   }
 }
 
-/* Matches MOBILE_BREAKPOINT_PX in src/hooks/useIsMobile.ts. */
-@media (max-width: 900px) {
+/* Matches MOBILE_QUERY in src/hooks/useIsMobile.ts. */
+@media (max-width: 900px), (max-height: 600px) and (pointer: coarse) {
   html, body {
     overflow-y: auto;
   }
