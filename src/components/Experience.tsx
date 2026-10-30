@@ -112,28 +112,26 @@ type DesignNote = {
 
 const designNotes: DesignNote[] = [
   {
-    title: 'Designing with AI',
+    title: 'AI tools have become a core part of my design process. I use Claude Code, Cursor, Codex every day when building and designing.',
     paragraphs: [
-      'AI tools have become a core part of my design process. I use Claude Code, Cursor, Codex everyday when building and designing. Jumping between Figma and these AI coding tools allows me to iterate much faster. In the past, as a Designer you needed to make assumptions when designing in Figma. You couldn’t actually see or feel the designs in the environment that your users would experience them in.',
-      'Figma continues to be a staple for me as it is so useful across the different phases. Using low-fi design to test interactions to high fidelity mockups that an agent can implement. Beautiful design requires Figma (and a human) most of the time.',
+      'Jumping between Figma and these AI coding tools allows me to iterate much faster. In the past, as a designer you needed to make assumptions when designing in Figma. You couldn’t actually see or feel the designs in the environment that your users would experience them in.',
+      'Figma continues to be a staple for me as it is so useful across the different phases. Using low-fi design to test interactions to high-fidelity mockups that an agent can implement. Beautiful design requires Figma (and a human) most of the time.',
     ],
   },
   {
-    title: 'Orchestrating agents',
+    title: 'Sending off multiple agents to update, test and implement my Figma designs is the best kind of addiction',
     paragraphs: [
-      'Cursor is what really unlocked this idea for me. I was using composer 2 a lot for making UI changes because it was super fast and pretty good at following my Figma designs. I just started making multiple thread with different changes. There was some learning curve to this when agents would collide with each other and confuse eachother (this is kinda solved now with how smart these things are now.)',
-      'I’ve now extended this to being able to work on multiple projects and features at a time. The challenge is not doing too much, where basically anything is possible you don’t want to jump around too much and have 50 things started and 0 finished. I also don’t have unlimited tokens :(',
+      'I’m regularly working in multiple threads and multiple projects. To some extent I can design as fast as I can think of what I want. I can test multiple variations nearly as fast as I can think of them. Once I build out my taste/style, shared taxonomy, design language and design system, I can literally just watch what’s in my head appear on my screen after some words and mockups.',
     ],
   },
   {
-    title: 'Design engineering',
+    title: 'Copying patterns from the labs and from prominent AI devs',
     paragraphs: [
-      'I have had to do quite a bit of learning when it comes to git, PRs, and code reviews to try and have confidence in the code LLMs write, when I don’t have the expertise to surmise that on my own.',
-      'I looked to the labs and people who were building these models and harnesses to setup some automated PR reviews, adversarial code reviews etc.',
+      'As a designer, I’m not able to actually judge the code that any of these agents are writing. I’ve been doing research, watching YouTube videos and trying to copy and learn how AI engineers are managing their agents and creating loops to strengthen the outputs that these agents give. At the end of the day, I have agents reviewing and verifying other agents, but it seems like for the most part, they know what they’re doing. :p',
     ],
   },
   {
-    title: 'Designing the system under the screens',
+    title: 'Making sure the concept model is clear and as simple as possible puts the UI design on autopilot',
     paragraphs: [
       'A lot of my work at Invisible went into the model underneath our internal management tool: who can see what, who can do what, and how that changes as people move between teams, projects and roles. Permission structures, user management, user groups.',
       'I start that work before Figma, mapping out the users, roles and groups and how they relate, then testing the model against the weird cases. Getting the UI right is a lot easier when the foundation underneath it is as clear and simple as it can be.',
@@ -255,7 +253,16 @@ export function DesigningNow() {
       {designNotes.map((note) => (
         <article key={note.title} style={{ display: 'flex', flexDirection: 'column', gap: space.md }}>
           <h2 style={{ ...roleTitle, color: TEXT }}>{note.title}</h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: space.lg }}>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: space.lg,
+              // The title leads at full strength; the copy under it is what
+              // follows from it.
+              opacity: 0.65,
+            }}
+          >
             {note.paragraphs.map((paragraph) => (
               <p key={paragraph.slice(0, 40)} style={body}>
                 {paragraph}

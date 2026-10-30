@@ -111,7 +111,7 @@ export const MARK: string[] = (() => {
   return grid.map((row) => row.join(''))
 })()
 
-const MARK_INK: Record<string, string> = {
+export const MARK_INK: Record<string, string> = {
   k: '#000000',
   g: '#26b846',
   G: '#3aed62',
