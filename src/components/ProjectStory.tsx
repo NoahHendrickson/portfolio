@@ -1,4 +1,4 @@
-import { Fragment, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { FastForward, MagnifyingGlassPlus, MouseMiddleClick, Scissors, VideoCamera } from '@phosphor-icons/react'
 import Header from './Header'
 import ProjectIntro, { IntroList, OutLink, Runs, SectionCopy, SectionHeading, WideMedia } from './ProjectIntro'
@@ -358,9 +358,29 @@ function Showcase({
   /** Its width — the hero breakout on desktop. */
   style: React.CSSProperties
 }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: space.lg, ...style }}>
+      <ShowcaseImg shot={showcase.shot} hero />
+      {showcase.grid && <ShowcaseGrid shots={showcase.grid} />}
+    </div>
+  )
+}
+
+/** Two to a row on the showcase's 16px gap — under the hero shot, or as its own `grid` row. */
+function ShowcaseGrid({ shots }: { shots: ShowcaseImage[] }) {
   const isMobile = useIsMobile()
-  // The wide shot is the page's hero; the grid under it can wait its turn.
-  const image = (shot: ShowcaseImage, hero = false) => (
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: space.lg }}>
+      {shots.map((shot) => (
+        <ShowcaseImg key={shot.src} shot={shot} />
+      ))}
+    </div>
+  )
+}
+
+/** The wide shot is the page's hero; the grid can wait its turn. */
+function ShowcaseImg({ shot, hero = false }: { shot: ShowcaseImage; hero?: boolean }) {
+  return (
     <img
       src={shot.src}
       alt={shot.alt}
@@ -376,17 +396,6 @@ function Showcase({
       }}
     />
   )
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: space.lg, ...style }}>
-      {image(showcase.shot, true)}
-      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: space.lg }}>
-        {showcase.grid.map((shot) => (
-          <Fragment key={shot.src}>{image(shot)}</Fragment>
-        ))}
-      </div>
-    </div>
-  )
 }
 
 /** Rows are keyed off their first screenshot; `copy` rows have none, so index it. */
@@ -396,6 +405,8 @@ function sectionKey(section: StorySection, i: number) {
     case 'tracks':
     case 'gallery':
       return `${i}-${section.heading}`
+    case 'grid':
+      return section.shots[0].src
     case 'columns':
       return section.columns[0].shot.src
     case 'feature':
@@ -428,6 +439,14 @@ function SectionContent({ section }: { section: StorySection }) {
     return (
       <WideMedia>
         <ArtGallery heading={section.heading} items={section.items} />
+      </WideMedia>
+    )
+  }
+
+  if (section.kind === 'grid') {
+    return (
+      <WideMedia>
+        <ShowcaseGrid shots={section.shots} />
       </WideMedia>
     )
   }
