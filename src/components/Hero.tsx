@@ -19,7 +19,12 @@ const LINKEDIN_URL = 'https://www.linkedin.com/in/noah-hendrickson-808959192/'
 const TEXT = color.text.primary
 const MUTED = color.text.muted
 const AVATAR = 26
-const PREVIEW = 200
+/**
+ * The name popover's photo, and so its width: wide enough that the email row
+ * (icon, gap and 170 of address) clears the hairline's 8 margins with a couple
+ * of px to spare, rather than running past them to the panel's edge.
+ */
+const PREVIEW = 212
 /** A card thumbnail's width in its popover. */
 const THUMB = 360
 /**
@@ -44,7 +49,7 @@ type Crop = { size: [number, number]; x: number; y: number; w: number; h: number
  */
 const ONBOARDING_CROP: Crop = { size: [1810, 1000], x: 148, y: 82, w: 1568, h: 918 }
 /**
- * The "explore, design, build and iterate faster" popover hangs two small
+ * The "AI every day" popover hangs two small
  * cream cards off its tab instead of one panel: no3y Code in front on the
  * left, tipped left side down, and Crisp behind it on the right, tipped right
  * side down. Each turns about one of the tab's bottom corners — its top edge
@@ -56,6 +61,13 @@ const ONBOARDING_CROP: Crop = { size: [1810, 1000], x: 148, y: 82, w: 1568, h: 9
  * same width.
  */
 const FAN_REACH = 96
+/**
+ * On a short tab the cards reach further instead of narrowing: each runs
+ * out until its inner end stops this far short of the tab's far corner, so
+ * the end that tips up stays tucked under the tab rather than poking into the
+ * line beside it.
+ */
+const FAN_TUCK = 24
 const FAN_TILT = 5
 const FAN_PAD = 4
 /** As wide as the other card popovers: their thumbnail and its cream either side. */
@@ -72,7 +84,7 @@ const CARD_ASPECT = 1392 / 769
 const STAT_BUILDER_CROP: Crop = { size: [1392, 769], x: 0, y: 0, w: 1392, h: 769 }
 /** The Psychespeeders icon beside "built a tool", off the pixel-art set. */
 const GEAR_ICON = 20
-/** The leaf mark beside "explore, design, build and iterate faster". */
+/** The leaf mark beside "AI every day". */
 const LEAF_ICON = 20
 
 /**
@@ -311,8 +323,7 @@ function ViewLink({ href }: { href: string }) {
  * A phrase in the copy that opens a project as its Work card thumbnail,
  * linking to its page: "using data, UX research, and empathy" opens the
  * Meridial onboarding study (the research-led one) and "built a tool" opens
- * D2 Conflux. ("explore, design, build and iterate faster" opens two, through
- * `FanTag`.)
+ * D2 Conflux. ("AI every day" opens two, through `FanTag`.)
  */
 function CardTag({
   card,
@@ -479,7 +490,7 @@ function FanCard({
 }
 
 /**
- * "explore, design, build and iterate faster" in the copy: a popover holding
+ * "AI every day" in the copy: a popover holding
  * two projects rather than one, no3y Code and Crisp fanned out from its tab
  * like a hand of cards.
  */
@@ -490,8 +501,9 @@ function FanTag({ children }: { children: ReactNode }) {
   // The full fan until an open measures less room than it needs.
   const [fit, setFit] = useState({ left: FAN_REACH, right: FAN_REACH, width: FAN_CARD_W })
   const measure = ({ left, right, tab }: PopoverRoom) => {
-    const reachL = Math.max(0, Math.min(FAN_REACH, left))
-    const reachR = Math.max(0, Math.min(FAN_REACH, right))
+    const want = Math.max(FAN_REACH, FAN_CARD_W - tab + FAN_TUCK)
+    const reachL = Math.max(0, Math.min(want, left))
+    const reachR = Math.max(0, Math.min(want, right))
     const width = Math.min(FAN_CARD_W, Math.round((tab + reachL + reachR) * FAN_SHARE))
     setFit({ left: reachL, right: reachR, width })
   }
@@ -585,17 +597,18 @@ export default function Hero() {
 
       <p style={{ ...body, color: TEXT }}>
         I&rsquo;m a super fast learner and eager to explore and embrace new tech, ideas
-        and workflows to hone my craft. I am comfortable in this evolving era of the
-        industry because it empowers me to{' '}
+        and workflows to hone my craft. I design with{' '}
         <span style={{ marginLeft: LEAD_ROOM }}>
           <FanTag>
             <span style={{ display: 'block', transform: capCentre(LEAF_ICON) }}>
               <LeafMark size={LEAF_ICON} />
             </span>
-            explore, design, build and iterate faster
+            AI every day
           </FanTag>
-        </span>{' '}
-        than ever possible before. I have multiple years of experience{' '}
+        </span>
+        , and I&rsquo;m comfortable in this evolving era of the industry because it
+        empowers me to explore, design, build and iterate faster than ever before. I
+        have multiple years of experience{' '}
         <span style={{ marginLeft: LEAD_ROOM }}>
           <CardTag card={ONBOARDING_CARD} crop={ONBOARDING_CROP} gap={4} iconAlign="baseline">
             <PixelHeart />
@@ -605,15 +618,15 @@ export default function Hero() {
         to solve business problems with product design.
       </p>
 
-      <p style={{ ...body, color: MUTED }}>
+      <p style={{ ...body, color: TEXT }}>
         I&rsquo;ve worked on consumer facing products and features like onboarding
-        users, driving engagement and simple IA. I also got to design
+        users, driving engagement and simple flows. I also got to design
         complex workflows, admin tools and user management systems. Using words,
         diagrams and research, I laid out clear conceptual models that served as
         the blueprint for the UX/UI.
       </p>
 
-      <p style={{ ...body, color: MUTED }}>
+      <p style={{ ...body, color: TEXT }}>
         I spend much of my free time gaming, hanging with friends and exercising. I
         have been a hard-core gamer for more than a decade. My most played and
         favorite game is Destiny 2. Participating in World First races and other PvE
