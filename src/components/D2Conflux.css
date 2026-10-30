@@ -217,6 +217,7 @@
 .cfx-browser > img,
 .cfx-browser video { display: block; width: 100%; height: auto; }
 
+
 .cfx-browser-chrome {
   font-size: calc(12px * var(--chrome-scale));
   color: var(--ink);
@@ -402,4 +403,27 @@
   .cfx-browser,
   .cfx-pair .cfx-browser { --chrome-scale: 0.7; border-radius: 8px; }
   .cfx-browser-lights { display: none; }
+}
+
+/* ── Component strip ─────────────────────────────────────────────────────── */
+
+/* The live component playground runs the page's full width as a band of the app's
+   Slate, out past the column's `--cfx-pad` on both sides. Later than the section
+   rule that widens media to 1320, which it overrides. The band is the app itself:
+   the iframe paints its own backdrop, and the ground here only shows while it loads.
+   The frame grows to the app's content height (ComponentStrip), so it never scrolls;
+   the height here only holds the space until the app reports in. */
+.cfx-section > .cfx-strip {
+  width: auto;
+  max-width: none;
+  margin-left: calc(-1 * var(--cfx-pad));
+  margin-right: calc(-1 * var(--cfx-pad));
+  background: linear-gradient(241.87deg, #374358 2.15%, #2f3841 93.13%);
+}
+
+.cfx-embed {
+  display: block;
+  width: 100%;
+  height: 1100px;
+  border: 0;
 }

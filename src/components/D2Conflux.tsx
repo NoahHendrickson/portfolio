@@ -1,4 +1,4 @@
-import { useState, type ComponentProps, type CSSProperties, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ComponentProps, type CSSProperties, type ReactNode } from 'react'
 import {
   ArrowClockwise,
   ArrowLeft,
@@ -32,6 +32,13 @@ import './D2Conflux.css'
 const project = projects['stat-builder']
 const GITHUB = 'https://github.com/NoahHendrickson/d2-stat-builder'
 const ASSET = '/work/stat-builder/conflux'
+/**
+ * The app's component playground, live: /components/embed is the bare copy the app lets
+ * this site frame. `VITE_CONFLUX_ORIGIN` points it at a local app server while working on it.
+ */
+const CONFLUX = import.meta.env.VITE_CONFLUX_ORIGIN ?? STAT_BUILDER_SITE
+const PLAYGROUND_EMBED = new URL('/components/embed#button', CONFLUX).href
+const PLAYGROUND = new URL('/components', STAT_BUILDER_SITE).href
 
 
 export default function D2Conflux() {
@@ -170,30 +177,20 @@ export default function D2Conflux() {
           />
         </Section>
 
-        <Section label="Items">
-          <Intro heading="An item page that shows all your characters and items in a similar UX to in-game">
+        <Section label="Components">
+          <Intro heading="Component library">
             <p className="cfx-body">
-              Items puts each character beside the vault the way the in-game character screen does.
-              Search with keywords, drag pieces between characters, and open anything to see its perks
-              and stats.
+              The app's own components, running live from d2conflux.com. Change their props, force
+              hover, focus and pressed states, switch themes, and copy the code.
             </p>
+            <div className="cfx-actions">
+              <PillLink href={PLAYGROUND} external>
+                Open full screen
+                <ArrowSquareOut size={16} aria-hidden />
+              </PillLink>
+            </div>
           </Intro>
-          <div className="cfx-pair">
-            <Shot
-              src={`${ASSET}/items.jpg`}
-              browser={{ path: '/manager', title: 'Items' }}
-              alt="The Items page: the Warlock's nameplate and stats, subclass, equipped weapons and armor with spare pieces beside each slot, and the vault grouped by weapon type on the right"
-              width={3200}
-              height={1800}
-            />
-            <Shot
-              src={`${ASSET}/item-popover.jpg`}
-              stage="Item details"
-              alt="An item popover for Chroma Rush, an Overload auto rifle at power 550: its perks, mods and full stat bars"
-              width={596}
-              height={1216}
-            />
-          </div>
+          <ComponentStrip />
         </Section>
 
         <Section label="Community feedback">
@@ -244,6 +241,67 @@ function Hero() {
             <OutLink href={GITHUB} label="Source" />
           </>
         }
+      />
+    </div>
+  )
+}
+
+/**
+ * The app's component playground, edge to edge: not a mockup but the app itself, whose
+ * Slate backdrop is the strip's colour (switching its theme repaints the whole band).
+ * The embed posts its content height and the frame takes it, so it never scrolls. Back
+ * the other way goes the slice of the frame that's on screen, so the app's dialogs,
+ * drawers and toasts open in view rather than halfway down a frame taller than the
+ * window (the app's embed-bridge.ts has the other end).
+ */
+function ComponentStrip() {
+  const frameRef = useRef<HTMLIFrameElement>(null)
+  const [height, setHeight] = useState<number>()
+
+  useEffect(() => {
+    const frame = frameRef.current
+    if (!frame) return
+    const origin = new URL(CONFLUX).origin
+    let raf = 0
+    const sendViewport = () => {
+      cancelAnimationFrame(raf)
+      raf = requestAnimationFrame(() => {
+        const rect = frame.getBoundingClientRect()
+        const top = Math.max(0, -rect.top)
+        const bottom = Math.min(rect.height, window.innerHeight - rect.top)
+        frame.contentWindow?.postMessage(
+          { type: 'd2-components:viewport', top, height: Math.max(0, bottom - top) },
+          origin,
+        )
+      })
+    }
+    const onMessage = (e: MessageEvent) => {
+      if (e.origin !== origin || e.source !== frame.contentWindow) return
+      if (e.data?.type !== 'd2-components:height' || typeof e.data.height !== 'number') return
+      setHeight(e.data.height)
+      sendViewport()
+    }
+    window.addEventListener('message', onMessage)
+    // Capture: the page may scroll in a container rather than the window.
+    window.addEventListener('scroll', sendViewport, { capture: true, passive: true })
+    window.addEventListener('resize', sendViewport)
+    return () => {
+      cancelAnimationFrame(raf)
+      window.removeEventListener('message', onMessage)
+      window.removeEventListener('scroll', sendViewport, { capture: true })
+      window.removeEventListener('resize', sendViewport)
+    }
+  }, [])
+
+  return (
+    <div className="cfx-strip">
+      <iframe
+        ref={frameRef}
+        className="cfx-embed"
+        src={PLAYGROUND_EMBED}
+        title="D2 Conflux component library"
+        loading="lazy"
+        style={height ? { height } : undefined}
       />
     </div>
   )
