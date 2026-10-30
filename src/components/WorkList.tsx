@@ -5,7 +5,7 @@ import Button from '../design-system/Button'
 import { VARIANTS } from '../design-system/buttonStyles'
 import { FEATURED, WORK_FILTERS, type WorkCard, type WorkFilter } from '../data/workCards'
 import { color, control, radius, space, type } from '../design-system/tokens'
-import { MOBILE_QUERY, useIsMobile, useIsWide } from '../hooks/useIsMobile'
+import { MOBILE_WIDTH_QUERY, useIsMobile, useIsWide } from '../hooks/useIsMobile'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 
 /**
@@ -462,7 +462,7 @@ function CardArt({
         // `auto` is the box's laid-out width (lazy images only); a browser
         // without it takes the fallback — the full column on mobile, about a
         // featured box (the widest desktop cell) otherwise.
-        sizes={card.art.srcSet ? `auto, ${MOBILE_QUERY} 100vw, 460px` : undefined}
+        sizes={card.art.srcSet ? `auto, ${MOBILE_WIDTH_QUERY} 100vw, 460px` : undefined}
         alt={card.art.alt}
         loading="lazy"
         style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover' }}

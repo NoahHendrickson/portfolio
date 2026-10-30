@@ -1,4 +1,4 @@
-import { useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import { useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { color, radius, radiusPx } from '../design-system/tokens'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import { visibleBox } from '../visibleBox'
@@ -35,6 +35,8 @@ export type PopoverRoom = { left: number; right: number; tab: number }
  * up into it: the fillet, then the panel's own top corner.
  */
 const SHOULDER = FILLET + PANEL_RADIUS
+/** The panel's least width: the tab, and a shoulder past it each side. */
+const PANEL_MIN = `calc(100% + ${PAD_X * 2 + SHOULDER * 2}px)`
 /**
  * How far a `bare` popover's fillets run below the tab's foot. The pieces
  * there leave the foot at a slight angle (a tipped card), so their top edge
@@ -57,7 +59,6 @@ const LABEL: CSSProperties = {
   position: 'relative',
   display: 'inline-flex',
   alignItems: 'center',
-  whiteSpace: 'nowrap',
   textDecoration: 'underline',
   textUnderlineOffset: '4px',
   textDecorationThickness: '1.5px',
@@ -76,7 +77,9 @@ const LABEL: CSSProperties = {
  * for the panel (the foot of a page, or a phone's screen) and more over it,
  * the whole shape flips: the panel hangs over the trigger and the tab rounds
  * at its foot instead. The fill is laid behind the trigger rather
- * than padding it, so the line doesn't shift when it opens.
+ * than padding it, so the line doesn't shift when it opens. A trigger wider
+ * than its column (a long phrase on a small phone) wraps, and the tab
+ * covers every line of it.
  *
  * Open, the trigger reads at medium weight. Medium runs wider than regular,
  * and letting the line reflow could carry the trigger out from under the
@@ -127,9 +130,41 @@ export default function Popover({
    * trigger rather than under it, and the tab's centre on the panel, for the
    * grow to come out of.
    */
-  const [place, setPlace] = useState({ x: -PAD_X, left: false, right: true, up: false, origin: 0 })
+  const [place, setPlace] = useState<{
+    x: number
+    left: boolean
+    right: boolean
+    up: boolean
+    origin: number
+    /** Set only when the panel is narrowed to fit the screen. */
+    width?: number
+  }>({ x: -PAD_X, left: false, right: true, up: false, origin: 0 })
   const faceRef = useRef<HTMLSpanElement>(null)
   const panelRef = useRef<HTMLSpanElement>(null)
+  const labelRef = useRef<HTMLSpanElement>(null)
+  /**
+   * The trigger's width when it is wider than its column (a long phrase on a
+   * small phone) and so wraps, for the face to wrap at too. Null on one line,
+   * where the face runs at its own width.
+   */
+  const [wrapWidth, setWrapWidth] = useState<number | null>(null)
+
+  useLayoutEffect(() => {
+    const label = labelRef.current
+    if (!label) return
+    const measure = () => {
+      // Wrapped if it would run wider held on one line.
+      const width = label.offsetWidth
+      label.style.whiteSpace = 'nowrap'
+      const single = label.offsetWidth
+      label.style.whiteSpace = ''
+      setWrapWidth(single > width + 0.5 ? width : null)
+    }
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(label)
+    return () => observer.disconnect()
+  }, [])
 
   // Measured as it opens, so it never paints in the wrong place. The panel is
   // always laid out (only faded), so its width is there to read.
@@ -147,8 +182,15 @@ export default function Popover({
       })
     } else if (faceRef.current && panelRef.current) {
       const box = faceRef.current.getBoundingClientRect()
+      // Measured at its natural width, without the narrowing a previous open
+      // may have left on it, which is put straight back for React to replace.
+      const panel = panelRef.current.style
+      const narrowed = [panel.width, panel.minWidth]
+      panel.width = ''
+      panel.minWidth = PANEL_MIN
       const width = panelRef.current.offsetWidth
       const height = panelRef.current.offsetHeight
+      ;[panel.width, panel.minWidth] = narrowed
       const tabLeft = -PAD_X
       const tabRight = box.width + PAD_X
       const view = visibleBox(faceRef.current)
@@ -156,6 +198,30 @@ export default function Popover({
       const below = view.bottom - EDGE - (box.bottom + PAD_Y)
       const above = box.top - PAD_Y - (view.top + EDGE)
       const up = below < height && above > below
+      // In the face's coordinates, the span the panel can show in.
+      const viewLeft = view.left + EDGE - box.left
+      const viewRight = view.right - EDGE - box.left
+      if (width > viewRight - viewLeft) {
+        // A trigger nearly the screen's width (a long phrase on a phone) leaves
+        // no room to clear the tab both sides. The panel runs from the tab's
+        // edge to the screen's on whichever side still holds a shoulder, or,
+        // with neither, hangs straight down at the tab's own width, square at
+        // both corners.
+        let from = tabLeft
+        let to = tabRight
+        if (viewRight - tabRight >= SHOULDER) to = viewRight
+        else if (tabLeft - viewLeft >= SHOULDER) from = viewLeft
+        setPlace({
+          x: from,
+          left: from < tabLeft,
+          right: to > tabRight,
+          up,
+          origin: box.width / 2 - from,
+          width: to - from,
+        })
+        setOpen(true)
+        return
+      }
       // Centred, then slid to stay inside what can show it.
       let x = (box.width - width) / 2
       x = Math.min(x, view.right - EDGE - box.left - width)
@@ -203,7 +269,9 @@ export default function Popover({
       }}
     >
       {/* The regular copy, which holds the line's layout. */}
-      <span style={{ ...LABEL, gap, alignItems: iconAlign, opacity: open ? 0 : 1, transition: FADE }}>{children}</span>
+      <span ref={labelRef} style={{ ...LABEL, gap, alignItems: iconAlign, opacity: open ? 0 : 1, transition: FADE }}>
+        {children}
+      </span>
 
       <span
         ref={faceRef}
@@ -215,7 +283,7 @@ export default function Popover({
           bottom: 0,
           left: 0,
           display: 'flex',
-          width: 'max-content',
+          width: wrapWidth ?? 'max-content',
           pointerEvents: 'none',
         }}
       >
@@ -271,8 +339,10 @@ export default function Popover({
               ? { left: -PAD_X, width: `calc(100% + ${PAD_X * 2}px)` }
               : {
                   left: place.x,
-                  // Wide enough to clear the tab by a shoulder each side.
-                  minWidth: `calc(100% + ${PAD_X * 2 + SHOULDER * 2}px)`,
+                  // Wide enough to clear the tab by a shoulder each side,
+                  // unless the screen can't hold that (`place.width`).
+                  width: place.width,
+                  minWidth: place.width === undefined ? PANEL_MIN : undefined,
                   padding: PANEL_PAD,
                   background: FILL,
                   // Square only where a side runs flush into the tab.

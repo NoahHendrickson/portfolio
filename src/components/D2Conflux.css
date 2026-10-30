@@ -334,8 +334,9 @@
 .cfx-section > .cfx-rule { margin-bottom: calc(24px - var(--cfx-stack)); }
 
 /* A section's media runs wider than its copy, out to the hero's 1320 (`WideMedia`),
-   centred on the column. Desktop only; mobile keeps the column. */
-@media (min-width: 901px) {
+   centred on the column. Desktop only; mobile keeps the column. The inverse of
+   `MOBILE_QUERY`: past 900 wide, unless it is also a short touch screen. */
+@media (min-width: 901px) and (min-height: 601px), (min-width: 901px) and (pointer: fine), (min-width: 901px) and (pointer: none) {
   .cfx-section > :not(.cfx-rule, .cfx-intro) {
     width: min(1320px, calc(100vw - 96px));
     max-width: none;
@@ -389,8 +390,8 @@
 
 /* ── Narrow screens ──────────────────────────────────────────────────────── */
 
-/* The site's mobile breakpoint (`useIsMobile`). */
-@media (max-width: 900px) {
+/* The site's mobile breakpoint (`MOBILE_QUERY` in `useIsMobile`). */
+@media (max-width: 900px), (max-height: 600px) and (pointer: coarse) {
   .cfx { --cfx-gap: 96px; --cfx-stack: 40px; }
   .cfx-h2 { font-size: 28px; }
   .cfx-intro { gap: 20px; }

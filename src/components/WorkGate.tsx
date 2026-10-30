@@ -104,7 +104,9 @@ export default function WorkGate({
             autoFocus
             style={{
               padding: `${space.md} ${space.lg}`,
-              fontSize: type['body-m'].fontSize,
+              // iOS Safari zooms the page into any field under 16px when it
+              // takes focus, and leaves it zoomed after the page unlocks.
+              fontSize: isMobile ? '16px' : type['body-m'].fontSize,
               fontFamily: 'inherit',
               border: `1px solid ${error ? ORANGE : color.border.default}`,
               borderRadius: radius.md,
