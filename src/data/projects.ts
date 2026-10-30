@@ -202,6 +202,8 @@ export type GalleryArt = {
  */
 export type StorySection =
   | { kind: 'gallery'; heading: string; items: GalleryArt[] }
+  /** Images two to a row on the showcase's 16px gap, without copy — no3y Code's composer tiles. */
+  | { kind: 'grid'; shots: ShowcaseImage[] }
   /** Screenshots side by side, captions underneath — The Forge. */
   | { kind: 'columns'; gap: number; columns: StoryColumn[] }
   /** One screenshot beside its caption, vertically centered. */
@@ -385,11 +387,11 @@ export type Landing = {
   // Gaps and alignment are the shared project frame's (`layout.ts`), not per page.
   /**
    * The wide opener under the intro — no3y Code. `shot` runs the hero
-   * breakout, then `grid` runs two images to a row under it.
+   * breakout, then `grid`, if set, runs two images to a row under it.
    */
   showcase?: {
     shot: ShowcaseImage
-    grid: ShowcaseImage[]
+    grid?: ShowcaseImage[]
   }
   /** The intro's copy and actions, then the hero media under it. */
   hero: {
@@ -838,28 +840,6 @@ export const projects: Record<string, Project> = {
           alt: 'no3y Code on the desktop — the new agent screen on the Glass theme, the thread sidebar beside an empty composer',
           aspect: '1272 / 820',
         },
-        grid: [
-          {
-            src: '/work/no3y-code/collage/dictation.webp',
-            alt: 'The composer while dictating, with a live level timeline beside cancel and confirm buttons',
-            aspect: '680 / 380',
-          },
-          {
-            src: '/work/no3y-code/collage/queue.webp',
-            alt: 'A follow-up message queued above the composer while the agent works, with edit, Steer and remove controls',
-            aspect: '680 / 380',
-          },
-          {
-            src: '/work/no3y-code/collage/usage.webp',
-            alt: 'The usage popover opened from the composer’s meter, showing session and weekly limits for Codex and Claude',
-            aspect: '680 / 380',
-          },
-          {
-            src: '/work/no3y-code/collage/question.webp',
-            alt: 'An agent’s question shown in place of the composer, with two options and a field for a custom answer',
-            aspect: '680 / 380',
-          },
-        ],
       },
       hero: {
         body: [
@@ -907,6 +887,47 @@ export const projects: Record<string, Project> = {
             aspect: '4703 / 3048',
             frame: 'plain',
           },
+        },
+        {
+          kind: 'feature',
+          gap: 80,
+          heading: 'Quickly start a new agent in the same branch or worktree',
+          body: 'When making UI changes I often have multiple ideas at once or one right after another and I don’t want to wait for the previous turn to finish.',
+          copyWidth: 700,
+          stack: true,
+          video: {
+            src: '/work/no3y-code/split-agent.mp4',
+            poster: '/work/no3y-code/split-agent-poster.jpg',
+            alt: 'Split agent in no3y Code: a second agent opens beside a working thread, the sidebar pairs the two threads on one row, and one thread floats as a window over the chat',
+            aspect: '16 / 9',
+          },
+        },
+        // The composer tiles, baked off one wallpaper so the 2×2 reads as one
+        // picture; they need the showcase's width and 16px gap to line up.
+        {
+          kind: 'grid',
+          shots: [
+            {
+              src: '/work/no3y-code/collage/dictation.webp',
+              alt: 'The composer while dictating, with a live level timeline beside cancel and confirm buttons',
+              aspect: '680 / 380',
+            },
+            {
+              src: '/work/no3y-code/collage/queue.webp',
+              alt: 'A follow-up message queued above the composer while the agent works, with edit, Steer and remove controls',
+              aspect: '680 / 380',
+            },
+            {
+              src: '/work/no3y-code/collage/usage.webp',
+              alt: 'The usage popover opened from the composer’s meter, showing session and weekly limits for Codex and Claude',
+              aspect: '680 / 380',
+            },
+            {
+              src: '/work/no3y-code/collage/question.webp',
+              alt: 'An agent’s question shown in place of the composer, with two options and a field for a custom answer',
+              aspect: '680 / 380',
+            },
+          ],
         },
         {
           kind: 'feature',
@@ -971,10 +992,9 @@ export const projects: Record<string, Project> = {
           copyWidth: 700,
           stack: true,
           video: {
-            src: '/work/no3y-code/design-mode.mp4',
-            hevc: '/work/no3y-code/design-mode-hevc.mp4',
-            poster: '/work/no3y-code/design-mode-poster.jpg',
-            alt: 'Design mode in no3y Code: the preview opens beside the thread, then an element is selected and a gap change is queued to the agent',
+            src: '/work/no3y-code/design-mode-glass.mp4',
+            poster: '/work/no3y-code/design-mode-glass-poster.jpg',
+            alt: 'Design mode in no3y Code on the Glass theme: the preview opens beside the thread, a button and a heading are edited in the properties panel, canvas mode previews the page at another size, and the changes attach to the composer for the agent',
             aspect: '16 / 9',
           },
         },
