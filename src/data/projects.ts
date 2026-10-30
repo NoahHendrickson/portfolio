@@ -911,6 +911,20 @@ export const projects: Record<string, Project> = {
         {
           kind: 'feature',
           gap: 80,
+          heading: 'Split agents',
+          body: 'Sometimes one agent isn’t enough for a task. Split agent opens a second agent right beside the one I’m in, on the same project and branch, and the sidebar keeps the two together as one row. When I want to keep an eye on one while I work in the other, I float it as a window over the chat.',
+          copyWidth: 700,
+          stack: true,
+          video: {
+            src: '/work/no3y-code/split-agent.mp4',
+            poster: '/work/no3y-code/split-agent-poster.jpg',
+            alt: 'Split agent in no3y Code: a second agent opens beside a working thread, the sidebar pairs the two threads on one row, and one thread floats as a window over the chat',
+            aspect: '16 / 9',
+          },
+        },
+        {
+          kind: 'feature',
+          gap: 80,
           heading: 'The idea',
           body: [
             'I wanted a really powerful design mode in the agent orchestration tools I was using. I didn’t want to just select an element and prompt. Sometimes I wanted to be precise with my edits and send those off to an agent to apply. I also wanted more information at a glance when I was working on multiple projects at once.',
