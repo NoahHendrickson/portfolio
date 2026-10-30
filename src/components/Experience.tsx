@@ -37,6 +37,13 @@ const clippings: Clipping[] = [
     aspect: '914 / 118',
     crop: { width: '100%', left: '0%', height: '100%', top: '0%' },
   },
+  {
+    src: '/work/llm-wall-designer-jargon.webp',
+    alt: 'An LLM thinking “Since this person’s a designer, I should keep the explanation simple and avoid technical jargon.”',
+    width: 520,
+    aspect: '1334 / 80',
+    crop: { width: '100%', left: '0%', height: '100%', top: '0%' },
+  },
 ]
 
 function QuoteCard({ clipping }: { clipping: Clipping }) {
