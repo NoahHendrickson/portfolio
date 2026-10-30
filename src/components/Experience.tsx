@@ -112,23 +112,22 @@ type DesignNote = {
 
 const designNotes: DesignNote[] = [
   {
-    title: 'AI tools have become a core part of my design process. I use Claude Code, Cursor, Codex everyday when building and designing.',
+    title: 'AI tools have become a core part of my design process. I use Claude Code, Cursor, Codex every day when building and designing.',
     paragraphs: [
-      'Jumping between Figma and these AI coding tools allows me to iterate much faster. In the past, as a Designer you needed to make assumptions when designing in Figma. You couldn’t actually see or feel the designs in the environment that your users would experience them in.',
-      'Figma continues to be a staple for me as it is so useful across the different phases. Using low-fi design to test interactions to high fidelity mockups that an agent can implement. Beautiful design requires Figma (and a human) most of the time.',
+      'Jumping between Figma and these AI coding tools allows me to iterate much faster. In the past, as a designer you needed to make assumptions when designing in Figma. You couldn’t actually see or feel the designs in the environment that your users would experience them in.',
+      'Figma continues to be a staple for me as it is so useful across the different phases. Using low-fi design to test interactions to high-fidelity mockups that an agent can implement. Beautiful design requires Figma (and a human) most of the time.',
     ],
   },
   {
     title: 'Sending off multiple agents to update, test and implement my Figma designs is the best kind of addiction',
     paragraphs: [
-      'I’m regularly working in multiple threads and multiple projects. To some extent I can design as fast as I can think of what I want. I can test multiple variations nearly as fast as I can think of them. Once I build out my taste/style, shared taxonomy, design language, design system I can literally just watch what’s in my head appear on my screen after some words and mockups.',
+      'I’m regularly working in multiple threads and multiple projects. To some extent I can design as fast as I can think of what I want. I can test multiple variations nearly as fast as I can think of them. Once I build out my taste/style, shared taxonomy, design language and design system, I can literally just watch what’s in my head appear on my screen after some words and mockups.',
     ],
   },
   {
-    title: 'Design engineering',
+    title: 'Copying patterns from the labs and from prominent AI devs',
     paragraphs: [
-      'I have had to do quite a bit of learning when it comes to git, PRs, and code reviews to try and have confidence in the code LLMs write, when I don’t have the expertise to surmise that on my own.',
-      'I looked to the labs and people who were building these models and harnesses to setup some automated PR reviews, adversarial code reviews etc.',
+      'As a designer, I’m not able to actually judge the code that any of these agents are writing. I’ve been doing research, watching YouTube videos and trying to copy and learn how AI engineers are managing their agents and creating loops to strengthen the outputs that these agents give. At the end of the day, I have agents reviewing and verifying other agents, but it seems like for the most part, they know what they’re doing. :p',
     ],
   },
   {
