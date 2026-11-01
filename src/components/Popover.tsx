@@ -143,6 +143,12 @@ export default function Popover({
   const panelRef = useRef<HTMLSpanElement>(null)
   const labelRef = useRef<HTMLSpanElement>(null)
   /**
+   * Whether it was open when a press on the trigger began. A tap opens it
+   * (through the mouseenter and focus a touch screen fires) before its click
+   * lands, so the click can only close it if it was open before the press.
+   */
+  const wasOpen = useRef(false)
+  /**
    * The trigger's width when it is wider than its column (a long phrase on a
    * small phone) and so wraps, for the face to wrap at too. Null on one line,
    * where the face runs at its own width.
@@ -250,6 +256,17 @@ export default function Popover({
       onMouseEnter={show}
       onMouseLeave={() => setOpen(false)}
       onFocus={show}
+      // A click on the trigger (or its tab) closes an open popover, and opens
+      // a closed one — on touch, a tap after closing fires no new mouseenter
+      // or focus to open it. Clicks in the panel are its links' business.
+      onPointerDown={(e) => {
+        if (!panelRef.current?.contains(e.target as Node)) wasOpen.current = open
+      }}
+      onClick={(e) => {
+        if (panelRef.current?.contains(e.target as Node)) return
+        if (wasOpen.current) setOpen(false)
+        else show()
+      }}
       onBlur={(e) => {
         // Focus moving onto a link in the panel keeps it open.
         if (!e.currentTarget.contains(e.relatedTarget)) setOpen(false)

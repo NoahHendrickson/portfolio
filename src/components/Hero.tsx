@@ -79,6 +79,15 @@ const FAN_CARD_W = THUMB + FAN_PAD * 2
  * so they still cross under its middle rather than running off the screen.
  */
 const FAN_SHARE = 0.64
+/**
+ * A tipped card's inner end rises as it runs from its corner, so one that
+ * runs past the tab's far corner (a side with no room to reach out, the tab
+ * near a phone's edge) would lift into the line of copy beside the tab.
+ * Such a card hangs straight instead, its top edge along the tab's foot.
+ */
+function fanTilt(width: number, reach: number, tab: number) {
+  return width - reach > tab - FAN_TUCK ? 0 : FAN_TILT
+}
 const CARD_ASPECT = 1392 / 769
 /** D2 Conflux's card is a zoomed cut as well, shown whole. */
 const STAT_BUILDER_CROP: Crop = { size: [1392, 769], x: 0, y: 0, w: 1392, h: 769 }
@@ -412,12 +421,15 @@ function FanCard({
   side,
   width,
   reach,
+  tilt,
   front,
   onRaise,
 }: {
   card: WorkCard
   side: 'left' | 'right'
   width: number
+  /** Degrees off level; 0 when the card would rise past the tab (`fanTilt`). */
+  tilt: number
   /**
    * How far the card runs past the tab's corner on its side. At 0 it sits
    * flush with the tab's edge, square at that corner, so the two read as one.
@@ -457,7 +469,7 @@ function FanCard({
             : `${radius.lg} 0 ${radius.lg} ${radius.lg}`,
         boxShadow: front ? '0 10px 28px rgba(15, 14, 14, 0.28)' : undefined,
         // Left side down is a turn anticlockwise; right side down, clockwise.
-        transform: `rotate(${left ? -FAN_TILT : FAN_TILT}deg)`,
+        transform: `rotate(${left ? -tilt : tilt}deg)`,
         transformOrigin: `${pivot}px 0`,
       }}
     >
@@ -499,19 +511,34 @@ function FanTag({ children }: { children: ReactNode }) {
   // hovered.
   const [front, setFront] = useState<'left' | 'right'>('left')
   // The full fan until an open measures less room than it needs.
-  const [fit, setFit] = useState({ left: FAN_REACH, right: FAN_REACH, width: FAN_CARD_W })
+  const [fit, setFit] = useState({
+    left: FAN_REACH,
+    right: FAN_REACH,
+    width: FAN_CARD_W,
+    tiltL: FAN_TILT,
+    tiltR: FAN_TILT,
+  })
   const measure = ({ left, right, tab }: PopoverRoom) => {
     const want = Math.max(FAN_REACH, FAN_CARD_W - tab + FAN_TUCK)
     const reachL = Math.max(0, Math.min(want, left))
     const reachR = Math.max(0, Math.min(want, right))
     const width = Math.min(FAN_CARD_W, Math.round((tab + reachL + reachR) * FAN_SHARE))
-    setFit({ left: reachL, right: reachR, width })
+    setFit({
+      left: reachL,
+      right: reachR,
+      width,
+      tiltL: fanTilt(width, reachL, tab),
+      tiltR: fanTilt(width, reachR, tab),
+    })
   }
   // A card's height, and how far below the tab its outer corner drops once
   // tipped, so the hover area under the tab reaches its foot.
   const cardH = FAN_PAD * 2 + (fit.width - FAN_PAD * 2) / CARD_ASPECT + CAPTION_GAP + CAPTION_H
-  const tilt = (FAN_TILT * Math.PI) / 180
-  const depth = Math.max(fit.left, fit.right) * Math.sin(tilt) + cardH * Math.cos(tilt)
+  const drop = (reach: number, deg: number) => {
+    const t = (deg * Math.PI) / 180
+    return reach * Math.sin(t) + cardH * Math.cos(t)
+  }
+  const depth = Math.max(drop(fit.left, fit.tiltL), drop(fit.right, fit.tiltR))
 
   return (
     <Popover
@@ -524,6 +551,7 @@ function FanTag({ children }: { children: ReactNode }) {
             side="right"
             width={fit.width}
             reach={fit.right}
+            tilt={fit.tiltR}
             front={front === 'right'}
             onRaise={() => setFront('right')}
           />
@@ -532,6 +560,7 @@ function FanTag({ children }: { children: ReactNode }) {
             side="left"
             width={fit.width}
             reach={fit.left}
+            tilt={fit.tiltL}
             front={front === 'left'}
             onRaise={() => setFront('left')}
           />
