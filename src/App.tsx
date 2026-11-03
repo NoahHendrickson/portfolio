@@ -364,10 +364,15 @@ export default function App() {
   const railStop = railEnd + RAIL_GAP
   const panelWidth = `max(0px, min(${panelMax}, 2 * (${CENTRE} - ${railStop}px)))`
   const centredLeft = `(${CENTRE} - ${panelWidth} / 2)`
-  // How far the copy would overrun the leaves' inset if it stayed centred.
-  const leafOverrun = `max(0px, ${CENTRE} + ${COPY_MAX / 2}px - (${rowWidth} - ${rightInset}))`
-  const panelLeft =
-    tab === 'me' ? centredLeft : `max(${railStop}px, ${centredLeft} - ${leafOverrun})`
+  // The tabs with leaves show only copy, so their panel *is* the copy box: on
+  // the shared centre while it clears the leaves' inset, slid left when it
+  // wouldn't, and once it is back against the rail, narrowed to the room
+  // before the leaves rather than run its 700 over them (~1100–1450).
+  const leafLimit = `(${rowWidth} - ${rightInset})`
+  const copyLeft = `max(${railStop}px, min(${CENTRE} - ${COPY_MAX / 2}px, ${leafLimit} - ${COPY_MAX}px))`
+  const copyWidth = `max(0px, min(${COPY_MAX}px, ${leafLimit} - ${copyLeft}))`
+  const panelLeft = tab === 'me' ? centredLeft : copyLeft
+  const boxWidth = tab === 'me' ? panelWidth : copyWidth
 
   return (
     <div
@@ -486,7 +491,7 @@ export default function App() {
           className={isMobile ? 'tab-content-in' : 'tab-content-in panel-scroll'}
           style={{
             flex: isMobile ? undefined : '0 0 auto',
-            width: isMobile ? '100%' : `calc(${panelWidth} + ${bleedLeft + bleedRight}px)`,
+            width: isMobile ? '100%' : `calc(${boxWidth} + ${bleedLeft + bleedRight}px)`,
             maxWidth: isMobile ? `${COPY_MAX}px` : undefined,
             minWidth: 0,
             boxSizing: 'border-box',
