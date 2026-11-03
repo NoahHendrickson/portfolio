@@ -1,12 +1,12 @@
 /**
- * The home page's six hover-tabs (Figma section `321:38613`). The whole page
+ * The home page's hover-tabs (Figma section `321:38613`). The whole page
  * lives on `/`, so the active tab is session state rather than a path — it
  * survives refresh and Back from a project page, but a shared link always
- * opens on Me (or Work, via the legacy `/work` redirect in `App`).
+ * opens on Me. The projects run under Me's copy, so there is no Work tab.
  */
-export type HomeTab = 'me' | 'work' | 'design' | 'been' | 'contact' | 'lols'
+export type HomeTab = 'me' | 'design' | 'been' | 'contact' | 'lols'
 
-export const HOME_TAB_IDS: HomeTab[] = ['me', 'work', 'been', 'design', 'contact', 'lols']
+export const HOME_TAB_IDS: HomeTab[] = ['me', 'been', 'design', 'contact', 'lols']
 
 const HOME_TAB_KEY = 'home-tab'
 

@@ -476,6 +476,34 @@ html:has(.showcase-lightbox[open]) {
 /* The grid's bare-art cells (`PeekCardCell`, mouse only): the cell lifts and
    its caption panel rises over the art's foot on hover or keyboard focus. The
    pills only take the pointer while the panel shows. */
+/* Hi tab's project column (`HomeProjects`): the caption rises over the art's
+   foot on hover or keyboard focus. The art itself holds still — no zoom. */
+.home-project {
+  outline: none;
+}
+.home-project:focus-visible {
+  outline: 2px solid var(--color-orange);
+  outline-offset: 4px;
+}
+.home-project-caption {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 180ms ease, transform 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.home-project:hover .home-project-caption,
+.home-project:focus-visible .home-project-caption {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-project-caption {
+    transition: opacity 180ms ease;
+  }
+  .home-project:hover .home-project-caption,
+  .home-project:focus-visible .home-project-caption {
+    transform: none;
+  }
+}
 .work-peek-card {
   transition: transform 220ms ease, box-shadow 220ms ease;
 }

@@ -21,7 +21,7 @@ const LEAVES = [
  * again for the vertical-tab home page's finer field; pitches below keep the
  * same interlocking ratio.
  */
-const LEAF_W = 117
+export const LEAF_W = 117
 const LEAF_H = 81
 /** Horizontal column pitch — the 2/7 pass's 105, scaled to the 117px leaf. */
 const COL_X = 79
@@ -63,9 +63,10 @@ export const LEAF_PANEL_HEIGHT_VH = 260
 const LEFT_EDGE = [0, 1, 1, 0, 1, 2, 1, 1, 0, 1, 2, 1, 0, 1, 1, 2, 1, 0]
 
 /**
- * The tab-switch slide. Work's content column runs wider than every other
- * tab's, so the field starts further right there (`App` hands the delta down as
- * `shift`); the leaves travel that distance rather than cutting to it.
+ * The tab-switch slide. `App` hands down a `shift` and the leaves travel that
+ * distance rather than cutting to it — first built for the Work tab's wider
+ * column, now what sends the whole field off the right edge on Hi and back in
+ * on the other tabs.
  *
  * The wave runs left to right — the column that just widened moves its
  * neighbours first and the rest follow, which reads as the leaves being pushed

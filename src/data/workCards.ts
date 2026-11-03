@@ -18,7 +18,16 @@ export type WorkCard = {
    * `srcSet` lists smaller cuts of a 4x export (see `cuts`), so the browser
    * scales from the nearest one rather than halving the 1810 itself.
    */
-  art: { src: string; alt: string; srcSet?: string }
+  art: {
+    src: string
+    alt: string
+    srcSet?: string
+    /**
+     * The uncropped export behind a `zoomed` card, for a slot wide enough
+     * that the zoom isn't needed (the Hi tab's project column).
+     */
+    whole?: { src: string; srcSet: string }
+  }
   /**
    * Art laid over the export. How to Build a PC's card is a bare field — the
    * Figma file never had its art — so the old thumbnail sits centred at
@@ -59,7 +68,7 @@ function cuts(src: string, width = 1810) {
 function zoomed(src: string, alt: string) {
   const dot = src.lastIndexOf('.')
   const zoom = `${src.slice(0, dot)}-zoom${src.slice(dot)}`
-  return { src: zoom, srcSet: cuts(zoom, 1392), alt }
+  return { src: zoom, srcSet: cuts(zoom, 1392), alt, whole: { src, srcSet: cuts(src) } }
 }
 
 const no3y: WorkCard = {

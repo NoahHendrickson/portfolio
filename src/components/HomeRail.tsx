@@ -9,7 +9,7 @@ import {
 } from 'react'
 import { color, radius } from '../design-system/tokens'
 import type { HomeTab } from '../homeTab'
-import { WORK_FILTERS, type WorkFilter } from '../data/workCards'
+import { RAIL_SPINE } from '../layout'
 
 const ORANGE = color.accent.default
 /** Spine, active pill and Work card — cream, same as the rest of the light surfaces. */
@@ -18,19 +18,17 @@ const PILL = color.bg.cream
  * The spine runs the full height of the viewport, flush with its left edge,
  * at the file's 48 (Figma `365:6122`).
  */
-const SPINE_W = 48
+const SPINE_W = RAIL_SPINE
 /** Inner radius at the spine join, up from 8 — the pill's own corners stay 8. */
 const FILLET = 16
 /** The file's 48 above the first row and below the last. */
 const RAIL_PAD = 48
 
 /**
- * The Work card (Figma `373:12447`): 16 off the spine and off the rows either
- * side, 8 inside, the rows on the tabs' own rhythm and 10 apart.
+ * A `RailList` menu card's inset (Figma `373:12447`): 16 off the spine and off
+ * the rows either side. Nothing passes a menu since the Work tab went.
  */
 const MENU_INSET = 16
-const MENU_PAD = 8
-const MENU_GAP = 10
 /** Figma `373:12446` — the orange card sits 10 off the Work menu's right edge. */
 const ALERT_GAP = 10
 
@@ -152,15 +150,11 @@ const face = (name: keyof typeof FACE_DOTS) => (
  */
 const TABS: RailItem<HomeTab>[] = [
   { id: 'me', label: 'Hi', glyph: face('smirk') },
-  { id: 'work', label: 'Work', glyph: face('grin') },
   { id: 'been', label: 'Where I’ve been', glyph: face('laugh') },
   { id: 'design', label: 'How I design', glyph: face('emoticon') },
   { id: 'contact', label: 'Contact', glyph: face('grin') },
   { id: 'lols', label: 'LOLs', glyph: face('laugh') },
 ]
-
-/** The Work card's mark is the Work pill's own face (Figma `373:12494`). */
-const WORK_MARK = TABS.find((tab) => tab.id === 'work')?.glyph
 
 /**
  * The rail's 12 × 10 arrow, drawn as 2px squares the way the file builds it —
@@ -448,87 +442,6 @@ function useHoverIntent<T>(active: T, onEnter: (id: T) => void, onCommit: (id: T
   }
 
   return { move, enter, leave: cancel, commit }
-}
-
-/**
- * The Work menu (Figma `373:12447`): the cream card that unfolds under the
- * Work pill, its mark at the top and a row per section — label and count.
- * The active row is the file's 8% ink wash; hover and click select the way
- * the rail's own rows do.
- */
-function FilterMenu({
-  active,
-  onEnter,
-  onCommit,
-}: {
-  active: WorkFilter
-  onEnter: (id: WorkFilter) => void
-  onCommit: (id: WorkFilter) => void
-}) {
-  const hover = useHoverIntent(active, onEnter, onCommit)
-  return (
-    <div
-      role="group"
-      aria-label="Work sections"
-      onMouseMove={hover.move}
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'stretch',
-        gap: MENU_GAP,
-        padding: MENU_PAD,
-        background: PILL,
-        borderRadius: radius.md,
-        width: 'max-content',
-      }}
-    >
-      {WORK_MARK}
-      {WORK_FILTERS.map((filter) => {
-        const isActive = filter.id === active
-        return (
-          <button
-            key={filter.id}
-            type="button"
-            onMouseEnter={() => hover.enter(filter.id)}
-            onMouseLeave={hover.leave}
-            onClick={() => hover.commit(filter.id)}
-            aria-pressed={isActive}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '16px',
-              padding: '8px 12px',
-              border: 'none',
-              outline: 'none',
-              borderRadius: radius.md,
-              background: isActive ? `color-mix(in srgb, ${color.ink.default} 8%, transparent)` : 'transparent',
-              color: color.text.inverse,
-              cursor: 'pointer',
-              fontFamily: 'inherit',
-              fontSize: '16px',
-              fontWeight: 500,
-              lineHeight: 'normal',
-              letterSpacing: 0,
-              whiteSpace: 'nowrap',
-              transition: 'background 120ms ease',
-            }}
-          >
-            {filter.label}
-            {/* The file's count at 45% ink; tabular so a wider digit can't nudge the row. */}
-            <span
-              style={{
-                color: `color-mix(in srgb, ${color.ink.default} 45%, transparent)`,
-                fontVariantNumeric: 'tabular-nums',
-              }}
-            >
-              {filter.cards.length}
-            </span>
-          </button>
-        )
-      })}
-    </div>
-  )
 }
 
 type Seat = { top: number; bottom: number; width: number; rows: number[] }
@@ -971,20 +884,14 @@ function RailList<T extends string>({
 export default function HomeRail({
   active,
   onSelect,
-  filter,
-  onSelectFilter,
   isMobile,
 }: {
   active: HomeTab
   onSelect: (tab: HomeTab) => void
-  filter: WorkFilter
-  onSelectFilter: (filter: WorkFilter) => void
   isMobile: boolean
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const railRef = useRef<HTMLElement | null>(null)
-
-  const menuOpen = active === 'work' && !isMobile
 
   useEffect(() => {
     if (!isOpen) return
@@ -1003,11 +910,9 @@ export default function HomeRail({
   }, [isOpen])
 
   /*
-   * The arrow keys walk one list from anywhere on the page — Hi, Work/All …
-   * Work/Graphic design, Where I've been, and so on — so the rail does not
-   * have to be clicked first. Stepping onto Work from above lands on its
-   * first section and from below on its last, so the walk is linear; hover
-   * and click keep whatever section was set. Inputs are left alone.
+   * The arrow keys walk the tabs from anywhere on the page, so the rail does
+   * not have to be clicked first. Inputs are left alone. (The Work tab and
+   * its section menu are gone on this branch — the projects run under Hi.)
    */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -1020,32 +925,11 @@ export default function HomeRail({
       const i = TABS.findIndex((tab) => tab.id === active)
       const neighbour = TABS[(i + step + TABS.length) % TABS.length].id
       setIsOpen(false)
-
-      if (isMobile) {
-        onSelect(neighbour)
-        return
-      }
-
-      if (menuOpen) {
-        const fi = WORK_FILTERS.findIndex((entry) => entry.id === filter)
-        const next = WORK_FILTERS[fi + step]
-        if (next) {
-          onSelectFilter(next.id)
-          return
-        }
-        onSelect(neighbour)
-        return
-      }
-
-      if (neighbour === 'work') {
-        const entry = step === 1 ? WORK_FILTERS[0] : WORK_FILTERS[WORK_FILTERS.length - 1]
-        onSelectFilter(entry.id)
-      }
       onSelect(neighbour)
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [active, filter, isMobile, menuOpen, onSelect, onSelectFilter])
+  }, [active, onSelect])
 
   /*
    * Mobile is a dropdown rather than the rail (Figma `325:43995`). Six tabs
@@ -1054,8 +938,7 @@ export default function HomeRail({
    * touch anyway, so the closed state shows only where you are. The trigger is
    * the active item's pill, carrying the file's stacked caret pair in place of
    * the rail's travel arrow — it stays put on open, since the glyph says
-   * unfoldable rather than pointing anywhere. The Work sections live inside
-   * `WorkList` as its pill row here.
+   * unfoldable rather than pointing anywhere.
    */
   if (isMobile) {
     const activeLabel = TABS.find((tab) => tab.id === active)?.label ?? TABS[0].label
@@ -1135,10 +1018,6 @@ export default function HomeRail({
         onCommit={onSelect}
         palette={MAIN_PALETTE}
         spine={{ width: SPINE_W, background: PILL }}
-        menu={{
-          at: 'work',
-          node: <FilterMenu active={filter} onEnter={onSelectFilter} onCommit={onSelectFilter} />,
-        }}
         label="Sections"
       />
     </nav>

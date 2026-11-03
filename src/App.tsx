@@ -1,17 +1,18 @@
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react'
 import '@noey-17/yearn-ui/style.css'
 import Hero from './components/Hero'
 import HomeRail from './components/HomeRail'
 import IntroSplash from './components/IntroSplash'
 import { introConfigFromUrl, markIntroSeen, shouldPlayIntro } from './intro'
 import { readHomeTab, writeHomeTab, type HomeTab } from './homeTab'
-import { readWorkFilter, writeWorkFilter, type WorkFilter } from './data/workCards'
-import WorkList from './components/WorkList'
+import HomeProjects from './components/HomeProjects'
+import ContactButtons from './components/ContactButtons'
 import ShaderPanel from './components/ShaderPanel'
 import {
   LEAF_PANEL_HEIGHT_VH,
   LEAF_STRIP_MAX,
   LEAF_TIP_INSET,
+  LEAF_W,
   SHIFT_EASE,
   SHIFT_MS,
 } from './components/LeafPattern'
@@ -24,10 +25,10 @@ import InvisibleSynapse from './components/InvisibleSynapse'
 import ProjectLanding from './components/ProjectLanding'
 import ProjectStory from './components/ProjectStory'
 import { projects } from './data/projects'
-import { useIsMobile, useIsWide } from './hooks/useIsMobile'
+import { useIsMobile } from './hooks/useIsMobile'
 import { useMediaQuery } from './hooks/useMediaQuery'
 import { getRoute, navigate, subscribeToRoute } from './navigation'
-import { pageGutter, TABLET_MAX } from './layout'
+import { pageGutter, RAIL_SPINE, TABLET_MAX } from './layout'
 
 const BG = 'var(--color-bg-primary)'
 
@@ -39,16 +40,28 @@ const COLUMN_FILL = `linear-gradient(to right, ${BG} 0%, ${BG} calc(100% - ${LEA
 
 /**
  * Percentage of the viewport the content column takes, and the panel's width
- * cap, per tab. Work runs a 937px two-column grid against everything else's
- * 700 (Figma frames `320:30803` / `320:30968`), so its column reaches further
- * and the leaf field starts at the file's 1268 instead of ~1050. Past
- * `WIDE_MIN` that panel grows to 1420 so three columns can sit at the same
- * card size as the two-column file. Both percentages sit a touch past the
+ * cap (Figma frame `320:30803`). The percentage sits a touch past the
  * content's edge so the leaf tips peek from under the column rather than
- * crowding the copy.
+ * crowding the copy. (The Work tab's wider 84.4 / 937 column went with the
+ * tab on this branch.)
  */
-const CONTENT_PCT = { default: 70, work: 84.4 }
-const PANEL_MAX = { default: 700, work: 937, workWide: 1420 }
+const CONTENT_PCT = 70
+/**
+ * The copy's measure, and the panel's: the panel runs wider so Hi's project
+ * thumbnails can break out past the copy, and every tab's copy sits centred
+ * on the copy measure inside it — so on a tab without thumbnails the text
+ * lands where a 700 panel would.
+ *
+ * The panel is 1000 until 60% of the dark area passes that (~1715), then
+ * grows with the screen — ~1120 at 1920, ~1290 at 2200 — to `PANEL_CAP` at
+ * ~2380. The cap is where the 1810 card exports would start to read soft on
+ * a 2x screen. The thumbnails are its full width; the copy stays 700.
+ */
+const COPY_MAX = 700
+const PANEL_MIN = 1000
+const PANEL_CAP = 1400
+const PANEL_GROWTH = 0.6
+const PANEL_MAX = `clamp(${PANEL_MIN}px, (100vw - ${RAIL_SPINE}px) * ${PANEL_GROWTH}, ${PANEL_CAP}px)`
 /**
  * Extra column width below `TABLET_MAX`, so the leaf strip yields space to
  * the copy instead of holding a 70/30 split on a ~1100px screen. Zero at
@@ -61,7 +74,7 @@ const contentWidth = (pct: number) =>
 
 /**
  * Breathing room each side of the scrolling panel, as padding paid back by an
- * equal negative margin — the content box stays exactly `PANEL_MAX` wide and
+ * equal negative margin — the content box stays exactly `panelWidth` wide and
  * lands where it always did, but the scroller's own box reaches past it.
  *
  * A scroll container clips, and the Work cards run flush to the panel's edges:
@@ -113,27 +126,65 @@ function useWheelAnywhere(panel: React.RefObject<HTMLElement | null>, enabled: b
 }
 
 /**
- * Where the leaf field's left frontier sits for a given content width — the
- * column's right edge less the tip overhang, pinned so the strip stops growing
- * past `LEAF_STRIP_MAX` on a big screen.
+ * The narrowest the leaf strip gets when it steps aside for the centred copy.
+ * Below about 1450 this binds, and on the tabs with leaves the copy moves
+ * left of centre rather than run into them.
  */
-const leafLeft = (pct: number) =>
-  `max(calc(${contentWidth(pct)} - ${LEAF_TIP_INSET}px), calc(100vw - ${LEAF_STRIP_MAX}px))`
+const LEAF_MIN = 280
 
 /**
- * The Work tab pushes the field right by the extra width its column takes. The
- * panel stays hung at the default tab's edge and this is handed to the leaves
- * as a `transform`, so the field's own width never changes and the switch can
- * animate — see `LeafPattern`'s `shift`. Past ~1660px both expressions clamp to
- * the same pinned edge and this resolves to 0, which is the field already
- * holding still between tabs up there.
+ * Where the panel centres: the middle of the dark area right of the rail's
+ * spine — what Hi shows, with no leaves — on every tab, so hovering across the
+ * rail never moves the copy sideways.
  */
-const LEAF_WORK_SHIFT = `calc(${leafLeft(CONTENT_PCT.work)} - ${leafLeft(CONTENT_PCT.default)})`
+const CENTRE = `((100vw + ${RAIL_SPINE}px) / 2)`
+
+/**
+ * The content row's width out to where the leaf tips start, so the leaf
+ * field's left frontier is this less `LEAF_TIP_INSET`. The largest of:
+ *
+ * - the 70vw column the file draws;
+ * - the edge that holds the strip at `LEAF_STRIP_MAX` on a big screen;
+ * - room for the centred copy plus the right inset, so the leaves move right
+ *   rather than crowd it — but never so far the strip drops under `LEAF_MIN`.
+ *
+ * Only the copy is reckoned, not the 1000 panel: the thumbnails are on Hi,
+ * which has no leaves.
+ */
+const rowWidthFor = (rightInset: string) =>
+  `max(${contentWidth(CONTENT_PCT)}, calc(100vw - ${LEAF_STRIP_MAX - LEAF_TIP_INSET}px), min(${CENTRE} + ${COPY_MAX / 2}px + ${rightInset}, calc(100vw - ${LEAF_MIN - LEAF_TIP_INSET}px)))`
+
+/**
+ * How far the leaf field slides to leave Hi: the strip's width (the viewport
+ * less its left edge) plus one leaf, so every column ends up past the clip.
+ */
+const LEAF_HIDE_SHIFT = (leafEdge: string) => `calc(100vw - ${leafEdge} + ${LEAF_W}px)`
+
+/**
+ * The rail's right edge, in px from the viewport's left (the rail is glued to
+ * it). The rail is `max-content` wide, so CSS can't know it; the panel's
+ * centring below needs it to work out how far the panel can move.
+ * A layout effect, so the first paint already has it.
+ */
+function useRailEnd(row: React.RefObject<HTMLElement | null>, enabled: boolean) {
+  const [end, setEnd] = useState(0)
+  useLayoutEffect(() => {
+    // The rail is the row's first child.
+    const rail = row.current?.firstElementChild
+    if (!enabled || !rail) return
+    const measure = () => setEnd(rail.getBoundingClientRect().right)
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(rail)
+    return () => observer.disconnect()
+  }, [row, enabled])
+  return end
+}
 
 /**
  * `/work` was the Design tab before the vertical-tab home page; project Back
  * pills and old links still point at it, so it (and the retired project routes
- * behind it) lands on home with the Work tab active.
+ * behind it) lands on home — on Hi, where the projects now run.
  */
 function isLegacyWorkRoute(route: string) {
   return (
@@ -147,13 +198,11 @@ function isLegacyWorkRoute(route: string) {
 export default function App() {
   const route = useSyncExternalStore(subscribeToRoute, getRoute)
   const isMobile = useIsMobile()
-  const isWide = useIsWide()
   const stillOnly = useMediaQuery('(prefers-reduced-motion: reduce)')
   const legacyWork = isLegacyWorkRoute(route)
-  const [tab, setTab] = useState<HomeTab>(() => (legacyWork ? 'work' : readHomeTab()))
-  // The Work section, held here because the rail's Work menu and the grid both
-  // read it; sessionStorage like the tab, so it survives refresh.
-  const [filter, setFilter] = useState<WorkFilter>(readWorkFilter)
+  // There is no Work tab on this branch: the projects run under Hi's copy, so
+  // the legacy `/work` routes land on Hi.
+  const [tab, setTab] = useState<HomeTab>(() => (legacyWork ? 'me' : readHomeTab()))
   // The logo intro plays once, on a first visit that lands on home — a cold
   // link to a project page goes straight to it, and a legacy `/work` redirect
   // is someone coming Back. Reduced motion skips it outright.
@@ -183,33 +232,30 @@ export default function App() {
   // flips the tab during render, so the redirected-to home never paints the
   // previous tab first. The initializer covers a cold load on `/work`.
   const panelRef = useRef<HTMLElement | null>(null)
+  const rowRef = useRef<HTMLDivElement | null>(null)
 
   const [prevRoute, setPrevRoute] = useState(route)
   if (route !== prevRoute) {
     setPrevRoute(route)
-    if (legacyWork) setTab('work')
+    if (legacyWork) setTab('me')
   }
 
   const selectTab = (next: HomeTab) => {
     setTab(next)
     writeHomeTab(next)
     // The panels replace each other wholesale, so a switch made while scrolled
-    // deep in Work or Previous roles starts the next tab at its top.
+    // deep in Hi's projects or Previous roles starts the next tab at its top.
     window.scrollTo({ top: 0 })
-  }
-
-  const selectFilter = (next: WorkFilter) => {
-    setFilter(next)
-    writeWorkFilter(next)
   }
 
   // Home only: project routes scroll the window and have no panel to redirect
   // into, and mobile keeps the ordinary page scroll.
   useWheelAnywhere(panelRef, !isMobile && !route.startsWith('/work/'))
+  const railEnd = useRailEnd(rowRef, !isMobile && !route.startsWith('/work/'))
 
   useEffect(() => {
     if (legacyWork) {
-      writeHomeTab('work')
+      writeHomeTab('me')
       navigate('/', { replace: true })
       return
     }
@@ -252,32 +298,43 @@ export default function App() {
 
   // Everything else is the home page: the vertical tab rail beside whichever
   // panel the hovered tab shows (Figma section `321:38613`).
+  // Every tab's copy holds the 700 measure, centred in the wider panel.
+  const copy = (node: React.ReactNode) =>
+    isMobile ? node : <div style={{ width: '100%', maxWidth: COPY_MAX, marginInline: 'auto' }}>{node}</div>
+
   const panel =
-    tab === 'work' ? (
-      <WorkList filter={filter} onSelectFilter={selectFilter} />
-    ) : tab === 'design' ? (
-      <DesigningNow />
+    tab === 'design' ? (
+      copy(<DesigningNow />)
     ) : tab === 'been' ? (
-      <PreviousRoles />
+      copy(<PreviousRoles />)
     ) : tab === 'contact' ? (
-      <ContactPanel />
+      copy(<ContactPanel />)
     ) : tab === 'lols' ? (
-      <LlmQuotes />
+      copy(<LlmQuotes />)
     ) : (
-      // The Me tab: the TLDR note over the hero copy, on the file's 32.
+      // The Me tab: the TLDR note over the hero copy, on the file's 32, then
+      // every project in one column under it, on the panel's full width.
       <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-        <p
-          style={{
-            margin: 0,
-            fontSize: '28px',
-            fontWeight: 500,
-            lineHeight: 1.1,
-            color: 'var(--color-text-primary)',
-          }}
-        >
-          Here&rsquo;s the tl;dr
-        </p>
-        <Hero />
+        {copy(
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+            <p
+              style={{
+                margin: 0,
+                fontSize: '28px',
+                fontWeight: 500,
+                lineHeight: 1.1,
+                color: 'var(--color-text-primary)',
+              }}
+            >
+              Here&rsquo;s the tl;dr
+            </p>
+            <Hero />
+            <ContactButtons />
+          </div>,
+        )}
+        <div style={{ marginTop: '48px' }}>
+          <HomeProjects />
+        </div>
       </div>
     )
 
@@ -290,18 +347,32 @@ export default function App() {
   const rightInset = isMobile
     ? '20px'
     : `max(24px, calc(${pageGutter()} - max(0px, (${TABLET_MAX}px - 100vw) * 0.24)))`
-  const contentPct = tab === 'work' ? CONTENT_PCT.work : CONTENT_PCT.default
-  const columnWidth = contentWidth(contentPct)
-  const panelMax =
-    tab === 'work' ? (isWide ? PANEL_MAX.workWide : PANEL_MAX.work) : PANEL_MAX.default
-  const leafShift = tab === 'work' ? LEAF_WORK_SHIFT : '0px'
-  // Work cards lift into this; the other tabs have no hover overhang, so a
-  // thinner bleed on them hands the squeezed column back to the copy. Their
-  // left bleed takes the rail's whole gap instead: the copy's popovers
+  const panelMax = PANEL_MAX
+  // The left bleed takes the rail's whole gap: the copy's popovers
   // (`Popover`) open centred under a phrase and run ~48 past it each side,
   // so one near the start of a line needs that room to keep its left curve.
-  const bleedLeft = tab === 'work' ? SCROLL_BLEED : RAIL_GAP
-  const bleedRight = tab === 'work' ? SCROLL_BLEED : 16
+  const bleedLeft = RAIL_GAP
+  const bleedRight = 16
+
+  // The panel centres on the dark area right of the spine (`CENTRE`), as wide
+  // as it can be while keeping 56 off the rail on both sides of that centre —
+  // so on Hi the gaps either side are even all the way down to ~1100. The
+  // tabs with leaves share that centre; only where the copy would run into
+  // the leaves (under ~1450) does it slide left, never back past the rail.
+  const rowWidth = rowWidthFor(rightInset)
+  const leafEdge = `calc(${rowWidth} - ${LEAF_TIP_INSET}px)`
+  const railStop = railEnd + RAIL_GAP
+  const panelWidth = `max(0px, min(${panelMax}, 2 * (${CENTRE} - ${railStop}px)))`
+  const centredLeft = `(${CENTRE} - ${panelWidth} / 2)`
+  // The tabs with leaves show only copy, so their panel *is* the copy box: on
+  // the shared centre while it clears the leaves' inset, slid left when it
+  // wouldn't, and once it is back against the rail, narrowed to the room
+  // before the leaves rather than run its 700 over them (~1100–1450).
+  const leafLimit = `(${rowWidth} - ${rightInset})`
+  const copyLeft = `max(${railStop}px, min(${CENTRE} - ${COPY_MAX / 2}px, ${leafLimit} - ${COPY_MAX}px))`
+  const copyWidth = `max(0px, min(${COPY_MAX}px, ${leafLimit} - ${copyLeft}))`
+  const panelLeft = tab === 'me' ? centredLeft : copyLeft
+  const boxWidth = tab === 'me' ? panelWidth : copyWidth
 
   return (
     <div
@@ -327,23 +398,26 @@ export default function App() {
         Pinned at `LEAF_STRIP_MAX` on a big screen so extra width moves the
         field right rather than revealing more of it.
 
-        The panel is hung at the *default* tab's edge on every tab; Work's
-        wider column moves the leaves inside it instead (`leafShift`), so the
-        slide animates and the field is never rebuilt mid-transition. What it
-        pushes off the right is clipped, and the column's own fill covers the
-        band it vacates on the left.
+        Hi has no leaves: the field slides off the right edge there and back
+        in on the other tabs, on `LeafPattern`'s tab-switch wave (the one the
+        Work tab's wider column used to push it aside with). The shift is the
+        strip's own width plus a leaf, so even the leftmost column clears the
+        clip. The panel keeps the seat the field gives it on every tab, so
+        hovering across the rail never moves the copy.
       */}
       {!isMobile && (
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: leafLeft(CONTENT_PCT.default),
-          right: 0,
-          height: `${LEAF_PANEL_HEIGHT_VH}vh`,
-          overflow: 'hidden',
-          zIndex: 0,
-        }}>
-          <ShaderPanel shift={leafShift} />
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: leafEdge,
+            right: 0,
+            height: `${LEAF_PANEL_HEIGHT_VH}vh`,
+            overflow: 'hidden',
+            zIndex: 0,
+          }}
+        >
+          <ShaderPanel shift={tab === 'me' ? LEAF_HIDE_SHIFT(leafEdge) : '0px'} />
         </div>
       )}
 
@@ -366,7 +440,7 @@ export default function App() {
             top: 0,
             bottom: 0,
             left: 0,
-            width: columnWidth,
+            width: rowWidth,
             background: COLUMN_FILL,
             transition: stillOnly ? undefined : `width ${SHIFT_MS}ms ${SHIFT_EASE}`,
             pointerEvents: 'none',
@@ -376,6 +450,7 @@ export default function App() {
       )}
 
       <div
+        ref={rowRef}
         style={{
           position: 'relative',
           zIndex: 2,
@@ -389,13 +464,15 @@ export default function App() {
           // Sized in `vw` rather than `%` so the split geometry doesn't shift by the
           // width of the page scrollbar. `overflow-x: hidden` on the body keeps the
           // shader's overhang from adding a horizontal scrollbar.
-          width: isMobile ? '100%' : columnWidth,
+          // The full viewport on desktop: the panel places itself (`panelLeft`),
+          // and the leaves' edge is the fill layer's and the field's business.
+          width: '100%',
           height: isMobile ? undefined : '100%',
           boxSizing: 'border-box',
           // The rail's spine is flush with the viewport's left edge, so the
           // shared `shellPad()` gutter no longer applies on home — the rail
           // pads its own rows 48 from the top instead.
-          padding: isMobile ? '20px 20px 60px' : `0 ${rightInset} 0 0`,
+          padding: isMobile ? '20px 20px 60px' : 0,
           // Desktop's fill is the animated mask layer above; mobile has no leaf
           // field beside it and paints its own.
           background: isMobile ? BG : undefined,
@@ -406,8 +483,6 @@ export default function App() {
         <HomeRail
           active={tab}
           onSelect={selectTab}
-          filter={filter}
-          onSelectFilter={selectFilter}
           isMobile={isMobile}
         />
         <main
@@ -415,9 +490,9 @@ export default function App() {
           ref={panelRef}
           className={isMobile ? 'tab-content-in' : 'tab-content-in panel-scroll'}
           style={{
-            flex: isMobile ? undefined : `0 1 ${panelMax + bleedLeft + bleedRight}px`,
-            width: isMobile ? '100%' : undefined,
-            maxWidth: isMobile ? `${panelMax}px` : `${panelMax + bleedLeft + bleedRight}px`,
+            flex: isMobile ? undefined : '0 0 auto',
+            width: isMobile ? '100%' : `calc(${boxWidth} + ${bleedLeft + bleedRight}px)`,
+            maxWidth: isMobile ? `${COPY_MAX}px` : undefined,
             minWidth: 0,
             boxSizing: 'border-box',
             // The only thing on the page that scrolls. `key={tab}` remounts it,
@@ -436,7 +511,7 @@ export default function App() {
             // the rest stays as margin so the copy still starts at 56.
             margin: isMobile
               ? undefined
-              : `${PANEL_TOP - SCROLL_BLEED}px -${bleedRight}px 0 -${bleedLeft}px`,
+              : `${PANEL_TOP - SCROLL_BLEED}px -${bleedRight}px 0 calc(${panelLeft} - ${railStop + bleedLeft}px)`,
           }}
         >
           {panel}
