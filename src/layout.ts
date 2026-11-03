@@ -143,3 +143,10 @@ export const projectWide = () => {
  * the same value via `barInset` so Back / Contact stay on the copy's edge.
  */
 export const PROJECT_MOBILE_PAD = '32px'
+
+/**
+ * The home rail's cream spine, glued to the viewport's left edge. Home centres
+ * its panel on the dark area to the spine's right, so `App` needs the width
+ * as well as `HomeRail`.
+ */
+export const RAIL_SPINE = 48
