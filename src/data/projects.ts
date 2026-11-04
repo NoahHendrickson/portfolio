@@ -386,14 +386,17 @@ export type Landing = {
   flow?: 'banded' | 'continuous'
   // Gaps and alignment are the shared project frame's (`layout.ts`), not per page.
   /**
-   * The wide opener under the intro — no3y Code. `shot` runs the hero
-   * breakout, then `grid`, if set, runs two images to a row under it.
+   * The wide opener under the intro — no3y Code. `video` and `shot` run the
+   * hero breakout, then `grid`, if set, runs two images to a row under them.
+   * `copy` is a section heading and body above the media, on the column's edge.
    */
   showcase?: {
     /** A looping clip above `shot`, at the same width — no3y Code's hero video. */
     video?: LandingVideo
-    shot: ShowcaseImage
+    shot?: ShowcaseImage
     grid?: ShowcaseImage[]
+    /** A heading and body leading the media — no3y Code's "How I work". */
+    copy?: { heading: string; body: Prose }
   }
   /** The intro's copy and actions, then the hero media under it. */
   hero: {
@@ -843,17 +846,17 @@ export const projects: Record<string, Project> = {
           alt: 'Focus mode in no3y Code on the Glass theme: a working thread opens from the status-grouped sidebar, the sidebar collapses into tabs filtered to its project, and a second working thread is dragged onto it to split the view',
           aspect: '16 / 9',
         },
-        shot: {
-          src: '/work/no3y-code/collage/new-agent.webp',
-          alt: 'no3y Code on the desktop — the new agent screen on the Glass theme, the thread sidebar beside an empty composer',
-          aspect: '1272 / 820',
+        // The new-agent still that used to stand under the clip was dropped
+        // (Nov 4 2026): the clip shows the same window, so it read twice.
+        copy: {
+          heading: 'How I work',
+          body: 'I’m often working on multiple projects or features at the same time with a heavy focus on UX/UI design tasks. I wanted to make sure when I have many threads going I can easily see which ones need my input, are completed or still working. I also wanted a Focus mode when I’m targeting one project in particular but doing multiple things in it. I rarely wait while an agent works, I am always thinking about what’s next and usually starting more threads in parallel. Collapsing the sidebar gives me horizontal tabs that let me focus on specific projects.',
         },
       },
       hero: {
         body: [
-          'This is my fork of an open source project called T3 Code. I have multiple AI subscriptions and like to use different models for different things, but I was getting annoyed with needing to have multiple apps open to use them or to be using my terminal, which was cool at first, but not a great way to actually work. I completely redesigned the UI, added some of my own features, and improved the UX from a designer’s perspective.',
+          'This is my fork of the open source T3 Code. I use several AI subscriptions for different things, and I got tired of juggling separate apps or working in the terminal. So I redesigned the UI and added features of my own.',
         ],
-        list: ['Glass theme', 'Sidebar and thread card layout', 'Local speech-to-text', 'Design mode'],
         cta: { label: 'GitHub', href: NO3Y_CODE_DOWNLOAD, gradient: true },
       },
       sections: [
@@ -888,13 +891,6 @@ export const projects: Record<string, Project> = {
               compact: true,
             },
           ],
-          // Under the sidebar: the card states board from the old Thread cards row.
-          shot: {
-            src: '/work/no3y-code/sidebar.jpg',
-            alt: 'Thread sidebar beside a board of thread card states — default, hover, selected, and status variants',
-            aspect: '4703 / 3048',
-            frame: 'plain',
-          },
         },
         {
           kind: 'feature',
@@ -936,43 +932,6 @@ export const projects: Record<string, Project> = {
               aspect: '680 / 380',
             },
           ],
-        },
-        {
-          kind: 'feature',
-          gap: 80,
-          heading: 'The idea',
-          body: [
-            'I wanted a really powerful design mode in the agent orchestration tools I was using. I didn’t want to just select an element and prompt. Sometimes I wanted to be precise with my edits and send those off to an agent to apply. I also wanted more information at a glance when I was working on multiple projects at once.',
-            [
-              { text: 'The Forge.', strong: true },
-              {
-                text: ' I created The Forge, an npm package for Vite apps that provides a design mode for making frontend changes in a sidebar and sending those edits to a coding agent.',
-                muted: true,
-              },
-            ],
-            [
-              { text: 'Phanttom.', strong: true },
-              {
-                text: ' This Ghostty fork added vertical tabs and surfaced more useful context for each session. I eventually found that I didn’t want my primary workflow to live in a terminal.',
-                muted: true,
-              },
-            ],
-            [
-              {
-                text: 'I wanted to combine these things to have one main app I used to get things done. But because I lack the technical expertise to create my own agent app from scratch, I forked an open-source one. Huge shout-out to ',
-              },
-              { text: 'T3 Code', href: T3_CODE },
-              { text: '—it’s an awesome open-source app and is very fork-friendly.' },
-            ],
-          ],
-          copyWidth: 700,
-          stack: true,
-          shot: {
-            src: '/work/no3y-code/idea.webp',
-            alt: 'no3y Code’s thread sidebar beside the design mode properties panel, over a fluted gradient',
-            aspect: '3090 / 1499',
-            frame: 'plain',
-          },
         },
         {
           kind: 'feature',

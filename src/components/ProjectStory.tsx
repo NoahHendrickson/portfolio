@@ -358,11 +358,32 @@ function Showcase({
   /** Its width — the hero breakout on desktop. */
   style: React.CSSProperties
 }) {
-  return (
+  const isMobile = useIsMobile()
+  const media = (
     <div style={{ display: 'flex', flexDirection: 'column', gap: space.lg, ...style }}>
-      {showcase.video && <StoryClip video={showcase.video} />}
-      <ShowcaseImg shot={showcase.shot} hero />
+      {showcase.video && <StoryClip video={showcase.video} priority={!showcase.shot} />}
+      {showcase.shot && <ShowcaseImg shot={showcase.shot} hero />}
       {showcase.grid && <ShowcaseGrid shots={showcase.grid} />}
+    </div>
+  )
+  if (!showcase.copy) return media
+
+  // The copy leads its media a section's stack gap up, at every width: beside
+  // it, on the sidebar row's 2fr 3fr, the clip read far too small even at 1728.
+  return (
+    <div
+      style={{
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'flex-start',
+        gap: `${isMobile ? PROJECT_STACK_GAP.mobile : PROJECT_STACK_GAP.desktop}px`,
+      }}
+    >
+      <SectionCopy heading={showcase.copy.heading}>
+        <Body body={showcase.copy.body} />
+      </SectionCopy>
+      {media}
     </div>
   )
 }
@@ -787,7 +808,7 @@ function Body({ body, lead }: { body: Prose; lead?: boolean }) {
  * gets the poster. Unlike `HeroVideo` it just fills the panel — no backdrop,
  * no mid-clip zoom.
  */
-function StoryClip({ video }: { video: LandingVideo }) {
+function StoryClip({ video, priority = false }: { video: LandingVideo; priority?: boolean }) {
   const stillOnly = useMediaQuery('(prefers-reduced-motion: reduce)')
   const clipRef = useRef<HTMLVideoElement>(null)
   usePlayWhenVisible(clipRef)
@@ -801,7 +822,14 @@ function StoryClip({ video }: { video: LandingVideo }) {
   }
 
   return stillOnly ? (
-    <img src={video.poster} alt={video.alt} loading="lazy" decoding="async" style={fill} />
+    <img
+      src={video.poster}
+      alt={video.alt}
+      loading={priority ? 'eager' : 'lazy'}
+      fetchPriority={priority ? 'high' : 'auto'}
+      decoding="async"
+      style={fill}
+    />
   ) : (
     <video
       ref={clipRef}
