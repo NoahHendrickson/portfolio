@@ -390,6 +390,8 @@ export type Landing = {
    * breakout, then `grid`, if set, runs two images to a row under it.
    */
   showcase?: {
+    /** A looping clip above `shot`, at the same width — no3y Code's hero video. */
+    video?: LandingVideo
     shot: ShowcaseImage
     grid?: ShowcaseImage[]
   }
@@ -835,6 +837,12 @@ export const projects: Record<string, Project> = {
       // Captures of the desktop app on the Glass theme, baked over the fluted
       // wallpaper.
       showcase: {
+        video: {
+          src: '/work/no3y-code/focus-mode-split.mp4',
+          poster: '/work/no3y-code/focus-mode-split-poster.jpg',
+          alt: 'Focus mode in no3y Code on the Glass theme: a working thread opens from the status-grouped sidebar, the sidebar collapses into tabs filtered to its project, and a second working thread is dragged onto it to split the view',
+          aspect: '16 / 9',
+        },
         shot: {
           src: '/work/no3y-code/collage/new-agent.webp',
           alt: 'no3y Code on the desktop — the new agent screen on the Glass theme, the thread sidebar beside an empty composer',

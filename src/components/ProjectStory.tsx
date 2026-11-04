@@ -346,9 +346,9 @@ export default function ProjectStory({ project }: { project: Project }) {
 }
 
 /**
- * The wide opener under the page's `ProjectIntro`: the shot across the hero
- * breakout, then the grid of feature images two to a row on the same 16px
- * rhythm, so the five read as one set.
+ * The wide opener under the page's `ProjectIntro`: an optional looping clip,
+ * then the shot across the hero breakout, then the grid of feature images two
+ * to a row, all on the same 16px rhythm so they read as one set.
  */
 function Showcase({
   showcase,
@@ -360,6 +360,7 @@ function Showcase({
 }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: space.lg, ...style }}>
+      {showcase.video && <StoryClip video={showcase.video} />}
       <ShowcaseImg shot={showcase.shot} hero />
       {showcase.grid && <ShowcaseGrid shots={showcase.grid} />}
     </div>
