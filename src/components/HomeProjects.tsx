@@ -19,7 +19,9 @@ import { HOME_BENTO } from '../layout'
  * is shorter, so the columns stagger. On a screen with a mouse the title and
  * a View pill rise over the art's foot on hover or keyboard focus
  * (`.home-project-*` in `index.css`); touch puts the caption under the art.
- * Mobile is one column, the cards keeping their shapes.
+ * Mobile is one column, the cards keeping their shapes (`rounded`); `ruled`
+ * keeps the two columns, edge to edge. Either way a phone shows the art alone,
+ * with no caption.
  *
  * no3y Code leads, then the rest in All's order from the old Work tab
  * (`WORK_FILTERS[0]`).
@@ -262,40 +264,37 @@ function RoundedBento() {
  * Square cards divided by 1px rules instead of gaps. The horizontal rules run
  * past the panel to the whole dark area (`App` widens the scroller on Hi so
  * they aren't clipped), and the four-leaf mark sits wherever one meets the
- * centre rule. Mobile is one card to a row, ruled between, with no centre rule
- * and so no marks.
+ * centre rule. Mobile keeps the two staggered columns too (Nov 5 2026), out to
+ * the phone's edges: the grid bleeds past the page's 20px pad
+ * (`MOBILE_PAGE_PAD`), so the cards meet the screen's sides and the centre
+ * rule. The outer-edge marks would sit half off the screen there, so mobile
+ * drops them.
  */
 function RuledBento() {
   const canHover = useMediaQuery(HOVER_QUERY)
   const single = useMediaQuery(MOBILE_WIDTH_QUERY)
-
-  if (single) {
-    return (
-      <section aria-label="Projects">
-        <Rule />
-        {CARDS.map((card) => (
-          <div key={card.href}>
-            <ProjectCard card={card} tune={tuneFor(card)} peek={canHover} ruled />
-            <Rule />
-          </div>
-        ))}
-      </section>
-    )
-  }
 
   // The columns keep their stagger, so a rule can't cross both: each column's
   // rules run from the centre rule out to its own edge of the screen, and each
   // meets the centre rule in a T. The left column's top rule carries the one
   // mark both share.
   return (
-    <section aria-label="Projects" style={{ display: 'grid', gridTemplateColumns: TRACKS }}>
+    <section
+      aria-label="Projects"
+      style={{
+        display: 'grid',
+        gridTemplateColumns: TRACKS,
+        // Mobile: the full phone width, out past the page's pad.
+        ...(single ? { width: '100vw', marginLeft: -MOBILE_PAGE_PAD } : {}),
+      }}
+    >
       {COLUMNS.map((col, c) => (
         <div key={c} style={{ gridColumn: c === 0 ? 1 : 3, gridRow: 1, alignSelf: 'start', minWidth: 0 }}>
           <Rule side={c === 0 ? 'left' : 'right'} mark={c === 0} />
           {col.map(({ card, tune }) => (
             <div key={card.href}>
               <ProjectCard card={card} tune={tune} peek={canHover} ruled />
-              <Rule side={c === 0 ? 'left' : 'right'} mark outer={OUTER_MARKS.has(card.href)} />
+              <Rule side={c === 0 ? 'left' : 'right'} mark outer={!single && OUTER_MARKS.has(card.href)} />
             </div>
           ))}
         </div>
@@ -312,6 +311,9 @@ function RuledBento() {
  * scattered down the page rather than in a row.
  */
 const OUTER_MARKS = new Set(['/work/invisible/onboarding', '/work/invisible/apply', '/work/pixel-art'])
+
+/** `App`'s pad round the page on mobile, which the grid bleeds past. */
+const MOBILE_PAGE_PAD = 20
 
 /** The two columns and the 1px centre rule between them. */
 const TRACKS = 'minmax(0, 1fr) 1px minmax(0, 1fr)'
@@ -424,6 +426,10 @@ function ProjectCard({
   ruled?: boolean
 }) {
   const art = tune.art ?? rowArt(card)
+  // Touch puts the caption under the art — except on a phone, where the cards
+  // stand as art alone (Nov 5 2026); the link's label still names them.
+  const phone = useMediaQuery(MOBILE_WIDTH_QUERY)
+  const captionUnder = !peek && !phone
   const corner = ruled ? '0px' : CARD_RADIUS
 
   // How wide the art draws against the card, so `sizes` asks for enough pixels:
@@ -434,7 +440,7 @@ function ProjectCard({
       ? Math.max(1, ratio(art.aspect) / ratio(tune.shape)) * (tune.zoom ?? 1)
       : tune.width / 100
   const sizes = art.srcSet
-    ? `${MOBILE_WIDTH_QUERY} ${Math.round(100 * spread)}vw, ${Math.round(COLUMN_MAX * spread)}px`
+    ? `${MOBILE_WIDTH_QUERY} ${Math.round((ruled ? 50 : 100) * spread)}vw, ${Math.round(COLUMN_MAX * spread)}px`
     : undefined
 
   const artBox: React.CSSProperties =
@@ -477,7 +483,7 @@ function ProjectCard({
         color: 'inherit',
         borderRadius: corner,
         // Touch puts the caption under the art, inside the cell.
-        paddingBottom: ruled && !peek ? space.lg : undefined,
+        paddingBottom: ruled && captionUnder ? space.lg : undefined,
       }}
     >
       {/* The art and, behind it, the hover ring (`.home-project-ring` in `index.css`). */}
@@ -592,7 +598,7 @@ function ProjectCard({
         </div>
       </div>
 
-      {!peek && (
+      {captionUnder && (
         <div style={{ paddingInline: ruled ? space.lg : undefined }}>
           <Caption card={card} />
         </div>
