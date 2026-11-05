@@ -1,0 +1,373 @@
+/*
+ * States for the optimizer replicas (StatTargets, BuildCard, OptimizerTooltip):
+ * the hover / focus / pressed rules the app writes as Tailwind variants and
+ * `d2-*` utilities in its globals.css (dark + slate theme, plain lines), which
+ * inline styles can't express. Layout stays inline in the components. Colours
+ * come in as custom properties set on each root from confluxTheme.ts
+ * (`--cfx-opt-fg`, `--cfx-opt-muted`).
+ *
+ * As in the app, hover rules only apply where the device can hover, and the
+ * square hover ring (`d2-hover-ring`) only with a fine pointer.
+ */
+
+/* The app's `--line-alpha`: a multiplier on every hairline, registered so hover can
+   ease it. It inherits, so hovering the Stats card brightens the Reset button and
+   every bar frame inside it, as the app does. */
+@property --cfx-opt-line-alpha {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 1;
+}
+/* The EQUIP fill and the drifting line's angle (`--equip-fill`, `--line-angle`). */
+@property --cfx-opt-equip-fill {
+  syntax: '<color>';
+  inherits: false;
+  initial-value: #378b3f;
+}
+@property --cfx-opt-line-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+/* The app's base layer gives every element a ring/50 outline colour, which is what a
+   browser focus ring (an img with a tab stop, the card header) draws in. */
+.cfx-opt-root,
+.cfx-opt-root * {
+  outline-color: color-mix(in srgb, var(--cfx-opt-fg) 35%, transparent);
+}
+
+/* ── The Stats card (`d2-card-frame` + hover:[--line-alpha:1.6]) ───────────── */
+
+.cfx-opt-card {
+  border: 1px solid color-mix(in srgb, var(--cfx-opt-fg) calc(var(--cfx-opt-line-alpha) * 15%), transparent);
+  transition: --cfx-opt-line-alpha 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+@media (hover: hover) {
+  .cfx-opt-card:hover {
+    --cfx-opt-line-alpha: 1.6;
+  }
+}
+
+/* ── Outline buttons (`Button variant="outline"`: d2-line + d2-hover-ring) ─── */
+
+.cfx-opt-btn {
+  border: 1px solid color-mix(in srgb, var(--cfx-opt-fg) calc(var(--cfx-opt-line-alpha) * 15%), transparent);
+  background-color: transparent;
+  outline: none;
+  transition-property: background-color, border-color, color, box-shadow, outline-offset, translate, --cfx-opt-line-alpha;
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+@media (hover: hover) {
+  .cfx-opt-btn:hover {
+    --cfx-opt-line-alpha: 1.6;
+    background-color: color-mix(in srgb, var(--cfx-opt-fg) 6%, transparent);
+  }
+}
+.cfx-opt-btn:focus-visible,
+.cfx-opt-equip:focus-visible {
+  --cfx-opt-line-alpha: 2.6;
+  border-color: rgb(255 255 255 / 0.85);
+}
+.cfx-opt-btn:active,
+.cfx-opt-equip:active {
+  translate: 0 1px;
+}
+
+/* d2-hover-ring: a 1px light ring standing 2px off the control. */
+@media (hover: hover) and (pointer: fine) {
+  .cfx-opt-ring:hover {
+    outline: 1px solid color-mix(in srgb, var(--cfx-opt-fg) 55%, transparent);
+    outline-offset: 2px;
+  }
+}
+
+/* ── SAVE AS LOADOUT (`variant="emphatic"`: d2-equip, d2-line-drift on hover) ── */
+
+.cfx-opt-equip {
+  --cfx-opt-equip-fill: #378b3f;
+  border: 1px solid transparent;
+  outline: none;
+  background:
+    linear-gradient(var(--cfx-opt-equip-fill), var(--cfx-opt-equip-fill)) padding-box,
+    linear-gradient(to right, rgb(255 255 255 / 0.26), rgb(255 255 255 / 0.6) 50%, rgb(255 255 255 / 0.26)) border-box,
+    var(--cfx-opt-equip-fill);
+  transition-property: border-color, box-shadow, outline-offset, translate, --cfx-opt-equip-fill;
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes cfx-opt-line-drift {
+  from {
+    --cfx-opt-line-angle: 0deg;
+  }
+  to {
+    --cfx-opt-line-angle: 360deg;
+  }
+}
+@media (hover: hover) {
+  /* The hovered EQUIP lightens and its line turns into two spots circling the frame. */
+  .cfx-opt-equip:hover {
+    --cfx-opt-equip-fill: #4aa354;
+    background:
+      linear-gradient(var(--cfx-opt-equip-fill), var(--cfx-opt-equip-fill)) padding-box,
+      conic-gradient(
+          from var(--cfx-opt-line-angle),
+          rgb(255 255 255 / 0.6) 0deg,
+          rgb(255 255 255 / 0.26) 90deg,
+          rgb(255 255 255 / 0.6) 180deg,
+          rgb(255 255 255 / 0.26) 270deg,
+          rgb(255 255 255 / 0.6) 360deg
+        )
+        border-box,
+      var(--cfx-opt-equip-fill);
+    animation: cfx-opt-line-drift 4s linear infinite;
+  }
+}
+@media (hover: hover) and (prefers-reduced-motion: reduce) {
+  .cfx-opt-equip:hover {
+    animation: none;
+    background:
+      linear-gradient(var(--cfx-opt-equip-fill), var(--cfx-opt-equip-fill)) padding-box,
+      linear-gradient(to right, rgb(255 255 255 / 0.26), rgb(255 255 255 / 0.6) 50%, rgb(255 255 255 / 0.26)) border-box,
+      var(--cfx-opt-equip-fill);
+  }
+}
+
+/* ── Icon actions whose label slides open (RevealAction / RevealLabel) ──────── */
+
+.cfx-opt-reveal-label {
+  display: grid;
+  grid-template-columns: 0fr;
+  transition: grid-template-columns 200ms ease-out;
+}
+@media (hover: hover) {
+  .cfx-opt-reveal:hover .cfx-opt-reveal-label {
+    grid-template-columns: 1fr;
+  }
+}
+.cfx-opt-reveal:has(:focus-visible) .cfx-opt-reveal-label {
+  grid-template-columns: 1fr;
+}
+/* Touch can't hover: Dream build stays open, the others open once the card is wide
+   enough for all of them (46rem), and the heart stays shut. */
+@media (pointer: coarse) {
+  .cfx-opt-reveal-label[data-touch='always'] {
+    grid-template-columns: 1fr;
+  }
+  @container cfx-build (min-width: 46rem) {
+    .cfx-opt-reveal-label[data-touch='wide'] {
+      grid-template-columns: 1fr;
+    }
+  }
+  @container cfx-build (max-width: 26rem) {
+    .cfx-opt-coarse-narrow-hide {
+      display: none;
+    }
+    .cfx-opt-footer {
+      gap: 4px !important;
+    }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cfx-opt-reveal-label {
+    transition: none;
+  }
+}
+
+/* ── Stat rows: the number field, the bar, the ticks ─────────────────────── */
+
+.cfx-opt-input {
+  appearance: textfield;
+  -moz-appearance: textfield;
+  border: 1px solid color-mix(in srgb, var(--cfx-opt-fg) 12%, transparent);
+  background-color: color-mix(in srgb, var(--cfx-opt-fg) 8%, transparent);
+  outline: none;
+  transition-property: background-color, border-color;
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+.cfx-opt-input::-webkit-inner-spin-button,
+.cfx-opt-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+@media (hover: hover) {
+  .cfx-opt-input:hover {
+    border-color: color-mix(in srgb, var(--cfx-opt-fg) 25%, transparent);
+  }
+}
+.cfx-opt-input:focus-visible {
+  border-color: color-mix(in srgb, var(--cfx-opt-fg) 40%, transparent);
+}
+/* Phones type at 16px (iOS zooms into anything smaller), so the chip grows to hold it. */
+@media (width < 48rem) {
+  .cfx-opt-input {
+    height: 28px !important;
+    width: 48px !important;
+    font-size: 16px !important;
+  }
+}
+
+/* The bar's frame: the plain line 3px outside the 10px well (2px gap + the line). */
+.cfx-opt-track::before {
+  content: '';
+  pointer-events: none;
+  position: absolute;
+  inset: -3px;
+  border: 1px solid color-mix(in srgb, var(--cfx-opt-fg) calc(var(--cfx-opt-line-alpha) * 15%), transparent);
+}
+
+.cfx-opt-thumb {
+  outline: none;
+  transition: box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+/* A wider hit area than the 2px bar. */
+.cfx-opt-thumb::after {
+  content: '';
+  position: absolute;
+  inset: -8px -12px;
+}
+@media (hover: hover) {
+  .cfx-opt-thumb:hover {
+    box-shadow: 0 0 6px color-mix(in srgb, var(--cfx-opt-fg) 60%, transparent);
+  }
+}
+.cfx-opt-thumb:focus-visible {
+  box-shadow:
+    0 0 0 1px var(--cfx-opt-fg),
+    0 0 8px color-mix(in srgb, var(--cfx-opt-fg) 60%, transparent);
+}
+.cfx-opt-thumb:active,
+.cfx-opt-thumb[data-dragging] {
+  box-shadow: 0 0 8px color-mix(in srgb, var(--cfx-opt-fg) 80%, transparent);
+}
+
+.cfx-opt-tick {
+  color: var(--cfx-opt-muted);
+  outline: none;
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.cfx-opt-tick[data-active] {
+  color: var(--cfx-opt-fg);
+}
+@media (hover: hover) {
+  .cfx-opt-tick:hover {
+    color: var(--cfx-opt-fg);
+  }
+}
+.cfx-opt-tick:focus-visible {
+  outline: 1px solid rgb(255 255 255 / 0.85);
+}
+/* The tick's hit area: 6px above and below, 8px out to the sides (ends grow outwards only). */
+.cfx-opt-tick::after {
+  content: '';
+  position: absolute;
+  top: -6px;
+  bottom: -6px;
+  left: -8px;
+  right: -8px;
+}
+.cfx-opt-tick[data-end='start']::after {
+  right: 0;
+}
+.cfx-opt-tick[data-end='end']::after {
+  left: 0;
+}
+
+/* ── Build card ──────────────────────────────────────────────────────────── */
+
+.cfx-opt-build {
+  transition: outline-offset 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* The header toggle: a faint lift on hover, only while the card is collapsed. */
+.cfx-opt-head {
+  transition-property: color, background-color;
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+@media (hover: hover) {
+  .cfx-opt-head[aria-expanded='false']:hover {
+    background-color: color-mix(in srgb, var(--cfx-opt-fg) 4%, transparent);
+  }
+}
+.cfx-opt-chevron {
+  transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* d2-reveal: the breakdown drops in under the header. */
+@keyframes cfx-opt-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+.cfx-opt-breakdown {
+  animation: cfx-opt-reveal 180ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+/* The breakdown grid: the name column hugs the longest piece name and six stat
+   columns share what's left. Text headers and 16px stats once the card is 44rem;
+   tighter tracks on a narrow card (the app's phone tracks, keyed to the card's own
+   width here), and tighter still under 22rem so the Tuning column isn't clipped. */
+.cfx-opt-grid {
+  grid-template-columns: minmax(7rem, max-content) repeat(6, minmax(2.25rem, 1fr)) auto;
+  column-gap: 8px;
+  padding: 0 16px;
+}
+.cfx-opt-rule {
+  margin: 0 -16px;
+}
+.cfx-opt-wide-only {
+  display: none;
+}
+@container cfx-build (min-width: 44rem) {
+  .cfx-opt-grid {
+    grid-template-columns: minmax(8rem, max-content) repeat(6, minmax(2.5rem, 1fr)) auto;
+    column-gap: 16px;
+  }
+  .cfx-opt-stat-cell {
+    font-size: 16px !important;
+    line-height: 24px !important;
+  }
+  .cfx-opt-wide-only {
+    display: inline;
+  }
+  .cfx-opt-narrow-only {
+    display: none;
+  }
+}
+@container cfx-build (max-width: 32.5rem) {
+  .cfx-opt-grid {
+    grid-template-columns: minmax(5.25rem, max-content) repeat(6, minmax(1.75rem, 1fr)) auto;
+    column-gap: 4px;
+    padding: 0 12px;
+  }
+  .cfx-opt-rule {
+    margin: 0 -12px;
+  }
+}
+@container cfx-build (max-width: 22rem) {
+  .cfx-opt-grid {
+    grid-template-columns: minmax(4.5rem, max-content) repeat(6, minmax(1.5rem, 1fr)) auto;
+  }
+}
+
+/* ── Tooltip (TooltipContent: d2-glass bg-panel-strong) ──────────────────── */
+
+@keyframes cfx-opt-tip-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+.cfx-opt-tip {
+  animation: cfx-opt-tip-in 150ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cfx-opt-tip,
+  .cfx-opt-breakdown {
+    animation: none;
+  }
+}

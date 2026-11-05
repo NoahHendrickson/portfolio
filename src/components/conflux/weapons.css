@@ -1,0 +1,171 @@
+/*
+ * States for the D2 Conflux weapon replicas (`PopularityCard`, `WeaponList`,
+ * `WeaponTip`) that inline styles can't express: hover, focus, pressed, the
+ * placeholder and the popups' entrances. Values are the app's own utilities as
+ * the dark Slate theme computes them (`d2-hover-ring`, `d2-tile-selected`, the
+ * tiles' `hover:bg-foreground/8`, the rows' `hover:border-foreground/50`).
+ * Tailwind's `hover:` only applies where the pointer can hover, so neither do these.
+ */
+
+/* Every control: square, no native chrome; focus is drawn per control below. */
+.cfx-wpn-btn {
+  appearance: none;
+  margin: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+  cursor: pointer;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* `focus-visible:d2-tile-selected`: a white hairline with a soft glow. */
+.cfx-wpn-glow:focus-visible {
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.85),
+    0 0 8px 1px rgb(255 255 255 / 0.25);
+}
+
+/* `focus-visible:outline-1` on the app's base ring colour (ring 70% at half). */
+.cfx-wpn-outline:focus-visible {
+  outline: 1px solid rgb(252 252 245 / 0.35);
+}
+
+/* `text-muted-foreground hover:text-foreground` (info, clear and sort). */
+.cfx-wpn-quiet {
+  color: rgb(255 255 255 / 0.7);
+}
+.cfx-wpn-quiet[aria-expanded='true'] {
+  color: #fcfcf5;
+}
+
+/* A perk or combo cell: the light hairline, a 4% fill and, for a perk in a
+   graded column, a low dome of its bar's colour rising from the bottom. Picked
+   cells take the grid's picked blue instead. */
+.cfx-wpn-cell {
+  border: 1px solid rgb(252 252 245 / 0.15);
+  background-color: rgb(252 252 245 / 0.04);
+}
+.cfx-wpn-cell[data-glow] {
+  background-image: radial-gradient(
+    70% 40% at 50% 112%,
+    color-mix(in oklch, var(--cfx-grade) 28%, transparent),
+    transparent
+  );
+}
+.cfx-wpn-cell[aria-pressed='true'] {
+  background-color: #305f8e;
+  background-image: none;
+  color: #fff;
+}
+
+/* The search bar's top and bottom rules brighten on focus, and a step less on hover
+   (hover wins while both hold, as Tailwind orders them). */
+.cfx-wpn-bar {
+  border-top: 1px solid rgb(252 252 245 / 0.12);
+  border-bottom: 1px solid rgb(252 252 245 / 0.12);
+  padding: 8px 16px;
+  transition: border-color 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.cfx-wpn-bar:focus-within {
+  border-color: rgb(252 252 245 / 0.3);
+}
+.cfx-wpn-input {
+  font-size: 16px;
+  line-height: 24px;
+}
+.cfx-wpn-input::placeholder {
+  color: rgb(255 255 255 / 0.7);
+  opacity: 1;
+}
+/* The rows sit 1px out past the bar's inset, so the icons line up with its glass. */
+.cfx-wpn-rows {
+  margin: 0 15px;
+}
+@media (min-width: 768px) {
+  .cfx-wpn-bar {
+    padding: 8px 24px;
+  }
+  .cfx-wpn-input {
+    font-size: 14px;
+    line-height: 20px;
+  }
+  .cfx-wpn-rows {
+    margin: 0 23px;
+  }
+}
+
+/* A result row: a clear 1px frame that turns half-ink on hover, keyboard focus
+   and for the open weapon. */
+.cfx-wpn-row {
+  border: 1px solid transparent;
+}
+.cfx-wpn-row:focus-visible,
+.cfx-wpn-row[aria-current='true'] {
+  border-color: rgb(252 252 245 / 0.5);
+}
+
+/* The sort menu's rows: highlighted by pointer or keys, square while lit. */
+.cfx-wpn-item {
+  border: 1px solid transparent;
+  border-radius: 4px;
+}
+.cfx-wpn-item[data-highlighted] {
+  border-radius: 0;
+  border-color: rgb(252 252 245 / 0.08);
+  background-color: rgb(252 252 245 / 0.06);
+}
+@media (max-width: 767px) {
+  .cfx-wpn-item {
+    min-height: 40px;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  /* `d2-hover-ring`: a 1px light ring standing 2px off the control. */
+  .cfx-wpn-ring:hover:not(:disabled) {
+    outline: 1px solid rgb(252 252 245 / 0.55);
+    outline-offset: 2px;
+  }
+  .cfx-wpn-cell:not([aria-pressed='true']):hover {
+    background-color: rgb(252 252 245 / 0.08);
+  }
+  .cfx-wpn-quiet:hover {
+    color: #fcfcf5;
+  }
+  .cfx-wpn-bar:hover {
+    border-color: rgb(252 252 245 / 0.2);
+  }
+  .cfx-wpn-row:hover {
+    border-color: rgb(252 252 245 / 0.5);
+  }
+}
+
+/* Popups: the tooltip fades and grows in from 97% (150ms); the menu from 95%,
+   dropping 8px into place (100ms). */
+@keyframes cfx-wpn-tip-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+@keyframes cfx-wpn-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+}
+.cfx-wpn-tip-in {
+  animation: cfx-wpn-tip-in 0.15s ease;
+}
+.cfx-wpn-menu-in {
+  animation: cfx-wpn-menu-in 0.1s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cfx-wpn-tip-in,
+  .cfx-wpn-menu-in {
+    animation: none;
+  }
+}

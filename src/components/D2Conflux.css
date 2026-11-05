@@ -1,225 +1,47 @@
 /*
- * D2 Conflux's page wears the app's own skin rather than the site's: the Slate theme's
- * blue-grey gradient, square panels on a 1px hairline over a white/4 lift, tracked
- * uppercase labels, corner-ticked icon wells, and the green Equip button. Values are
- * copied from the app's globals.css (`.dark`, `[data-app-theme="slate"]`, the d2-*
- * utilities) so the two stay recognisably the same product.
+ * The Chrome window each D2 Conflux capture sits in, so the shots read as the
+ * live site in a browser rather than floating mocks (Nov 4 2026). Since Nov 5
+ * 2026 it stands as a rounded window padded on the sheet's cell fill — 32 / 16
+ * round it, like Crisp's stills — rather than running square to the column's
+ * rules, with Chrome's curved tab feet, a bookmark star and a profile dot.
+ * Chrome's dark frame: a tab strip on the darkest grey, the open tab and
+ * toolbar one step up, the address bar sunk back down.
  */
-.cfx {
-  --cfx-fg: #fcfcf5;
-  --cfx-muted: rgb(255 255 255 / 0.7);
-  --cfx-faint: rgb(255 255 255 / 0.45);
-  --cfx-line: rgb(252 252 245 / 0.15);
-  --cfx-lift: rgb(255 255 255 / 0.04);
-  --cfx-green: #378b3f;
-  /* The shared project frame's rhythm (`layout.ts`): between sections, copy to media. */
-  --cfx-gap: 160px;
-  --cfx-stack: 64px;
-
-  min-height: 100vh;
-  color: var(--cfx-fg);
-  /* Darker than the app's Slate backdrop on purpose: the captures carry that
-     gradient, so the page sits a few steps under it and only borrows a faint
-     slate glow, letting every screenshot read as a lit screen. */
-  background:
-    radial-gradient(1400px 700px at 85% -10%, rgb(55 67 88 / 0.45), transparent 70%),
-    radial-gradient(1000px 600px at -10% 40%, rgb(47 56 65 / 0.3), transparent 70%),
-    #101317;
-  background-attachment: fixed;
-  font-feature-settings: 'tnum' 1;
-}
-
-.cfx *,
-.cfx *::before,
-.cfx *::after { box-sizing: border-box; }
-
-/* `--cfx-pad` is the shared `projectPad()`, which centres the project column. */
-.cfx-shell {
-  width: 100%;
-  /* The page's floor is padding, not the closing card's margin: a margin would
-     collapse out through `main` and `.cfx` and show the body under the page. */
-  padding: 0 var(--cfx-pad) 96px;
-}
-
-/* ── Type ────────────────────────────────────────────────────────────────── */
-
-.cfx-label {
-  margin: 0;
-  font-size: 11px;
-  line-height: 16px;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--cfx-muted);
-}
-
-/* A section's label with the hairline that fades out to the right. */
-.cfx-rule {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.cfx-rule::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(to right, rgb(252 252 245 / 0.22), rgb(252 252 245 / 0.06) 60%, transparent);
-}
-
-/* The shared project section heading (`SectionHeading`). */
-.cfx-h2 {
-  margin: 0;
-  font-size: 32px;
-  line-height: 1.15;
-  font-weight: 500;
-  letter-spacing: -0.015em;
-  text-wrap: balance;
-}
-
-.cfx-body {
-  margin: 0;
-  font-size: var(--text-body-xl);
-  line-height: 1.5;
-  color: var(--cfx-muted);
-}
-
-.cfx-copy { display: flex; flex-direction: column; gap: 20px; }
-
-.cfx-list {
-  margin: 0;
-  padding-left: 1.25em;
-  list-style-type: decimal;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-/* ── Hero ────────────────────────────────────────────────────────────────── */
-
-/* The opener is the site's shared `ProjectIntro`; this only spaces it from the first shot. */
-.cfx-hero { padding-bottom: 80px; }
-
-.cfx-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
-
-/* ── Panels ──────────────────────────────────────────────────────────────── */
-
-.cfx-panel {
-  position: relative;
-  border: 1px solid var(--cfx-line);
-  background: var(--cfx-lift);
-}
-
-/* Brighter 6px ticks on the four corners of a panel, like the app's icon wells. */
-.cfx-ticks::before {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  pointer-events: none;
-  --t: rgb(252 252 245 / 0.6);
-  --l: 8px;
-  background:
-    linear-gradient(var(--t), var(--t)) top left / var(--l) 1px no-repeat,
-    linear-gradient(var(--t), var(--t)) top left / 1px var(--l) no-repeat,
-    linear-gradient(var(--t), var(--t)) top right / var(--l) 1px no-repeat,
-    linear-gradient(var(--t), var(--t)) top right / 1px var(--l) no-repeat,
-    linear-gradient(var(--t), var(--t)) bottom left / var(--l) 1px no-repeat,
-    linear-gradient(var(--t), var(--t)) bottom left / 1px var(--l) no-repeat,
-    linear-gradient(var(--t), var(--t)) bottom right / var(--l) 1px no-repeat,
-    linear-gradient(var(--t), var(--t)) bottom right / 1px var(--l) no-repeat;
-}
-
-/* A screenshot in a frame: no radius, the hairline, a soft drop. */
-.cfx-shot {
-  display: block;
-  margin: 0;
-  border: 1px solid var(--cfx-line);
-  background: rgb(0 0 0 / 0.2);
-  box-shadow: 0 2px 16px rgb(0 0 0 / 0.25), 0 24px 64px rgb(0 0 0 / 0.18);
-}
-
-.cfx-shot img { display: block; width: 100%; height: auto; }
-
-/* ── Stage ───────────────────────────────────────────────────────────────── */
-
-/* A close-up's ground: the app's Slate backdrop in a tile, a soft light from the
-   top right, and the panel set on it with room to breathe and a real shadow. */
-.cfx-stage {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: clamp(16px, 2.5vw, 28px);
-  padding: clamp(20px, 3.5vw, 48px);
-  border-radius: 10px;
-  overflow: hidden;
-  background:
-    radial-gradient(90% 70% at 90% 0%, rgb(255 255 255 / 0.07), transparent 70%),
-    linear-gradient(241.87deg, #374358 2.15%, #2f3841 93.13%);
-  box-shadow:
-    0 0 0 1px rgb(255 255 255 / 0.1),
-    0 2px 16px rgb(0 0 0 / 0.3),
-    0 32px 80px rgb(0 0 0 / 0.35);
-}
-
-.cfx-stage-label { position: relative; }
-
-.cfx-stage-body {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: clamp(16px, 2vw, 24px);
-}
-
-/* On the stage the panel keeps its hairline but drops the page's heavy drop for a
-   shadow cast onto the backdrop, as the app's own floating panels do. */
-.cfx-stage .cfx-shot {
-  background: none;
-  box-shadow: 0 2px 6px rgb(0 0 0 / 0.2), 0 18px 48px rgb(0 0 0 / 0.35);
-}
-
-/* A capture that runs on past its bottom edge dissolves into the stage instead of being
-   cut off, and the stage drops its bottom padding so the fade reaches the edge. */
-.cfx-stage-fade { padding-bottom: 0; }
-
-.cfx-stage-fade .cfx-shot {
-  mask-image: linear-gradient(to bottom, #000 72%, transparent);
-  box-shadow: none;
-}
-
-/* Beside a browser window the stage takes the row's height and centres its panel. */
-.cfx-pair > .cfx-browser { align-self: start; }
-
-/* ── Browser window ──────────────────────────────────────────────────────── */
-
-/* Chrome's dark frame: a tab strip on the darkest grey, the open tab and toolbar
-   one step up, the address bar sunk back down. The only rounded thing on the page,
-   because it's the visitor's browser, not the app. */
 .cfx-browser {
   --frame: #202124;
   --bar: #35363a;
   --omni: #282a2d;
-  --ink: rgb(232 234 237 / 0.82);
-  --ink-dim: rgb(232 234 237 / 0.45);
+  --ink: rgb(232 234 237 / 0.86);
+  --ink-dim: rgb(232 234 237 / 0.5);
   --chrome-scale: 1;
+  --tab-radius: calc(8px * var(--chrome-scale));
 
   display: block;
   margin: 0;
-  overflow: hidden;
-  border-radius: 10px;
-  background: var(--frame);
-  box-shadow:
-    0 0 0 1px rgb(255 255 255 / 0.1),
-    0 2px 16px rgb(0 0 0 / 0.3),
-    0 32px 80px rgb(0 0 0 / 0.35);
+  padding: 32px;
+  background: color-mix(in srgb, var(--color-text-primary) 4%, transparent);
 }
 
-.cfx-browser > img,
-.cfx-browser video { display: block; width: 100%; height: auto; }
+.cfx-browser *,
+.cfx-browser *::before,
+.cfx-browser *::after { box-sizing: border-box; }
 
+.cfx-browser-window {
+  overflow: hidden;
+  border-radius: calc(12px * var(--chrome-scale));
+  background: var(--frame);
+  /* A hairline round the window, and a soft drop to lift it off the fill. */
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.1),
+    0 16px 40px -12px rgb(0 0 0 / 0.55);
+}
+
+.cfx-browser-window > img,
+.cfx-browser-window video { display: block; width: 100%; height: auto; }
 
 .cfx-browser-chrome {
   font-size: calc(12px * var(--chrome-scale));
+  line-height: 1;
   color: var(--ink);
   user-select: none;
 }
@@ -227,16 +49,16 @@
 .cfx-browser-tabs {
   display: flex;
   align-items: flex-end;
-  gap: calc(10px * var(--chrome-scale));
-  height: calc(38px * var(--chrome-scale));
-  padding: 0 calc(12px * var(--chrome-scale));
+  gap: calc(12px * var(--chrome-scale));
+  height: calc(40px * var(--chrome-scale));
+  padding: 0 calc(14px * var(--chrome-scale));
 }
 
 .cfx-browser-lights {
   display: flex;
   gap: calc(8px * var(--chrome-scale));
   align-self: center;
-  margin-right: calc(10px * var(--chrome-scale));
+  margin-right: calc(12px * var(--chrome-scale));
 }
 
 .cfx-browser-lights i {
@@ -244,20 +66,42 @@
   height: calc(12px * var(--chrome-scale));
   border-radius: 50%;
   background: #ff5f57;
+  box-shadow: inset 0 0 0 0.5px rgb(0 0 0 / 0.25);
 }
 
 .cfx-browser-lights i:nth-child(2) { background: #febc2e; }
 .cfx-browser-lights i:nth-child(3) { background: #28c840; }
 
 .cfx-browser-tab {
+  position: relative;
   display: flex;
   align-items: center;
   gap: calc(8px * var(--chrome-scale));
   width: min(240px, 40%);
-  height: calc(30px * var(--chrome-scale));
-  padding: 0 calc(10px * var(--chrome-scale));
-  border-radius: calc(8px * var(--chrome-scale)) calc(8px * var(--chrome-scale)) 0 0;
+  height: calc(32px * var(--chrome-scale));
+  padding: 0 calc(10px * var(--chrome-scale)) 0 calc(12px * var(--chrome-scale));
+  border-radius: var(--tab-radius) var(--tab-radius) 0 0;
   background: var(--bar);
+}
+
+/* Chrome's feet: the open tab curves out into the toolbar at both bottom corners. */
+.cfx-browser-tab::before,
+.cfx-browser-tab::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  width: var(--tab-radius);
+  height: var(--tab-radius);
+}
+
+.cfx-browser-tab::before {
+  left: calc(var(--tab-radius) * -1);
+  background: radial-gradient(circle at 0 0, transparent calc(var(--tab-radius) - 0.5px), var(--bar) var(--tab-radius));
+}
+
+.cfx-browser-tab::after {
+  right: calc(var(--tab-radius) * -1);
+  background: radial-gradient(circle at 100% 0, transparent calc(var(--tab-radius) - 0.5px), var(--bar) var(--tab-radius));
 }
 
 .cfx-browser-tab img {
@@ -282,11 +126,11 @@
 .cfx-browser-toolbar {
   display: flex;
   align-items: center;
-  gap: calc(14px * var(--chrome-scale));
-  height: calc(40px * var(--chrome-scale));
-  padding: 0 calc(14px * var(--chrome-scale));
+  gap: calc(16px * var(--chrome-scale));
+  height: calc(44px * var(--chrome-scale));
+  padding: 0 calc(16px * var(--chrome-scale));
   background: var(--bar);
-  border-bottom: 1px solid rgb(0 0 0 / 0.35);
+  border-bottom: 1px solid rgb(0 0 0 / 0.4);
 }
 
 .cfx-browser-toolbar > svg { flex-shrink: 0; }
@@ -299,8 +143,8 @@
   gap: calc(10px * var(--chrome-scale));
   flex: 1;
   min-width: 0;
-  height: calc(28px * var(--chrome-scale));
-  padding: 0 calc(12px * var(--chrome-scale));
+  height: calc(30px * var(--chrome-scale));
+  padding: 0 calc(14px * var(--chrome-scale));
   border-radius: 999px;
   background: var(--omni);
   white-space: nowrap;
@@ -309,122 +153,32 @@
 
 .cfx-browser-omnibox svg { flex-shrink: 0; color: var(--ink-dim); }
 
+.cfx-browser-url {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .cfx-browser-path { color: var(--ink-dim); }
 
-/* Beside a close-up the window is narrower, so its chrome steps down with it. */
-.cfx-pair .cfx-browser { --chrome-scale: 0.85; }
-
-.cfx-caption {
-  margin: 12px 0 0;
-  font-size: 13px;
-  line-height: 1.5;
-  color: var(--cfx-faint);
+/* The signed-in profile: a plain dot in the app's exotic yellow. */
+.cfx-browser-avatar {
+  flex-shrink: 0;
+  width: calc(20px * var(--chrome-scale));
+  height: calc(20px * var(--chrome-scale));
+  border-radius: 50%;
+  background: #f6de62;
 }
 
-/* ── Feature rows ────────────────────────────────────────────────────────── */
+/* The row below's column rule, carried up through the bottom padding to the window. */
+.cfx-browser-rule { height: 32px; }
 
-.cfx-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--cfx-stack);
-  padding-top: var(--cfx-gap);
-}
-
-/* The label rides 24 over its heading rather than a full copy-to-media step. */
-.cfx-section > .cfx-rule { margin-bottom: calc(24px - var(--cfx-stack)); }
-
-/* A section's media runs wider than its copy, out to the hero's 1320 (`WideMedia`),
-   centred on the column. Desktop only; mobile keeps the column. The inverse of
-   `MOBILE_QUERY`: past 900 wide, unless it is also a short touch screen. */
-@media (min-width: 901px) and (min-height: 601px), (min-width: 901px) and (pointer: fine), (min-width: 901px) and (pointer: none) {
-  .cfx-section > :not(.cfx-rule, .cfx-intro) {
-    width: min(1320px, calc(100vw - 96px));
-    max-width: none;
-    margin-left: calc((100% - min(1320px, calc(100vw - 96px))) / 2);
-  }
-}
-
-/* Heading over copy, flush left on the shared measure (`PROJECT_COPY_MAX`). */
-.cfx-intro {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  max-width: 880px;
-}
-
-.cfx-pair {
-  display: grid;
-  grid-template-columns: minmax(0, 3fr) minmax(0, 1fr);
-  gap: 24px;
-  align-items: stretch;
-}
-
-/* ── Feedback wall ───────────────────────────────────────────────────────── */
-
-.cfx-wall {
-  columns: 3 280px;
-  column-gap: 20px;
-}
-
-.cfx-quote {
-  break-inside: avoid;
-  margin: 0 0 20px;
-  padding: 10px;
-}
-
-.cfx-quote img { display: block; width: 100%; height: auto; }
-
-/* ── Closing ─────────────────────────────────────────────────────────────── */
-
-.cfx-close {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px 48px;
-  margin-top: var(--cfx-gap);
-  padding: 40px;
-}
-
-.cfx-close .cfx-copy { max-width: 620px; gap: 12px; }
-
-/* ── Narrow screens ──────────────────────────────────────────────────────── */
-
-/* The site's mobile breakpoint (`MOBILE_QUERY` in `useIsMobile`). */
+/* The site's mobile breakpoint (`MOBILE_QUERY` in `useIsMobile`): the chrome steps down. */
 @media (max-width: 900px), (max-height: 600px) and (pointer: coarse) {
-  .cfx { --cfx-gap: 96px; --cfx-stack: 40px; }
-  .cfx-h2 { font-size: 28px; }
-  .cfx-intro { gap: 20px; }
-  .cfx-hero { padding-bottom: 48px; }
-}
-
-@media (max-width: 640px) {
-  .cfx-pair { grid-template-columns: minmax(0, 1fr); }
-  .cfx-close { padding: 24px; }
-  .cfx-browser,
-  .cfx-pair .cfx-browser { --chrome-scale: 0.7; border-radius: 8px; }
+  .cfx-browser {
+    --chrome-scale: 0.7;
+    padding: 16px;
+  }
   .cfx-browser-lights { display: none; }
-}
-
-/* ── Component strip ─────────────────────────────────────────────────────── */
-
-/* The live component playground runs the page's full width as a band of the app's
-   Slate, out past the column's `--cfx-pad` on both sides. Later than the section
-   rule that widens media to 1320, which it overrides. The band is the app itself:
-   the iframe paints its own backdrop, and the ground here only shows while it loads.
-   The frame grows to the app's content height (ComponentStrip), so it never scrolls;
-   the height here only holds the space until the app reports in. */
-.cfx-section > .cfx-strip {
-  width: auto;
-  max-width: none;
-  margin-left: calc(-1 * var(--cfx-pad));
-  margin-right: calc(-1 * var(--cfx-pad));
-  background: linear-gradient(241.87deg, #374358 2.15%, #2f3841 93.13%);
-}
-
-.cfx-embed {
-  display: block;
-  width: 100%;
-  height: 1100px;
-  border: 0;
 }

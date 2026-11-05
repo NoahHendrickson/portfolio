@@ -921,8 +921,13 @@ function StatusHeader({
         textAlign: 'left',
       }}
     >
-      <span style={{ ...TRUNCATE, fontWeight: 600, color: MUTED_GREY }}>{label}</span>
-      <span style={{ flexShrink: 0, fontWeight: 600, color: mutedGreyA(0.6), fontVariantNumeric: 'tabular-nums' }}>
+      {/*
+        The Threads label's white at 65%, not the app's opaque `--muted-foreground`
+        grey, which read flatter than Threads over the glass (Nov 4 2026). The
+        count keeps its 60% of the label: white at 39%.
+      */}
+      <span style={{ ...TRUNCATE, fontWeight: 600, color: MUTED }}>{label}</span>
+      <span style={{ flexShrink: 0, fontWeight: 600, color: 'rgba(255, 255, 255, 0.39)', fontVariantNumeric: 'tabular-nums' }}>
         {count}
       </span>
     </button>

@@ -28,7 +28,7 @@ import { projects } from './data/projects'
 import { useIsMobile } from './hooks/useIsMobile'
 import { useMediaQuery } from './hooks/useMediaQuery'
 import { getRoute, navigate, subscribeToRoute } from './navigation'
-import { pageGutter, RAIL_SPINE, TABLET_MAX } from './layout'
+import { HOME_BENTO, pageGutter, RAIL_SPINE, TABLET_MAX } from './layout'
 
 const BG = 'var(--color-bg-primary)'
 
@@ -373,6 +373,11 @@ export default function App() {
   const copyWidth = `max(0px, min(${COPY_MAX}px, ${leafLimit} - ${copyLeft}))`
   const panelLeft = tab === 'me' ? centredLeft : copyLeft
   const boxWidth = tab === 'me' ? panelWidth : copyWidth
+  // The ruled bento's rules run the whole dark area, so on Hi the scroller
+  // spans it — from the spine (under the rail, which stays on top) to the
+  // viewport's right edge — and pads the panel back onto its seat. It clips
+  // sideways, so anything narrower would cut the rules off at the panel.
+  const spanDark = !isMobile && tab === 'me' && HOME_BENTO === 'ruled'
 
   return (
     <div
@@ -491,7 +496,13 @@ export default function App() {
           className={isMobile ? 'tab-content-in' : 'tab-content-in panel-scroll'}
           style={{
             flex: isMobile ? undefined : '0 0 auto',
-            width: isMobile ? '100%' : `calc(${boxWidth} + ${bleedLeft + bleedRight}px)`,
+            position: 'relative',
+            zIndex: 0,
+            width: isMobile
+              ? '100%'
+              : spanDark
+                ? `calc(100vw - ${RAIL_SPINE}px)`
+                : `calc(${boxWidth} + ${bleedLeft + bleedRight}px)`,
             maxWidth: isMobile ? `${COPY_MAX}px` : undefined,
             minWidth: 0,
             boxSizing: 'border-box',
@@ -505,13 +516,19 @@ export default function App() {
             // scales a card past the edge. `SCROLL_BLEED` is what keeps that
             // overhang inside the box in the first place.
             overflowX: isMobile ? undefined : 'hidden',
-            padding: isMobile ? undefined : `${SCROLL_BLEED}px ${bleedRight}px 80px ${bleedLeft}px`,
+            padding: isMobile
+              ? undefined
+              : spanDark
+                ? `${SCROLL_BLEED}px calc(100vw - ${panelLeft} - ${panelWidth}) 80px calc(${panelLeft} - ${RAIL_SPINE}px)`
+                : `${SCROLL_BLEED}px ${bleedRight}px 80px ${bleedLeft}px`,
             // The file's 56 above the panel: `SCROLL_BLEED` of it is padding
             // inside the scroller so a first-row hover lift isn't clipped, and
             // the rest stays as margin so the copy still starts at 56.
             margin: isMobile
               ? undefined
-              : `${PANEL_TOP - SCROLL_BLEED}px -${bleedRight}px 0 calc(${panelLeft} - ${railStop + bleedLeft}px)`,
+              : spanDark
+                ? `${PANEL_TOP - SCROLL_BLEED}px 0 0 ${RAIL_SPINE - railStop}px`
+                : `${PANEL_TOP - SCROLL_BLEED}px -${bleedRight}px 0 calc(${panelLeft} - ${railStop + bleedLeft}px)`,
           }}
         >
           {panel}

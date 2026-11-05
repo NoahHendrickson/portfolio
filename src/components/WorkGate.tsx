@@ -1,33 +1,37 @@
 import { useState, type FormEvent } from 'react'
-import Header from './Header'
+import { SheetPage } from './Sheet'
 import Button from '../design-system/Button'
 import { color, radius, space, type } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
-import { PROJECT_MOBILE_PAD, shellPad } from '../layout'
+import { FILL, INTRO_PAD, RULE, SHEET_HEADING, TEXT, TEXT_SOFT } from '../sheetStyle'
 import { unlock } from '../workGate'
 
-const TEXT = color.text.primary
-const BODY = color.text.secondary
 const ORANGE = color.accent.default
 
 const WORK_PASSWORD = 'noah2026'
 
-/** Password form shown in place of a locked Invisible case study. */
+const EMAIL = 'noahjames017@gmail.com'
+
+/**
+ * Password form shown in place of a locked Invisible case study, on the ruled
+ * sheet the studies run (`Sheet.tsx`): the header, then the form in a cell on
+ * the intro's padding, so Back and Contact sit where they will once it unlocks.
+ * The form is centred in its cell, and asks for an email rather than a
+ * LinkedIn message (Nov 5 2026).
+ */
 export default function WorkGate({
   onUnlock,
-  barInset,
 }: {
   onUnlock: () => void
   /**
-   * Where the study it guards puts Back and Contact, so they don't jump when
-   * the page unlocks. Defaults to the shared gutter, which Synapse and Apply use.
+   * Ignored: the sheet places Back and Contact itself. Kept so callers that
+   * still pass the inset their page used compile unchanged.
    */
   barInset?: string
 }) {
   const isMobile = useIsMobile()
   const [input, setInput] = useState('')
   const [error, setError] = useState(false)
-  const pad = isMobile ? PROJECT_MOBILE_PAD : shellPad()
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -40,57 +44,36 @@ export default function WorkGate({
   }
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        background: color.bg.primary,
-        color: TEXT,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: isMobile ? space.xl : space['2xl'],
-        paddingBottom: isMobile ? '60px' : '120px',
-        overflowX: 'clip',
-      }}
-    >
-      <Header leading="back" showProfile={false} barInset={barInset ?? pad} />
-
+    <SheetPage>
       <div
         style={{
+          background: FILL,
+          padding: isMobile ? `${space['4xl']} ${space.xl}` : `${space['5xl']} ${INTRO_PAD}`,
+          borderBottom: RULE,
           display: 'flex',
-          flexDirection: 'column',
-          gap: isMobile ? space.xl : space['2xl'],
-          // Shared gutter, so Back/Contact don't jump when the page unlocks.
-          padding: `0 ${pad}`,
-          flex: 1,
-          minWidth: 0,
-          boxSizing: 'border-box',
-          width: '100%',
+          justifyContent: 'center',
         }}
       >
         <form
           onSubmit={handleSubmit}
           style={{
-            margin: 'auto',
             display: 'flex',
             flexDirection: 'column',
             gap: space.lg,
             maxWidth: '360px',
             width: '100%',
+            textAlign: 'center',
           }}
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: space.sm }}>
-            <label
-              htmlFor="work-password"
-              style={{
-                fontSize: type['heading-m'].fontSize,
-                fontWeight: type['heading-m'].fontWeight,
-                color: TEXT,
-              }}
-            >
-              Enter the password to view this case study
+            <label htmlFor="work-password" style={SHEET_HEADING}>
+              This one needs a password
             </label>
-            <p style={{ margin: 0, fontSize: type['body-s'].fontSize, lineHeight: type['body-s'].lineHeight, color: BODY }}>
-              Reach out on LinkedIn to get access.
+            <p style={{ margin: 0, fontSize: '16px', lineHeight: SHEET_HEADING.lineHeight, color: TEXT_SOFT }}>
+              <a href={`mailto:${EMAIL}`} style={{ color: TEXT, textDecoration: 'underline', textUnderlineOffset: '3px' }}>
+                Email me
+              </a>{' '}
+              and I’ll send it your way.
             </p>
           </div>
           <input
@@ -104,27 +87,23 @@ export default function WorkGate({
             autoFocus
             style={{
               padding: `${space.md} ${space.lg}`,
-              // iOS Safari zooms the page into any field under 16px when it
-              // takes focus, and leaves it zoomed after the page unlocks.
-              fontSize: isMobile ? '16px' : type['body-m'].fontSize,
+              // 16 everywhere: iOS Safari zooms the page into any field under
+              // 16px when it takes focus, and leaves it zoomed after it unlocks.
+              fontSize: '16px',
               fontFamily: 'inherit',
-              border: `1px solid ${error ? ORANGE : color.border.default}`,
+              border: error ? `1px solid ${ORANGE}` : RULE,
               borderRadius: radius.md,
               background: color.bg.raised,
               color: TEXT,
               outline: 'none',
             }}
           />
-          {error && (
-            <span style={{ color: ORANGE, fontSize: type['body-s'].fontSize }}>
-              Incorrect password
-            </span>
-          )}
+          {error && <span style={{ color: ORANGE, fontSize: type['body-s'].fontSize }}>Not quite. Try again?</span>}
           <Button type="submit" variant="secondary" size="lg" style={{ width: '100%' }}>
             Unlock
           </Button>
         </form>
       </div>
-    </div>
+    </SheetPage>
   )
 }

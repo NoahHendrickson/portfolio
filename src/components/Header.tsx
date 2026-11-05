@@ -91,7 +91,8 @@ function BackLink() {
         gap: space.sm,
         height: control.sm,
         boxSizing: 'border-box',
-        padding: `0 ${space.lg}`,
+        // 12 a side rather than the `sm` button's 16 — matched by Contact (Nov 4 2026).
+        padding: `0 ${space.md}`,
         borderRadius: radius.full,
         border: `1px solid ${VARIANTS.ghost.default.borderColor}`,
         background: VARIANTS.ghost.default.background,

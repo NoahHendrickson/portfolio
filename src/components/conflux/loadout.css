@@ -1,0 +1,538 @@
+/*
+ * States and container queries for the D2 Conflux loadout card and item tile replicas
+ * (LoadoutCard.tsx, ItemTile.tsx) — the parts inline styles can't express. Values are
+ * the app's own (`globals.css`, dark + Slate, plain lines). The card is its own
+ * `@container`, like the app's: `@3xl` is 48rem, `@6xl` 72rem of the card's content
+ * box; `max-md` is the viewport under 768px.
+ */
+
+@property --cfx-lo-equip-fill {
+  syntax: '<color>';
+  inherits: false;
+  initial-value: #378b3f;
+}
+@property --cfx-lo-line-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+@keyframes cfx-lo-line-drift {
+  to {
+    --cfx-lo-line-angle: 360deg;
+  }
+}
+@keyframes cfx-lo-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+@keyframes cfx-lo-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+}
+
+/* Border-box throughout, whatever the host page's reset (the app runs Tailwind's). */
+.cfx-lo-card,
+.cfx-lo-card *,
+.cfx-lo-card *::before,
+.cfx-lo-card *::after,
+.cfx-lo-tip,
+.cfx-lo-tip *,
+.cfx-lo-menu,
+.cfx-lo-menu *,
+.cfx-item-tile,
+.cfx-item-tile * {
+  box-sizing: border-box;
+}
+
+/* ── Card ─────────────────────────────────────────────────────────────── */
+
+/* d2-card-frame under plain lines: a solid foreground/15 edge, ×1.6 on hover. */
+.cfx-lo-card {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid rgb(252 252 245 / 0.15);
+  background-color: rgb(255 255 255 / 0.04);
+  transition: border-color 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.cfx-lo-card:hover {
+  border-color: rgb(252 252 245 / 0.24);
+}
+
+.cfx-lo-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+}
+
+/* The game's hover frame: a 1px light ring 2px off the control (pointer only). */
+@media (hover: hover) and (pointer: fine) {
+  .cfx-lo-ring:hover,
+  .cfx-item-tile:hover {
+    outline: 1px solid rgb(252 252 245 / 0.55);
+    outline-offset: 2px;
+  }
+}
+
+/* Set-bonus cells: keyboard focus is the white selected frame. */
+.cfx-lo-bonus {
+  outline: none;
+}
+.cfx-lo-bonus:focus-visible,
+.cfx-item-tile:focus-visible {
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.85),
+    0 0 8px 1px rgb(255 255 255 / 0.25);
+}
+
+/* The stat line: a borderless button that toggles the breakdown. */
+.cfx-lo-stats {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 36px;
+  padding: 0 8px;
+  border: 0;
+  background-color: transparent;
+  color: #fcfcf5;
+  font: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  outline: none;
+  transition:
+    background-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    outline-offset 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.cfx-lo-stats:hover {
+  background-color: rgb(252 252 245 / 0.06);
+}
+.cfx-lo-stats:focus-visible {
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.85);
+}
+.cfx-lo-stat {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.cfx-lo-glyph {
+  width: 16px;
+  height: 16px;
+  opacity: 0.75;
+}
+.cfx-lo-chevron {
+  width: 12px;
+  height: 12px;
+  color: rgb(255 255 255 / 0.7);
+  transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.cfx-lo-stats[aria-expanded='true'] .cfx-lo-chevron {
+  transform: rotate(180deg);
+}
+
+/* EQUIP (Figma 69:1430): green under a 1px line, white/26 at the sides to white/60 in the
+   middle. Hover lightens the fill and spins the line (a two-lobe conic gradient). */
+.cfx-lo-equip {
+  --line-side: rgb(255 255 255 / 0.26);
+  --line-mid: rgb(255 255 255 / 0.6);
+  --cfx-lo-line: linear-gradient(to right, var(--line-side), var(--line-mid) 50%, var(--line-side));
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 16px;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--cfx-lo-equip-fill), var(--cfx-lo-equip-fill)) padding-box,
+    var(--cfx-lo-line) border-box,
+    var(--cfx-lo-equip-fill);
+  color: #fcfcf5;
+  font: inherit;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+  transition:
+    border-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    outline-offset 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    --cfx-lo-equip-fill 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.cfx-lo-equip:hover {
+  --cfx-lo-equip-fill: #4aa354;
+  --cfx-lo-line: conic-gradient(
+    from var(--cfx-lo-line-angle),
+    var(--line-mid) 0deg,
+    var(--line-side) 90deg,
+    var(--line-mid) 180deg,
+    var(--line-side) 270deg,
+    var(--line-mid) 360deg
+  );
+  animation: cfx-lo-line-drift 4s linear infinite;
+}
+.cfx-lo-equip:focus-visible {
+  border-color: rgb(255 255 255 / 0.85);
+}
+.cfx-lo-equip:active {
+  transform: translateY(1px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cfx-lo-equip:hover {
+    animation: none;
+    --cfx-lo-line: linear-gradient(to right, var(--line-side), var(--line-mid) 50%, var(--line-side));
+  }
+}
+
+/* The corner-tick well (Figma 69:883): a faint foreground/16 frame with brighter 5px
+   ticks on the corners, over the white/4 lift. The section wells and the ⋮ button. */
+.cfx-lo-well {
+  --cfx-lo-tick: rgb(252 252 245 / 0.32);
+  position: relative;
+  border: 1px solid rgb(252 252 245 / 0.16);
+  background-color: rgb(255 255 255 / 0.04);
+}
+.cfx-lo-well::before {
+  content: '';
+  pointer-events: none;
+  position: absolute;
+  inset: -1px;
+  background:
+    linear-gradient(var(--cfx-lo-tick), var(--cfx-lo-tick)) top left / 5px 1px no-repeat,
+    linear-gradient(var(--cfx-lo-tick), var(--cfx-lo-tick)) top left / 1px 5px no-repeat,
+    linear-gradient(var(--cfx-lo-tick), var(--cfx-lo-tick)) top right / 5px 1px no-repeat,
+    linear-gradient(var(--cfx-lo-tick), var(--cfx-lo-tick)) top right / 1px 5px no-repeat,
+    linear-gradient(var(--cfx-lo-tick), var(--cfx-lo-tick)) bottom left / 5px 1px no-repeat,
+    linear-gradient(var(--cfx-lo-tick), var(--cfx-lo-tick)) bottom left / 1px 5px no-repeat,
+    linear-gradient(var(--cfx-lo-tick), var(--cfx-lo-tick)) bottom right / 5px 1px no-repeat,
+    linear-gradient(var(--cfx-lo-tick), var(--cfx-lo-tick)) bottom right / 1px 5px no-repeat;
+}
+
+.cfx-lo-more {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  color: #fcfcf5;
+  cursor: pointer;
+  outline: none;
+  transition:
+    background-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    outline-offset 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.cfx-lo-more:hover,
+.cfx-lo-more[aria-expanded='true'] {
+  --cfx-lo-tick: rgb(252 252 245 / 0.6);
+  background-color: rgb(252 252 245 / 0.08);
+}
+.cfx-lo-more:focus-visible {
+  border-color: rgb(255 255 255 / 0.85);
+}
+
+/* ── Body ─────────────────────────────────────────────────────────────── */
+
+/* Below @3xl the subclass box spans the card over five piece columns; from @3xl it is
+   the first column, at least 18.5rem. */
+.cfx-lo-grid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+.cfx-lo-subcell {
+  grid-column: 1 / -1;
+}
+.cfx-lo-col {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0;
+  padding: 8px;
+}
+.cfx-lo-sub {
+  gap: 12px;
+}
+.cfx-lo-piece {
+  gap: 8px;
+}
+
+/* A framed subclass plug: a white/40 hairline drawn over the art. */
+.cfx-lo-plug {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  outline: none;
+}
+.cfx-lo-plug > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.cfx-lo-plug:focus-visible {
+  outline: 2px solid rgb(252 252 245 / 0.35);
+}
+.cfx-lo-framed::after {
+  content: '';
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.4);
+}
+
+/* A piece: art above the mod rows; from @6xl the name heads the box and the box is a
+   grid — the art spanning two rows, then three mod columns of up to 44px. */
+.cfx-lo-pname {
+  display: none;
+  min-width: 0;
+  flex-direction: column;
+}
+.cfx-lo-pbody {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cfx-lo-ptile {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  align-self: start;
+  width: 60px;
+  padding: 1px;
+}
+.cfx-lo-pthumb {
+  width: 58px;
+  height: 58px;
+}
+.cfx-lo-mods,
+.cfx-lo-modrow {
+  display: flex;
+  gap: 4px;
+}
+.cfx-lo-mods {
+  flex-direction: column;
+}
+.cfx-lo-modrow {
+  flex-wrap: wrap;
+}
+.cfx-lo-mod {
+  width: 36px;
+  height: 36px;
+}
+/* An unfilled socket: the game's empty-slot bracket corners over black/20. */
+.cfx-lo-empty {
+  flex-shrink: 0;
+  --b: rgb(252 252 245 / 0.4);
+  background:
+    linear-gradient(var(--b), var(--b)) top left / 6px 1px no-repeat,
+    linear-gradient(var(--b), var(--b)) top left / 1px 6px no-repeat,
+    linear-gradient(var(--b), var(--b)) top right / 6px 1px no-repeat,
+    linear-gradient(var(--b), var(--b)) top right / 1px 6px no-repeat,
+    linear-gradient(var(--b), var(--b)) bottom left / 6px 1px no-repeat,
+    linear-gradient(var(--b), var(--b)) bottom left / 1px 6px no-repeat,
+    linear-gradient(var(--b), var(--b)) bottom right / 6px 1px no-repeat,
+    linear-gradient(var(--b), var(--b)) bottom right / 1px 6px no-repeat;
+  background-color: rgb(0 0 0 / 0.2);
+}
+
+@container (min-width: 48rem) {
+  .cfx-lo-grid {
+    grid-template-columns: minmax(18.5rem, 1.25fr) repeat(5, minmax(0, 1fr));
+  }
+  .cfx-lo-subcell {
+    grid-column: auto;
+  }
+  .cfx-lo-col {
+    padding: 12px;
+  }
+  .cfx-lo-mod {
+    width: 44px;
+    height: 44px;
+  }
+}
+@container (min-width: 72rem) {
+  .cfx-lo-pname {
+    display: flex;
+  }
+  .cfx-lo-pbody {
+    display: grid;
+    grid-template-columns: auto repeat(3, minmax(0, 2.75rem));
+    gap: 4px;
+  }
+  .cfx-lo-ptile {
+    grid-row: span 2 / span 2;
+  }
+  .cfx-lo-mods,
+  .cfx-lo-modrow {
+    display: contents;
+  }
+  .cfx-lo-mod,
+  .cfx-lo-mod > img {
+    aspect-ratio: 1;
+    width: 100%;
+    height: auto;
+  }
+  .cfx-lo-newline {
+    grid-column-start: 2;
+  }
+}
+
+/* Phones: the stat line spreads across the card so all seven numbers fit one line, and
+   five 60px tiles don't fit, so each fills its column up to that size. */
+@media (max-width: 767.98px) {
+  .cfx-lo-stats {
+    width: 100%;
+    justify-content: space-between;
+    gap: 4px;
+    padding: 0 4px;
+  }
+  .cfx-lo-stat {
+    gap: 2px;
+  }
+  .cfx-lo-glyph {
+    width: 14px;
+    height: 14px;
+  }
+  .cfx-lo-grid {
+    gap: 6px;
+  }
+  .cfx-lo-piece {
+    padding: 4px;
+  }
+  .cfx-lo-ptile {
+    width: 100%;
+    max-width: 60px;
+  }
+  .cfx-lo-pthumb {
+    aspect-ratio: 1;
+    width: 100%;
+    height: auto;
+  }
+}
+
+/* ── Floating layers ──────────────────────────────────────────────────── */
+
+/* The item-inspect tooltip: a square slate plate, hairline frame, deep shadow. */
+.cfx-lo-tip {
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  left: 0;
+  width: max-content;
+  max-width: 320px;
+  padding: 8px 12px;
+  border: 1px solid rgb(252 252 245 / 0.15);
+  background-color: rgb(55 67 88 / 0.82);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 2px 16px rgb(0 0 0 / 0.25);
+  color: #fcfcf5;
+  font-size: 12px;
+  line-height: 1.625;
+  white-space: pre-line;
+  pointer-events: none;
+  animation: cfx-lo-pop 150ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+@media (max-width: 767.98px) {
+  .cfx-lo-tip {
+    max-width: calc(100vw - 1rem);
+  }
+}
+
+/* The actions menu: frosted glass, a thin tint over a heavy blur. */
+.cfx-lo-menu {
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  width: 200px;
+  padding: 4px;
+  border: 1px solid rgb(252 252 245 / 0.15);
+  background-color: rgb(82 88 100 / 0.4);
+  backdrop-filter: blur(36px) saturate(1.1);
+  -webkit-backdrop-filter: blur(36px) saturate(1.1);
+  box-shadow: 0 2px 16px rgb(0 0 0 / 0.25);
+  color: #fcfcf5;
+  outline: none;
+  animation: cfx-lo-menu-in 100ms ease-out;
+}
+.cfx-lo-mi {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-sizing: border-box;
+  width: 100%;
+  height: 32px;
+  padding: 0 8px 0 6px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: none;
+  color: #fcfcf5;
+  font: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  text-align: left;
+  cursor: default;
+  outline: none;
+  user-select: none;
+}
+.cfx-lo-mi:focus {
+  border-radius: 0;
+  border-color: rgb(252 252 245 / 0.08);
+  background-color: rgb(252 252 245 / 0.06);
+}
+.cfx-lo-mi[data-variant='destructive'] {
+  color: #ff8f84;
+}
+.cfx-lo-mi[data-variant='destructive']:focus {
+  background-color: rgb(255 143 132 / 0.2);
+}
+.cfx-lo-mi svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+.cfx-lo-sep {
+  height: 1px;
+  margin: 4px -4px;
+  background-color: rgb(252 252 245 / 0.08);
+}
+@media (max-width: 767.98px) {
+  .cfx-lo-mi {
+    min-height: 40px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cfx-lo-tip,
+  .cfx-lo-menu {
+    animation: none;
+  }
+}
+
+/* ── Item tile ────────────────────────────────────────────────────────── */
+
+.cfx-item-tile {
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+  transition:
+    opacity 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    outline-offset 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}

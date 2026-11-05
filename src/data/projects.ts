@@ -19,6 +19,8 @@ const LIME = '#cef982'
 const T3_CODE = 'https://github.com/pingdotgg/t3code'
 /** Desktop builds — GitHub Releases on the fork. `WorkList`'s card links here too. */
 export const NO3Y_CODE_DOWNLOAD = 'https://github.com/NoahHendrickson/t3code/releases'
+/** The fork's repo — the sheet's Repo link. */
+const NO3Y_CODE_REPO = 'https://github.com/NoahHendrickson/t3code'
 /** Crisp’s GitHub Pages download. The case-study CTA points here. */
 export const CRISP_DOWNLOAD = 'https://noahhendrickson.github.io/crisp/'
 /** Live D2 Conflux (formerly D2 Stat Builder). The Work card and the case-study CTA both point here. */
@@ -226,7 +228,8 @@ export type StorySection =
       kind: 'feature'
       gap: number
       heading: string
-      body: Prose
+      /** Optional on the sheet, which can run a heading alone (no3y Code's Focus mode). */
+      body?: Prose
       copyWidth: number
       panelWidth?: number
       /** Heading and copy above the media. Copy is a centred `copyWidth` column; media fills the row, or `panelWidth` if set. */
@@ -340,7 +343,18 @@ export type FeedbackShot = {
 
 /** A compact, screenshot-first alternative to the long-form story rows. */
 /** A still in the `showcasePage` gallery, at its native pixel size. */
-export type GalleryImage = { src: string; alt: string; width: number; height: number }
+export type GalleryImage = {
+  src: string
+  alt: string
+  width: number
+  height: number
+  /**
+   * The window's corner radius baked into the export, in export px, where the
+   * capture's rounded corners sit on a dark ground — the still is clipped just
+   * inside it so it can stand padded on the sheet's fill (Crisp, Nov 5 2026).
+   */
+  corner?: number
+}
 
 /** A gallery card: a still that opens in the lightbox, or a looping clip that plays in place. */
 export type ShowcaseCard = {
@@ -360,7 +374,15 @@ export type ProjectShowcaseContent = {
     steps: { label: string; body: string; shot: GalleryImage }[]
   }
   cards: ShowcaseCard[]
+  /**
+   * The page's accent in place of the site's orange — what `ContactMenu` reads
+   * (Crisp's timeline green, Nov 5 2026). `ink` is the text on it.
+   */
+  accent?: PageAccent
 }
+
+/** A page's accent in place of the site's orange — what `ContactMenu` reads. `ink` is the text on it. */
+export type PageAccent = { color: string; hover: string; ink: string }
 
 /**
  * The screenshot-led landing layout rendered by `ProjectStory.tsx` — no stats
@@ -369,6 +391,20 @@ export type ProjectShowcaseContent = {
  */
 export type Landing = {
   showcasePage?: ProjectShowcaseContent
+  /**
+   * The ruled sheet's accent, taken off the project's own art so Contact
+   * matches it (Pixel art's gold, How to PC's teal, Nacho Box's lime — Nov 5 2026).
+   */
+  accent?: PageAccent
+  /**
+   * The ruled-sheet layout (`ProjectSheet.tsx`, Figma `461:14182`) — no3y
+   * Code. `icon` is the app icon beside the title; `facts` are the labelled
+   * chip lists beside the showcase copy (Tools, Skills).
+   */
+  sheet?: {
+    icon: string
+    facts: { heading: string; items: string[] }[]
+  }
   /**
    * The helper text under the title (`ProjectIntro`). Several entries render
    * as one row split by hairlines ("Vibe coded / Figma+Cursor+Claude"). An
@@ -386,12 +422,17 @@ export type Landing = {
   flow?: 'banded' | 'continuous'
   // Gaps and alignment are the shared project frame's (`layout.ts`), not per page.
   /**
-   * The wide opener under the intro — no3y Code. `shot` runs the hero
-   * breakout, then `grid`, if set, runs two images to a row under it.
+   * The wide opener under the intro — no3y Code. `video` and `shot` run the
+   * hero breakout, then `grid`, if set, runs two images to a row under them.
+   * `copy` is a section heading and body above the media, on the column's edge.
    */
   showcase?: {
-    shot: ShowcaseImage
+    /** A looping clip above `shot`, at the same width — no3y Code's hero video. */
+    video?: LandingVideo
+    shot?: ShowcaseImage
     grid?: ShowcaseImage[]
+    /** A heading and body leading the media — no3y Code's "How I work". */
+    copy?: { heading: string; body: Prose }
   }
   /** The intro's copy and actions, then the hero media under it. */
   hero: {
@@ -466,6 +507,8 @@ export const projects: Record<string, Project> = {
     pageReady: true,
     accent: 'var(--color-orange)',
     landing: {
+      // The gold off the gallery's art (the bento ring's), white ink like D2 Conflux's gold.
+      accent: { color: '#c3a918', hover: '#a88f12', ink: '#ffffff' },
       eyebrow: ['Illustration', 'Destiny 2'],
       flow: 'continuous',
       hero: {},
@@ -829,24 +872,60 @@ export const projects: Record<string, Project> = {
       // 80 so the hero shows on landing.)
       eyebrow: [
         [{ text: 'Fork of ' }, { text: 'T3 Code', href: T3_CODE }],
-        'Agent orchestration + Design mode',
+        'Agent orchestration',
       ],
       flow: 'continuous',
+      // The ruled sheet (Figma 461:14182, Nov 4 2026).
+      sheet: {
+        icon: '/work/no3y-code/app-icon.svg',
+        facts: [
+          {
+            heading: 'Tools',
+            items: ['Figma', 'Claude Code', 'Codex', 'Shaders.com', 'React', 'TypeScript', 'Electron'],
+          },
+          {
+            heading: 'Skills',
+            items: [
+              'Product design',
+              'Interaction design',
+              'Visual design',
+              'Design engineering',
+              'Prototyping',
+              'Agent orchestration',
+            ],
+          },
+        ],
+      },
       // Captures of the desktop app on the Glass theme, baked over the fluted
       // wallpaper.
       showcase: {
-        shot: {
-          src: '/work/no3y-code/collage/new-agent.webp',
-          alt: 'no3y Code on the desktop — the new agent screen on the Glass theme, the thread sidebar beside an empty composer',
-          aspect: '1272 / 820',
+        video: {
+          src: '/work/no3y-code/focus-mode-split.mp4',
+          poster: '/work/no3y-code/focus-mode-split-poster.jpg',
+          alt: 'Focus mode in no3y Code on the Glass theme: a working thread opens from the status-grouped sidebar, the sidebar collapses into tabs filtered to its project, and a second working thread is dragged onto it to split the view',
+          aspect: '16 / 9',
+        },
+        // The new-agent still that used to stand under the clip was dropped
+        // (Nov 4 2026): the clip shows the same window, so it read twice.
+        copy: {
+          heading: 'What I wanted',
+          body: [
+            'As I moved into using LLMs and agentic coding tools more and more for design work, I wanted to design my own. I decided to fork an open source project that I really liked but couldn’t stand to look at it. When I made the fork there were a few key pillars I was thinking/wanted to improve.',
+            'How I work: I wanted more information at a glance for the different threads I was working in. Every other tool basically showed the title and the status. I wanted to know what project, what model, was it a worktree etc. I have actually abstracted more of that now because the models are just so good they don’t really get confused and I don’t care about some of that info anymore.',
+            'I focus on what I needed and wanted as a designer using this tool. I have multiple edits in my head at once and don’t wait turn by turn to do them. Sometimes I want the precision and ease of the Figma editor as well. Those inspired the focus mode and design mode.',
+            'The last thing I was really focused on was the style of the UI. I wanted to embrace the liquid glass trend with a touch of nostalgia on certain elements that felt old school iOS. There are a lot of micro UX improvements I made when it comes to seeing your usage, customizing the sidebar, starting new threads, local speech to text and more.',
+          ],
         },
       },
       hero: {
         body: [
-          'This is my fork of an open source project called T3 Code. I have multiple AI subscriptions and like to use different models for different things, but I was getting annoyed with needing to have multiple apps open to use them or to be using my terminal, which was cool at first, but not a great way to actually work. I completely redesigned the UI, added some of my own features, and improved the UX from a designer’s perspective.',
+          'This is my fork of the open source T3 Code. I use several AI subscriptions for different things, and I got tired of juggling separate apps or working in the terminal. So I redesigned the UI and added features of my own.',
         ],
-        list: ['Glass theme', 'Sidebar and thread card layout', 'Local speech-to-text', 'Design mode'],
-        cta: { label: 'GitHub', href: NO3Y_CODE_DOWNLOAD, gradient: true },
+        // Label-only links under the description in the sheet's intro.
+        links: [
+          { label: 'Repo', href: NO3Y_CODE_REPO },
+          { label: 'Download', href: NO3Y_CODE_DOWNLOAD },
+        ],
       },
       sections: [
         {
@@ -880,12 +959,19 @@ export const projects: Record<string, Project> = {
               compact: true,
             },
           ],
-          // Under the sidebar: the card states board from the old Thread cards row.
-          shot: {
-            src: '/work/no3y-code/sidebar.jpg',
-            alt: 'Thread sidebar beside a board of thread card states — default, hover, selected, and status variants',
-            aspect: '4703 / 3048',
-            frame: 'plain',
+        },
+        {
+          kind: 'feature',
+          gap: 80,
+          heading: 'Focus mode',
+          body: 'When I’m targeting one project in particular but doing multiple things in it. I rarely wait while an agent works, I am always thinking about what’s next and usually starting more threads in parallel. Collapsing the sidebar gives me horizontal tabs that let me focus on specific projects.',
+          copyWidth: 700,
+          stack: true,
+          video: {
+            src: '/work/no3y-code/focus-mode.mp4',
+            poster: '/work/no3y-code/focus-mode-poster.jpg',
+            alt: 'Focus mode in no3y Code on the Glass theme: the sidebar collapses into a row of thread tabs, switching tabs moves between working threads, and a second thread opens beside the first in a split view',
+            aspect: '16 / 9',
           },
         },
         {
@@ -928,43 +1014,6 @@ export const projects: Record<string, Project> = {
               aspect: '680 / 380',
             },
           ],
-        },
-        {
-          kind: 'feature',
-          gap: 80,
-          heading: 'The idea',
-          body: [
-            'I wanted a really powerful design mode in the agent orchestration tools I was using. I didn’t want to just select an element and prompt. Sometimes I wanted to be precise with my edits and send those off to an agent to apply. I also wanted more information at a glance when I was working on multiple projects at once.',
-            [
-              { text: 'The Forge.', strong: true },
-              {
-                text: ' I created The Forge, an npm package for Vite apps that provides a design mode for making frontend changes in a sidebar and sending those edits to a coding agent.',
-                muted: true,
-              },
-            ],
-            [
-              { text: 'Phanttom.', strong: true },
-              {
-                text: ' This Ghostty fork added vertical tabs and surfaced more useful context for each session. I eventually found that I didn’t want my primary workflow to live in a terminal.',
-                muted: true,
-              },
-            ],
-            [
-              {
-                text: 'I wanted to combine these things to have one main app I used to get things done. But because I lack the technical expertise to create my own agent app from scratch, I forked an open-source one. Huge shout-out to ',
-              },
-              { text: 'T3 Code', href: T3_CODE },
-              { text: '—it’s an awesome open-source app and is very fork-friendly.' },
-            ],
-          ],
-          copyWidth: 700,
-          stack: true,
-          shot: {
-            src: '/work/no3y-code/idea.webp',
-            alt: 'no3y Code’s thread sidebar beside the design mode properties panel, over a fluted gradient',
-            aspect: '3090 / 1499',
-            frame: 'plain',
-          },
         },
         {
           kind: 'feature',
@@ -1060,6 +1109,8 @@ export const projects: Record<string, Project> = {
       sections: [],
       showcasePage: {
         meta: 'Personal project · Design & development · 2026',
+        // The playback track's green off the timeline shots, with white ink (dark was tried first).
+        accent: { color: '#30c078', hover: '#2aa868', ink: '#ffffff' },
         heading: 'Screen recordings that do your work justice.',
         body: [
           'I built Crisp because the recordings I made for my portfolio never looked quite as good as the work on my screen. Gradients banded, glass lost its depth, and small details disappeared.',
@@ -1070,6 +1121,7 @@ export const projects: Record<string, Project> = {
           alt: 'Crisp’s native Mac editor with a recording preview, zoom controls, and a color-coded timeline',
           width: 2200,
           height: 1380,
+          corner: 22,
         },
         evolution: {
           heading: 'The timeline',
@@ -1092,6 +1144,7 @@ export const projects: Record<string, Project> = {
                 alt: 'Crisp’s player: the toolbar above five colored timeline tracks: playback, zoom, pan, clip, and fast-forward',
                 width: 2340,
                 height: 520,
+                corner: 16,
               },
             },
           ],
@@ -1176,6 +1229,8 @@ export const projects: Record<string, Project> = {
     },
     pageReady: true,
     landing: {
+      // The poster's teal, white ink.
+      accent: { color: '#00a2a2', hover: '#008a8a', ink: '#ffffff' },
       // Ported from the 2022 site (Noah-Site, /HowToPC). No Figma frame for this
       // one — it reuses the story shell so it sits on the same dark theme.
       eyebrow: ['Graphic Design', '2019'],
@@ -1187,12 +1242,13 @@ export const projects: Record<string, Project> = {
       },
       sections: [
         {
-          // The poster runs 1378.6 × 5951.8; seated at 880 in the 1272 column so
-          // the callout copy stays a readable size rather than filling the page.
+          // The poster runs 1378.6 × 5951.8, edge to edge across its cell (Nov 5 2026;
+          // it was seated at 880 of the 1272 on the cell fill, which left a margin of
+          // fill round its own teal). It's an SVG, so it stays sharp at any width.
           kind: 'shot',
           width: 1272,
-          height: 3799,
-          frame: { left: 196, top: 0, width: 880 },
+          height: 5493,
+          frame: { left: 0, top: 0, width: 1272 },
           shot: {
             src: '/work/how-to-pc/infographic.svg',
             alt: 'How to Build a PC — a parts legend, then CPU, RAM, AIO cooler, motherboard, PSU and GPU installation steps, ending with the cable-connection checklist',
@@ -1242,6 +1298,8 @@ export const projects: Record<string, Project> = {
     },
     pageReady: true,
     landing: {
+      // The pack's lime. Dark ink: white on it is near invisible (~1.2:1).
+      accent: { color: LIME, hover: '#b6e35f', ink: 'var(--color-text-inverse)' },
       // Ported from the 2022 site (Noah-Site, /NachoBox), same as How to Build a
       // PC. The artwork is black line on white, so every SVG carries a baked
       // background rect — the 2022 page's cream for the sheets, the pack colours

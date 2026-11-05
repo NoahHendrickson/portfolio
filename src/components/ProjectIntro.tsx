@@ -141,13 +141,13 @@ export default function ProjectIntro({
  * the theme (onboarding) or sets its own ink gets it for free.
  */
 export function SectionHeading({ children, id, style }: { children: ReactNode; id?: string; style?: React.CSSProperties }) {
-  const isMobile = useIsMobile()
   return (
     <h2
       id={id}
       style={{
         margin: 0,
-        fontSize: isMobile ? '28px' : '32px',
+        // 24 / 22 (Nov 4 2026; it was 32 / 28) — `--text-section-heading`.
+        fontSize: 'var(--text-section-heading)',
         fontWeight: 500,
         lineHeight: 1.15,
         letterSpacing: '-0.015em',

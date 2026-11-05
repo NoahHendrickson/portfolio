@@ -133,7 +133,8 @@ export const SIDEBAR_THREADS: SidebarThread[] = [
     status: 'done',
     model: 'Fable 5.1',
     provider: 'claude',
-    pinned: true,
+    // Pinned in the seed; unpinned here (Nov 4 2026) so the page shows no
+    // Pinned block. The replica still draws one if a thread sets `pinned`.
     pr: { number: 186, state: 'merged', title: 'fix(desktop): sharper, noise-proof local dictation that returns faster' },
   },
   {
