@@ -61,8 +61,9 @@ export default function WeaponList({ style }: { style?: CSSProperties }) {
         // A card like the others (Nov 5 2026): the app's panel has no frame of its own,
         // and on the Slate the bar and rows read as loose pieces. The cards' fill, 1px
         // line and raised shadow, with the rows' foot padded off its edge.
+        // No overflow clip: the sort menu hangs below the bar and must show even when a
+        // search leaves the card short.
         paddingBottom: 16,
-        overflow: 'hidden',
         background: CARD_BG,
         border: `1px solid ${CARD_LINE}`,
         boxShadow: SHADOW_RAISED,

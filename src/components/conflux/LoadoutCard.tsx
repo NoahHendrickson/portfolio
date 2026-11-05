@@ -494,8 +494,11 @@ function ActionsMenu() {
               else if (e.key === 'Home') step('first')
               else if (e.key === 'End') step('last')
               else if (e.key === 'Escape') close()
-              else if (e.key === 'Tab') close(false)
-              else return
+              else if (e.key === 'Tab') {
+                // Back to the trigger, then let Tab move on from it (the menu unmounts).
+                close()
+                return
+              } else return
               e.preventDefault()
             }}
           >
