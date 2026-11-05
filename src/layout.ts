@@ -109,6 +109,16 @@ export const flushTrailingPad = (width: number) =>
 export const PROJECT_MAX = 1160
 /** The measure for a project page's copy — every section's heading and body. */
 export const PROJECT_COPY_MAX = 880
+/**
+ * A project page's section copy — 16px at every width (Nov 4 2026; it ran the
+ * intro's 20 / 18 `body-xl` until then). The intro description keeps `body-xl`.
+ */
+export const PROJECT_BODY = {
+  fontSize: 'var(--text-section-body)',
+  fontWeight: 400,
+  lineHeight: 1.5,
+  letterSpacing: '0',
+} as const
 /** How wide a hero runs past the column. */
 export const PROJECT_WIDE_MAX = 1320
 /** Between a project page's sections, and from a section's copy to its media. */
@@ -150,3 +160,14 @@ export const PROJECT_MOBILE_PAD = '32px'
  * as well as `HomeRail`.
  */
 export const RAIL_SPINE = 48
+
+/**
+ * How the Hi tab's project bento is drawn (Nov 5 2026, on trial). `ruled`
+ * squares the cards off and divides them with 1px rules instead of gaps — the
+ * horizontal ones running the whole width of the dark area, from the rail's
+ * spine to the viewport's right edge, with the four-leaf mark at every point a
+ * rule meets the centre one. `rounded` is the staggered bento with 16px
+ * corners and the hover ring. `App` reads it too: the ruled rules need the
+ * panel's scroller to span the dark area, or it clips them at the panel.
+ */
+export const HOME_BENTO: 'ruled' | 'rounded' = 'ruled'

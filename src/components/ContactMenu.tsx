@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { CaretDown, Copy, LinkedinLogo, GithubLogo } from '@phosphor-icons/react'
 import Button from '../design-system/Button'
+import { space } from '../design-system/tokens'
 
 const EMAIL = 'noahjames017@gmail.com'
 const LINKEDIN_URL = 'https://www.linkedin.com/in/noah-hendrickson-808959192/'
@@ -86,7 +87,8 @@ export default function ContactMenu() {
         onClick={() => setIsOpen(o => !o)}
         aria-haspopup="menu"
         aria-expanded={isOpen}
-        style={{ paddingInline: 16 }}
+        // 12 a side rather than 16, to match the Back pill (Nov 4 2026).
+        style={{ paddingInline: space.md }}
       >
         Contact
       </Button>

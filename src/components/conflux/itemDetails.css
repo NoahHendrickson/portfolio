@@ -1,0 +1,184 @@
+/*
+ * States for the D2 Conflux item details replica (ItemDetails.tsx) that inline styles
+ * can't express: hover, focus-visible and pressed, and the tooltip's entrance. Values
+ * are the app's own (`globals.css`, dark + Slate, plain lines; `ui/button.tsx`,
+ * `manager/item-details.tsx`, `manager/tag-buttons.tsx`), read off a DOM dump of the
+ * running app. Resting fills live here too wherever a hover changes them, so the
+ * hover rule doesn't have to fight an inline style.
+ */
+
+/* Border-box throughout, whatever the host page's reset (the app runs Tailwind's). */
+.cfx-det,
+.cfx-det *,
+.cfx-det *::before,
+.cfx-det *::after,
+.cfx-det-tip,
+.cfx-det-tip * {
+  box-sizing: border-box;
+}
+
+/* Every control starts bare: the app's buttons carry outline-none and no UA chrome. */
+.cfx-det button {
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  outline: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* d2-hover-ring: a 1px light ring standing 2px off the control (pointer only). */
+@media (hover: hover) and (pointer: fine) {
+  .cfx-det .cfx-det-ring:hover:not(:disabled) {
+    outline: 1px solid rgb(252 252 245 / 0.55);
+    outline-offset: 2px;
+  }
+}
+
+/* focus-visible:d2-tile-selected — the white frame and its soft glow. */
+.cfx-det .cfx-det-focus:focus-visible {
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.85),
+    0 0 8px 1px rgb(255 255 255 / 0.25);
+}
+
+/* ── Header lock ──────────────────────────────────────────────────────── */
+
+.cfx-det .cfx-det-lock {
+  display: block;
+  flex-shrink: 0;
+  margin: -4px;
+  padding: 4px;
+  opacity: 0.75;
+}
+.cfx-det .cfx-det-lock:hover {
+  opacity: 1;
+}
+
+/* ── Perk cells ───────────────────────────────────────────────────────── */
+
+/* 40px round cells on a foreground/12 line: the rolled perk filled blue, the one in the
+   socket a faint blue once another is picked, the rest a lifted fill that brightens. */
+.cfx-det .cfx-det-perk {
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgb(252 252 245 / 0.12);
+  border-radius: 9999px;
+  background-color: rgb(252 252 245 / 0.04);
+  transition:
+    background-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    outline-offset 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.cfx-det .cfx-det-perk[data-state='selected'] {
+  background-color: #305f8e;
+}
+.cfx-det .cfx-det-perk[data-state='current'] {
+  background-color: rgb(48 95 142 / 0.35);
+}
+.cfx-det .cfx-det-perk[data-state='option']:hover {
+  background-color: rgb(252 252 245 / 0.1);
+}
+
+/* The perk row scrolls sideways if it must; inset so the scroller doesn't clip the ring. */
+.cfx-det-perks {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(252 252 245 / 0.28) transparent;
+}
+
+/* ── Buttons (ui/button.tsx, size xs) ─────────────────────────────────── */
+
+.cfx-det .cfx-det-btn {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 8px;
+  border: 1px solid rgb(252 252 245 / 0.15);
+  background-color: rgb(255 255 255 / 0.04);
+  background-clip: padding-box;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  white-space: nowrap;
+  user-select: none;
+  transition:
+    background-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    outline-offset 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+/* default: the lifted chip; hover lifts the fill and the line (×1.6). */
+.cfx-det .cfx-det-btn:hover {
+  background-color: rgb(252 252 245 / 0.08);
+  border-color: rgb(252 252 245 / 0.24);
+}
+/* ghost: the 10px hover pill. */
+.cfx-det .cfx-det-btn[data-variant='ghost'] {
+  border-color: transparent;
+  border-radius: 10px;
+  background-color: transparent;
+}
+.cfx-det .cfx-det-btn[data-variant='ghost']:hover {
+  background-color: rgb(252 252 245 / 0.08);
+}
+.cfx-det .cfx-det-btn:focus-visible,
+.cfx-det .cfx-det-btn[data-variant='ghost']:focus-visible {
+  border-color: rgb(255 255 255 / 0.85);
+}
+.cfx-det .cfx-det-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.cfx-det .cfx-det-btn:disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* ── Tag buttons and Compare (tag-buttons.tsx TAG_BUTTON) ─────────────── */
+
+.cfx-det .cfx-det-tag {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  min-width: 32px;
+  border: 1px solid rgb(252 252 245 / 0.12);
+  background-color: rgb(252 252 245 / 0.04);
+}
+.cfx-det .cfx-det-tag[aria-pressed='true'] {
+  border-color: transparent;
+  background-color: #fcfcf5;
+  color: #0b0d10;
+}
+
+/* ── Tooltip (ui/tooltip.tsx: fade + 97% zoom in; none when another just closed) ── */
+
+@keyframes cfx-det-tip-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+.cfx-det-tip-in {
+  animation: cfx-det-tip-in 150ms ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cfx-det-tip-in {
+    animation: none;
+  }
+  .cfx-det .cfx-det-perk,
+  .cfx-det .cfx-det-btn {
+    transition: none;
+  }
+}

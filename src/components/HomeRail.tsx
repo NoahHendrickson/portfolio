@@ -10,6 +10,7 @@ import {
 import { color, radius } from '../design-system/tokens'
 import type { HomeTab } from '../homeTab'
 import { RAIL_SPINE } from '../layout'
+import { FACE_DOTS } from '../pixelFaces'
 
 const ORANGE = color.accent.default
 /** Spine, active pill and Work card — cream, same as the rest of the light surfaces. */
@@ -69,74 +70,6 @@ function PixelGlyph({ dots, width, height }: { dots: [number, number][]; width: 
   )
 }
 
-/**
- * The 16px pixel faces the frame seats where a pill otherwise carries the
- * orange arrow: the Hi tab's (Figma `371:12378`) and the three in section
- * `372:12388`. Each is two eyes over a mouth, drawn on the 2px grid.
- */
-const FACE_DOTS = {
-  /** `371:12378` — a smile that turns up at its right end. */
-  smirk: [
-    [5, 2],
-    [9, 2],
-    [5, 4],
-    [9, 4],
-    [11, 8],
-    [5, 10],
-    [7, 10],
-    [9, 10],
-  ],
-  /** `371:12355` — an open grin. */
-  grin: [
-    [5, 4],
-    [9, 4],
-    [3, 8],
-    [11, 8],
-    [3, 10],
-    [5, 10],
-    [7, 10],
-    [9, 10],
-    [11, 10],
-  ],
-  /** `371:12365` — laughing, eyes up and the mouth wide open. */
-  laugh: [
-    [5, 2],
-    [9, 2],
-    [3, 6],
-    [5, 6],
-    [7, 6],
-    [9, 6],
-    [11, 6],
-    [3, 8],
-    [11, 8],
-    [5, 10],
-    [7, 10],
-    [9, 10],
-  ],
-  /** `371:12346` — a typed `:)`, turned upright to match the other faces. */
-  emoticon: [
-    [5, 4],
-    [9, 4],
-    [12, 8],
-    [10, 10],
-    [8, 10],
-    [6, 10],
-    [4, 10],
-    [2, 8],
-  ],
-  /** `390:28031` — eyes up-right, mouth a flat line. */
-  eyeroll: [
-    [3, 3],
-    [5, 5],
-    [9, 3],
-    [11, 5],
-    [3, 10],
-    [5, 10],
-    [7, 10],
-    [9, 10],
-    [11, 10],
-  ],
-} satisfies Record<string, [number, number][]>
 
 const face = (name: keyof typeof FACE_DOTS) => (
   <span style={{ color: ORANGE, display: 'flex' }}>
@@ -1005,6 +938,10 @@ export default function HomeRail({
       ref={railRef}
       aria-label="Site sections. Up and down arrows to switch."
       style={{
+        // Over the panel, which on Hi spans under the rail so the bento's
+        // rules can reach the spine (`HOME_BENTO`).
+        position: 'relative',
+        zIndex: 1,
         display: 'flex',
         alignItems: 'stretch',
         flexShrink: 0,

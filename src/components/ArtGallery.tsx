@@ -92,7 +92,7 @@ function ArtViewer({ items, selected, onSelect, onClose }: {
       }}
     >
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: space.md }}>
-        <IconButton autoFocus label="Close artwork" icon={<X size={20} />} variant="ghost" onClick={close} />
+        <IconButton autoFocus label="Close artwork" icon={<X size={20} weight="regular" />} variant="ghost" onClick={close} />
       </div>
       <img className="art-gallery-enlarged" src={art.src} alt={art.alt} />
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: space.md, marginTop: space.lg }}>
