@@ -716,8 +716,6 @@ export const projects: Record<string, Project> = {
       'TypeScript',
       'Tailwind v4',
       'shadcn/ui',
-      'TanStack Query',
-      'IndexedDB',
       'Bungie API',
       'Vercel',
     ],
