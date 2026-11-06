@@ -62,7 +62,7 @@ const SLATE = 'linear-gradient(241.87deg, #374358 2.15%, #2f3841 93.13%)'
  * here Nov 5 2026); skills are what the page shows off.
  */
 const FACTS = [
-  { heading: 'Tools', items: ['Figma', 'shadcn/ui'] },
+  { heading: 'Tools', items: ['Figma', 'Cursor', 'shadcn/ui'] },
   {
     heading: 'Skills',
     items: ['Product design', 'Interaction design', 'Design systems', 'Design engineering', 'Information architecture'],

@@ -879,7 +879,7 @@ export const projects: Record<string, Project> = {
         facts: [
           {
             heading: 'Tools',
-            items: ['Figma', 'Claude Code', 'Codex', 'Shaders.com', 'React', 'TypeScript', 'Electron'],
+            items: ['Figma', 'Claude Code', 'Codex', 'Shaders.com'],
           },
           {
             heading: 'Skills',
