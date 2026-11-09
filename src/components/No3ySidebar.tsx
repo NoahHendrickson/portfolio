@@ -14,6 +14,7 @@ import {
 } from 'react'
 import { createPortal } from 'react-dom'
 import autoAnimate, { getTransitionSizes, type AutoAnimationPlugin } from '@formkit/auto-animate'
+import Reveal from './Reveal'
 import {
   SIDEBAR_INITIAL_ACTIVE,
   SIDEBAR_MACHINE,
@@ -1897,7 +1898,7 @@ function OptionMark({ shape, on }: { shape: 'radio' | 'check'; on: boolean }) {
         justifyContent: 'center',
         boxSizing: 'border-box',
         borderRadius: shape === 'radio' ? '50%' : 4,
-        border: `1.5px solid ${on ? PAGE_ACCENT : PAGE_RING}`,
+        border: `1.5px solid ${on ? PAGE_ACCENT : `var(--n3sb-option-ring, ${PAGE_RING})`}`,
         background: on && shape === 'check' ? PAGE_ACCENT : 'transparent',
         color: 'var(--color-on-accent)',
       }}
@@ -1919,6 +1920,7 @@ export default function SidebarPlayground({
   copy,
   radius,
   isMobile,
+  cell,
 }: {
   options: SidebarPlaygroundOption[]
   /** The row's heading and body, which the controls stand under. */
@@ -1926,6 +1928,12 @@ export default function SidebarPlayground({
   /** The project pages' shared mockup corner. */
   radius: string
   isMobile: boolean
+  /**
+   * On the cream lattice: the copy and controls sit in a cream cell of this
+   * `style`, in ink (`.n3sb-on-cream`), the stage the next cell over, `gap`
+   * between them.
+   */
+  cell?: { gap: number; style: React.CSSProperties }
 }) {
   const [settings, setSettings] = useState<SidebarSettings>({ grouping: 'project', compact: false })
   const [stageWidth, setStageWidth] = useState(0)
@@ -2034,24 +2042,45 @@ export default function SidebarPlayground({
     </div>
   )
 
+  // On the lattice they animate in. The stage only rises: its glass lines itself
+  // up with measured rects, which a scale would throw off.
+  const stageIn = cell ? <Reveal delay={100}>{stage}</Reveal> : stage
+  const controlsIn = cell ? <Reveal>{controls}</Reveal> : controls
+
   // Mobile stacks the controls under the stage, so a tap changes what's on screen.
   if (isMobile) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-        {copy}
-        {stage}
-        {controls}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: cell?.gap ?? 24 }}>
+        {cell ? <div style={cell.style}>{copy}</div> : copy}
+        {stageIn}
+        {cell ? <div className="n3sb-on-cream" style={cell.style}>{controlsIn}</div> : controls}
       </div>
     )
   }
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '2fr 3fr', columnGap: 64, alignItems: 'start' }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 48 }}>
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '2fr 3fr',
+        columnGap: cell?.gap ?? 64,
+        alignItems: cell ? 'stretch' : 'start',
+      }}
+    >
+      {/* In a cell it fills the stage's height, so the controls sit on its floor. */}
+      <div
+        className={cell ? 'n3sb-on-cream' : undefined}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 48,
+          ...(cell && { ...cell.style, justifyContent: 'space-between' }),
+        }}
+      >
         {copy}
-        {controls}
+        {controlsIn}
       </div>
-      {stage}
+      {stageIn}
     </div>
   )
 }

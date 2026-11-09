@@ -2,11 +2,13 @@ import { ArrowRight } from '@phosphor-icons/react'
 import AppLink from '../AppLink'
 import { NO3Y_CARD, WORK_FILTERS, type WorkCard } from '../data/workCards'
 import { VARIANTS } from '../design-system/buttonStyles'
+import { CREAM, CREAM_GAP, CREAM_GAP_PHONE, CREAM_RADIUS, CREAM_RADIUS_PHONE } from '../creamStyle'
 import { color, control, radius, space, type } from '../design-system/tokens'
 import { MOBILE_WIDTH_QUERY } from '../hooks/useIsMobile'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import { MARK, MARK_INK } from '../introTimeline'
-import { HOME_BENTO } from '../layout'
+import { HOME_BENTO, RAIL_SPINE } from '../layout'
+import { Fillet } from './Cream'
 
 /**
  * Every project under the Hi tab's copy, as a two-column bento (Nov 4 2026;
@@ -82,7 +84,6 @@ const RING_REACH = 5
  * own colours (`ring` in `TUNES`), the first version.
  */
 const RING_STYLE: 'cream' | 'gradient' = 'cream'
-const CREAM = 'var(--color-bg-cream)'
 const CREAM_GLOW = 'color-mix(in srgb, var(--color-bg-cream) 18%, transparent)'
 
 /**
@@ -232,7 +233,116 @@ const COLUMN_MAX = 700
 const RULE_COLOR = 'var(--color-border-default)'
 
 export default function HomeProjects() {
+  if (HOME_BENTO === 'cream') return <CreamBento />
   return HOME_BENTO === 'ruled' ? <RuledBento /> : <RoundedBento />
+}
+
+/** Half the dark area right of the spine: the grid centres on it. */
+const DARK_HALF = `((100vw - ${RAIL_SPINE}px) / 2)`
+
+/**
+ * The cards suspended in cream (Nov 9 2026): the grid's own fill shows through
+ * the gaps and round the outside, and each card rounds off inside it. Past the
+ * grid, every horizontal gap carries on as a cream rule, from the grid's edge
+ * to the rail's spine on the left and off the screen on the right, flaring
+ * into concave fillets where it leaves the grid and where it meets the spine.
+ * The columns keep their stagger, so each column's rules go out its own side.
+ * The last card in each column takes up any slack (only the shorter column has
+ * any), so the grid closes on one level rule. A phone has no margin past the
+ * grid, which runs edge to edge, so it has no rules or fillets.
+ */
+function CreamBento() {
+  const canHover = useMediaQuery(HOVER_QUERY)
+  const single = useMediaQuery(MOBILE_WIDTH_QUERY)
+  const gap = single ? CREAM_GAP_PHONE : CREAM_GAP
+
+  return (
+    <section
+      aria-label="Projects"
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
+        gap,
+        padding: gap,
+        boxSizing: 'border-box',
+        background: CREAM,
+        // Mobile: the full phone width, out past the page's pad.
+        ...(single ? { width: '100vw', marginLeft: -MOBILE_PAGE_PAD } : {}),
+      }}
+    >
+      {COLUMNS.map((col, c) => {
+        const side = c === 0 ? 'left' : 'right'
+        return (
+          <div key={c} style={{ display: 'flex', flexDirection: 'column', gap, minWidth: 0 }}>
+            {col.map(({ card, tune }, i) => {
+              const last = i === col.length - 1
+              return (
+                <div
+                  key={card.href}
+                  style={{ position: 'relative', display: 'flex', flexDirection: 'column', flex: last ? 1 : undefined }}
+                >
+                  {!single && <CreamRule side={side} place="above" first={i === 0} />}
+                  <ProjectCard card={card} tune={tune} peek={canHover} cream fill={last} />
+                  {!single && last && <CreamRule side={side} place="below" />}
+                </div>
+              )
+            })}
+          </div>
+        )
+      })}
+    </section>
+  )
+}
+
+/**
+ * One gap carried past the grid, seated off its card: `above` is the gap over
+ * it, `below` the grid's closing rule under the last one. The grid's outer edge
+ * only has cream below the top rule and above the closing one, so those two
+ * take a single fillet there; the spine runs the page's height, so its fillets
+ * are always a pair.
+ */
+function CreamRule({
+  side,
+  place,
+  first = false,
+}: {
+  side: 'left' | 'right'
+  place: 'above' | 'below'
+  first?: boolean
+}) {
+  const G = CREAM_GAP
+  // From the card's outer edge out to the spine, or to the screen's right
+  // edge: the grid centres on the dark area, so both are the same distance.
+  const reach = `calc(100% + ${G / 2}px - ${DARK_HALF})`
+  // The fillets on the grid's edge, a gap out from the card (less the 1px each
+  // tucks under the cream beside it, so no seam can open).
+  const outer = { [side === 'left' ? 'right' : 'left']: G - 1 }
+  const arcX = side === 'left' ? '0' : '100%'
+  const above = -CREAM_RADIUS
+  const below = G - 1
+
+  return (
+    <div
+      aria-hidden
+      style={{
+        position: 'absolute',
+        top: place === 'above' ? -G : '100%',
+        height: G,
+        background: CREAM,
+        pointerEvents: 'none',
+        ...(side === 'left' ? { left: reach, right: '100%' } : { right: reach, left: '100%' }),
+      }}
+    >
+      {!first && <Fillet at={`${arcX} 0`} style={{ ...outer, top: above }} />}
+      {place === 'above' && <Fillet at={`${arcX} 100%`} style={{ ...outer, top: below }} />}
+      {side === 'left' && (
+        <>
+          <Fillet at="100% 0" style={{ left: -1, top: above }} />
+          <Fillet at="100% 100%" style={{ left: -1, top: below }} />
+        </>
+      )}
+    </div>
+  )
 }
 
 function RoundedBento() {
@@ -418,19 +528,33 @@ function ProjectCard({
   tune,
   peek,
   ruled = false,
+  cream = false,
+  fill = false,
 }: {
   card: WorkCard
   tune: Tune
   peek: boolean
   /** Square, its ring too, which sits over the rules round it. */
   ruled?: boolean
+  /** Rounded inside the cream grid, its ring and any caption under it in ink. */
+  cream?: boolean
+  /** Grows past its shape to take up the height its column has spare. */
+  fill?: boolean
 }) {
   const art = tune.art ?? rowArt(card)
   // Touch puts the caption under the art — except on a phone, where the cards
   // stand as art alone (Nov 5 2026); the link's label still names them.
   const phone = useMediaQuery(MOBILE_WIDTH_QUERY)
   const captionUnder = !peek && !phone
-  const corner = ruled ? '0px' : CARD_RADIUS
+  const creamCorner = `${phone ? CREAM_RADIUS_PHONE : CREAM_RADIUS}px`
+  const corner = ruled ? '0px' : cream ? creamCorner : CARD_RADIUS
+  const twoUpOnPhone = ruled || cream
+  // Ruled, a square bar across the card's foot rather than a floating rounded
+  // one. In the cream it floats one gap in, on the corner concentric with the
+  // card's. Otherwise 12 against the card's 16: strictly concentric would be
+  // 4, which reads as squared off this close to the card's curve.
+  const captionInset = ruled ? '0px' : cream ? `${CREAM_GAP}px` : space.md
+  const captionCorner = ruled ? '0px' : cream ? `${CREAM_RADIUS - CREAM_GAP}px` : radius.lg
 
   // How wide the art draws against the card, so `sizes` asks for enough pixels:
   // a cover crop draws past the card's sides when the card is narrower than
@@ -440,7 +564,7 @@ function ProjectCard({
       ? Math.max(1, ratio(art.aspect) / ratio(tune.shape)) * (tune.zoom ?? 1)
       : tune.width / 100
   const sizes = art.srcSet
-    ? `${MOBILE_WIDTH_QUERY} ${Math.round((ruled ? 50 : 100) * spread)}vw, ${Math.round(COLUMN_MAX * spread)}px`
+    ? `${MOBILE_WIDTH_QUERY} ${Math.round((twoUpOnPhone ? 50 : 100) * spread)}vw, ${Math.round(COLUMN_MAX * spread)}px`
     : undefined
 
   const artBox: React.CSSProperties =
@@ -474,6 +598,7 @@ function ProjectCard({
       href={card.href}
       className="home-project"
       data-ruled={ruled || undefined}
+      data-cream={cream || undefined}
       aria-label={`${card.title} — ${card.subtitle}`}
       style={{
         display: 'flex',
@@ -482,24 +607,32 @@ function ProjectCard({
         textDecoration: 'none',
         color: 'inherit',
         borderRadius: corner,
+        flex: fill ? 1 : undefined,
         // Touch puts the caption under the art, inside the cell.
-        paddingBottom: ruled && captionUnder ? space.lg : undefined,
+        paddingBottom: twoUpOnPhone && captionUnder ? space.lg : undefined,
       }}
     >
       {/* The art and, behind it, the hover ring (`.home-project-ring` in `index.css`). */}
-      <div style={{ position: 'relative' }}>
-        {RING_STYLE === 'cream' ? (
+      <div
+        style={{
+          position: 'relative',
+          ...(fill ? { flex: 1, display: 'flex', flexDirection: 'column' } : {}),
+        }}
+      >
+        {RING_STYLE === 'cream' || cream ? (
           <span
             aria-hidden
             className="home-project-ring"
             style={{
               position: 'absolute',
               inset: `-${RING_REACH}px`,
-              borderRadius: ruled ? 0 : `calc(${CARD_RADIUS} + ${RING_REACH}px)`,
-              border: `${RING_WIDTH}px solid ${CREAM}`,
+              borderRadius: ruled ? 0 : `calc(${corner} + ${RING_REACH}px)`,
+              // In the cream grid a cream ring would vanish, so it's ink, and
+              // it only shows for keyboard focus (`index.css`).
+              border: `${RING_WIDTH}px solid ${cream ? color.ink.default : CREAM}`,
               // The glow: outward from the ring and into the gap; the card
               // covers it inside.
-              boxShadow: `0 0 10px ${CREAM_GLOW}, inset 0 0 4px ${CREAM_GLOW}`,
+              boxShadow: cream ? undefined : `0 0 10px ${CREAM_GLOW}, inset 0 0 4px ${CREAM_GLOW}`,
               pointerEvents: 'none',
               // Ruled, the ring reaches over the rules and the next cards'
               // edges, so it has to sit above them.
@@ -536,7 +669,12 @@ function ProjectCard({
             overflow: 'hidden',
             borderRadius: corner,
             aspectRatio: tune.shape,
-            background: tune.fit === 'inset' ? tune.bg : color.bg.raised,
+            ...(fill ? { flex: 1, width: '100%' } : {}),
+            backgroundColor: tune.fit === 'inset' ? tune.bg : color.bg.raised,
+            // The dark placeholder behind a cover crop stops 1px short of the
+            // rounded edge: reaching it, it bled through the corner's
+            // antialiasing as a dark fringe against the cream.
+            ...(cream && tune.fit === 'cover' ? { padding: 1, backgroundClip: 'content-box' } : {}),
           }}
         >
           <div style={artBox}>
@@ -573,19 +711,15 @@ function ProjectCard({
               className="home-project-caption"
               style={{
                 position: 'absolute',
-                // Ruled, a square bar across the card's foot rather than a
-                // floating rounded one.
-                left: ruled ? 0 : space.md,
-                right: ruled ? 0 : space.md,
-                bottom: ruled ? 0 : space.md,
+                left: captionInset,
+                right: captionInset,
+                bottom: captionInset,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 gap: space.lg,
                 padding: `${space.md} ${space.md} ${space.md} ${space.lg}`,
-                // 12 against the card's 16: strictly concentric would be 4, which
-                // reads as squared off this close to the card's curve.
-                borderRadius: ruled ? 0 : radius.lg,
+                borderRadius: captionCorner,
                 background: `color-mix(in srgb, ${color.bg.primary} 80%, transparent)`,
                 backdropFilter: 'blur(12px)',
                 WebkitBackdropFilter: 'blur(12px)',
@@ -599,23 +733,35 @@ function ProjectCard({
       </div>
 
       {captionUnder && (
-        <div style={{ paddingInline: ruled ? space.lg : undefined }}>
-          <Caption card={card} />
+        <div style={{ paddingInline: twoUpOnPhone ? space.lg : undefined }}>
+          <Caption card={card} onCream={cream} />
         </div>
       )}
     </AppLink>
   )
 }
 
-function Caption({ card, onScrim = false }: { card: WorkCard; onScrim?: boolean }) {
+function Caption({
+  card,
+  onScrim = false,
+  onCream = false,
+}: {
+  card: WorkCard
+  onScrim?: boolean
+  onCream?: boolean
+}) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-      <span style={{ ...type['body-l'], fontWeight: 500, color: color.text.primary }}>{card.title}</span>
+      <span
+        style={{ ...type['body-l'], fontWeight: 500, color: onCream ? color.ink.default : color.text.primary }}
+      >
+        {card.title}
+      </span>
       <span
         style={{
           ...type['body-m'],
           // Secondary over the scrim, where muted would sink into the art.
-          color: onScrim ? color.text.secondary : color.text.muted,
+          color: onCream ? color.ink.secondary : onScrim ? color.text.secondary : color.text.muted,
         }}
       >
         {card.subtitle}

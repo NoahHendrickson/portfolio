@@ -3,7 +3,6 @@ import { ArrowUpRight } from '@phosphor-icons/react'
 import AppLink from '../AppLink'
 import Header from './Header'
 import { Runs } from './ProjectIntro'
-import { VARIANTS } from '../design-system/buttonStyles'
 import { control, radius, space, type } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
 import { useMediaQuery } from '../hooks/useMediaQuery'
@@ -122,6 +121,7 @@ export function SheetIntro({
   helper,
   description,
   links,
+  padding,
   children,
 }: {
   icon?: string
@@ -129,6 +129,8 @@ export function SheetIntro({
   helper?: string | EyebrowEntry[]
   description: string[]
   links?: { label: string; href: string }[]
+  /** Overrides the sheet's own 48 / 24. */
+  padding?: string
   children?: ReactNode
 }) {
   const isMobile = useIsMobile()
@@ -138,7 +140,7 @@ export function SheetIntro({
     // cells below read as the content.
     <header
       style={{
-        padding: isMobile ? space.xl : INTRO_PAD,
+        padding: padding ?? (isMobile ? space.xl : INTRO_PAD),
         display: 'flex',
         flexDirection: 'column',
         gap: space.xl,
@@ -245,20 +247,29 @@ export function CopyWithFacts({ copy, facts }: { copy: ReactNode; facts: { headi
             ...(isMobile ? { borderTop: RULE } : { borderLeft: RULE }),
           }}
         >
-          {facts.map((fact) => (
-            <div key={fact.heading} style={{ display: 'flex', flexDirection: 'column', gap: space.lg }}>
-              <h2 style={SHEET_HEADING}>{fact.heading}</h2>
-              <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexWrap: 'wrap', gap: space.sm }}>
-                {fact.items.map((item) => (
-                  <li key={item}>
-                    <Chip>{item}</Chip>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          <SheetFacts facts={facts} />
         </div>
       )}
+    </div>
+  )
+}
+
+/** The labelled chip lists (Tools, Skills), 24 apart. */
+export function SheetFacts({ facts }: { facts: { heading: string; items: string[] }[] }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: space.xl }}>
+      {facts.map((fact) => (
+        <div key={fact.heading} style={{ display: 'flex', flexDirection: 'column', gap: space.lg }}>
+          <h2 style={SHEET_HEADING}>{fact.heading}</h2>
+          <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexWrap: 'wrap', gap: space.sm }}>
+            {fact.items.map((item) => (
+              <li key={item}>
+                <Chip>{item}</Chip>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
     </div>
   )
 }
@@ -307,11 +318,11 @@ export function SheetImg({ shot, priority = false }: { shot: ShowcaseImage; prio
 }
 
 /**
- * A static label on the `ghost` button's palette (the Back pill's) at the `xs` control
- * height — a fact, not a control, so it takes no hover state.
+ * A static label, a cream pill with ink text (Nov 9 2026; it was the `ghost` button's
+ * outline until then), at the `xs` control height — a fact, not a control, so it
+ * takes no hover state.
  */
 export function Chip({ children }: { children: ReactNode }) {
-  const colors = VARIANTS.ghost.default
   return (
     <span
       style={{
@@ -321,9 +332,8 @@ export function Chip({ children }: { children: ReactNode }) {
         boxSizing: 'border-box',
         padding: `0 ${space.md}`,
         borderRadius: radius.full,
-        border: `1px solid ${colors.borderColor}`,
-        background: colors.background,
-        color: colors.color,
+        background: 'var(--color-bg-cream)',
+        color: 'var(--color-ink)',
         ...type['label-m'],
         whiteSpace: 'nowrap',
       }}

@@ -377,7 +377,7 @@ export default function App() {
   // spans it — from the spine (under the rail, which stays on top) to the
   // viewport's right edge — and pads the panel back onto its seat. It clips
   // sideways, so anything narrower would cut the rules off at the panel.
-  const spanDark = !isMobile && tab === 'me' && HOME_BENTO === 'ruled'
+  const spanDark = !isMobile && tab === 'me' && HOME_BENTO !== 'rounded'
 
   return (
     <div

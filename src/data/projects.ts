@@ -384,6 +384,14 @@ export type ProjectShowcaseContent = {
 /** A page's accent in place of the site's orange — what `ContactMenu` reads. `ink` is the text on it. */
 export type PageAccent = { color: string; hover: string; ink: string }
 
+export type CreamSide = 'left' | 'right'
+/**
+ * The cream rules a section sets off. `above` leaves from the top of its media
+ * (or the gap over it, if the media above shares its block); `copy` from the
+ * foot of its media, over its copy.
+ */
+export type CreamRules = { above?: CreamSide; copy?: CreamSide }
+
 /**
  * The screenshot-led landing layout rendered by `ProjectStory.tsx` — no stats
  * row, résumé rail, or stack/status grid. A project that sets `landing` gets
@@ -405,6 +413,13 @@ export type Landing = {
     icon: string
     facts: { heading: string; items: string[] }[]
   }
+  /**
+   * Runs the page on the cream lattice (`ProjectCream.tsx`, Nov 9 2026, on
+   * trial) rather than the ruled sheet. It reads the same fields. `rules`,
+   * keyed by a section's heading, picks the few edges that carry on past the
+   * cream and which side each goes; every other one stops at the block.
+   */
+  cream?: { rules: Record<string, CreamRules> }
   /**
    * The helper text under the title (`ProjectIntro`). Several entries render
    * as one row split by hairlines ("Vibe coded / Figma+Cursor+Claude"). An
@@ -873,6 +888,16 @@ export const projects: Record<string, Project> = {
         'Agent orchestration',
       ],
       flow: 'continuous',
+      // Placed by hand: six one-sided rules at uneven heights, so no two line up.
+      cream: {
+        rules: {
+          'What I wanted': { above: 'left', copy: 'right' },
+          'Focus mode': { above: 'left' },
+          'Quickly start a new agent in the same branch or worktree': { copy: 'right' },
+          'Scheduled tasks': { above: 'right' },
+          'Design mode': { copy: 'left' },
+        },
+      },
       // The ruled sheet (Figma 461:14182, Nov 4 2026).
       sheet: {
         icon: '/work/no3y-code/app-icon.svg',

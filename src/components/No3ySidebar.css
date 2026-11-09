@@ -843,21 +843,34 @@ li:has(> .n3sb-card[data-active][data-compact])::before {
 
 /* The page's controls under the copy: whichever ones the sidebar is showing
    read bright, the rest sit dim until they're hovered or chosen. */
+.n3sb-option {
+  --n3sb-option-on: var(--color-text-primary);
+  --n3sb-option-soft: var(--color-text-secondary);
+  --n3sb-option-off: var(--color-text-muted);
+}
+/* On the cream lattice's cream cell. Off is stronger than the --color-ink-muted
+   token, whose 35% is too faint for a caption people need to read. */
+.n3sb-on-cream .n3sb-option {
+  --n3sb-option-on: var(--color-ink);
+  --n3sb-option-soft: var(--color-ink-secondary);
+  --n3sb-option-off: color-mix(in srgb, var(--color-ink) 50%, transparent);
+  --n3sb-option-ring: var(--color-ink-muted);
+}
 .n3sb-option .n3sb-option-label,
 .n3sb-option .n3sb-option-caption {
-  color: var(--color-text-muted);
+  color: var(--n3sb-option-off);
   transition: color 150ms ease-out;
 }
 .n3sb-option[aria-pressed='true'] .n3sb-option-label {
-  color: var(--color-text-primary);
+  color: var(--n3sb-option-on);
 }
 .n3sb-option[aria-pressed='true'] .n3sb-option-caption {
-  color: var(--color-text-secondary);
+  color: var(--n3sb-option-soft);
 }
 @media (hover: hover) {
   .n3sb-option[aria-pressed='false']:hover .n3sb-option-label,
   .n3sb-option[aria-pressed='false']:hover .n3sb-option-caption {
-    color: var(--color-text-secondary);
+    color: var(--n3sb-option-soft);
   }
 }
 

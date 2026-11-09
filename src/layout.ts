@@ -167,7 +167,9 @@ export const RAIL_SPINE = 48
  * horizontal ones running the whole width of the dark area, from the rail's
  * spine to the viewport's right edge, with the four-leaf mark at every point a
  * rule meets the centre one. `rounded` is the staggered bento with 16px
- * corners and the hover ring. `App` reads it too: the ruled rules need the
+ * corners and the hover ring. `cream` (Nov 9 2026, on trial) rounds the cards
+ * inside a cream grid, its gaps running on past it as cream rules with concave
+ * fillets. `App` reads it too: the rules of `ruled` and `cream` need the
  * panel's scroller to span the dark area, or it clips them at the panel.
  */
-export const HOME_BENTO: 'ruled' | 'rounded' = 'ruled'
+export const HOME_BENTO: 'ruled' | 'rounded' | 'cream' = 'cream'

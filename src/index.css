@@ -496,7 +496,40 @@ html:has(.showcase-lightbox[open]) {
     opacity 260ms ease,
     transform 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
-.home-project:hover .home-project-ring,
+/* Scrolling in (`Reveal`, `useReveal`): text lifts, media settles from a slight
+   zoom inside its cell, and the cream rules grow out of the grid. The hidden
+   states live under no-preference, so reduced motion simply shows everything.
+   The settled state is `transform: none` on purpose: a lingering transform would
+   make a containing block of anything fixed inside. */
+@media (prefers-reduced-motion: no-preference) {
+  .reveal-rise,
+  .reveal-settle {
+    transition:
+      opacity 700ms ease-out var(--reveal-delay, 0ms),
+      transform 1000ms cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay, 0ms);
+  }
+  .reveal-rise:not([data-revealed]) {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  .reveal-settle:not([data-revealed]) {
+    opacity: 0;
+    transform: scale(1.06);
+  }
+  .cream-arm,
+  .cream-fillet {
+    transition: transform 1000ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .cream-rule:not([data-revealed]) .cream-arm {
+    transform: scaleX(0);
+  }
+  .cream-rule:not([data-revealed]) .cream-fillet {
+    transform: scale(0);
+  }
+}
+
+/* In the cream grid the mouse gets no ring, only the caption. */
+.home-project:not([data-cream]):hover .home-project-ring,
 .home-project:focus-visible .home-project-ring {
   opacity: 1;
   transform: none;
