@@ -463,9 +463,9 @@ export function CurvedCluster({ tiles, slots }: { tiles: ClusterTile[]; slots: C
     return (
       <section data-theme={cardTheme} style={{ ...vars, display: 'flex', flexDirection: 'column', gap: spacePx.md }}>
         {tiles.map((tile) => (
-          <div key={tile.key} style={{ background: SURFACE, borderRadius: OUTER, padding: MEDIA_INSET }}>
+          <Piece key={tile.key} style={{ background: SURFACE, borderRadius: OUTER, padding: MEDIA_INSET }}>
             {box(tile.media)}
-          </div>
+          </Piece>
         ))}
       </section>
     )
@@ -520,13 +520,13 @@ export function CurvedCluster({ tiles, slots }: { tiles: ClusterTile[]; slots: C
   // A box in a cut: its picture at the cards' scale and centred, so a box narrower than
   // the picture crops its sides.
   const between = (tile: ClusterTile, style: CSSProperties) => (
-    <div style={{ position: 'absolute', boxSizing: 'border-box', background: SURFACE, padding: MEDIA_INSET, borderRadius: SIDE_RADIUS, ...style }}>
+    <Piece style={{ position: 'absolute', boxSizing: 'border-box', background: SURFACE, padding: MEDIA_INSET, borderRadius: SIDE_RADIUS, ...style }}>
       <div style={{ position: 'relative', height: cqw(drawn(tile.height)), borderRadius: SIDE_RADIUS - MEDIA_INSET, overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: 0, left: '50%', width: cqw(drawn(tile.width)), transform: 'translateX(-50%)' }}>
           {tile.media}
         </div>
       </div>
-    </div>
+    </Piece>
   )
   // A box starts the gap off the seam and may run out past its column's edge. The column
   // is centred, so the margin beside it is half of what the window has left over.
@@ -537,38 +537,52 @@ export function CurvedCluster({ tiles, slots }: { tiles: ClusterTile[]; slots: C
     <section data-theme={cardTheme} style={{ ...vars, containerType: 'inline-size' }}>
       <div style={{ position: 'relative', height: cqw(total) }}>
         {/* Top left: the left cut opens under it. */}
-        <div style={{ ...column(false), top: 0, borderRadius: `${OUTER} ${OUTER} 0 ${OUTER}` }}>
+        <Piece style={{ ...column(false), top: 0, borderRadius: `${OUTER} ${OUTER} 0 ${OUTER}` }}>
           {box(at(slots.left[0]).media)}
           {below(false)}
-        </div>
+        </Piece>
 
         {/* On its own in the left cut, out past the column's left edge. */}
         {between(leftBox, { right: cqw([0.5, CLUSTER_GAP]), top: cqw(leftBoxTop), width: boxWidth(leftBox) })}
 
         {/* The first right-hand card closes the left cut; the right cut opens under it. */}
-        <div style={{ ...column(true), top: cqw(rightTop), borderRadius: `0 ${OUTER} ${OUTER} 0` }}>
+        <Piece style={{ ...column(true), top: cqw(rightTop), borderRadius: `0 ${OUTER} ${OUTER} 0` }}>
           {box(card.media)}
           {above(true)}
           {below(true)}
-        </div>
+        </Piece>
 
         {/* The second left-hand card closes the right cut. */}
-        <div style={{ ...column(false), top: cqw(lowerLeftTop), borderRadius: `${OUTER} 0 0 ${OUTER}` }}>
+        <Piece style={{ ...column(false), top: cqw(lowerLeftTop), borderRadius: `${OUTER} 0 0 ${OUTER}` }}>
           {box(at(slots.left[1]).media)}
           {above(false)}
           {below(false)}
-        </div>
+        </Piece>
 
         {/* On its own in the right cut, out past the column. */}
         {between(rightBox, { left: cqw([0.5, CLUSTER_GAP]), top: cqw(rightBoxTop), width: boxWidth(rightBox) })}
 
         {/* The second right-hand card, off the foot of the second left-hand one. */}
-        <div style={{ ...column(true), top: cqw(lowerRightTop), borderRadius: `0 ${OUTER} ${OUTER} ${OUTER}` }}>
+        <Piece style={{ ...column(true), top: cqw(lowerRightTop), borderRadius: `0 ${OUTER} ${OUTER} ${OUTER}` }}>
           {box(at(slots.right[1]).media)}
           {above(true)}
-        </div>
+        </Piece>
       </div>
     </section>
+  )
+}
+
+/**
+ * One card or box of the cluster, springing in on its own as it scrolls into view
+ * (`.reveal`), from 90% like Hi's bento cards: the cluster runs taller than a laptop
+ * window, so springing it in whole moved only the edge that was on screen.
+ */
+function Piece({ style, children }: { style: CSSProperties; children: ReactNode }) {
+  const [ref, shown] = useInView<HTMLDivElement>()
+  return (
+    <div ref={ref} className="reveal" data-shown={shown || undefined} style={{ ...style, '--reveal-scale': 0.9 } as CSSProperties}>
+      {children}
+    </div>
   )
 }
 

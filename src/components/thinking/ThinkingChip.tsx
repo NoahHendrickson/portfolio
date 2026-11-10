@@ -22,6 +22,7 @@ export default function ThinkingChip({
   iconOnly = false,
   shimmer = false,
   title,
+  density = 1,
 }: {
   chip: Chip
   label?: string
@@ -35,6 +36,8 @@ export default function ThinkingChip({
   shimmer?: boolean
   /** A tooltip, for an icon shown without its label. */
   title?: string
+  /** The CSS `zoom` it is drawn under, so the canvas stays sharp. */
+  density?: number
 }) {
   const canvas = useRef<HTMLCanvasElement>(null)
   const live = useRef({ chip, shape, color, speed })
@@ -53,8 +56,9 @@ export default function ThinkingChip({
       () => live.current.chip,
       () => live.current,
       size,
+      density,
     )
-  }, [size])
+  }, [size, density])
 
   const icon = <canvas ref={canvas} aria-hidden style={{ width: size, height: size }} />
   if (iconOnly) {

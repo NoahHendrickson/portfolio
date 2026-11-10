@@ -1,6 +1,6 @@
 import { ArrowRight } from '@phosphor-icons/react'
 import AppLink from '../AppLink'
-import ChipField from './thinking/ChipField'
+import ChipShowcase from './thinking/ChipShowcase'
 import { NO3Y_CARD, WORK_FILTERS, type WorkCard } from '../data/workCards'
 import { VARIANTS } from '../design-system/buttonStyles'
 import { color, control, radius, space, type } from '../design-system/tokens'
@@ -186,7 +186,7 @@ const TUNES: Record<string, Tune> = {
 
 /** Cards drawn live in place of their art: Thinking States' chips run on the card itself. */
 const LIVE_ART: Record<string, () => React.ReactNode> = {
-  '/work/thinking-states': () => <ChipField />,
+  '/work/thinking-states': () => <ChipShowcase />,
 }
 
 const DEFAULT_TUNE: Tune = { shape: '5 / 4', fit: 'cover' }

@@ -17,7 +17,7 @@ const PILL_PAD = space.lg
 /**
  * The row of contact pills under the Hi tab's hero copy: the email, LinkedIn and
  * GitHub. The email pill reads "Email me!" with a copy icon after it; a click
- * copies the address and swaps the icon for a check, the way
+ * copies the address and reads "Copied" with a check for a moment, the way
  * the Contact tab and the name popover do, rather than opening a mail client
  * the visitor may not have set up. The two links open a tab.
  */
@@ -37,13 +37,14 @@ export default function ContactButtons() {
         size="md"
         style={{ padding: `0 ${PILL_PAD}` }}
         aria-label={copied ? 'Email copied' : `Copy email, ${EMAIL}`}
-        trailingIcon={copied ? <Check size={20} color={color.accent.default} /> : <Copy size={20} />}
+        // The check in the label's own colour at regular weight: duotone's tint read as a blot behind it.
+        trailingIcon={copied ? <Check size={20} weight="regular" /> : <Copy size={20} />}
         onClick={() => {
           navigator.clipboard?.writeText(EMAIL)
           setCopied(true)
         }}
       >
-        Email me!
+        {copied ? 'Copied' : 'Email me!'}
       </Button>
       <LinkPill href={LINKEDIN_URL} icon={<LinkedinLogo size={20} />}>
         LinkedIn

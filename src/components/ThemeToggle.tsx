@@ -75,7 +75,7 @@ function Glyph({ rows, active }: { rows: string[]; active: boolean }) {
  * in the page's colour over the current mode, so the sun always sits on light
  * and the moon on dark, and the fill meets the cut-out in concave corners. (With
  * the cut-out over the mode that's off, the current mode read as switched off.)
- * The cut-out slides across on a change (`.theme-toggle-*` in `index.css`). A
+ * The sun sits over the moon, and the cut-out slides up or down on a change (`.theme-toggle-*` in `index.css`). A
  * click anywhere flips it.
  */
 export default function ThemeToggle() {
@@ -96,6 +96,8 @@ export default function ThemeToggle() {
         // Over the page's content, under the intro splash.
         zIndex: 900,
         display: 'flex',
+        // Stacked: the sun over the moon.
+        flexDirection: 'column',
         padding: FRAME,
         border: 'none',
         // The rail tabs' corner and fill.
@@ -116,7 +118,7 @@ export default function ThemeToggle() {
           // Concentric with the frame's 8.
           borderRadius: 'var(--radius-sm)',
           background: color.bg.primary,
-          transform: `translateX(${theme === 'dark' ? SEGMENT_W : 0}px)`,
+          transform: `translateY(${theme === 'dark' ? SEGMENT_H : 0}px)`,
         }}
       />
       <Glyph rows={SUN} active={theme === 'light'} />

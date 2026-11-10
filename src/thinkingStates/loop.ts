@@ -120,15 +120,18 @@ export const invalidate = () => schedule()
 
 /**
  * Animates `chip` on `canvas` at `size` CSS px. Options are read every frame,
- * so callers pass getters over live state. Returns the unmount.
+ * so callers pass getters over live state. `density` is any CSS `zoom` the canvas
+ * is drawn under, so a zoomed chip still gets a backing pixel per device pixel.
+ * Returns the unmount.
  */
 export function mountChip(
   canvas: HTMLCanvasElement,
   chip: () => Chip,
   options: () => ChipOptions,
   size: number,
+  density = 1,
 ): () => void {
-  const px = Math.round(size * Math.min(3, window.devicePixelRatio || 1))
+  const px = Math.round(size * Math.min(3, window.devicePixelRatio || 1) * density)
   canvas.width = canvas.height = px
   const m: Mount = {
     canvas,

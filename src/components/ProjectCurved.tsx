@@ -150,6 +150,8 @@ function OwnSection({ section }: { section: StorySection }) {
   return <CurvedCard media={media} copy={<CurvedCopy heading={section.heading} body={section.body} />} />
 }
 
+const isCluster = (group: Group) => !group.section && !group.copy && group.media[0]?.kind === 'grid' && !!group.media[0].cluster
+
 function Block({ group }: { group: Group }) {
   const isMobile = useIsMobile()
   if (group.section) return <OwnSection section={group.section} />
@@ -229,8 +231,9 @@ export default function ProjectCurved({ project }: { project: Project }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: sheetGap(isMobile) }}>
           {opener}
           {groupSections(landing.sections).map((group, i) =>
-            // With no opener the first block is the hero, which is there from the start.
-            !opener && i === 0 ? (
+            // With no opener the first block is the hero, which is there from the start. A
+            // cluster springs its cards in one by one itself.
+            (!opener && i === 0) || isCluster(group) ? (
               <Block key={i} group={group} />
             ) : (
               <Reveal key={i}>

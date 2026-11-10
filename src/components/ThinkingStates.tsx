@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
-import { CurvedCard, CurvedCopy, CurvedFacts, CurvedPanel } from './Curved'
+import { CurvedCard, CurvedCopy, CurvedFacts, CurvedMedia } from './Curved'
 import Reveal from './Reveal'
-import { SheetIntro, SheetLinks, SheetPage } from './Sheet'
+import { SheetIntro, SheetPage } from './Sheet'
 import ChipField from './thinking/ChipField'
 import ThinkingChip from './thinking/ThinkingChip'
 import { THINKING_STATES_REPO } from '../data/workCards'
@@ -16,8 +16,8 @@ import { CURVED_BODY_SIZE, CURVED_INNER, SHEET_BODY, TEXT_SOFT, curvedInset, she
   (`Curved.tsx`, Nov 9 2026; it was on the ruled sheet until then): the intro, a live
   field of chips as the hero with "What's in here" on its tab and Tools / Skills as a
   card of its own, then a playground (one chip on a stage beside the project's own
-  controls, over every chip by family, each a button that picks it) with "Play with
-  them" on its tab, then the remix note. The chips stand on dark stages, the project's
+  controls, over every chip by family, each a button that picks it) on a plain card.
+  The chips stand on dark stages, the project's
   own ground, in either theme; the controls sit on the card. Every chip is the
   project's own draw function, copied verbatim into `src/thinkingStates/`, running on
   its shared loop, so nothing here is a recording.
@@ -61,7 +61,7 @@ export default function ThinkingStates() {
           title="Thinking States"
           helper={['Side project', '2026']}
           description={[
-            'I was messing around with Claude Opus to see what kind of little loading animations we could make together. I wanted some fun ones to use in my own projects, and it kind of snowballed from there.',
+            'This was an experiment in motion design: some loading and thinking animations for the AI stuff I was working on. I made it all by prompting Claude and never opened a design tool, to see what I could get with minimal hands-on work.',
           ]}
           links={[{ label: 'Repo', href: THINKING_STATES_REPO }]}
           inset={0}
@@ -80,8 +80,7 @@ export default function ThinkingStates() {
               <CurvedCopy
                 heading="What's in here"
                 body={[
-                  "Each one is a tiny animation next to a label, like Thinking, Searching or Compiling, the kind of thing you see while an AI tool is working. I'd describe an idea to Opus, see what came back, and keep the ones I liked. I've cut a bunch since.",
-                  "They're all drawn on a little canvas, so I can copy any of them into a project as HTML, React or a web component.",
+                  'I wanted a set of variations I could tweak, changing the color, size and shape, and copy straight into other projects.',
                 ]}
               />
             }
@@ -90,19 +89,6 @@ export default function ThinkingStates() {
 
           <Reveal>
             <Playground isMobile={isMobile} />
-          </Reveal>
-
-          <Reveal>
-            <CurvedPanel style={{ padding: curvedInset(isMobile), display: 'flex', flexDirection: 'column', gap: space.xl }}>
-              <CurvedCopy
-                heading="Remixing them"
-                body={[
-                  "The site also has a remix button that asks Claude Code or Codex for new takes on a chip, using your own sign-in. It all runs on your computer, so there's nothing on my end.",
-                ]}
-              >
-                <SheetLinks links={[{ label: 'Repo', href: THINKING_STATES_REPO }]} />
-              </CurvedCopy>
-            </CurvedPanel>
           </Reveal>
         </div>
       </SheetPage>
@@ -249,17 +235,8 @@ function Playground({ isMobile }: { isMobile: boolean }) {
     </div>
   )
 
-  return (
-    <CurvedCard
-      media={media}
-      copy={
-        <CurvedCopy
-          heading="Play with them"
-          body={[`All ${CHIPS.length} of them are here and running. Pick one and change the label, colour, shape, size or speed.`]}
-        />
-      }
-    />
-  )
+  // A plain card, no tab: the controls speak for themselves.
+  return <CurvedMedia>{media}</CurvedMedia>
 }
 
 /** A control under its name: a `<label>` for an input, a group's name otherwise. */
