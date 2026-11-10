@@ -292,6 +292,27 @@ html:has(.showcase-lightbox[open]) {
   }
 }
 
+/* no3y Code's component cluster (`CurvedCluster`): a join between two cards closes
+   only once both have sprung in, its curves fading in and the corners either side
+   squaring off as the second card settles, so a card that lands first is a whole
+   rounded card rather than one with curves hanging off it. */
+@media (prefers-reduced-motion: no-preference) {
+  .cluster-join {
+    transition: opacity 200ms ease 450ms;
+  }
+  .reveal.cluster-card {
+    transition:
+      opacity 240ms ease,
+      transform 800ms cubic-bezier(0.3, 1.08, 0.5, 1),
+      border-radius 200ms ease 450ms;
+  }
+  @supports (transition-timing-function: linear(0, 1)) {
+    .reveal.cluster-card {
+      transition-timing-function: ease, var(--spring), ease;
+    }
+  }
+}
+
 /* A curved page's copy tab (`ProjectCurved`): it starts as a stub under the
    media and grows to the right on the same spring. The
    surface's edge moves rather than scaling, so its corner and the concave curve

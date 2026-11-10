@@ -331,10 +331,11 @@ const STEP_OVERLAP = 0.3
  * each card's edge on the tangent. Laid 1 under at its own size, the arc crossed
  * the edges 7px early and the curve arrived at a visible angle.
  */
-function StepCurve({ at, style }: { at: string; style: CSSProperties }) {
+function StepCurve({ at, style, className }: { at: string; style: CSSProperties; className?: string }) {
   return (
     <span
       aria-hidden
+      className={className}
       style={{
         position: 'absolute',
         width: CURVE + 1,
@@ -458,6 +459,17 @@ export function CurvedCluster({ tiles, slots }: { tiles: ClusterTile[]; slots: C
   const isMobile = useIsMobile()
   const { theme: cardTheme, vars } = useCardTheme()
   const box = (media: ReactNode) => <div style={{ borderRadius: CURVED_INNER, overflow: 'hidden' }}>{media}</div>
+  // Which of the four stepping cards (top left, first right, second left, second right)
+  // have sprung in. A join's curves and squared corners only show once both cards
+  // either side of it have, so a card that lands first is a plain rounded card rather
+  // than one with its curves hanging off into nothing.
+  const [landed, setLanded] = useState([false, false, false, false])
+  const land = useCallback((index: number) => setLanded((was) => (was[index] ? was : was.map((v, i) => v || i === index))), [])
+  const joined = (a: number, b: number) => landed[a] && landed[b]
+  const j01 = joined(0, 1)
+  const j12 = joined(1, 2)
+  const j23 = joined(2, 3)
+  const corner = (on: boolean) => (on ? '0px' : OUTER)
 
   if (isMobile) {
     return (
@@ -511,11 +523,19 @@ export function CurvedCluster({ tiles, slots }: { tiles: ClusterTile[]; slots: C
   const past = 'calc(100% - 1px)'
   // The concave ends of a join, on the card they sit above or below. A left card's are on
   // its right, at the seam, and a right card's on its left.
-  const above = (right: boolean) => (
-    <StepCurve at={right ? '100% 0' : '0 0'} style={{ bottom: past, ...(right ? { left: 0 } : { right: 0 }) }} />
+  const above = (right: boolean, on: boolean) => (
+    <StepCurve
+      at={right ? '100% 0' : '0 0'}
+      className="cluster-join"
+      style={{ bottom: past, opacity: on ? 1 : 0, ...(right ? { left: 0 } : { right: 0 }) }}
+    />
   )
-  const below = (right: boolean) => (
-    <StepCurve at={right ? '100% 100%' : '0 100%'} style={{ top: past, ...(right ? { left: 0 } : { right: 0 }) }} />
+  const below = (right: boolean, on: boolean) => (
+    <StepCurve
+      at={right ? '100% 100%' : '0 100%'}
+      className="cluster-join"
+      style={{ top: past, opacity: on ? 1 : 0, ...(right ? { left: 0 } : { right: 0 }) }}
+    />
   )
   // A box in a cut: its picture at the cards' scale and centred, so a box narrower than
   // the picture crops its sides.
@@ -537,35 +557,35 @@ export function CurvedCluster({ tiles, slots }: { tiles: ClusterTile[]; slots: C
     <section data-theme={cardTheme} style={{ ...vars, containerType: 'inline-size' }}>
       <div style={{ position: 'relative', height: cqw(total) }}>
         {/* Top left: the left cut opens under it. */}
-        <Piece style={{ ...column(false), top: 0, borderRadius: `${OUTER} ${OUTER} 0 ${OUTER}` }}>
+        <Piece onShow={() => land(0)} style={{ ...column(false), top: 0, borderRadius: `${OUTER} ${OUTER} ${corner(j01)} ${OUTER}` }}>
           {box(at(slots.left[0]).media)}
-          {below(false)}
+          {below(false, j01)}
         </Piece>
 
         {/* On its own in the left cut, out past the column's left edge. */}
         {between(leftBox, { right: cqw([0.5, CLUSTER_GAP]), top: cqw(leftBoxTop), width: boxWidth(leftBox) })}
 
         {/* The first right-hand card closes the left cut; the right cut opens under it. */}
-        <Piece style={{ ...column(true), top: cqw(rightTop), borderRadius: `0 ${OUTER} ${OUTER} 0` }}>
+        <Piece onShow={() => land(1)} style={{ ...column(true), top: cqw(rightTop), borderRadius: `${corner(j01)} ${OUTER} ${OUTER} ${corner(j12)}` }}>
           {box(card.media)}
-          {above(true)}
-          {below(true)}
+          {above(true, j01)}
+          {below(true, j12)}
         </Piece>
 
         {/* The second left-hand card closes the right cut. */}
-        <Piece style={{ ...column(false), top: cqw(lowerLeftTop), borderRadius: `${OUTER} 0 0 ${OUTER}` }}>
+        <Piece onShow={() => land(2)} style={{ ...column(false), top: cqw(lowerLeftTop), borderRadius: `${OUTER} ${corner(j12)} ${corner(j23)} ${OUTER}` }}>
           {box(at(slots.left[1]).media)}
-          {above(false)}
-          {below(false)}
+          {above(false, j12)}
+          {below(false, j23)}
         </Piece>
 
         {/* On its own in the right cut, out past the column. */}
         {between(rightBox, { left: cqw([0.5, CLUSTER_GAP]), top: cqw(rightBoxTop), width: boxWidth(rightBox) })}
 
         {/* The second right-hand card, off the foot of the second left-hand one. */}
-        <Piece style={{ ...column(true), top: cqw(lowerRightTop), borderRadius: `0 ${OUTER} ${OUTER} ${OUTER}` }}>
+        <Piece onShow={() => land(3)} style={{ ...column(true), top: cqw(lowerRightTop), borderRadius: `${corner(j23)} ${OUTER} ${OUTER} ${OUTER}` }}>
           {box(at(slots.right[1]).media)}
-          {above(true)}
+          {above(true, j23)}
         </Piece>
       </div>
     </section>
@@ -577,10 +597,18 @@ export function CurvedCluster({ tiles, slots }: { tiles: ClusterTile[]; slots: C
  * (`.reveal`), from 90% like Hi's bento cards: the cluster runs taller than a laptop
  * window, so springing it in whole moved only the edge that was on screen.
  */
-function Piece({ style, children }: { style: CSSProperties; children: ReactNode }) {
+function Piece({ style, onShow, children }: { style: CSSProperties; onShow?: () => void; children: ReactNode }) {
   const [ref, shown] = useInView<HTMLDivElement>()
+  useEffect(() => {
+    if (shown) onShow?.()
+  }, [shown, onShow])
   return (
-    <div ref={ref} className="reveal" data-shown={shown || undefined} style={{ ...style, '--reveal-scale': 0.9 } as CSSProperties}>
+    <div
+      ref={ref}
+      className="reveal cluster-card"
+      data-shown={shown || undefined}
+      style={{ ...style, '--reveal-scale': 0.9 } as CSSProperties}
+    >
       {children}
     </div>
   )
