@@ -15,7 +15,7 @@ const GITHUB_URL = 'https://github.com/NoahHendrickson'
 const PILL_PAD = space.lg
 
 /**
- * The row of contact pills under the Hi tab's tl;dr: the email, LinkedIn and
+ * The row of contact pills under the Hi tab's hero copy: the email, LinkedIn and
  * GitHub. The email pill reads "Email me!" with a copy icon after it; a click
  * copies the address and swaps the icon for a check, the way
  * the Contact tab and the name popover do, rather than opening a mail client

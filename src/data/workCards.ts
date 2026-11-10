@@ -1,5 +1,8 @@
 import { NO3Y_CODE_DOWNLOAD, STAT_BUILDER_SITE, projects } from './projects'
 
+/** Thinking States' repo (private until the user makes it public). */
+export const THINKING_STATES_REPO = 'https://github.com/NoahHendrickson/thinking-states'
+
 /**
  * The Work tab's cards and the sections that group them. Declared here rather
  * than in `WorkList` because the rail's Work menu (`HomeRail`) reads the same
@@ -163,6 +166,22 @@ const apply: WorkCard = {
   extra: { label: '@ Invisible Technologies' },
 }
 
+/**
+ * Thinking States: no export behind it. The home bento draws the card live
+ * (`ChipField`, chips animating on the project's dark page), so `art`
+ * is only the project's mark, for anything that still reads a picture.
+ */
+const thinkingStates: WorkCard = {
+  href: '/work/thinking-states',
+  title: 'Thinking States',
+  subtitle: 'Fun loading animations, made with Opus',
+  art: {
+    src: '/work/thinking-states/icon.svg',
+    alt: 'Thinking States — animated loader chips on a dark field',
+  },
+  extra: { label: 'View the repo', href: THINKING_STATES_REPO },
+}
+
 const nachoBox: WorkCard = {
   href: '/work/nacho-box',
   title: projects['nacho-box'].title,
@@ -207,7 +226,7 @@ export type WorkFilter = 'all' | 'fun' | 'career' | 'graphic'
 
 const SECTIONS: { id: Exclude<WorkFilter, 'all'>; label: string; cards: WorkCard[] }[] = [
   { id: 'career', label: 'Case studies', cards: [onboarding, synapse, apply] },
-  { id: 'fun', label: 'Personal projects', cards: [crisp, no3y, statBuilder] },
+  { id: 'fun', label: 'Personal projects', cards: [crisp, no3y, statBuilder, thinkingStates] },
   { id: 'graphic', label: 'Graphic design', cards: [pixelArt, nachoBox, howToPc] },
 ]
 

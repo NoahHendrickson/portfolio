@@ -32,6 +32,8 @@ export const color = {
   accent: {
     default: 'var(--color-orange)',
     hover: 'var(--color-orange-hover)',
+    /** The accent as text, darkened a step in light mode where the plain accent is too light to read. */
+    text: 'var(--color-orange-text)',
     onAccent: 'var(--color-on-accent)',
   },
 } as const

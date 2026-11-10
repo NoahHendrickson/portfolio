@@ -1,9 +1,8 @@
 /*
  * The Chrome window each D2 Conflux capture sits in, so the shots read as the
- * live site in a browser rather than floating mocks (Nov 4 2026). Since Nov 5
- * 2026 it stands as a rounded window padded on the sheet's cell fill — 32 / 16
- * round it, like Crisp's stills — rather than running square to the column's
- * rules, with Chrome's curved tab feet, a bookmark star and a profile dot.
+ * live site in a browser rather than floating mocks (Nov 4 2026), with Chrome's
+ * curved tab feet, a bookmark star and a profile dot. It fills its curved card's
+ * media box, which rounds it (Nov 9 2026).
  * Chrome's dark frame: a tab strip on the darkest grey, the open tab and
  * toolbar one step up, the address bar sunk back down.
  */
@@ -25,8 +24,6 @@
 
   display: block;
   margin: 0;
-  padding: 32px;
-  background: color-mix(in srgb, var(--color-text-primary) 4%, transparent);
 }
 
 .cfx-browser *,
@@ -35,12 +32,7 @@
 
 .cfx-browser-window {
   overflow: hidden;
-  border-radius: calc(12 * var(--u));
   background: var(--frame);
-  /* A hairline round the window, and a soft drop to lift it off the fill. */
-  box-shadow:
-    0 0 0 1px rgb(255 255 255 / 0.1),
-    0 16px 40px -12px rgb(0 0 0 / 0.55);
 }
 
 .cfx-browser-window > img,
@@ -184,10 +176,3 @@
   background: #f6de62;
 }
 
-/* The row below's column rule, carried up through the bottom padding to the window. */
-.cfx-browser-rule { height: 32px; }
-
-/* The site's mobile breakpoint (`MOBILE_QUERY` in `useIsMobile`): a tighter pad. */
-@media (max-width: 900px), (max-height: 600px) and (pointer: coarse) {
-  .cfx-browser { padding: 16px; }
-}

@@ -1,22 +1,23 @@
 import { useState, type FormEvent } from 'react'
+import { CurvedPanel } from './Curved'
 import { SheetPage } from './Sheet'
 import Button from '../design-system/Button'
 import { color, radius, space, type } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
-import { FILL, INTRO_PAD, RULE, SHEET_HEADING, TEXT, TEXT_SOFT } from '../sheetStyle'
+import { RULE, SHEET_HEADING, TEXT, TEXT_SOFT } from '../sheetStyle'
 import { unlock } from '../workGate'
 
-const ORANGE = color.accent.default
+// Text, so the readable accent: the plain one is too light on cream.
+const ORANGE = color.accent.text
 
 const WORK_PASSWORD = 'noah2026'
 
 const EMAIL = 'noahjames017@gmail.com'
 
 /**
- * Password form shown in place of a locked Invisible case study, on the ruled
- * sheet the studies run (`Sheet.tsx`): the header, then the form in a cell on
- * the intro's padding, so Back and Contact sit where they will once it unlocks.
- * The form is centred in its cell, and asks for an email rather than a
+ * Password form shown in place of a locked Invisible case study: the page's
+ * header, so Back and Contact sit where they will once it unlocks, then the form
+ * centred on a rounded card (`Curved.tsx`). It asks for an email rather than a
  * LinkedIn message (Nov 5 2026).
  */
 export default function WorkGate({
@@ -24,7 +25,7 @@ export default function WorkGate({
 }: {
   onUnlock: () => void
   /**
-   * Ignored: the sheet places Back and Contact itself. Kept so callers that
+   * Ignored: the page places Back and Contact itself. Kept so callers that
    * still pass the inset their page used compile unchanged.
    */
   barInset?: string
@@ -45,15 +46,17 @@ export default function WorkGate({
 
   return (
     <SheetPage>
-      <div
-        style={{
-          background: FILL,
-          padding: isMobile ? `${space['4xl']} ${space.xl}` : `${space['5xl']} ${INTRO_PAD}`,
-          borderBottom: RULE,
-          display: 'flex',
-          justifyContent: 'center',
-        }}
-      >
+      <div style={{ display: 'flex', justifyContent: 'center', paddingTop: isMobile ? space.xl : space['3xl'] }}>
+        <CurvedPanel
+          style={{
+            width: '100%',
+            maxWidth: '520px',
+            boxSizing: 'border-box',
+            padding: isMobile ? `${space['3xl']} ${space.xl}` : space['4xl'],
+            display: 'flex',
+            justifyContent: 'center',
+          }}
+        >
         <form
           onSubmit={handleSubmit}
           style={{
@@ -103,6 +106,7 @@ export default function WorkGate({
             Unlock
           </Button>
         </form>
+        </CurvedPanel>
       </div>
     </SheetPage>
   )

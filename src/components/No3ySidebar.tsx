@@ -1964,6 +1964,7 @@ export default function SidebarPlayground({
   const stage = (
     <div
       ref={stageRef}
+      data-theme="dark"
       style={{ position: 'relative', height: stageHeight, borderRadius: radius, overflow: 'hidden', isolation: 'isolate' }}
     >
       <div

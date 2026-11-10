@@ -3,6 +3,8 @@ import '@noey-17/yearn-ui/style.css'
 import Hero from './components/Hero'
 import HomeRail from './components/HomeRail'
 import IntroSplash from './components/IntroSplash'
+import LogoWatermark from './components/LogoWatermark'
+import ScrollHint from './components/ScrollHint'
 import { introConfigFromUrl, markIntroSeen, shouldPlayIntro } from './intro'
 import { readHomeTab, writeHomeTab, type HomeTab } from './homeTab'
 import HomeProjects from './components/HomeProjects'
@@ -24,11 +26,12 @@ import InvisibleOnboarding from './components/InvisibleOnboarding'
 import InvisibleSynapse from './components/InvisibleSynapse'
 import ProjectLanding from './components/ProjectLanding'
 import ProjectStory from './components/ProjectStory'
+import ThinkingStates from './components/ThinkingStates'
 import { projects } from './data/projects'
 import { useIsMobile } from './hooks/useIsMobile'
 import { useMediaQuery } from './hooks/useMediaQuery'
 import { getRoute, navigate, subscribeToRoute } from './navigation'
-import { HOME_BENTO, pageGutter, RAIL_SPINE, TABLET_MAX } from './layout'
+import { pageGutter, RAIL_SPINE, TABLET_MAX } from './layout'
 
 const BG = 'var(--color-bg-primary)'
 
@@ -36,6 +39,12 @@ const BG = 'var(--color-bg-primary)'
  * The dark fill over the content column. Stops short of its own right edge so
  * the leaf tips peek past the column as a jagged edge rather than a square cut.
  */
+/** The Hi tab's corner logo (`LogoWatermark`). */
+const WATERMARK_WIDTH = '72vw'
+const WATERMARK_RIGHT = 32
+const WATERMARK_OPACITY = 0.08
+const SCROLL_HINT_BOTTOM = 32
+
 const COLUMN_FILL = `linear-gradient(to right, ${BG} 0%, ${BG} calc(100% - ${LEAF_TIP_INSET}px), transparent calc(100% - ${LEAF_TIP_INSET}px))`
 
 /**
@@ -279,6 +288,11 @@ export default function App() {
     return <D2Conflux />
   }
 
+  // Hand-built around its live chips; it has no `projects` entry.
+  if (route === '/work/thinking-states') {
+    return <ThinkingStates />
+  }
+
   // Routes are pathnames like '/work/no3y-code'.
   const project = route.startsWith('/work/')
     ? projects[route.slice('/work/'.length)]
@@ -298,46 +312,6 @@ export default function App() {
 
   // Everything else is the home page: the vertical tab rail beside whichever
   // panel the hovered tab shows (Figma section `321:38613`).
-  // Every tab's copy holds the 700 measure, centred in the wider panel.
-  const copy = (node: React.ReactNode) =>
-    isMobile ? node : <div style={{ width: '100%', maxWidth: COPY_MAX, marginInline: 'auto' }}>{node}</div>
-
-  const panel =
-    tab === 'design' ? (
-      copy(<DesigningNow />)
-    ) : tab === 'been' ? (
-      copy(<PreviousRoles />)
-    ) : tab === 'contact' ? (
-      copy(<ContactPanel />)
-    ) : tab === 'lols' ? (
-      copy(<LlmQuotes />)
-    ) : (
-      // The Me tab: the TLDR note over the hero copy, on the file's 32, then
-      // every project in one column under it, on the panel's full width.
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-        {copy(
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-            <p
-              style={{
-                margin: 0,
-                fontSize: '28px',
-                fontWeight: 500,
-                lineHeight: 1.1,
-                color: 'var(--color-text-primary)',
-              }}
-            >
-              Here&rsquo;s the tl;dr
-            </p>
-            <Hero />
-            <ContactButtons />
-          </div>,
-        )}
-        <div style={{ marginTop: '48px' }}>
-          <HomeProjects />
-        </div>
-      </div>
-    )
-
   // One shared left edge with the project pages (see `layout.ts`). The right
   // side stays on the plain gutter — the shared inset is centred against the
   // viewport, and mirroring it inside a column narrower than the viewport
@@ -373,11 +347,60 @@ export default function App() {
   const copyWidth = `max(0px, min(${COPY_MAX}px, ${leafLimit} - ${copyLeft}))`
   const panelLeft = tab === 'me' ? centredLeft : copyLeft
   const boxWidth = tab === 'me' ? panelWidth : copyWidth
-  // The ruled bento's rules run the whole dark area, so on Hi the scroller
-  // spans it — from the spine (under the rail, which stays on top) to the
-  // viewport's right edge — and pads the panel back onto its seat. It clips
-  // sideways, so anything narrower would cut the rules off at the panel.
-  const spanDark = !isMobile && tab === 'me' && HOME_BENTO === 'ruled'
+  // Hi's corner logo (and the ruled bento's rules) reach past the panel, so on
+  // Hi the scroller spans the whole dark area — from the spine (under the rail,
+  // which stays on top) to the viewport's right edge — and pads the panel back
+  // onto its seat. It clips sideways, so anything narrower would cut them off.
+  const spanDark = !isMobile && tab === 'me'
+
+  // Every tab's copy holds the 700 measure, centred in the wider panel.
+  const copy = (node: React.ReactNode) =>
+    isMobile ? node : <div style={{ width: '100%', maxWidth: COPY_MAX, marginInline: 'auto' }}>{node}</div>
+
+  const panel =
+    tab === 'design' ? (
+      copy(<DesigningNow />)
+    ) : tab === 'been' ? (
+      copy(<PreviousRoles />)
+    ) : tab === 'contact' ? (
+      copy(<ContactPanel />)
+    ) : tab === 'lols' ? (
+      copy(<LlmQuotes />)
+    ) : (
+      // The Me tab: the hero copy, on the file's 32, then every project under
+      // it, on the panel's full width. On desktop the copy fills at least the
+      // first screen, so the projects start just past the fold.
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+        {!isMobile && (
+          // Placed against the scroller itself (nothing between is positioned):
+          // its bottom edge is the window's at any height, and the logo still
+          // scrolls away with the content. Behind the copy if a short window
+          // brings the two together.
+          <LogoWatermark
+            style={{
+              position: 'absolute',
+              right: WATERMARK_RIGHT,
+              bottom: 0,
+              zIndex: -1,
+              width: WATERMARK_WIDTH,
+              color: 'var(--color-bg-cream)',
+              opacity: WATERMARK_OPACITY,
+            }}
+          />
+        )}
+        <div style={isMobile ? undefined : { minHeight: `calc(100vh - ${PANEL_TOP}px)` }}>
+          {copy(
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+              <Hero />
+              <ContactButtons />
+            </div>,
+          )}
+        </div>
+        <div style={{ marginTop: '48px' }}>
+          <HomeProjects />
+        </div>
+      </div>
+    )
 
   return (
     <div
@@ -450,6 +473,20 @@ export default function App() {
             transition: stillOnly ? undefined : `width ${SHIFT_MS}ms ${SHIFT_EASE}`,
             pointerEvents: 'none',
             zIndex: 1,
+          }}
+        />
+      )}
+
+      {/* Pinned to the window, at its foot on the panel's centre. */}
+      {!isMobile && tab === 'me' && (
+        <ScrollHint
+          scroller={panelRef}
+          style={{
+            position: 'absolute',
+            left: `calc(${CENTRE})`,
+            transform: 'translateX(-50%)',
+            bottom: SCROLL_HINT_BOTTOM,
+            zIndex: 3,
           }}
         />
       )}

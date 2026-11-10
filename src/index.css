@@ -3,8 +3,15 @@
 
 /* Design tokens — mirrors the "Mini Design System" page of the July 2026 Figma
    file. Keep the two in sync: variable names here match the `codeSyntax` on each
-   Figma variable. */
-:root {
+   Figma variable.
+
+   The colours that change with the theme are in their own two blocks. Dark is
+   the default; `data-theme` on <html> (`src/theme.ts`) picks light. Set
+   `data-theme="dark"` on anything that has to stay dark in light mode, like
+   the product replicas, whose literal colours assume a dark page around them.
+   Accents aren't here because a project page re-points them on its root. */
+:root,
+[data-theme='dark'] {
   /* Surfaces */
   --color-bg-primary: #171615;
   --color-bg-raised: #1d1f1e;
@@ -30,6 +37,45 @@
   --color-border-default: rgba(255, 255, 255, 0.16);
   --color-border-ink: rgba(15, 14, 14, 0.12);
 
+  /* The accent as text: on the dark page it reads as it is. */
+  --color-orange-text: var(--color-orange);
+}
+
+/* Either theme can be nested in the other, so a scope sets its own text colour. */
+[data-theme='dark'],
+[data-theme='light'] {
+  color: var(--color-text-primary);
+}
+
+/* An inversion: the page takes the cream, and the "cream" surfaces (the spine,
+   the active pill, the secondary button) take the dark, their ink flipping
+   with them. */
+[data-theme='light'] {
+  --color-bg-primary: #f5efe0;
+  --color-bg-raised: #ebe4d3;
+  --color-bg-inverse: #171615;
+  --color-bg-cream: #171615;
+  --color-bg-tint: rgba(15, 14, 14, 0.06);
+
+  --color-text-primary: #171615;
+  --color-text-secondary: #45423d;
+  --color-text-muted: rgba(23, 22, 21, 0.62);
+  --color-text-inverse: #f5efe0;
+
+  --color-ink: #f5efe0;
+  --color-ink-secondary: rgba(245, 239, 224, 0.72);
+  --color-ink-muted: rgba(245, 239, 224, 0.35);
+
+  --color-border-subtle: rgba(15, 14, 14, 0.08);
+  --color-border-default: rgba(15, 14, 14, 0.16);
+  --color-border-ink: rgba(245, 239, 224, 0.12);
+
+  /* On cream the accent is too light to read as text (orange 2.8:1), so it darkens a
+     step, following whatever accent the page has re-pointed it to. */
+  --color-orange-text: color-mix(in srgb, var(--color-orange) 78%, black);
+}
+
+:root {
   /* Accent */
   --color-orange: #f95b1c;
   --color-orange-hover: #e05219;
@@ -210,6 +256,136 @@ html:has(.showcase-lightbox[open]) {
 
 .tab-content-in {
   animation: tab-content-in 300ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+/* Content springing into view on scroll (`Reveal`): it grows from a little
+   small and low, overshoots under 2% of the move and settles, with the fade
+   kept short so the motion does the work. `--spring` is a damped spring
+   (ratio 0.8; 0.58 read loopy) sampled into stops. It ends on `transform: none`, not a zero
+   translate, so nothing inside keeps a transformed ancestor once it has landed:
+   fixed tooltips and 100vw bleeds measure against the page again. */
+:root {
+  --spring: linear(0, 0.031, 0.107, 0.208, 0.319, 0.431, 0.537, 0.633, 0.716, 0.787, 0.846, 0.893, 0.93, 0.958, 0.979, 0.993, 1.003, 1.01, 1.013, 1.015, 1.015, 1.014, 1.013, 1.011, 1.01, 1.008, 1.006, 1.005, 1.004, 1.003, 1);
+}
+.reveal {
+  opacity: 0;
+  transform: translateY(32px) scale(var(--reveal-scale, 0.94));
+  transform-origin: 50% 100%;
+  transition:
+    opacity 240ms ease,
+    transform 800ms cubic-bezier(0.3, 1.08, 0.5, 1);
+}
+@supports (transition-timing-function: linear(0, 1)) {
+  .reveal {
+    transition-timing-function: ease, var(--spring);
+  }
+}
+.reveal[data-shown] {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* A curved page's copy tab (`ProjectCurved`): it starts as a stub under the
+   media and grows to the right on the same spring. The
+   surface's edge moves rather than scaling, so its corner and the concave curve
+   riding it keep their shape, and the copy's clip moves in step, uncovering the
+   text behind that edge. */
+.curved-tab-surface {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .curved-tab {
+    --tab-stub: 48px;
+    --tab-ease: cubic-bezier(0.3, 1.08, 0.5, 1);
+  }
+  @supports (transition-timing-function: linear(0, 1)) {
+    .curved-tab {
+      --tab-ease: var(--spring);
+    }
+  }
+  .curved-tab-surface {
+    transition: right 800ms var(--tab-ease) 100ms;
+  }
+  .curved-tab-copy {
+    clip-path: inset(0 0 0 0);
+    transition:
+      clip-path 800ms var(--tab-ease) 100ms,
+      opacity 300ms ease 220ms;
+  }
+  .curved-tab:not([data-shown]) .curved-tab-surface {
+    right: calc(100% - var(--tab-stub));
+  }
+  .curved-tab:not([data-shown]) .curved-tab-copy {
+    clip-path: inset(0 calc(100% - var(--tab-stub)) 0 0);
+    opacity: 0;
+  }
+}
+
+/* The theme switch (`ThemeToggle`). It takes itself out of the page's
+   cross-fade (`setTheme`) and animates live, or the cross-fade would ghost the
+   cut-out in both places while it slides. */
+.theme-toggle {
+  view-transition-name: theme-toggle;
+}
+::view-transition-old(theme-toggle) {
+  display: none;
+}
+::view-transition-new(theme-toggle) {
+  animation: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .theme-toggle {
+    transition: background-color 250ms ease;
+  }
+  .theme-toggle svg {
+    transition: color 250ms ease;
+  }
+  .theme-toggle-hole {
+    transition:
+      transform 450ms var(--spring),
+      background-color 250ms ease;
+  }
+}
+
+/* Hi's scroll hint (`ScrollHint`). Stepped, not eased, so the arrow moves a
+   whole pixel-art square at a time; the units are the SVG's, one a square. */
+.scroll-hint {
+  transition: opacity 200ms ease;
+}
+.scroll-hint[data-hidden] {
+  opacity: 0;
+}
+@keyframes scroll-hint-arrow {
+  0%,
+  45% {
+    transform: translateY(0);
+  }
+  60% {
+    transform: translateY(1px);
+  }
+  75%,
+  100% {
+    transform: translateY(2px);
+  }
+}
+.scroll-hint-arrow {
+  animation: scroll-hint-arrow 1600ms step-end infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .scroll-hint-arrow {
+    animation: none;
+  }
 }
 
 /* First-visit logo intro (`IntroSplash`). Each square pops in on its own
@@ -590,3 +766,16 @@ html:has(.showcase-lightbox[open]) {
   }
 }
 
+
+/* The project pages' Back pill: the filled chips' low-opacity tint, a step deeper on hover. */
+.back-pill {
+  background: var(--color-bg-tint);
+  transition: background 0.15s;
+}
+.back-pill:hover {
+  background: color-mix(in srgb, var(--color-text-primary) 14%, transparent);
+}
+.back-pill:focus-visible {
+  outline: 2px solid var(--color-orange);
+  outline-offset: 2px;
+}

@@ -1,0 +1,137 @@
+/*
+  Thinking States' chip, as the project draws it (`.chip` in
+  ~/Developer/thinking-states/src/styles.css): the product itself, always the
+  dark pill its snippets produce, whatever page it sits on. Its hexes are the
+  product's, not theme surfaces.
+*/
+.ts-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 18px 9px 11px;
+  border-radius: 999px;
+  background: #17181d;
+  border: 1px solid #282a33;
+  color: #e8eaef;
+  font: 500 14px/1 ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.ts-chip canvas,
+.ts-icon canvas {
+  display: block;
+  flex: none;
+}
+.ts-icon {
+  display: inline-block;
+}
+.ts-chip--bare {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text-primary);
+}
+.ts-shimmer > span {
+  background: linear-gradient(100deg, #e8eaef 40%, #fff 50%, #e8eaef 60%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: ts-shimmer 2.4s linear infinite;
+}
+@keyframes ts-shimmer {
+  from {
+    background-position: 120% 0;
+  }
+  to {
+    background-position: -120% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ts-shimmer > span {
+    animation: none;
+  }
+}
+
+/* The page's playground controls: a muted option that brightens when chosen,
+   like the no3y Code sidebar's (`.n3sb-option`). */
+.ts-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--color-border-default);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-text-muted);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.ts-option:hover {
+  color: var(--color-text-primary);
+}
+.ts-option[aria-pressed='true'] {
+  color: var(--color-text-primary);
+  border-color: color-mix(in srgb, var(--color-text-primary) 40%, transparent);
+  background: color-mix(in srgb, var(--color-text-primary) 6%, transparent);
+}
+.ts-option:focus-visible,
+.ts-swatch:focus-visible,
+.ts-pick:focus-visible {
+  outline: 2px solid var(--color-orange);
+  outline-offset: 2px;
+}
+.ts-swatch {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  cursor: pointer;
+}
+.ts-swatch[aria-pressed='true'] {
+  box-shadow: 0 0 0 2px var(--color-bg-primary), 0 0 0 3px var(--color-text-primary);
+}
+/* A family's icons: each one picks that chip into the playground. */
+.ts-pick {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.ts-pick:hover {
+  background: color-mix(in srgb, var(--color-text-primary) 6%, transparent);
+}
+.ts-pick[aria-pressed='true'] {
+  border-color: color-mix(in srgb, var(--color-text-primary) 30%, transparent);
+  background: color-mix(in srgb, var(--color-text-primary) 6%, transparent);
+}
+.ts-label-input {
+  height: 32px;
+  width: 100%;
+  max-width: 240px;
+  padding: 0 12px;
+  border: 1px solid var(--color-border-default);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-text-primary);
+  font: 500 14px ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+}
+.ts-label-input:focus-visible {
+  outline: 2px solid var(--color-orange);
+  outline-offset: 1px;
+}
+.ts-range {
+  width: 160px;
+  accent-color: var(--color-orange);
+}

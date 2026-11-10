@@ -100,7 +100,7 @@ const LEAF_ICON = 20
  * For an icon leading a trigger set with `iconAlign="baseline"`: sat on the
  * baseline, an icon taller than the capitals towers over them, so this drops
  * it by half its overhang to centre it on the cap height (Geist's ~0.7em).
- * In `em`, so it holds at the mobile body size too.
+ * In `em`, so it holds if the body size changes.
  */
 function capCentre(size: number) {
   return `translateY(calc((${size}px - 0.7em) / 2))`
@@ -576,9 +576,9 @@ function FanTag({ children }: { children: ReactNode }) {
 
 /**
  * The Me tab's opening block. The sizes sit off the shared type ramp — the
- * Figma frame (`320:30805`) sets them directly: a 24px medium title over 18px
- * subtitle and body copy, all small enough now that nothing needs to clamp
- * with the column.
+ * Figma frame (`320:30805`) sets them directly: a 24px medium title over an
+ * 18px subtitle, then 16px body copy (the frame's 18 until Nov 9 2026), all
+ * small enough now that nothing needs to clamp with the column.
  */
 export default function Hero() {
   const isMobile = useIsMobile()
@@ -586,7 +586,7 @@ export default function Hero() {
   const body: React.CSSProperties = {
     margin: 0,
     maxWidth: '700px',
-    fontSize: isMobile ? '17px' : '18px',
+    fontSize: '16px',
     fontWeight: 400,
     lineHeight: 1.4,
     letterSpacing: 0,

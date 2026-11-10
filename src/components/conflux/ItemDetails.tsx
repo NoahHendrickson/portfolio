@@ -1125,6 +1125,7 @@ function DetTip({
         createPortal(
           <div
             ref={popupRef}
+            data-theme="dark"
             className="cfx-det-tip"
             style={{ position: 'fixed', top: 0, left: 0, zIndex: 1000, pointerEvents: 'none', visibility: 'hidden' }}
           >

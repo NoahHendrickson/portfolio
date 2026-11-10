@@ -1,5 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { ArrowClockwise, ArrowLeft, ArrowRight, DotsThreeVertical, Plus, SlidersHorizontal, Star, X } from '@phosphor-icons/react'
+import { CurvedCard, CurvedCopy, CurvedFacts, CurvedPanel } from './Curved'
+import Reveal from './Reveal'
 import ScrubbableClip from './ScrubbableClip'
 import BuildCard from './conflux/BuildCard'
 import ItemDetails from './conflux/ItemDetails'
@@ -9,23 +11,20 @@ import LoadoutCard from './conflux/LoadoutCard'
 import PopularityCard from './conflux/PopularityCard'
 import StatTargets from './conflux/StatTargets'
 import WeaponList from './conflux/WeaponList'
-import { CopyCell, CopyWithFacts, SheetBlock, SheetGap, SheetImg, SheetIntro, SheetLinks, SheetPage } from './Sheet'
+import { SheetImg, SheetIntro, SheetLinks, SheetPage } from './Sheet'
 import { projects, STAT_BUILDER_SITE } from '../data/projects'
-import { space } from '../design-system/tokens'
+import { radius, space } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
 import { useMediaQuery } from '../hooks/useMediaQuery'
-import { FACTS_WIDTH, FILL, RULE, SHEET_BODY, sheetGap } from '../sheetStyle'
+import { CURVED_BODY_SIZE, SHEET_BODY, curvedInset, sheetGap } from '../sheetStyle'
 import './D2Conflux.css'
 
 /*
-  `/work/stat-builder`, on the ruled sheet no3y Code runs (`Sheet.tsx`, Nov 4
-  2026): the intro, a ruled gap, the optimizer shot across the column with the
-  overview beside Tools / Skills under it, then each feature as its media,
-  square and edge to edge, over its copy cell. It wore the app's own skin
-  before — the Slate gradient page, uppercase
-  section labels, rounded floating windows; the Chrome frames came back
-  square and flush (`D2Conflux.css`, Nov 4 2026), and only the Slate stays, behind the live
-  component playground, which is the app's own surface.
+  `/work/stat-builder`, on the curved cards no3y Code runs (`Curved.tsx`, Nov 9
+  2026): the intro, the optimizer in its browser frame with the overview on a tab
+  and Tools / Skills as a card of its own, then each feature as its media on a
+  rounded card with its copy on a tab. The Slate stays only behind the live
+  components, which are the app's own surface.
 
   Every capture is the live app signed in with real gear, taken in October 2026 on the
   Slate theme in a 2560 × 1440 window (a 27" monitor) at 2×.
@@ -43,8 +42,11 @@ const project = projects['stat-builder']
 const THEME = {
   '--color-orange': '#f6de62',
   '--color-orange-hover': '#ebd047',
-  '--color-on-accent': 'var(--color-text-inverse)',
+  // Fixed dark ink, not the theme's inverse text, which turns cream in light mode.
+  '--color-on-accent': '#0f0e0e',
 } as React.CSSProperties
+/** Copy that needs more than `Prose` carries (the game's title in italics). */
+const PARAGRAPH: React.CSSProperties = { ...SHEET_BODY, fontSize: CURVED_BODY_SIZE }
 const GITHUB = 'https://github.com/NoahHendrickson/d2-stat-builder'
 const ASSET = '/work/stat-builder/conflux'
 /**
@@ -86,155 +88,194 @@ export default function D2Conflux() {
             { label: 'Website', href: STAT_BUILDER_SITE },
             { label: 'Repo', href: GITHUB },
           ]}
+          inset={0}
+          bodySize={CURVED_BODY_SIZE}
         />
 
-        <SheetGap top />
-
-        <Browser path="/" title="Optimizer" ruleAt={isMobile ? undefined : FACTS_WIDTH}>
-          <SheetImg
-            priority
-            shot={{
-              src: `${ASSET}/optimizer.jpg`,
-              alt: 'The stat optimizer: Warlock picked, Health, Grenade and Class targets set, Getaway Artist as the exotic, and the top build opened to its armor, mods, tuning and masterwork cost',
-              aspect: '3200 / 1800',
-            }}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: sheetGap(isMobile) }}>
+          <CurvedCard
+            media={
+              <Browser path="/" title="Optimizer">
+                <SheetImg
+                  priority
+                  shot={{
+                    src: `${ASSET}/optimizer.jpg`,
+                    alt: 'The stat optimizer: Warlock picked, Health, Grenade and Class targets set, Getaway Artist as the exotic, and the top build opened to its armor, mods, tuning and masterwork cost',
+                    aspect: '3200 / 1800',
+                  }}
+                />
+              </Browser>
+            }
+            copy={
+              <CurvedCopy heading="What it does">
+                <p style={PARAGRAPH}>
+                  D2 Conflux is a web companion app I built for <em>Destiny 2</em> to give players a faster, smarter way to
+                  manage their gear while actively playing the game.
+                </p>
+                <p style={PARAGRAPH}>
+                  Beyond basic inventory management, it introduces tools that simply aren’t possible within the game’s native
+                  UI. The standout feature is the build optimizer: in <em>Destiny 2</em>, hitting specific armor stat tiers
+                  requires complex math that’s virtually impossible to calculate in your head, so the tool runs those
+                  combinations automatically to tell you exactly which pieces to equip.
+                </p>
+                <p style={PARAGRAPH}>
+                  Alongside the optimizer, players can audit their vault to filter duplicates and clear out junk rolls, search
+                  the full database of in-game weapons to inspect possible perks and plan what to farm, and assemble custom
+                  loadouts that can be saved and swapped on the fly. It also includes a dedicated items view that gives
+                  players a complete look at their character inventory and vault, making it effortless to organize and
+                  transfer gear seamlessly in real time.
+                </p>
+              </CurvedCopy>
+            }
+            side={<CurvedFacts facts={FACTS} />}
           />
-        </Browser>
-        <CopyWithFacts
-          copy={
-            <CopyCell heading="What it does" style={{ flex: 1 }}>
-              <p style={SHEET_BODY}>
-                D2 Conflux is a web companion app I built for <em>Destiny 2</em> to give players a faster, smarter way to
-                manage their gear while actively playing the game.
-              </p>
-              <p style={SHEET_BODY}>
-                Beyond basic inventory management, it introduces tools that simply aren’t possible within the game’s native
-                UI. The standout feature is the build optimizer: in <em>Destiny 2</em>, hitting specific armor stat tiers
-                requires complex math that’s virtually impossible to calculate in your head, so the tool runs those
-                combinations automatically to tell you exactly which pieces to equip.
-              </p>
-              <p style={SHEET_BODY}>
-                Alongside the optimizer, players can audit their vault to filter duplicates and clear out junk rolls, search
-                the full database of in-game weapons to inspect possible perks and plan what to farm, and assemble custom
-                loadouts that can be saved and swapped on the fly. It also includes a dedicated items view that gives
-                players a complete look at their character inventory and vault, making it effortless to organize and
-                transfer gear seamlessly in real time.
-              </p>
-            </CopyCell>
-          }
-          facts={FACTS}
-        />
 
-        <UpClose />
+          <UpClose />
 
-        <SheetBlock>
-          <Browser path="/" title="Optimizer">
-            <Clip
-              src={`${ASSET}/dream-flow.mp4`}
-              hevc={`${ASSET}/dream-flow-hevc.mp4`}
-              poster={`${ASSET}/dream-flow-poster.jpg`}
-              alt="Screen recording: picking Warlock and Getaway Artist, setting Health 70, Grenade 150 and Class 100, opening the top build, then in Dream build lowering Weapons and raising Super until it suggests replacing the helmet with a Demolitionist helmet"
+          <Reveal>
+            <CurvedCard
+              media={
+                <Browser path="/" title="Optimizer">
+                  <Clip
+                    src={`${ASSET}/dream-flow.mp4`}
+                    hevc={`${ASSET}/dream-flow-hevc.mp4`}
+                    poster={`${ASSET}/dream-flow-poster.jpg`}
+                    alt="Screen recording: picking Warlock and Getaway Artist, setting Health 70, Grenade 150 and Class 100, opening the top build, then in Dream build lowering Weapons and raising Super until it suggests replacing the helmet with a Demolitionist helmet"
+                  />
+                </Browser>
+              }
+              copy={
+                <CurvedCopy
+                  heading="Find the stats you can reach or what armor pieces you should replace to reach them"
+                  body="Here is a quick video showing a build with stats you can reach with your current armor, then extending those stats to see what armor to farm to achieve them."
+                />
+              }
             />
-          </Browser>
-          <CopyCell
-            heading="Find the stats you can reach or what armor pieces you should replace to reach them"
-            body="Here is a quick video showing a build with stats you can reach with your current armor, then extending those stats to see what armor to farm to achieve them."
-          />
-        </SheetBlock>
+          </Reveal>
 
-        <SheetBlock>
-          <Browser path="/armor" title="Armor">
-            <SheetImg
-              shot={{
-                src: `${ASSET}/armor-table.jpg`,
-                alt: 'The armor table: 973 pieces with name, class, archetype, tertiary and tuned stats, set bonus, a Searches count, and the six stat columns, filters and Cleanup and Duplicates views along the top',
-                aspect: '3200 / 1800',
-              }}
+          <Reveal>
+            <CurvedCard
+              media={
+                <Browser path="/armor" title="Armor">
+                  <SheetImg
+                    shot={{
+                      src: `${ASSET}/armor-table.jpg`,
+                      alt: 'The armor table: 973 pieces with name, class, archetype, tertiary and tuned stats, set bonus, a Searches count, and the six stat columns, filters and Cleanup and Duplicates views along the top',
+                      aspect: '3200 / 1800',
+                    }}
+                  />
+                </Browser>
+              }
+              copy={
+                <CurvedCopy
+                  heading="Sort your armor"
+                  body="Armor 3.0 simplified how stats are distributed on a piece of armor, with finite combinations. That changed how players thought about armor, but none of the previous armor management tools accounted for it. A table view with quick filters that matched players' mental model made it easy and intuitive to search, filter and delete the armor you own."
+                />
+              }
             />
-          </Browser>
-          <CopyCell
-            heading="Sort your armor"
-            body="Armor 3.0 simplified how stats are distributed on a piece of armor, with finite combinations. That changed how players thought about armor, but none of the previous armor management tools accounted for it. A table view with quick filters that matched players' mental model made it easy and intuitive to search, filter and delete the armor you own."
-          />
-        </SheetBlock>
+          </Reveal>
 
-        <SheetBlock>
-          {/*
-            Recaptured Oct 28 2026 after the details pane split into Stats / Perks / Popularity
-            cards: the app's own verify-d2 harness (stubbed sign-in, its full fixture vault), the
-            same 2560 × 1440 window at 2×, with Fatebringer (Timelost) on its most popular roll.
-            The Popularity close-up that stood beside it was dropped (Nov 4 2026); the shot
-            carries the card already.
-          */}
-          <Browser path="/weapons" title="Weapons">
-            <SheetImg
-              shot={{
-                src: `${ASSET}/weapon-search.jpg`,
-                alt: 'Weapon search: the full catalog of 1,335 weapons as coloured nameplates by element, and Fatebringer (Timelost) open in three cards: its stats, its perk grid with the most popular roll picked, and how popular each perk and combo is',
-                aspect: '3200 / 1800',
-              }}
+          <Reveal>
+            {/*
+              Recaptured Oct 28 2026 after the details pane split into Stats / Perks / Popularity
+              cards: the app's own verify-d2 harness (stubbed sign-in, its full fixture vault), the
+              same 2560 × 1440 window at 2×, with Fatebringer (Timelost) on its most popular roll.
+            */}
+            <CurvedCard
+              media={
+                <Browser path="/weapons" title="Weapons">
+                  <SheetImg
+                    shot={{
+                      src: `${ASSET}/weapon-search.jpg`,
+                      alt: 'Weapon search: the full catalog of 1,335 weapons as coloured nameplates by element, and Fatebringer (Timelost) open in three cards: its stats, its perk grid with the most popular roll picked, and how popular each perk and combo is',
+                      aspect: '3200 / 1800',
+                    }}
+                  />
+                </Browser>
+              }
+              copy={
+                <CurvedCopy
+                  heading="Find the roll"
+                  body="Every weapon in the game, filterable by trait, perk combo, barrel and magazine, or champion. Click perks to build a roll and the stat bars move with it. Hover any perk for community-tested numbers on what it really does. The popularity card shows how often players run each perk and combo, and one click tries the most popular roll."
+                />
+              }
             />
-          </Browser>
-          <CopyCell
-            heading="Find the roll"
-            body="Every weapon in the game, filterable by trait, perk combo, barrel and magazine, or champion. Click perks to build a roll and the stat bars move with it. Hover any perk for community-tested numbers on what it really does. The popularity card shows how often players run each perk and combo, and one click tries the most popular roll."
-          />
-        </SheetBlock>
+          </Reveal>
 
-        <SheetBlock>
-          {/* The Save loadout drawer shot that led this block was dropped (Nov 4 2026). */}
-          <Browser path="/loadouts" title="Loadouts">
-            <SheetImg
-              shot={{
-                src: `${ASSET}/loadouts.jpg`,
-                alt: 'The Loadouts page: two activity sets with Save in-game buttons, a list of 27 loadout names, and saved loadouts as cards, each with its subclass, aspects and fragments, five armor pieces with their mods, stat totals and an Equip button',
-                aspect: '3200 / 1800',
-              }}
+          <Reveal>
+            <CurvedCard
+              media={
+                <Browser path="/loadouts" title="Loadouts">
+                  <SheetImg
+                    shot={{
+                      src: `${ASSET}/loadouts.jpg`,
+                      alt: 'The Loadouts page: two activity sets with Save in-game buttons, a list of 27 loadout names, and saved loadouts as cards, each with its subclass, aspects and fragments, five armor pieces with their mods, stat totals and an Equip button',
+                      aspect: '3200 / 1800',
+                    }}
+                  />
+                </Browser>
+              }
+              copy={
+                <CurvedCopy
+                  heading="Save it, then equip it in one click"
+                  body="Any build saves as a loadout with its subclass, mods, weapons and artifact. Equip pulls every piece out of the vault, slots the mods and swaps the exotic. Activity sets write a whole group of loadouts into the game's own loadout slots at once."
+                />
+              }
             />
-          </Browser>
-          <CopyCell
-            heading="Save it, then equip it in one click"
-            body="Any build saves as a loadout with its subclass, mods, weapons and artifact. Equip pulls every piece out of the vault, slots the mods and swaps the exotic. Activity sets write a whole group of loadouts into the game's own loadout slots at once."
-          />
-        </SheetBlock>
+          </Reveal>
 
-        <SheetBlock>
-          <ComponentStrip />
-          <CopyCell
-            heading="Component library"
-            body="The app's own components, running live from d2conflux.com. Change their props, force hover, focus and pressed states, switch themes, and copy the code."
-          >
-            <SheetLinks links={[{ label: 'Open full screen', href: PLAYGROUND }]} />
-          </CopyCell>
-        </SheetBlock>
+          <Reveal>
+            <Wide>
+              <CurvedCard
+                media={<ComponentStrip />}
+                copy={
+                  <CurvedCopy
+                    heading="Component library"
+                    body="The app's own components, running live from d2conflux.com. Change their props, force hover, focus and pressed states, switch themes, and copy the code."
+                  >
+                    <SheetLinks links={[{ label: 'Open full screen', href: PLAYGROUND }]} />
+                  </CurvedCopy>
+                }
+              />
+            </Wide>
+          </Reveal>
 
-        <SheetBlock>
-          <div style={{ background: FILL, padding: space.lg, columns: isMobile ? 1 : '3 240px', columnGap: space.lg }}>
-            {project.landing?.feedback?.shots.map((shot) => (
-              <figure
-                key={shot.src}
-                style={{ breakInside: 'avoid', margin: `0 0 ${space.lg}`, padding: '10px', border: RULE, background: FILL }}
-              >
-                <img src={shot.src} alt={shot.alt} loading="lazy" decoding="async" style={{ display: 'block', width: '100%', height: 'auto' }} />
-              </figure>
-            ))}
-          </div>
-          <CopyCell
-            heading="Built for one very picky player, then shared"
-            body="I made it for myself and posted it to a Destiny community. These are some of the messages that came back."
-          />
-        </SheetBlock>
-
-        <SheetBlock>
-          <CopyCell heading="Try it with your own vault" body="Sign in with Bungie. It's free, and it works on your phone too.">
-            <SheetLinks
-              links={[
-                { label: 'Open D2 Conflux', href: STAT_BUILDER_SITE },
-                { label: 'More of my work', href: '/work' },
-              ]}
+          <Reveal>
+            <CurvedCard
+              media={
+                <div style={{ padding: `${space.sm} ${space.sm} 0`, columns: isMobile ? 1 : '3 240px', columnGap: space.lg }}>
+                  {project.landing?.feedback?.shots.map((shot) => (
+                    <figure
+                      key={shot.src}
+                      style={{ breakInside: 'avoid', margin: `0 0 ${space.lg}`, borderRadius: radius.md, overflow: 'hidden' }}
+                    >
+                      <img src={shot.src} alt={shot.alt} loading="lazy" decoding="async" style={{ display: 'block', width: '100%', height: 'auto' }} />
+                    </figure>
+                  ))}
+                </div>
+              }
+              copy={
+                <CurvedCopy
+                  heading="Built for one very picky player, then shared"
+                  body="I made it for myself and posted it to a Destiny community. These are some of the messages that came back."
+                />
+              }
             />
-          </CopyCell>
-        </SheetBlock>
+          </Reveal>
+
+          <Reveal>
+            <CurvedPanel style={{ padding: curvedInset(isMobile), display: 'flex', flexDirection: 'column', gap: space.xl }}>
+              <CurvedCopy heading="Try it with your own vault" body="Sign in with Bungie. It's free, and it works on your phone too.">
+                <SheetLinks
+                  links={[
+                    { label: 'Open D2 Conflux', href: STAT_BUILDER_SITE },
+                    { label: 'More of my work', href: '/work' },
+                  ]}
+                />
+              </CurvedCopy>
+            </CurvedPanel>
+          </Reveal>
+        </div>
       </SheetPage>
     </div>
   )
@@ -313,7 +354,7 @@ function ComponentStrip() {
  * one column on mobile. Under the tiles, the item details card (`ItemDetails`)
  * for whichever tile is picked — clicking a tile opens its card, as on Items.
  */
-function Collage({ onBand = false }: { onBand?: boolean }) {
+function Collage() {
   const isMobile = useIsMobile()
   // The tile whose details card shows under the grid; clicking a tile picks it. Opens on
   // Mint Retrograde (Nov 5 2026), the tier 5 roll with alternatives to preview.
@@ -321,8 +362,7 @@ function Collage({ onBand = false }: { onBand?: boolean }) {
   const selectedTile = ITEM_TILE_SET.find((t) => t.id === item) ?? ITEM_TILE_SET[0]
   const stack: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: space.lg, minWidth: 0 }
   return (
-    // On the wide band the band paints the Slate, so the gradient runs unbroken edge to edge.
-    <div style={{ ...stack, background: onBand ? undefined : SLATE, padding: isMobile ? '16px' : '48px' }}>
+    <div data-theme="dark" style={{ ...stack, background: SLATE, padding: isMobile ? '16px' : '48px' }}>
       {isMobile ? (
         <>
           <StatTargets />
@@ -455,44 +495,35 @@ function ScaledLayout({ children }: { children: (three: boolean) => ReactNode })
 
 /** Past this the collage breaks out of the column (Nov 5 2026). */
 const WIDE_QUERY = '(min-width: 1440px)'
-/** The collage band's content width when it breaks out. */
-const WIDE_MAX = 1504
-/** Out from the column to the window's edges (the page clips the scrollbar's few px). */
-const BLEED: React.CSSProperties = { marginInline: 'calc(50% - 50vw)' }
+/** Across the window, less a margin so the card keeps its rounded corners. */
+const WIDE_CARD = 'calc(100vw - 32px)'
 
 /**
- * The "Up close" block. On a wide screen (`WIDE_QUERY`) the collage breaks out of the
- * 1128 column as a band of the app's Slate across the whole window, its content to
- * `WIDE_MAX`, and its two rules — the gap's floor above it and its own foot — run out
- * to the window's edges too, so the band reads as one strip through the page; its
- * copy stays on the column under it. Narrower, it is an ordinary `SheetBlock`.
+ * Spreads a card holding live UI across the window on a wide screen (`WIDE_QUERY`),
+ * centred on the column. Past the collage's own widths its content stays centred on
+ * the Slate.
  */
-function UpClose() {
+function Wide({ children }: { children: ReactNode }) {
   const wide = useMediaQuery(WIDE_QUERY)
-  const copy = (
-    <CopyCell
-      heading="Up close"
-      body="A few of the app’s components, live: drag the stat targets, open and close the build, pick perks, search the list, and open a loadout’s actions."
-    />
-  )
-  if (!wide) {
-    return (
-      <SheetBlock>
-        <Collage />
-        {copy}
-      </SheetBlock>
-    )
-  }
+  return wide ? <div style={{ width: WIDE_CARD, marginLeft: `calc(50% - ${WIDE_CARD} / 2)` }}>{children}</div> : children
+}
+
+/** The "Up close" block: the collage needs more room than the column to draw at its cards' own widths. */
+function UpClose() {
   return (
-    <section>
-      <div aria-hidden style={{ ...BLEED, height: sheetGap(false), borderBottom: RULE }} />
-      <div style={{ ...BLEED, background: SLATE, borderBottom: RULE }}>
-        <div style={{ maxWidth: WIDE_MAX, margin: '0 auto' }}>
-          <Collage onBand />
-        </div>
-      </div>
-      <div style={{ borderBottom: RULE }}>{copy}</div>
-    </section>
+    <Reveal>
+      <Wide>
+        <CurvedCard
+          media={<Collage />}
+          copy={
+            <CurvedCopy
+              heading="Up close"
+              body="A few of the app’s components, live: drag the stat targets, open and close the build, pick perks, search the list, and open a loadout’s actions."
+            />
+          }
+        />
+      </Wide>
+    </Reveal>
   )
 }
 
@@ -531,38 +562,15 @@ function FitItemTiles({
 /**
  * A dark Chrome window around a full-window capture, open on the app's own tab title
  * (`D2 Conflux - <page>`) and route, so the screenshots read as the live site in a
- * browser rather than floating mocks. A rounded window padded on the cell fill
- * (`D2Conflux.css`, Nov 5 2026; it ran square and edge to edge until then).
+ * browser rather than floating mocks. It fills its card's media box, which rounds it
+ * (`D2Conflux.css`).
  */
-function Browser({
-  path,
-  title,
-  ruleAt,
-  children,
-}: {
-  path: string
-  title: string
-  /**
-   * Carries the row below's column rule up through the frame's bottom padding to the
-   * window, this far in from the right edge (the opener's facts cell, Nov 5 2026), so
-   * the divider runs all the way up rather than stopping 32 short. The cell's rule is its
-   * own left border, the first px inside its box, hence the `- 1`.
-   */
-  ruleAt?: number
-  children: ReactNode
-}) {
+function Browser({ path, title, children }: { path: string; title: string; children: ReactNode }) {
   // Regular weight throughout: the site's duotone tint reads as a filled blob at
   // Chrome's small icon sizes.
   return (
-    <figure className="cfx-browser" style={ruleAt === undefined ? undefined : { position: 'relative' }}>
-      {ruleAt !== undefined && (
-        <span
-          aria-hidden
-          className="cfx-browser-rule"
-          style={{ position: 'absolute', right: ruleAt - 1, bottom: 0, width: 1, background: 'var(--color-border-default)' }}
-        />
-      )}
-      <div className="cfx-browser-window">
+    <figure className="cfx-browser">
+      <div className="cfx-browser-window" data-theme="dark">
         <div className="cfx-browser-chrome" aria-hidden>
           <div className="cfx-browser-tabs">
             <span className="cfx-browser-lights">

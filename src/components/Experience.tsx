@@ -3,7 +3,8 @@ import { useIsMobile } from '../hooks/useIsMobile'
 
 const TEXT = color.text.primary
 const MUTED = color.text.muted
-const ORANGE = color.accent.default
+// Text, so the readable accent: the plain one is too light on cream.
+const ORANGE = color.accent.text
 const BORDER = color.border.default
 const TINT = color.bg.tint
 

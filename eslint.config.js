@@ -20,4 +20,14 @@ export default tseslint.config(
       globals: globals.browser,
     },
   },
+  {
+    // Copied verbatim from ~/Developer/thinking-states (`src/engine`, `src/chips`) so
+    // they can be re-copied as the project changes; its draw functions use `var` and
+    // ternary statements on purpose (they are pasted into snippets as plain JS).
+    files: ['src/thinkingStates/engine/**', 'src/thinkingStates/chips/**'],
+    rules: {
+      'no-var': 'off',
+      '@typescript-eslint/no-unused-expressions': 'off',
+    },
+  },
 )

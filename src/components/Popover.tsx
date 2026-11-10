@@ -9,7 +9,7 @@ const INK = color.ink.default
 const PAD_X = 8
 const PAD_Y = 4
 /**
- * The concave join where the tab meets the panel. Tighter than the rail's 16,
+ * The concave join where the tab meets the panel. Tighter than the rail's 24,
  * so the joins read crisper against a small tab.
  */
 const FILLET = 10

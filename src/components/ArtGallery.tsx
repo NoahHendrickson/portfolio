@@ -80,6 +80,7 @@ function ArtViewer({ items, selected, onSelect, onClose }: {
   return (
     <dialog
       ref={dialogRef}
+      data-theme="dark"
       className="art-gallery-dialog"
       aria-labelledby="art-viewer-title"
       onCancel={(event) => { event.preventDefault(); close() }}

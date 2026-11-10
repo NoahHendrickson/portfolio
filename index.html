@@ -5,6 +5,14 @@
     <link rel="icon" type="image/png" href="/pixel-flower.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Noah Hendrickson | Product Designer &amp; Design Engineer</title>
+    <!-- Before first paint, so the page never flashes the other theme (`src/theme.ts`). Light unless dark was chosen. -->
+    <script>
+      var theme = 'light'
+      try {
+        if (localStorage.getItem('theme') === 'dark') theme = 'dark'
+      } catch {}
+      document.documentElement.dataset.theme = theme
+    </script>
   </head>
   <body>
     <div id="root"></div>

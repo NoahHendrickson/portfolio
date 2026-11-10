@@ -1,22 +1,25 @@
 import { useState, type CSSProperties, type ReactNode } from 'react'
 import { ChartLineUp, DeviceMobile, Lightning, type Icon } from '@phosphor-icons/react'
-import { CopyCell, CopyWithFacts, SheetBlock, SheetGap, SheetIntro, SheetPage } from './Sheet'
+import Reveal from './Reveal'
+import { CurvedCard, CurvedCopy, CurvedFacts, CurvedPanel } from './Curved'
+import { SheetIntro, SheetPage } from './Sheet'
 import WorkGate from './WorkGate'
 import { radius, space } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
 import { PROJECT_MAX, PROJECT_MOBILE_PAD } from '../layout'
-import { FILL, LEADING, RULE, SHEET_BODY, SHEET_HEADING, TEXT, TEXT_SOFT, cellStyle } from '../sheetStyle'
-import { MERIDIAL_ACCENT, MERIDIAL_ACCENT_HOVER, MERIDIAL_THEME } from '../meridialTheme'
+import { CURVED_BODY_SIZE, LEADING, RULE, SHEET_BODY, SHEET_HEADING, TEXT, TEXT_SOFT, curvedInset, sheetGap } from '../sheetStyle'
+import { MERIDIAL_ACCENT, MERIDIAL_ACCENT_HOVER, MERIDIAL_PLATE, MERIDIAL_THEME } from '../meridialTheme'
 import { isUnlocked } from '../workGate'
 
 /*
-  `/work/invisible/onboarding`, on the ruled sheet no3y Code and D2 Conflux run
-  (`Sheet.tsx`, Nov 4 2026): the intro, a ruled gap, the shipped flow's stage
-  across the column, then each step of the study as its media — square and edge
-  to edge between the rules — over its copy cell, a ruled gap between steps.
-  Role / Team / Partners sit beside the problem's copy as the facts cell.
+  `/work/invisible/onboarding`, on the curved cards no3y Code runs (`Curved.tsx`,
+  Nov 9 2026): the intro, then each step of the study as its media on a rounded
+  card with its copy on a tab hanging off the card's foot. Role / Team / Partners
+  the process's four steps and the key findings stand apart as cards of their own
+  under the media they sit beside, and the process is split into two cards, its first half under the
+  research board and its second under the journey map it describes.
 
-  The page is the dark sheet like every other, but what it shows takes its
+  The page is the site's like every other, but what it shows takes its
   colour from the product it describes — Meridial's pale-blue panel, white
   cards, soft greys and its magenta — so the screenshots stand on their own
   light rather than being cut into a different one. It borrows the palette, not
@@ -28,8 +31,6 @@ import { isUnlocked } from '../workGate'
 */
 const MERIDIAL = {
   canvas: '#ffffff',
-  /** The product's left-hand info panel. */
-  panel: '#dff2fe',
   surface: '#f7f7f7',
   border: '#ececec',
   ink: '#141414',
@@ -40,8 +41,7 @@ const MERIDIAL = {
   accentWash: '#f9ecf7',
 } as const
 
-/** The plates the screenshots stand on: the panel's blue easing into the magenta's wash. */
-const PLATE = `linear-gradient(135deg, ${MERIDIAL.panel} 0%, #eef2fd 50%, ${MERIDIAL.accentWash} 100%)`
+const PLATE = MERIDIAL_PLATE
 
 /**
  * The site's accent, re-pointed to the product's magenta. The page keeps the
@@ -50,7 +50,7 @@ const PLATE = `linear-gradient(135deg, ${MERIDIAL.panel} 0%, #eef2fd 50%, ${MERI
  */
 const THEME = MERIDIAL_THEME
 
-/** Chrome inside a plate (the charts' cards, the research board) keeps its corner; the plates don't. */
+/** Chrome inside a plate (the charts' cards, the research board) keeps its corner. */
 const MOCKUP_RADIUS = radius.xl
 
 const media = {
@@ -66,20 +66,38 @@ const BOARD_ASPECT = '1515 / 844'
 const RESEARCH_ASPECT = '1742 / 1622'
 const PROTOTYPE_ASPECT = '1620 / 1089'
 /**
- * The research board is 1742px wide, so half that is the widest it renders at
- * a clean 2×; the prototype windows are 2× captures of an 810 frame. Holding
- * them there keeps the UI text sharp.
+ * The research board is held to what fits on a laptop's screen with its copy, since it
+ * is nearly square. The prototype windows are 2× captures of an 810 frame, so they
+ * stay sharp up to 960; they run as wide as the plate allows (640 read too small).
  */
-const RESEARCH_MAX = 871
+const RESEARCH_MAX = 560
 /** The charts' card on its plate — wide enough to read, narrow enough not to sprawl. */
 const CHART_MAX = 760
 const PROTOTYPE_MAX = 960
 
-/** The intro's Role / Team / Partners, as the facts cell beside the problem. */
+/** The intro's Role / Team / Partners, as the card beside the problem. */
 const FACTS = [
   { heading: 'Role', items: ['Design Lead'] },
   { heading: 'Team', items: ['1.5 designers', '1 PM', '5 engineers'] },
   { heading: 'Partners', items: ['Legal', 'Compliance', 'Hiring', 'Operations'] },
+]
+
+/** Tools and Skills, as the card beside the opener's results (no3y Code and D2 Conflux carry theirs the same way). */
+const TOOLS_AND_SKILLS = [
+  { heading: 'Tools', items: ['Figma', 'Cursor', 'Claude Code', 'Mixpanel', 'Microsoft Clarity'] },
+  {
+    heading: 'Skills',
+    items: [
+      'A/B testing',
+      'User research',
+      'User testing',
+      'Journey mapping',
+      'Wireframes',
+      'Data interpretation',
+      'Competitor analysis',
+      'Cross-functional facilitation',
+    ],
+  },
 ]
 
 export default function InvisibleOnboarding() {
@@ -101,115 +119,134 @@ export default function InvisibleOnboarding() {
           description={[
             'Meridial is Invisible’s talent marketplace for AI training projects. It’s where users sign up and onboard and actually complete tasks. I led the research and redesign of this platform to improve our onboarding metrics as they were straining business and operational needs.',
           ]}
+          inset={0}
+          bodySize={CURVED_BODY_SIZE}
         />
 
-        <SheetGap top />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: sheetGap(isMobile) }}>
+          <CurvedCard media={<Showcase />} copy={<ShowcaseResults />} side={<CurvedFacts facts={TOOLS_AND_SKILLS} />} />
 
-        <div style={{ borderBottom: RULE }}>
-          <Showcase />
-        </div>
-
-        {/* The problem: the old funnel, then its copy beside Role / Team / Partners. */}
-        <section id="problem">
-          <SheetGap />
-          <Plate maxWidth={CHART_MAX}>
-            <FunnelCard />
-          </Plate>
-          <CopyWithFacts
-            copy={
-              <CopyCell
-                heading="The problem"
-                body="Meridial’s onboarding conversion rate was severely underperforming. Its many high-friction steps caused significant drop-off. This strained operations as teams tried to staff projects on time and deliver results to clients."
-                style={{ flex: 1 }}
-              />
-            }
-            facts={FACTS}
-          />
-        </section>
-
-        <SheetBlock id="process">
-          {/*
-            Copy left, the two boards stacked right (Nov 5 2026): the section's
-            copy reads as one run beside the boards it describes. Not sticky: the
-            copy can run taller than a laptop's window. Stacked on mobile, copy first.
-          */}
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: isMobile ? '1fr' : '2fr 3fr',
-              borderBottom: RULE,
-            }}
-          >
-            <div style={{ background: FILL, minWidth: 0 }}>
-              <CopyCell
-                heading="The process"
-                body={[
-                  'We needed to move fast to identify where users were getting stuck and improve our onboarding conversion. To figure out where the biggest opportunities were, one of our marketing designers and I kicked things off by studying how our competitors handled their own onboarding. Because the marketing site served as the primary front door to our product, we partnered closely with the marketing team right from the start. We documented and dissected competitor flows inside a shared FigJam board that quickly became the foundation for the entire initiative.',
-                  'As we analyzed each competitor, we wanted to understand what made their experiences work well or feel painful. We looked closely at the exact information they asked for upfront, how they ordered and paced the steps, and how long it realistically took to finish. We also evaluated how easy or forgiving the experience felt—paying attention to how strict they were with mandatory requirements and form validation versus letting users get into the product with less upfront friction.',
-                  'With that baseline in place, it was time to turn the mirror on ourselves and map out what our own process actually looked like. As we walked through the end-to-end user journey, we annotated friction points, open questions, and early ideas. What immediately stood out was how fragmented our entry points were. Instead of a single, coherent path, users coming from different campaigns or pages were dropped into completely different experiences. Right from their first interaction, the journey felt disjointed, confusing, and inconsistent.',
-                  'To make sure we spent our design energy where it would move the needle most, we layered those journey-map risks over our quantitative drop-off data. This gave us a clear, evidence-backed strategy to tackle on two fronts: zooming out to clean up the overall flow and sequence across entry points, while simultaneously zooming in to strip away friction on the specific steps where we were losing the most people.',
-                ]}
-                style={{ background: 'transparent' }}
-              />
-            </div>
-            <div style={{ minWidth: 0, ...(isMobile ? { borderTop: RULE } : { borderLeft: RULE }) }}>
-              <Figure caption="Competitor onboarding flows, collected and grouped in FigJam.">
-                <Plate maxWidth={RESEARCH_MAX}>
-                  <Board
-                    src={media.research}
-                    alt="Competitive research and onboarding references organized in FigJam"
-                    aspect={RESEARCH_ASPECT}
-                    onPlate
+          <div id="problem">
+            <Reveal>
+              <CurvedCard
+                media={
+                  <Plate maxWidth={CHART_MAX}>
+                    <FunnelCard />
+                  </Plate>
+                }
+                copy={
+                  <CurvedCopy
+                    heading="The problem"
+                    body="Meridial’s onboarding conversion rate was severely underperforming. Its many high-friction steps caused significant drop-off. This strained operations as teams tried to staff projects on time and deliver results to clients."
                   />
-                </Plate>
-              </Figure>
-              <div style={{ borderTop: RULE }}>
-                <Figure caption="The journey as it stood, with high-risk areas, questions and ideas pinned to each step.">
-                  <Board src={media.journey} alt="Annotated onboarding journey, risks and user flow in FigJam" aspect={BOARD_ASPECT} />
-                </Figure>
-              </div>
-            </div>
+                }
+                side={<CurvedFacts facts={FACTS} />}
+              />
+            </Reveal>
           </div>
-          <Findings />
-        </SheetBlock>
 
-        <SheetBlock id="design">
-          <PrototypeViewer />
-          <CopyCell
-            heading="The design"
-            body={[
-              'Once the research and journey mapping showed us where to focus, I moved into design. Each decision went back to a question we’d asked in the process.',
-              'First, the order and pacing. People were landing in different places depending on how they came in, then dropped on the homepage with a list of “optional” setup steps. I replaced that with a directive, sequential flow: a standard onboarding wizard that takes everyone through the same steps in the same order.',
-              'Next, what we asked for upfront. The profile asked for far more than our teams used, so I cut profile details back to what our sourcing tools actually read: a resume, skills, and languages. Everything else came out of the flow.',
-              'Verification was the strictest part of the flow, and it showed up with no warning. We asked for ID and proof of address without saying why. Now each of those steps starts with a short tip on why we need it and what to have ready, so people can gather everything before they begin.',
-              'Given the short timeline, I suggested a new workflow in which a vibe-coded prototype served as the design source of truth. We could iterate quickly, then hand engineers working frontend code to accelerate the build.',
-            ]}
-          />
-        </SheetBlock>
+          <div id="process" style={{ display: 'flex', flexDirection: 'column', gap: sheetGap(isMobile) }}>
+            <Reveal>
+              <CurvedCard
+                media={
+                  <Plate maxWidth={RESEARCH_MAX}>
+                    <Board
+                      src={media.research}
+                      alt="Competitive research and onboarding references organized in FigJam"
+                      aspect={RESEARCH_ASPECT}
+                      onPlate
+                    />
+                  </Plate>
+                }
+                copy={
+                  <CurvedCopy
+                    heading="The process"
+                    caption="Competitor onboarding flows, collected and grouped in FigJam."
+                    body={[
+                      'We needed to move fast to identify where users were getting stuck and improve our onboarding conversion. To figure out where the biggest opportunities were, one of our marketing designers and I kicked things off by studying how our competitors handled their own onboarding. Because the marketing site served as the primary front door to our product, we partnered closely with the marketing team right from the start. We documented and dissected competitor flows inside a shared FigJam board that quickly became the foundation for the entire initiative.',
+                      'As we analyzed each competitor, we wanted to understand what made their experiences work well or feel painful. We looked closely at the exact information they asked for upfront, how they ordered and paced the steps, and how long it realistically took to finish. We also evaluated how easy or forgiving the experience felt—paying attention to how strict they were with mandatory requirements and form validation versus letting users get into the product with less upfront friction.',
+                    ]}
+                  />
+                }
+                side={<NumberedList heading="The steps" items={STEPS} />}
+              />
+            </Reveal>
+            <Reveal>
+              <CurvedCard
+                media={<Board src={media.journey} alt="Annotated onboarding journey, risks and user flow in FigJam" aspect={BOARD_ASPECT} />}
+                copy={
+                  <CurvedCopy
+                    caption="The journey as it stood, with high-risk areas, questions and ideas pinned to each step."
+                    body={[
+                      'With that baseline in place, it was time to turn the mirror on ourselves and map out what our own process actually looked like. As we walked through the end-to-end user journey, we annotated friction points, open questions, and early ideas. What immediately stood out was how fragmented our entry points were. Instead of a single, coherent path, users coming from different campaigns or pages were dropped into completely different experiences. Right from their first interaction, the journey felt disjointed, confusing, and inconsistent.',
+                      'To make sure we spent our design energy where it would move the needle most, we layered those journey-map risks over our quantitative drop-off data. This gave us a clear, evidence-backed strategy to tackle on two fronts: zooming out to clean up the overall flow and sequence across entry points, while simultaneously zooming in to strip away friction on the specific steps where we were losing the most people.',
+                    ]}
+                  />
+                }
+                side={<NumberedList heading="Key findings" items={FINDINGS} />}
+              />
+            </Reveal>
+          </div>
 
-        <SheetBlock id="outcomes">
-          <Plate maxWidth={CHART_MAX}>
-            <ExperimentCard />
-          </Plate>
-          <CopyCell
-            heading="Measurable outcomes"
-            body={[
-              'We placed the new flow behind a feature flag and ran a 50/50 experiment against the existing onboarding experience, tracking results with Mixpanel and Microsoft Clarity.',
-              'After three weeks, the results supported our original hypotheses about the high-risk areas we targeted.',
-            ]}
-          />
-          <Results />
-        </SheetBlock>
+          <div id="design">
+            <Reveal>
+              <CurvedCard
+                media={<PrototypeViewer />}
+                copy={
+                  <CurvedCopy
+                    heading="The design"
+                    body={[
+                      'Once the research and journey mapping showed us where to focus, I moved into design. Each decision went back to a question we’d asked in the process.',
+                      'First, the order and pacing. People were landing in different places depending on how they came in, then dropped on the homepage with a list of “optional” setup steps. I replaced that with a directive, sequential flow: a standard onboarding wizard that takes everyone through the same steps in the same order.',
+                      'Next, what we asked for upfront. The profile asked for far more than our teams used, so I cut profile details back to what our sourcing tools actually read: a resume, skills, and languages. Everything else came out of the flow.',
+                      'Verification was the strictest part of the flow, and it showed up with no warning. We asked for ID and proof of address without saying why. Now each of those steps starts with a short tip on why we need it and what to have ready, so people can gather everything before they begin.',
+                      'Given the short timeline, I suggested a new workflow in which a vibe-coded prototype served as the design source of truth. We could iterate quickly, then hand engineers working frontend code to accelerate the build.',
+                    ]}
+                  />
+                }
+              />
+            </Reveal>
+          </div>
 
-        <SheetBlock id="next">
-          <Figure caption="The updated source-of-flow map, used to find the next risks to design for.">
-            <Board src={media.next} alt="Updated onboarding source-of-flow map in FigJam" aspect={BOARD_ASPECT} />
-          </Figure>
-          <CopyCell
-            heading="What’s next?"
-            body="I wanted to carry the experiment’s momentum into the next onboarding improvements. I reviewed both variants and documented why one outperformed the other. The flow still contained legacy requirements we could not address in this release, so I returned to research to identify the next risks that needed design attention."
-          />
-        </SheetBlock>
+          <div id="outcomes" style={{ display: 'flex', flexDirection: 'column', gap: space.xl }}>
+            <Reveal>
+              <CurvedCard
+                media={
+                  <Plate maxWidth={CHART_MAX}>
+                    <ExperimentCard />
+                  </Plate>
+                }
+                copy={
+                  <CurvedCopy
+                    heading="Measurable outcomes"
+                    body={[
+                      'We placed the new flow behind a feature flag and ran a 50/50 experiment against the existing onboarding experience, tracking results with Mixpanel and Microsoft Clarity.',
+                      'After three weeks, the results supported our original hypotheses about the high-risk areas we targeted.',
+                    ]}
+                  />
+                }
+              />
+            </Reveal>
+            <Reveal>
+              <Results />
+            </Reveal>
+          </div>
+
+          <div id="next">
+            <Reveal>
+              <CurvedCard
+                media={<Board src={media.next} alt="Updated onboarding source-of-flow map in FigJam" aspect={BOARD_ASPECT} />}
+                copy={
+                  <CurvedCopy
+                    heading="What’s next?"
+                    caption="The updated source-of-flow map, used to find the next risks to design for."
+                    body="I wanted to carry the experiment’s momentum into the next onboarding improvements. I reviewed both variants and documented why one outperformed the other. The flow still contained legacy requirements we could not address in this release, so I returned to research to identify the next risks that needed design attention."
+                  />
+                }
+              />
+            </Reveal>
+          </div>
+        </div>
       </SheetPage>
     </div>
   )
@@ -220,9 +257,8 @@ export default function InvisibleOnboarding() {
 /* ------------------------------------------------------------------------ */
 
 /**
- * The ground for a visual that shouldn't run the whole column: the palette's
- * gradient across the column, square and edge to edge, with the visual
- * centred on it at `maxWidth`.
+ * The ground for a visual that shouldn't run the whole card: the palette's
+ * gradient across it, with the visual centred on it at `maxWidth`.
  */
 function Plate({ maxWidth, children }: { maxWidth: number; children: ReactNode }) {
   const isMobile = useIsMobile()
@@ -240,32 +276,7 @@ function Plate({ maxWidth, children }: { maxWidth: number; children: ReactNode }
   )
 }
 
-/**
- * Media with its caption over it, on the copy cells' inset and ruled off from
- * the media, so the media runs straight into its copy below (Nov 5 2026; the
- * caption sat under the media until then and split it from its copy).
- */
-function Figure({ caption, children }: { caption: string; children: ReactNode }) {
-  const isMobile = useIsMobile()
-  return (
-    <figure style={{ margin: 0 }}>
-      <figcaption
-        style={{
-          padding: isMobile ? '12px 20px' : '12px 32px',
-          fontSize: '14px',
-          lineHeight: LEADING,
-          color: TEXT_SOFT,
-          borderBottom: RULE,
-        }}
-      >
-        {caption}
-      </figcaption>
-      {children}
-    </figure>
-  )
-}
-
-/** A FigJam board: square across the column, or with its own corner when it floats on a plate. */
+/** A FigJam board: across its card, or with its own corner when it floats on a plate. */
 function Board({ src, alt, aspect, onPlate = false }: { src: string; alt: string; aspect: string; onPlate?: boolean }) {
   return (
     <img
@@ -305,26 +316,6 @@ function Card({ children, style }: { children: ReactNode; style?: CSSProperties 
   )
 }
 
-/**
- * A row of cells ruled apart — three across, stacked on a phone — for the
- * findings and the results.
- */
-function cellRowStyle(isMobile: boolean): CSSProperties {
-  return {
-    margin: 0,
-    padding: 0,
-    listStyle: 'none',
-    display: 'grid',
-    gridTemplateColumns: isMobile ? 'minmax(0, 1fr)' : 'repeat(3, minmax(0, 1fr))',
-  }
-}
-
-/** Each cell after the first takes the rule on its leading edge (its top on a phone). */
-function cellRule(isMobile: boolean, index: number): CSSProperties {
-  if (index === 0) return {}
-  return isMobile ? { borderTop: RULE } : { borderLeft: RULE }
-}
-
 /* ------------------------------------------------------------------------ */
 /* Opening                                                                   */
 /* ------------------------------------------------------------------------ */
@@ -349,10 +340,8 @@ const enter = (name: 'rise' | 'pop', delay: number): CSSProperties => ({
 })
 
 /**
- * The shipped flow on its plate, square and edge to edge across the column:
- * the profile step in front, address verification behind it, and the three
- * results as callouts over the corner. On a phone the front window stands
- * alone, the callouts stacked under it.
+ * The shipped flow on its plate: the profile step in front, address
+ * verification behind it. On a phone the front window stands alone.
  *
  * Positions are shares of a 1160 × 660 stage, so the composition scales with
  * the stage; both windows run off its edges — the front one past the foot,
@@ -361,34 +350,6 @@ const enter = (name: 'rise' | 'pop', delay: number): CSSProperties => ({
  */
 function Showcase() {
   const isMobile = useIsMobile()
-
-  const callouts: { icon: Icon; figure: string; label: string }[] = [
-    { icon: ChartLineUp, figure: '2×', label: 'overall funnel conversion' },
-    { icon: Lightning, figure: '4×', label: 'at the highest-friction step' },
-    { icon: DeviceMobile, figure: '+50%', label: 'profile completion on mobile' },
-  ]
-
-  /*
-    The results run as a row of cells under the stage, ruled apart (stacked on
-    a phone), rather than floating over the windows (Nov 4 2026) — they had to
-    shrink with the stage there, and covered the windows' lower right.
-  */
-  const results = (
-    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', borderTop: RULE }}>
-      {callouts.map((callout, index) => (
-        <div
-          key={callout.label}
-          style={{
-            ...cellStyle(isMobile),
-            justifyContent: 'center',
-            ...(index > 0 && (isMobile ? { borderTop: RULE } : { borderLeft: RULE })),
-          }}
-        >
-          <Callout {...callout} delay={500 + index * 120} />
-        </div>
-      ))}
-    </div>
-  )
 
   if (isMobile) {
     return (
@@ -406,7 +367,6 @@ function Showcase() {
             <BrowserWindow src={media.prototypeProfile} alt={SHOWCASE_ALT.profile} />
           </div>
         </div>
-        {results}
       </div>
     )
   }
@@ -436,7 +396,23 @@ function Showcase() {
           <BrowserWindow src={media.prototypeProfile} alt={SHOWCASE_ALT.profile} />
         </div>
       </div>
-      {results}
+    </div>
+  )
+}
+
+/** The three headline results, on the stage's tab. */
+function ShowcaseResults() {
+  const isMobile = useIsMobile()
+  const callouts: { icon: Icon; figure: string; label: string }[] = [
+    { icon: ChartLineUp, figure: '2×', label: 'overall funnel conversion' },
+    { icon: Lightning, figure: '4×', label: 'at the highest-friction step' },
+    { icon: DeviceMobile, figure: '+50%', label: 'profile completion on mobile' },
+  ]
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, minmax(0, 1fr))', gap: space.xl }}>
+      {callouts.map((callout, index) => (
+        <Callout key={callout.label} {...callout} delay={500 + index * 120} />
+      ))}
     </div>
   )
 }
@@ -506,17 +482,18 @@ function Callout({
   label: string
   delay: number
 }) {
-  // A result on its cell: the product's magenta icon well, the figure on the
-  // page's ink, the label soft. No card of its own now it sits in a cell.
+  // A result on the tab: the product's magenta icon well, the figure on the
+  // card's ink, the label soft.
   return (
-    <div className="onb-enter" style={{ display: 'flex', alignItems: 'center', gap: '12px', ...enter('pop', delay) }}>
+    <div className="onb-enter" style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', ...enter('pop', delay) }}>
       <span
         style={{
           width: '36px',
           height: '36px',
           flexShrink: 0,
           borderRadius: radius.md,
-          background: MERIDIAL.accentWash,
+          // The magenta at 18%, not the product's pale wash, which all but vanished on the cream card.
+          background: `color-mix(in srgb, ${MERIDIAL.accent} 18%, transparent)`,
           display: 'grid',
           placeItems: 'center',
           color: MERIDIAL.accent,
@@ -524,8 +501,8 @@ function Callout({
       >
         <CalloutIcon size={20} />
       </span>
-      <span style={{ display: 'flex', alignItems: 'baseline', gap: '8px', flexWrap: 'wrap' }}>
-        <span style={{ fontSize: '22px', fontWeight: 500, letterSpacing: '-0.02em', color: TEXT }}>{figure}</span>
+      <span style={{ display: 'flex', flexDirection: 'column', gap: space.xs }}>
+        <span style={{ fontSize: '22px', fontWeight: 500, lineHeight: 1.2, letterSpacing: '-0.02em', color: TEXT }}>{figure}</span>
         <span style={{ fontSize: '14px', color: TEXT_SOFT }}>{label}</span>
       </span>
     </div>
@@ -535,32 +512,39 @@ function Callout({
 /* Section media                                                             */
 /* ------------------------------------------------------------------------ */
 
-/** The three findings as a row of cells under their heading. */
-function Findings() {
-  const isMobile = useIsMobile()
-  const findings = [
-    {
-      title: 'We asked for data no one used',
-      body: 'The profile asked for far more than our internal teams needed, and almost none of it fed into how we sourced people for projects.',
-    },
-    {
-      title: 'Verification came out of nowhere',
-      body: 'We asked for ID and proof of address without explaining why, and some of the copy set the wrong expectation.',
-    },
-    {
-      title: 'The assessment lost the most people',
-      body: 'The initial assessment had the biggest drop-off in the flow, and like the profile details, teams barely used the results.',
-    },
-  ]
+/** The process in five steps, for the card beside the research board: the study's process, design and outcomes boiled down. */
+const STEPS = [
+  { title: 'Break down competitors', body: 'What they asked for, in what order, and how strict they were.' },
+  { title: 'Map our own journey', body: 'Friction points, open questions and early ideas at every step.' },
+  { title: 'Layer in the data', body: 'Mixpanel and Clarity for the conversion rate at each step, to measure where people dropped off.' },
+  { title: 'Prototype and test', body: 'A coded prototype as the design source of truth, quick to iterate on and ready to hand to engineers.' },
+  { title: 'A/B test', body: 'The new flow behind a feature flag, 50/50 against the old one for three weeks.' },
+]
 
+/** The three findings, for the card beside the journey map's tab. */
+const FINDINGS = [
+  {
+    title: 'We asked for data no one used',
+    body: 'The profile asked for far more than our internal teams needed, and almost none of it fed into how we sourced people for projects.',
+  },
+  {
+    title: 'Verification came out of nowhere',
+    body: 'We asked for ID and proof of address without explaining why, and some of the copy set the wrong expectation.',
+  },
+  {
+    title: 'The assessment lost the most people',
+    body: 'The initial assessment had the biggest drop-off in the flow, and like the profile details, teams barely used the results.',
+  },
+]
+
+/** A heading over numbered items, each a short title and a line under it: a side card's content. */
+function NumberedList({ heading, items }: { heading: string; items: { title: string; body: string }[] }) {
   return (
-    <div>
-      <div style={{ ...cellStyle(isMobile), borderBottom: RULE }}>
-        <h3 style={SHEET_HEADING}>Key findings</h3>
-      </div>
-      <ol style={cellRowStyle(isMobile)}>
-        {findings.map(({ title, body }, index) => (
-          <li key={title} style={{ ...cellStyle(isMobile), gap: space.md, ...cellRule(isMobile, index) }}>
+    <>
+      <CurvedCopy heading={heading} />
+      <ol style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: space.xl }}>
+        {items.map(({ title, body }, index) => (
+          <li key={title} style={{ display: 'flex', flexDirection: 'column', gap: space.sm }}>
             <span
               style={{
                 width: '28px',
@@ -577,18 +561,18 @@ function Findings() {
             >
               {index + 1}
             </span>
-            <span style={{ fontSize: '16px', fontWeight: 500, lineHeight: LEADING, color: TEXT }}>{title}</span>
-            <span style={{ ...SHEET_BODY, color: TEXT_SOFT }}>{body}</span>
+            <span style={{ fontSize: CURVED_BODY_SIZE, fontWeight: 500, lineHeight: LEADING, color: TEXT }}>{title}</span>
+            <span style={{ ...SHEET_BODY, fontSize: '14px', color: TEXT_SOFT }}>{body}</span>
           </li>
         ))}
       </ol>
-    </div>
+    </>
   )
 }
 
 /**
  * The two prototype screens, one at a time behind a two-way toggle, on a plate
- * across the column. The two windows share one grid cell and cross-fade, so
+ * across the card, the current one's caption under the toggle. The two windows share one grid cell and cross-fade, so
  * the plate never changes height as the screen changes.
  */
 function PrototypeViewer() {
@@ -610,13 +594,13 @@ function PrototypeViewer() {
   const [current, setCurrent] = useState(0)
 
   return (
-    <Figure caption={screens[current].caption}>
+    <figure style={{ margin: 0 }}>
       <div
         style={{
           position: 'relative',
           overflow: 'hidden',
           background: PLATE,
-          padding: isMobile ? '20px 12px 12px' : '32px 48px 56px',
+          padding: isMobile ? '20px 12px 12px' : '32px 32px 40px',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -665,6 +649,11 @@ function PrototypeViewer() {
           ))}
         </div>
 
+        {/* On the pale plate at every theme, so it sets the product's ink. */}
+        <figcaption style={{ fontSize: '14px', lineHeight: LEADING, color: MERIDIAL.body, textAlign: 'center' }}>
+          {screens[current].caption}
+        </figcaption>
+
         <div
           style={{
             position: 'relative',
@@ -697,11 +686,11 @@ function PrototypeViewer() {
           ))}
         </div>
       </div>
-    </Figure>
+    </figure>
   )
 }
 
-/** The three results as a row of cells, ruled off from the outcomes' copy above. */
+/** The three results, a row of cards under the outcomes (stacked on a phone). */
 function Results() {
   const isMobile = useIsMobile()
   const results = [
@@ -728,19 +717,27 @@ function Results() {
     every cell's body down together instead of staggering them.
   */
   return (
-    <ul style={{ ...cellRowStyle(isMobile), borderTop: RULE }}>
-      {results.map(({ figure, title, body }, index) => (
-        <li
+    <ul
+      style={{
+        margin: 0,
+        padding: 0,
+        listStyle: 'none',
+        display: 'grid',
+        gridTemplateColumns: isMobile ? 'minmax(0, 1fr)' : 'repeat(3, minmax(0, 1fr))',
+        columnGap: space.xl,
+        rowGap: isMobile ? space.md : 0,
+      }}
+    >
+      {results.map(({ figure, title, body }) => (
+        <CurvedPanel
+          as="li"
           key={title}
           style={{
-            background: FILL,
-            padding: isMobile ? '20px' : '32px',
+            padding: curvedInset(isMobile),
             display: 'grid',
-            gridRow: 'span 3',
-            gridTemplateRows: 'subgrid',
+            ...(isMobile ? {} : { gridRow: 'span 3', gridTemplateRows: 'subgrid' }),
             rowGap: space.md,
             alignContent: 'start',
-            ...cellRule(isMobile, index),
           }}
         >
           <span
@@ -754,9 +751,9 @@ function Results() {
           >
             {figure}
           </span>
-          <span style={{ ...SHEET_HEADING, marginTop: space.sm }}>{title}</span>
-          <span style={{ ...SHEET_BODY, color: TEXT_SOFT }}>{body}</span>
-        </li>
+          <span style={{ ...SHEET_HEADING, fontSize: '18px', marginTop: space.sm }}>{title}</span>
+          <span style={{ ...SHEET_BODY, fontSize: CURVED_BODY_SIZE, color: TEXT_SOFT }}>{body}</span>
+        </CurvedPanel>
       ))}
     </ul>
   )

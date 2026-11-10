@@ -162,12 +162,11 @@ export const PROJECT_MOBILE_PAD = '32px'
 export const RAIL_SPINE = 48
 
 /**
- * How the Hi tab's project bento is drawn (Nov 5 2026, on trial). `ruled`
- * squares the cards off and divides them with 1px rules instead of gaps — the
+ * How the Hi tab's project bento is drawn (`rounded` since Nov 9 2026; `ruled`
+ * was on trial from Nov 5). `ruled` squares the cards off and divides them with 1px rules instead of gaps — the
  * horizontal ones running the whole width of the dark area, from the rail's
  * spine to the viewport's right edge, with the four-leaf mark at every point a
  * rule meets the centre one. `rounded` is the staggered bento with 16px
- * corners and the hover ring. `App` reads it too: the ruled rules need the
- * panel's scroller to span the dark area, or it clips them at the panel.
+ * corners and the hover ring.
  */
-export const HOME_BENTO: 'ruled' | 'rounded' = 'ruled'
+export const HOME_BENTO: 'ruled' | 'rounded' = 'rounded'

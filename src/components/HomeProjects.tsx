@@ -1,5 +1,6 @@
 import { ArrowRight } from '@phosphor-icons/react'
 import AppLink from '../AppLink'
+import ChipField from './thinking/ChipField'
 import { NO3Y_CARD, WORK_FILTERS, type WorkCard } from '../data/workCards'
 import { VARIANTS } from '../design-system/buttonStyles'
 import { color, control, radius, space, type } from '../design-system/tokens'
@@ -7,6 +8,7 @@ import { MOBILE_WIDTH_QUERY } from '../hooks/useIsMobile'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import { MARK, MARK_INK } from '../introTimeline'
 import { HOME_BENTO } from '../layout'
+import Reveal from './Reveal'
 
 /**
  * Every project under the Hi tab's copy, as a two-column bento (Nov 4 2026;
@@ -178,6 +180,13 @@ const TUNES: Record<string, Tune> = {
   // The pattern carries on past any crop; LIME stays centred.
   '/work/nacho-box': { ring: ['#f9f18f', '#9be15d'], shape: '1 / 1', fit: 'cover' },
   '/work/how-to-pc': { ring: ['#00a2a2', '#de1440'], shape: '1 / 1', fit: 'inset', bg: '#00a2a2', width: 110, anchor: 'center' },
+  // Drawn live (`LIVE_ART`), so `fit` only sizes the box. The ring is the chips' own green and blue.
+  '/work/thinking-states': { ring: ['#4ade80', '#60a5fa', '#f472b6'], shape: '3 / 2', fit: 'cover' },
+}
+
+/** Cards drawn live in place of their art: Thinking States' chips run on the card itself. */
+const LIVE_ART: Record<string, () => React.ReactNode> = {
+  '/work/thinking-states': () => <ChipField />,
 }
 
 const DEFAULT_TUNE: Tune = { shape: '5 / 4', fit: 'cover' }
@@ -205,7 +214,14 @@ type Placed = { card: WorkCard; tune: Tune }
  */
 const PLACEMENT: [string[], string[]] = [
   ['/work/no3y-code', '/work/invisible/apply', '/work/crisp', '/work/how-to-pc'],
-  ['/work/invisible/onboarding', '/work/stat-builder', '/work/invisible/synapse', '/work/pixel-art', '/work/nacho-box'],
+  [
+    '/work/invisible/onboarding',
+    '/work/stat-builder',
+    '/work/thinking-states',
+    '/work/invisible/synapse',
+    '/work/pixel-art',
+    '/work/nacho-box',
+  ],
 ]
 
 function columns(cards: WorkCard[]): [Placed[], Placed[]] {
@@ -230,6 +246,8 @@ const GAP = space.xl
 const COLUMN_MAX = 700
 
 const RULE_COLOR = 'var(--color-border-default)'
+const COLUMN_STAGGER = 90
+const CARD_GROW_FROM = 0.9
 
 export default function HomeProjects() {
   return HOME_BENTO === 'ruled' ? <RuledBento /> : <RoundedBento />
@@ -239,7 +257,11 @@ function RoundedBento() {
   const canHover = useMediaQuery(HOVER_QUERY)
   const single = useMediaQuery(MOBILE_WIDTH_QUERY)
 
-  const card = ({ card, tune }: Placed) => <ProjectCard key={card.href} card={card} tune={tune} peek={canHover} />
+  const card = ({ card, tune }: Placed, delay = 0) => (
+    <Reveal key={card.href} delay={delay} scale={CARD_GROW_FROM}>
+      <ProjectCard card={card} tune={tune} peek={canHover} />
+    </Reveal>
+  )
 
   return (
     <section aria-label="Projects">
@@ -251,7 +273,8 @@ function RoundedBento() {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: GAP, alignItems: 'start' }}>
           {COLUMNS.map((col, i) => (
             <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: GAP, minWidth: 0 }}>
-              {col.map(card)}
+              {/* The right column a beat behind, for the cards that arrive side by side. */}
+              {col.map((placed) => card(placed, i * COLUMN_STAGGER))}
             </div>
           ))}
         </div>
@@ -539,6 +562,9 @@ function ProjectCard({
             background: tune.fit === 'inset' ? tune.bg : color.bg.raised,
           }}
         >
+          {LIVE_ART[card.href] ? (
+            LIVE_ART[card.href]()
+          ) : (
           <div style={artBox}>
             <img
               src={art.src}
@@ -567,6 +593,7 @@ function ProjectCard({
               />
             )}
           </div>
+          )}
 
           {peek && (
             <div

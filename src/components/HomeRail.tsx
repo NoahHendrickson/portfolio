@@ -20,8 +20,8 @@ const PILL = color.bg.cream
  * at the file's 48 (Figma `365:6122`).
  */
 const SPINE_W = RAIL_SPINE
-/** Inner radius at the spine join, up from 8 — the pill's own corners stay 8. */
-const FILLET = 16
+/** Inner radius at the spine join, the project pages' concave 24 (`CURVE` in `Curved.tsx`) — the pill's own corners stay 8. */
+const FILLET = 24
 /** The file's 48 above the first row and below the last. */
 const RAIL_PAD = 48
 
@@ -938,8 +938,7 @@ export default function HomeRail({
       ref={railRef}
       aria-label="Site sections. Up and down arrows to switch."
       style={{
-        // Over the panel, which on Hi spans under the rail so the bento's
-        // rules can reach the spine (`HOME_BENTO`).
+        // Over the panel, which on Hi spans under the rail (`spanDark` in `App`).
         position: 'relative',
         zIndex: 1,
         display: 'flex',

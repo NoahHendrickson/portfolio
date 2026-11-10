@@ -1,27 +1,27 @@
 import { useRef, useState } from 'react'
 import { X } from '@phosphor-icons/react'
 import ScrubbableClip from './ScrubbableClip'
-import { CopyCell, SheetBlock, SheetGap, SheetIntro, SheetPage } from './Sheet'
+import { CurvedCard, CurvedChain, CurvedCopy, CurvedSoftInDark } from './Curved'
+import Reveal from './Reveal'
+import { SheetIntro, SheetPage } from './Sheet'
 import IconButton from '../design-system/IconButton'
 import { space } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
 import { useMediaQuery } from '../hooks/useMediaQuery'
-import { COPY_MEASURE, FILL, RULE, SHEET_BODY, SHEET_HEADING, TEXT, TEXT_SOFT, accentTheme, cellStyle } from '../sheetStyle'
-import type { GalleryImage, LandingVideo, Project, ProjectShowcaseContent, ShowcaseCard } from '../data/projects'
+import { CURVED_BODY_SIZE, TEXT, TEXT_SOFT, accentTheme, sheetGap } from '../sheetStyle'
+import type { GalleryImage, LandingVideo, Project, ProjectShowcaseContent } from '../data/projects'
 
 /*
-  `/work/crisp`, on the ruled sheet no3y Code and D2 Conflux run (`Sheet.tsx`,
-  Nov 4 2026): the intro (the tagline as its description, the `meta` as its
-  helper, the download as a label-only link), a ruled gap, the editor shot
-  across the column with the overview copy under it, then the timeline's two
-  passes and each card as their media, square and edge to edge between the
-  rules, over a copy cell. Stills still open in the lightbox; clips keep their
-  scrub bar. It ran rounded, shadowed cards on tinted wells out to the hero's
-  1320 before.
+  `/work/crisp`, on the curved cards no3y Code runs (`Curved.tsx`, Nov 9 2026): the
+  intro (the tagline as its description, the `meta` as its helper, the download as a
+  label-only link), then the editor, each pass of the timeline and each card as their
+  media on a rounded card with the copy on a tab hanging off its foot. Stills open in
+  the lightbox; clips keep their scrub bar.
 */
 
 /** The page: a short overview and the product captures, each over its copy. */
 export default function ProjectShowcase({ project, content }: { project: Project; content: ProjectShowcaseContent }) {
+  const isMobile = useIsMobile()
   const dialog = useRef<HTMLDialogElement>(null)
   const [selected, setSelected] = useState<GalleryImage>(content.hero)
   const cta = project.landing?.hero.cta
@@ -42,40 +42,55 @@ export default function ProjectShowcase({ project, content }: { project: Project
           helper={content.meta.split(' · ')}
           description={[project.tagline]}
           links={cta && [{ label: cta.label, href: cta.href }]}
+          inset={0}
+          bodySize={CURVED_BODY_SIZE}
         />
 
-        <SheetGap top />
+        <CurvedSoftInDark>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: sheetGap(isMobile) }}>
+          <CurvedCard
+            media={<Enlargeable shot={content.hero} onEnlarge={enlarge} priority />}
+            copy={<CurvedCopy heading={content.heading} body={content.body} />}
+          />
 
-        {/* The opener: the editor, then the overview under it. */}
-        <div style={{ borderBottom: RULE }}>
-          <Enlargeable shot={content.hero} onEnlarge={enlarge} priority />
-          <CopyCell heading={content.heading} body={content.body} />
+          {/* The passes as one shape, the second hanging off the first's copy. */}
+          {evolution && (
+            <Reveal>
+              <CurvedChain
+                steps={evolution.steps.map((step) => ({
+                  key: step.label,
+                  media: <Enlargeable shot={step.shot} onEnlarge={enlarge} />,
+                  copy: (
+                    <CurvedCopy
+                      heading={
+                        <>
+                          {evolution.heading}
+                          <span style={{ color: TEXT_SOFT }}> / {step.label}</span>
+                        </>
+                      }
+                      body={step.body}
+                    />
+                  ),
+                }))}
+              />
+            </Reveal>
+          )}
+
+          {content.cards.map((card) => (
+            <Reveal key={card.heading}>
+              <CurvedCard
+                holdClip
+                media={card.video ? <ShowcaseClip video={card.video} /> : <Enlargeable shot={card.shot} onEnlarge={enlarge} />}
+                copy={<CurvedCopy heading={card.heading} body={card.body} />}
+              />
+            </Reveal>
+          ))}
         </div>
-
-        {evolution && (
-          <SheetBlock>
-            {/*
-              Each pass's copy over its shot, the passes on one fill with no rule
-              between them (Nov 5 2026): the copy sits a shot's padding above the
-              shot it describes, and twice that from the pass before it.
-            */}
-            {evolution.steps.map((step) => (
-              <div key={step.label}>
-                <StepCell heading={evolution.heading} label={step.label} body={step.body} />
-                <Enlargeable shot={step.shot} onEnlarge={enlarge} />
-              </div>
-            ))}
-          </SheetBlock>
-        )}
-
-        {cardRows(content.cards).map((row) => (
-          <SheetBlock key={row[0].heading}>
-            {row.length === 1 ? <Card card={row[0]} onEnlarge={enlarge} /> : <CardPair cards={row} onEnlarge={enlarge} />}
-          </SheetBlock>
-        ))}
+        </CurvedSoftInDark>
 
         <dialog
           ref={dialog}
+          data-theme="dark"
           className="showcase-lightbox"
           aria-label="Screenshot detail"
           onClick={(event) => {
@@ -99,141 +114,53 @@ export default function ProjectShowcase({ project, content }: { project: Project
   )
 }
 
-/**
- * Wide cards stand alone; normal ones pair up two to a row (a lone one at the
- * end of a run stands alone too).
- */
-function cardRows(cards: ShowcaseCard[]): ShowcaseCard[][] {
-  const rows: ShowcaseCard[][] = []
-  for (const card of cards) {
-    const last = rows[rows.length - 1]
-    if (card.layout !== 'wide' && last?.length === 1 && last[0].layout !== 'wide') last.push(card)
-    else rows.push([card])
-  }
-  return rows
-}
-
-/** A card's media (a still or a clip), then its copy cell. */
-function Card({ card, onEnlarge }: { card: ShowcaseCard; onEnlarge: (shot: GalleryImage) => void }) {
-  return (
-    <>
-      {card.video ? <ShowcaseClip video={card.video} /> : <Enlargeable shot={card.shot} onEnlarge={onEnlarge} />}
-      <CopyCell heading={card.heading} body={card.body} />
-    </>
-  )
-}
-
-/**
- * Two normal cards side by side, split by a rule; each one's media on the
- * first row and its copy on the second, so the copy cells line up. Stacked on a
- * phone.
- */
-function CardPair({ cards, onEnlarge }: { cards: ShowcaseCard[]; onEnlarge: (shot: GalleryImage) => void }) {
-  const isMobile = useIsMobile()
-  if (isMobile) {
-    return cards.map((card, i) => (
-      <div key={card.heading} style={i > 0 ? { borderTop: RULE } : undefined}>
-        <Card card={card} onEnlarge={onEnlarge} />
-      </div>
-    ))
-  }
-  return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gridTemplateRows: 'auto 1fr' }}>
-      {cards.map((card, i) => {
-        const side: React.CSSProperties = { gridColumn: i + 1, ...(i > 0 && { borderLeft: RULE }) }
-        return (
-          <div key={card.heading} style={{ display: 'contents' }}>
-            {/* A shorter still leaves the cell fill under it rather than the page. */}
-            <div style={{ ...side, gridRow: 1, background: FILL }}>
-              {card.video ? (
-                <ShowcaseClip video={card.video} />
-              ) : (
-                <Enlargeable shot={card.shot} onEnlarge={onEnlarge} filled={false} />
-              )}
-            </div>
-            <CopyCell heading={card.heading} body={card.body} style={{ ...side, gridRow: 2 }} />
-          </div>
-        )
-      })}
-    </div>
-  )
-}
-
-/** A timeline pass's copy: the section's heading with the pass after it, " / "-split like the intro's helper. */
-function StepCell({ heading, label, body }: { heading: string; label: string; body: string }) {
-  const isMobile = useIsMobile()
-  return (
-    // No bottom padding: the shot under it brings its own.
-    <div style={{ ...cellStyle(isMobile), paddingBottom: 0 }}>
-      <h2 style={SHEET_HEADING}>
-        {heading}
-        <span style={{ color: TEXT_SOFT }}> / {label}</span>
-      </h2>
-      <p style={{ ...SHEET_BODY, maxWidth: COPY_MEASURE }}>{body}</p>
-    </div>
-  )
-}
-
-/**
- * A still that opens in the lightbox, padded on the cell fill so an app
- * window's rounded corners never meet the column's rules (Nov 5 2026; it ran
- * edge to edge until then). A capture with its corners baked onto a dark ground
- * (`corner`) is clipped just inside them, so the ground doesn't show on the fill.
- * `filled={false}` leaves the fill to a parent that already paints it.
- */
+/** A still that opens in the lightbox, filling its card's media box, which rounds it. */
 function Enlargeable({
   shot,
   onEnlarge,
   priority = false,
-  filled = true,
 }: {
   shot: GalleryImage
   onEnlarge: (shot: GalleryImage) => void
   priority?: boolean
-  filled?: boolean
 }) {
-  const isMobile = useIsMobile()
   const [focused, setFocused] = useState(false)
-  const corner = shot.corner && `${(shot.corner / shot.width) * 100}% / ${(shot.corner / shot.height) * 100}%`
   return (
-    <div style={{ background: filled ? FILL : undefined, padding: isMobile ? '16px' : '32px' }}>
-      <button
-        type="button"
-        aria-label={`Enlarge: ${shot.alt}`}
-        onClick={() => onEnlarge(shot)}
-        onFocus={(event) => setFocused(event.currentTarget.matches(':focus-visible'))}
-        onBlur={() => setFocused(false)}
-        style={{
-          display: 'block',
-          padding: 0,
-          border: 0,
-          borderRadius: corner || 0,
-          background: 'none',
-          width: '100%',
-          cursor: 'zoom-in',
-          outline: focused ? `3px solid ${TEXT}` : 'none',
-          outlineOffset: '3px',
-        }}
-      >
-        <img
-          src={shot.src}
-          alt={shot.alt}
-          width={shot.width}
-          height={shot.height}
-          loading={priority ? 'eager' : 'lazy'}
-          fetchPriority={priority ? 'high' : 'auto'}
-          decoding="async"
-          style={{ display: 'block', width: '100%', height: 'auto', borderRadius: corner || undefined }}
-        />
-      </button>
-    </div>
+    <button
+      type="button"
+      aria-label={`Enlarge: ${shot.alt}`}
+      onClick={() => onEnlarge(shot)}
+      onFocus={(event) => setFocused(event.currentTarget.matches(':focus-visible'))}
+      onBlur={() => setFocused(false)}
+      style={{
+        display: 'block',
+        padding: 0,
+        border: 0,
+        background: 'none',
+        width: '100%',
+        cursor: 'zoom-in',
+        // Inside the shot: the media box clips anything outside it.
+        outline: focused ? '3px solid var(--color-orange)' : 'none',
+        outlineOffset: '-6px',
+      }}
+    >
+      <img
+        src={shot.src}
+        alt={shot.alt}
+        width={shot.width}
+        height={shot.height}
+        loading={priority ? 'eager' : 'lazy'}
+        fetchPriority={priority ? 'high' : 'auto'}
+        decoding="async"
+        style={{ display: 'block', width: '100%', height: 'auto' }}
+      />
+    </button>
   )
 }
 
 /**
- * A looping clip across its box, square and edge to edge, with its scrub bar
- * (`ScrubbableClip`) — the recording's own wallpaper is the backdrop. Reduced
- * motion gets the poster.
+ * A looping clip across its box, with its scrub bar (`ScrubbableClip`) — the
+ * recording's own wallpaper is the backdrop. Reduced motion gets the poster.
  */
 function ShowcaseClip({ video }: { video: LandingVideo }) {
   const stillOnly = useMediaQuery('(prefers-reduced-motion: reduce)')
