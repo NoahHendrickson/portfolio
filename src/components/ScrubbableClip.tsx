@@ -1,4 +1,5 @@
-import { useEffect, useRef, type ComponentProps } from 'react'
+import { useContext, useEffect, useRef, type ComponentProps } from 'react'
+import { PlayGate } from '../hooks/playGate'
 import { usePlayWhenVisible } from '../hooks/usePlayWhenVisible'
 
 /**
@@ -23,7 +24,7 @@ export default function ScrubbableClip({
   const scrubber = useRef<HTMLDivElement>(null)
   const input = useRef<HTMLInputElement>(null)
   const resume = useRef(false)
-  usePlayWhenVisible(clipRef, threshold)
+  usePlayWhenVisible(clipRef, threshold, useContext(PlayGate))
 
   useEffect(() => {
     const clip = clipRef.current

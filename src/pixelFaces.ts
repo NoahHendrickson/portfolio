@@ -1,8 +1,18 @@
 /*
   The rail's pixel faces, in their own module so the no3y Code page's
-  background pattern (`ProjectSheet`) can share them — a component file should
+  background pattern (`Sheet`) can share them — a component file should
   export only components for Fast Refresh.
 */
+
+/**
+ * Rows of pixel art (`.` empty, anything else filled) as one SVG path, one
+ * unit a square, so an opacity lands on the whole shape with no seams.
+ */
+export function pixelPath(rows: string[]) {
+  return rows
+    .flatMap((row, y) => [...row].flatMap((ch, x) => (ch === '.' ? [] : [`M${x} ${y}h1v1h-1z`])))
+    .join('')
+}
 
 /**
  * The 16px pixel faces the frame seats where a pill otherwise carries the

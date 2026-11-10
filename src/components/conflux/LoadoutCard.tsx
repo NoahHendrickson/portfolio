@@ -174,7 +174,7 @@ function Tip({
       </span>
       {open &&
         createPortal(
-          <div ref={pop} role="tooltip" className="cfx-lo-tip" style={{ fontFamily: FONT, ...popStyle }}>
+          <div ref={pop} role="tooltip" data-theme="dark" className="cfx-lo-tip" style={{ fontFamily: FONT, ...popStyle }}>
             {content}
           </div>,
           document.body,
@@ -485,6 +485,7 @@ function ActionsMenu() {
             role="menu"
             aria-labelledby={buttonId}
             tabIndex={-1}
+            data-theme="dark"
             className="cfx-lo-menu"
             style={{ fontFamily: FONT }}
             onMouseLeave={() => menu.current?.focus()}

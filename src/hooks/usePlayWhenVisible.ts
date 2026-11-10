@@ -5,12 +5,13 @@ import { useEffect } from 'react'
  * decoding at once on Crisp is wasteful, and a clip you haven't reached
  * yet shouldn't be moving. `play()` is allowed without a gesture because
  * the element stays muted + inline — the same pair that used to back
- * `autoPlay`. `threshold` is the share of the clip that counts as on screen.
+ * `autoPlay`. `threshold` is the share of the clip that counts as on screen;
+ * `enabled` false holds it still until something else says it may start.
  */
-export function usePlayWhenVisible(ref: React.RefObject<HTMLVideoElement | null>, threshold = 0.25) {
+export function usePlayWhenVisible(ref: React.RefObject<HTMLVideoElement | null>, threshold = 0.25, enabled = true) {
   useEffect(() => {
     const el = ref.current
-    if (!el) return
+    if (!el || !enabled) return
 
     const io = new IntersectionObserver(
       ([entry]) => {
@@ -21,5 +22,5 @@ export function usePlayWhenVisible(ref: React.RefObject<HTMLVideoElement | null>
     )
     io.observe(el)
     return () => io.disconnect()
-  }, [ref, threshold])
+  }, [ref, threshold, enabled])
 }

@@ -1,17 +1,15 @@
 import ProjectShowcase from './ProjectShowcase'
-import ProjectSheet from './ProjectSheet'
+import ProjectCurved from './ProjectCurved'
 import type { Project } from '../data/projects'
 
 /**
- * Every `/work/<slug>` page with `landing` data. Since Nov 4 2026 they all run
- * the ruled sheet: Crisp through its own `showcasePage` layout
- * (`ProjectShowcase`), the rest through `ProjectSheet`. The screenshot-led
- * story renderer that lived here (banded / continuous rows on the shared
- * project frame) was retired with that move; it's in git history before then.
+ * Every `/work/<slug>` page with `landing` data, on the curved cards (`Curved.tsx`):
+ * Crisp through its own `showcasePage` layout (`ProjectShowcase`), the rest through
+ * `ProjectCurved`.
  */
 export default function ProjectStory({ project }: { project: Project }) {
   const landing = project.landing
   if (!landing) return null
   if (landing.showcasePage) return <ProjectShowcase project={project} content={landing.showcasePage} />
-  return <ProjectSheet project={project} />
+  return <ProjectCurved project={project} />
 }

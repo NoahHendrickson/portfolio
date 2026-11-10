@@ -1,55 +1,31 @@
-import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react'
+import { Fragment, useRef, useState, type ReactNode } from 'react'
 import { ArrowUpRight } from '@phosphor-icons/react'
 import AppLink from '../AppLink'
 import Header from './Header'
 import { Runs } from './ProjectIntro'
 import { VARIANTS } from '../design-system/buttonStyles'
-import { control, radius, space, type } from '../design-system/tokens'
+import { color, control, radius, space, type } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import { usePlayWhenVisible } from '../hooks/usePlayWhenVisible'
-import type { EyebrowEntry, LandingVideo, Prose, ShowcaseImage } from '../data/projects'
+import type { EyebrowEntry, LandingVideo, ShowcaseImage } from '../data/projects'
 import {
-  COPY_MEASURE,
+  CURVED_MAX,
   FACE_FADE,
   FACE_TILE,
-  FACTS_WIDTH,
   INTRO_PAD,
   LEADING,
-  OVERSCROLL_RULES,
   PAGE_BG,
-  RULE,
-  SHEET_BODY,
-  SHEET_HEADING,
-  SHEET_MAX,
   TEXT,
   TEXT_SOFT,
-  cellStyle,
   sheetGap,
-  toParagraphs,
 } from '../sheetStyle'
 
 /*
-  The ruled sheet's building blocks (Figma `461:14182`, Nov 4 2026): the page
-  and its column, the intro, the ruled gap, copy and facts cells, square media,
-  chips and label-only links. no3y Code (`ProjectSheet`) and D2 Conflux
-  (`D2Conflux`) are built from them; the values are in `sheetStyle.ts`.
+  The project pages' shell and small pieces: the page and its column, the intro, media
+  and chips and label-only links. The cards they sit on are `Curved.tsx`'s; the values
+  are in `sheetStyle.ts`.
 */
-
-/** Paints the column's rules on the root while the page is up, and puts the root back after. */
-function useOverscrollRules(enabled: boolean) {
-  useEffect(() => {
-    if (!enabled) return
-    const root = document.documentElement.style
-    const before = { color: root.backgroundColor, image: root.backgroundImage }
-    root.backgroundColor = PAGE_BG
-    root.backgroundImage = OVERSCROLL_RULES
-    return () => {
-      root.backgroundColor = before.color
-      root.backgroundImage = before.image
-    }
-  }, [enabled])
-}
 
 /** The faces in the side margins, fading in toward the window's edges. */
 function FacePattern() {
@@ -74,15 +50,9 @@ function FacePattern() {
   )
 }
 
-/**
- * The page: the dark shell with the face pattern in its margins, one column
- * between two rules, and the header (Back and Contact, inset to the intro's
- * padding) ruled off at its top. Ends on a ruled gap.
- */
+/** The page: the shell with the face pattern in its margins, one column, the header (Back and Contact) at its top. */
 export function SheetPage({ children }: { children: ReactNode }) {
   const isMobile = useIsMobile()
-  // On a phone the column is the screen's width, so its rules are its edges.
-  useOverscrollRules(!isMobile)
 
   return (
     // Clips sideways overflow: a block that bleeds to the window (D2 Conflux's Up close)
@@ -94,15 +64,14 @@ export function SheetPage({ children }: { children: ReactNode }) {
       <div
         style={{
           position: 'relative',
-          maxWidth: SHEET_MAX,
+          maxWidth: CURVED_MAX,
           margin: '0 auto',
-          borderLeft: RULE,
-          borderRight: RULE,
+          paddingInline: isMobile ? space.lg : undefined,
           minHeight: '100vh',
         }}
       >
-        <div style={{ borderBottom: RULE, padding: isMobile ? 0 : `${space.lg} 0` }}>
-          <Header leading="back" showProfile={false} barInset={isMobile ? space.xl : INTRO_PAD} />
+        <div style={{ padding: isMobile ? 0 : `${space.lg} 0` }}>
+          <Header leading="back" showProfile={false} barInset="0px" />
         </div>
         {children}
         <div aria-hidden style={{ height: sheetGap(isMobile) }} />
@@ -122,8 +91,16 @@ export function SheetIntro({
   helper,
   description,
   links,
+  inset,
+  bodySize = '16px',
+  iconSize = 36,
   children,
 }: {
+  /** The side padding, where it isn't the top and bottom's. */
+  inset?: number
+  /** The helper and description's size. */
+  bodySize?: string
+  iconSize?: number
   icon?: string
   title: string
   helper?: string | EyebrowEntry[]
@@ -134,11 +111,10 @@ export function SheetIntro({
   const isMobile = useIsMobile()
   const entries = helper === undefined ? [] : typeof helper === 'string' ? [helper] : helper
   return (
-    // No fill (Nov 4 2026): the intro sits on the page itself, so the filled
-    // cells below read as the content.
     <header
       style={{
-        padding: isMobile ? space.xl : INTRO_PAD,
+        paddingBlock: isMobile ? space.xl : INTRO_PAD,
+        paddingInline: inset !== undefined ? inset : isMobile ? space.xl : INTRO_PAD,
         display: 'flex',
         flexDirection: 'column',
         gap: space.xl,
@@ -146,14 +122,14 @@ export function SheetIntro({
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: space.md }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: space.md }}>
-          {icon && <img src={icon} alt="" width={36} height={36} style={{ display: 'block', flexShrink: 0 }} />}
+          {icon && <img src={icon} alt="" width={iconSize} height={iconSize} style={{ display: 'block', flexShrink: 0 }} />}
           <h1 style={{ margin: 0, fontSize: '28px', fontWeight: 500, lineHeight: LEADING, textWrap: 'balance' }}>
             {title}
           </h1>
         </div>
         {/* The body copy's 16, like the description (Nov 4 2026; the frame's 20 read too big). */}
         {entries.length > 0 && (
-          <p style={{ margin: 0, fontSize: '16px', lineHeight: LEADING, color: TEXT_SOFT }}>
+          <p style={{ margin: 0, fontSize: bodySize, lineHeight: LEADING, color: TEXT_SOFT }}>
             {entries.map((entry, i) => (
               <Fragment key={i}>
                 {i > 0 && ' / '}
@@ -164,7 +140,7 @@ export function SheetIntro({
         )}
       </div>
       {description.map((paragraph) => (
-        <p key={paragraph} style={{ margin: 0, fontSize: '16px', lineHeight: LEADING, color: TEXT_SOFT, textWrap: 'balance' }}>
+        <p key={paragraph} style={{ margin: 0, fontSize: bodySize, lineHeight: LEADING, color: TEXT_SOFT, textWrap: 'balance' }}>
           {paragraph}
         </p>
       ))}
@@ -174,96 +150,7 @@ export function SheetIntro({
   )
 }
 
-/**
- * The ruled gap between blocks — the column's rules run on through it. `top`
- * draws the rule over it too, for a block above that carries no bottom rule
- * (the intro).
- */
-export function SheetGap({ top = false }: { top?: boolean }) {
-  const isMobile = useIsMobile()
-  return <div aria-hidden style={{ height: sheetGap(isMobile), borderBottom: RULE, ...(top && { borderTop: RULE }) }} />
-}
-
-/**
- * One section: the ruled gap, then its media and copy, ruled off underneath.
- * `id` anchors it (onboarding's steps).
- */
-export function SheetBlock({ id, children }: { id?: string; children: ReactNode }) {
-  return (
-    <section id={id}>
-      <SheetGap />
-      <div style={{ borderBottom: RULE }}>{children}</div>
-    </section>
-  )
-}
-
-/**
- * A heading and its copy on the cell fill, the copy held to the frame's
- * measure. `body` is prose; `children` take anything else (a list, links)
- * under it on the same measure. No `heading` for copy that carries on a
- * section further down (onboarding, Apply's walkthrough rows).
- */
-export function CopyCell({
-  heading,
-  body,
-  children,
-  style,
-}: {
-  heading?: string
-  body?: Prose
-  children?: ReactNode
-  style?: React.CSSProperties
-}) {
-  const isMobile = useIsMobile()
-  return (
-    <div style={{ ...cellStyle(isMobile), ...style }}>
-      {heading && <h2 style={SHEET_HEADING}>{heading}</h2>}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: space.lg, maxWidth: COPY_MEASURE }}>
-        {body &&
-          toParagraphs(body).map((paragraph, i) => (
-            <p key={i} style={SHEET_BODY}>
-              {typeof paragraph === 'string' ? paragraph : <Runs runs={paragraph} />}
-            </p>
-          ))}
-        {children}
-      </div>
-    </div>
-  )
-}
-
-/** A copy cell beside the facts cell (Tools / Skills), ruled off underneath — the opener's row. */
-export function CopyWithFacts({ copy, facts }: { copy: ReactNode; facts: { heading: string; items: string[] }[] }) {
-  const isMobile = useIsMobile()
-  return (
-    <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', borderBottom: RULE }}>
-      <div style={{ flex: '1 1 0', minWidth: 0, display: 'flex' }}>{copy}</div>
-      {facts.length > 0 && (
-        <div
-          style={{
-            ...cellStyle(isMobile),
-            flex: isMobile ? undefined : `0 0 ${FACTS_WIDTH}px`,
-            ...(isMobile ? { borderTop: RULE } : { borderLeft: RULE }),
-          }}
-        >
-          {facts.map((fact) => (
-            <div key={fact.heading} style={{ display: 'flex', flexDirection: 'column', gap: space.lg }}>
-              <h2 style={SHEET_HEADING}>{fact.heading}</h2>
-              <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexWrap: 'wrap', gap: space.sm }}>
-                {fact.items.map((item) => (
-                  <li key={item}>
-                    <Chip>{item}</Chip>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
-
-/** A looping clip across the column, square-cornered; the poster under reduced motion. */
+/** A looping clip across its box; the poster under reduced motion. */
 export function SheetClip({ video, priority = false }: { video: LandingVideo; priority?: boolean }) {
   const stillOnly = useMediaQuery('(prefers-reduced-motion: reduce)')
   const clipRef = useRef<HTMLVideoElement>(null)
@@ -292,11 +179,14 @@ export function SheetClip({ video, priority = false }: { video: LandingVideo; pr
   )
 }
 
-/** A still across its box, square-cornered. */
+/** A still across its box. */
 export function SheetImg({ shot, priority = false }: { shot: ShowcaseImage; priority?: boolean }) {
   return (
     <img
       src={shot.src}
+      srcSet={shot.srcSet}
+      // A lazy image is sized by its own box (`auto`); the px is for browsers without it.
+      sizes={shot.srcSet ? 'auto, (max-width: 900px) 100vw, 560px' : undefined}
       alt={shot.alt}
       loading={priority ? 'eager' : 'lazy'}
       fetchPriority={priority ? 'high' : 'auto'}
@@ -308,9 +198,10 @@ export function SheetImg({ shot, priority = false }: { shot: ShowcaseImage; prio
 
 /**
  * A static label on the `ghost` button's palette (the Back pill's) at the `xs` control
- * height — a fact, not a control, so it takes no hover state.
+ * height — a fact, not a control, so it takes no hover state. `filled` swaps the outline
+ * for a low-opacity fill, the curved page's take.
  */
-export function Chip({ children }: { children: ReactNode }) {
+export function Chip({ children, filled = false }: { children: ReactNode; filled?: boolean }) {
   const colors = VARIANTS.ghost.default
   return (
     <span
@@ -321,8 +212,8 @@ export function Chip({ children }: { children: ReactNode }) {
         boxSizing: 'border-box',
         padding: `0 ${space.md}`,
         borderRadius: radius.full,
-        border: `1px solid ${colors.borderColor}`,
-        background: colors.background,
+        border: filled ? 'none' : `1px solid ${colors.borderColor}`,
+        background: filled ? color.bg.tint : colors.background,
         color: colors.color,
         ...type['label-m'],
         whiteSpace: 'nowrap',

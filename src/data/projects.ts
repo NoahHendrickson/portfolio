@@ -197,6 +197,18 @@ export type GalleryArt = {
   size?: 'hero' | 'big'
 }
 
+/** Which shot goes where in `CurvedCluster`, as indexes into a `grid` section's `shots`. */
+export type ClusterSlots = {
+  /** The left-hand cards, above and below the left cut. */
+  left: readonly [number, number]
+  /** The right-hand cards, above and below the right cut. */
+  right: readonly [number, number]
+  /** The box on its own in the left cut; a wider shot runs out past the column's left edge. */
+  leftBetween: number
+  /** The box on its own in the right cut; a wider shot runs out past the column. */
+  rightBetween: number
+}
+
 /**
  * A row between the hero and the closing card, centered as a group in the
  * content column. All widths and gaps are px at the file's 1272px content
@@ -205,7 +217,12 @@ export type GalleryArt = {
 export type StorySection =
   | { kind: 'gallery'; heading: string; items: GalleryArt[] }
   /** Images two to a row on the showcase's 16px gap, without copy — no3y Code's composer tiles. */
-  | { kind: 'grid'; shots: ShowcaseImage[] }
+  | {
+      kind: 'grid'
+      shots: ShowcaseImage[]
+      /** Lays six shots out as `CurvedCluster`'s uneven shape instead of stepped cards. */
+      cluster?: ClusterSlots
+    }
   /** Screenshots side by side, captions underneath — The Forge. */
   | { kind: 'columns'; gap: number; columns: StoryColumn[] }
   /** One screenshot beside its caption, vertically centered. */
@@ -320,7 +337,33 @@ export type TimelineTrack = {
 }
 
 /** A baked showcase image — `aspect` is its width / height as CSS. */
-export type ShowcaseImage = { src: string; alt: string; aspect: string }
+export type ShowcaseImage = {
+  src: string
+  alt: string
+  aspect: string
+  /** Smaller cuts of the bake (see `tileCuts`), so the browser never scales it far itself. */
+  srcSet?: string
+}
+
+/**
+ * A no3y Code component tile with its smaller cuts as `srcSet`. The bake is 3× the
+ * tile's drawn width (the first number of its `aspect`), with 1.5× and 2× cuts beside
+ * it named by their pixel width (`queue-1020.webp`). A card draws a tile at about 400
+ * to 550 CSS px, so on a 2× screen the browser was scaling the 2040 bake down 2 to 2.5×
+ * itself, which softens the UI's edges and type; with the cuts it scales by 1.3× at
+ * most. Each cut is blended and dithered at its own size from resized layers
+ * (`cuts9.mjs` in the capture scratch), never resized from the finished tile, which
+ * would smear the dither that keeps the glass from banding. Re-cut all three when a
+ * tile is re-baked.
+ */
+function tileCuts(src: string, drawnWidth: number): string {
+  const base = src.replace(/\.webp$/, '')
+  return [1.5, 2]
+    .map((k) => Math.round(drawnWidth * k))
+    .map((width) => `${base}-${width}.webp ${width}w`)
+    .concat(`${src} ${drawnWidth * 3}w`)
+    .join(', ')
+}
 
 /** One chat screenshot in the community-feedback wall. */
 export type FeedbackShot = {
@@ -348,12 +391,6 @@ export type GalleryImage = {
   alt: string
   width: number
   height: number
-  /**
-   * The window's corner radius baked into the export, in export px, where the
-   * capture's rounded corners sit on a dark ground — the still is clipped just
-   * inside it so it can stand padded on the sheet's fill (Crisp, Nov 5 2026).
-   */
-  corner?: number
 }
 
 /** A gallery card: a still that opens in the lightbox, or a looping clip that plays in place. */
@@ -397,7 +434,7 @@ export type Landing = {
    */
   accent?: PageAccent
   /**
-   * The ruled-sheet layout (`ProjectSheet.tsx`, Figma `461:14182`) — no3y
+   * The extras on `ProjectCurved` — no3y
    * Code. `icon` is the app icon beside the title; `facts` are the labelled
    * chip lists beside the showcase copy (Tools, Skills).
    */
@@ -875,7 +912,8 @@ export const projects: Record<string, Project> = {
       flow: 'continuous',
       // The ruled sheet (Figma 461:14182, Nov 4 2026).
       sheet: {
-        icon: '/work/no3y-code/app-icon.svg',
+        // The app icon's leaves without its green tile (`app-icon.svg` keeps it).
+        icon: '/work/no3y-code/app-mark.svg',
         facts: [
           {
             heading: 'Tools',
@@ -890,6 +928,7 @@ export const projects: Record<string, Project> = {
               'Design engineering',
               'Prototyping',
               'Agent orchestration',
+              'Information architecture',
             ],
           },
         ],
@@ -986,32 +1025,59 @@ export const projects: Record<string, Project> = {
             aspect: '16 / 9',
           },
         },
-        // The composer tiles, baked off one wallpaper so the 2×2 reads as one
-        // picture; they need the showcase's width and 16px gap to line up.
+        // The component tiles. Baked off one wallpaper for a 2×N grid on a 16px
+        // gap, but shown since Nov 9 2026 on separate joined cards (`CurvedCluster`),
+        // so the picture no longer runs across them.
         {
           kind: 'grid',
           shots: [
             {
-              src: '/work/no3y-code/collage/dictation.webp',
+              // The 680 × 380 tile re-baked as a banner for the box that stands alone,
+              // the composer scaled up to fill it on 48 of wallpaper all round. The
+              // box is drawn at the cards' scale, so it runs out past them, and its
+              // height is what leaves the card beside it room to join both neighbours.
+              src: '/work/no3y-code/collage/dictation-wide.webp',
+              srcSet: tileCuts('/work/no3y-code/collage/dictation-wide.webp', 860),
               alt: 'The composer while dictating, with a live level timeline beside cancel and confirm buttons',
-              aspect: '680 / 380',
+              aspect: '860 / 180',
             },
             {
               src: '/work/no3y-code/collage/queue.webp',
+              srcSet: tileCuts('/work/no3y-code/collage/queue.webp', 680),
               alt: 'A follow-up message queued above the composer while the agent works, with edit, Steer and remove controls',
               aspect: '680 / 380',
             },
             {
               src: '/work/no3y-code/collage/usage.webp',
+              srcSet: tileCuts('/work/no3y-code/collage/usage.webp', 680),
               alt: 'The usage popover opened from the composer’s meter, showing session and weekly limits for Codex and Claude',
               aspect: '680 / 380',
             },
             {
               src: '/work/no3y-code/collage/question.webp',
+              srcSet: tileCuts('/work/no3y-code/collage/question.webp', 680),
               alt: 'An agent’s question shown in place of the composer, with two options and a field for a custom answer',
               aspect: '680 / 380',
             },
+            // Row three (Nov 9 2026), off the current build: the same wallpaper
+            // carried on below the 2×2, mirrored past its foot.
+            {
+              src: '/work/no3y-code/collage/model.webp',
+              srcSet: tileCuts('/work/no3y-code/collage/model.webp', 680),
+              alt: 'The model menu open over the composer: a provider rail, the Claude models with Fable 5.1 checked, a reasoning slider set to High and an Ultracode toggle',
+              aspect: '680 / 380',
+            },
+            {
+              src: '/work/no3y-code/collage/threads.webp',
+              srcSet: tileCuts('/work/no3y-code/collage/threads.webp', 860),
+              alt: 'Thread pills in the selected state: two sidebar cards, one needing input and one completed, beside two horizontal-bar tabs, one working and one needing input',
+              aspect: '860 / 228',
+            },
           ],
+          // Usage and the model menu on the left with the thread pills in the box
+          // between them; queue and the agent question on the right with dictation
+          // between those.
+          cluster: { left: [2, 4], right: [1, 3], leftBetween: 5, rightBetween: 0 },
         },
         {
           kind: 'feature',
@@ -1119,7 +1185,6 @@ export const projects: Record<string, Project> = {
           alt: 'Crisp’s native Mac editor with a recording preview, zoom controls, and a color-coded timeline',
           width: 2200,
           height: 1380,
-          corner: 22,
         },
         evolution: {
           heading: 'The timeline',
@@ -1142,7 +1207,6 @@ export const projects: Record<string, Project> = {
                 alt: 'Crisp’s player: the toolbar above five colored timeline tracks: playback, zoom, pan, clip, and fast-forward',
                 width: 2340,
                 height: 520,
-                corner: 16,
               },
             },
           ],
@@ -1297,7 +1361,7 @@ export const projects: Record<string, Project> = {
     pageReady: true,
     landing: {
       // The pack's lime. Dark ink: white on it is near invisible (~1.2:1).
-      accent: { color: LIME, hover: '#b6e35f', ink: 'var(--color-text-inverse)' },
+      accent: { color: LIME, hover: '#b6e35f', ink: '#0f0e0e' },
       // Ported from the 2022 site (Noah-Site, /NachoBox), same as How to Build a
       // PC. The artwork is black line on white, so every SVG carries a baked
       // background rect — the 2022 page's cream for the sheets, the pack colours

@@ -185,6 +185,7 @@ export function WeaponTip({
         createPortal(
           <div
             ref={popupRef}
+            data-theme="dark"
             style={{
               position: 'fixed',
               top: 0,

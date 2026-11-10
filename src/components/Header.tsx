@@ -78,13 +78,16 @@ export default function Header({
 }
 
 /**
- * Ghost pill matching the Design tab's controls. Kept as an `<a>` — `Button`
- * renders a <button>, and nesting one inside a link is invalid.
+ * A pill on the low-opacity tint, like the curved pages' filled chips (Nov 9 2026;
+ * it was the ghost outline until then); its fill and hover are `.back-pill` in
+ * `index.css`. Kept as an `<a>` — `Button` renders a <button>, and nesting one
+ * inside a link is invalid.
  */
 function BackLink() {
   return (
     <AppLink
       href="/work"
+      className="back-pill"
       style={{
         display: 'inline-flex',
         alignItems: 'center',
@@ -94,8 +97,6 @@ function BackLink() {
         // 12 a side rather than the `sm` button's 16 — matched by Contact (Nov 4 2026).
         padding: `0 ${space.md}`,
         borderRadius: radius.full,
-        border: `1px solid ${VARIANTS.ghost.default.borderColor}`,
-        background: VARIANTS.ghost.default.background,
         color: VARIANTS.ghost.default.color,
         fontSize: type['label-m'].fontSize,
         fontWeight: type['label-m'].fontWeight,

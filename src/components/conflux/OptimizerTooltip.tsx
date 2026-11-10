@@ -104,6 +104,7 @@ function TipPlate({ anchor, children }: { anchor: HTMLElement; children: ReactNo
     <div
       ref={ref}
       role="tooltip"
+      data-theme="dark"
       className="cfx-opt-tip"
       style={
         {
