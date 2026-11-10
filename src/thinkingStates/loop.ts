@@ -8,8 +8,9 @@ import type { Shape } from './engine/types'
  * ~/Developer/thinking-states), trimmed to what the portfolio needs: one
  * requestAnimationFrame for every chip on the page, drawing only the ones on
  * screen, capped at 60 fps, and holding a still frame under reduced motion.
+ * The frame stops whenever no chip is in view or none is mounted.
  * The engine and chips beside it are copied verbatim; this file is the one
- * adapted (lazy observer, no pause).
+ * adapted (lazy observer, no pause, the loop idle off screen).
  */
 
 export interface ChipOptions {
@@ -89,18 +90,29 @@ function frame(now: number) {
   if (!still() && last !== null && now - last < MIN_FRAME_MS) return schedule()
   const dt = last === null ? 0 : Math.min(0.1, (now - last) / 1000)
   last = now
+  let drawn = false
   for (const m of mounts) {
     if (!m.visible) continue
     if (!still()) m.t += dt * m.options().speed
     paint(m)
+    drawn = true
   }
-  // Still: paint once and stop until something changes.
-  if (!still()) schedule()
+  // Keep going only while a chip is on screen and moving. Still, or with nothing in
+  // view, paint once and stop: the observer, an option change or the motion setting
+  // starts it again.
+  if (drawn && !still()) schedule()
   else last = null
 }
 
 function schedule() {
   if (!raf) raf = requestAnimationFrame(frame)
+}
+
+/** Drops the pending frame and the clock, for when the last chip unmounts. */
+function stop() {
+  if (raf) cancelAnimationFrame(raf)
+  raf = 0
+  last = null
 }
 
 /** Repaint now — for an option change while motion is reduced. */
@@ -134,5 +146,6 @@ export function mountChip(
   return () => {
     observer?.unobserve(canvas)
     mounts.delete(m)
+    if (mounts.size === 0) stop()
   }
 }
