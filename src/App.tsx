@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react'
 import '@noey-17/yearn-ui/style.css'
 import Hero from './components/Hero'
 import HomeRail from './components/HomeRail'
@@ -8,7 +8,7 @@ import ScrollHint from './components/ScrollHint'
 import { introConfigFromUrl, markIntroSeen, shouldPlayIntro } from './intro'
 import { readHomeTab, writeHomeTab, type HomeTab } from './homeTab'
 import HomeProjects from './components/HomeProjects'
-import ContactButtons from './components/ContactButtons'
+import ContactButtons, { CalmButton } from './components/ContactButtons'
 import ShaderPanel from './components/ShaderPanel'
 import {
   LEAF_PANEL_HEIGHT_VH,
@@ -20,6 +20,7 @@ import {
 } from './components/LeafPattern'
 import { DesigningNow, LlmQuotes, PreviousRoles } from './components/Experience'
 import ContactPanel from './components/ContactPanel'
+import { HomeTexture } from './components/PixelTexture'
 import D2Conflux from './components/D2Conflux'
 import InvisibleApply from './components/InvisibleApply'
 import InvisibleOnboarding from './components/InvisibleOnboarding'
@@ -31,9 +32,16 @@ import { projects } from './data/projects'
 import { useIsMobile } from './hooks/useIsMobile'
 import { useMediaQuery } from './hooks/useMediaQuery'
 import { getRoute, navigate, subscribeToRoute } from './navigation'
-import { pageGutter, RAIL_SPINE, TABLET_MAX } from './layout'
+import { HOME_TEXTURE, pageGutter, RAIL_SPINE, TABLET_MAX } from './layout'
 
 const BG = 'var(--color-bg-primary)'
+
+/**
+ * The Texture tab's playground, a reference kept off the published site: only
+ * the dev server imports it (the rail lists the tab only there too), so a
+ * production build drops the import and the module with it.
+ */
+const TexturePlayground = import.meta.env.DEV ? lazy(() => import('./components/TexturePlayground')) : null
 
 /**
  * The dark fill over the content column. Stops short of its own right edge so
@@ -43,6 +51,16 @@ const BG = 'var(--color-bg-primary)'
 const WATERMARK_WIDTH = '72vw'
 const WATERMARK_RIGHT = 32
 const WATERMARK_OPACITY = 0.08
+/**
+ * The home texture's box stops this far short of the copy's right edge: its
+ * line reaches the box's whole width, so running it under the copy (120, at
+ * first, behind a fade) would put tiles behind the text.
+ */
+const TEXTURE_COPY_GAP = 32
+/** The pause button's distance below a tab's copy. */
+const CALM_GAP = 64
+/** Below this the box would be a sliver beside the copy; it holds here and slides under the copy's edge. */
+const TEXTURE_MIN_WIDTH = 240
 const SCROLL_HINT_BOTTOM = 32
 
 const COLUMN_FILL = `linear-gradient(to right, ${BG} 0%, ${BG} calc(100% - ${LEAF_TIP_INSET}px), transparent calc(100% - ${LEAF_TIP_INSET}px))`
@@ -345,8 +363,10 @@ export default function App() {
   const leafLimit = `(${rowWidth} - ${rightInset})`
   const copyLeft = `max(${railStop}px, min(${CENTRE} - ${COPY_MAX / 2}px, ${leafLimit} - ${COPY_MAX}px))`
   const copyWidth = `max(0px, min(${COPY_MAX}px, ${leafLimit} - ${copyLeft}))`
-  const panelLeft = tab === 'me' ? centredLeft : copyLeft
-  const boxWidth = tab === 'me' ? panelWidth : copyWidth
+  // Hi and the Texture experiment run the full centred panel with no leaves.
+  const widePanel = tab === 'me' || tab === 'texture'
+  const panelLeft = widePanel ? centredLeft : copyLeft
+  const boxWidth = widePanel ? panelWidth : copyWidth
   // Hi's corner logo (and the ruled bento's rules) reach past the panel, so on
   // Hi the scroller spans the whole dark area — from the spine (under the rail,
   // which stays on top) to the viewport's right edge — and pads the panel back
@@ -356,22 +376,52 @@ export default function App() {
   // Every tab's copy holds the 700 measure, centred in the wider panel.
   const copy = (node: React.ReactNode) =>
     isMobile ? node : <div style={{ width: '100%', maxWidth: COPY_MAX, marginInline: 'auto' }}>{node}</div>
+  // The tabs beside the texture end on the button that pauses it, so it's in
+  // reach wherever a visitor has read to (Hi has it in its contact row).
+  const withCalm = (node: React.ReactNode) =>
+    HOME_TEXTURE ? (
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
+        {node}
+        <CalmButton style={{ alignSelf: 'flex-start', marginTop: CALM_GAP }} />
+      </div>
+    ) : (
+      node
+    )
 
   const panel =
     tab === 'design' ? (
-      copy(<DesigningNow />)
+      copy(withCalm(<DesigningNow />))
     ) : tab === 'been' ? (
-      copy(<PreviousRoles />)
+      copy(withCalm(<PreviousRoles />))
     ) : tab === 'contact' ? (
-      copy(<ContactPanel />)
+      copy(withCalm(<ContactPanel />))
     ) : tab === 'lols' ? (
-      copy(<LlmQuotes />)
+      copy(withCalm(<LlmQuotes />))
+    ) : tab === 'texture' && TexturePlayground ? (
+      <Suspense fallback={null}>
+        <TexturePlayground />
+      </Suspense>
     ) : (
       // The Me tab: the hero copy, on the file's 32, then every project under
       // it, on the panel's full width. On desktop the copy fills at least the
       // first screen, so the projects start just past the fold.
       <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-        {!isMobile && (
+        {!isMobile && HOME_TEXTURE && (
+          // Against the scroller like the watermark it replaces, so it fills
+          // the first screen and scrolls away with it: from the window's right
+          // edge to just short of the copy's, behind everything.
+          <HomeTexture
+            style={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              zIndex: -1,
+              width: `max(${TEXTURE_MIN_WIDTH}px, calc(100vw - ${CENTRE} - ${COPY_MAX / 2}px - ${TEXTURE_COPY_GAP}px))`,
+              height: '100%',
+            }}
+          />
+        )}
+        {!isMobile && !HOME_TEXTURE && (
           // Placed against the scroller itself (nothing between is positioned):
           // its bottom edge is the window's at any height, and the logo still
           // scrolls away with the content. Behind the copy if a short window
@@ -433,7 +483,29 @@ export default function App() {
         clip. The panel keeps the seat the field gives it on every tab, so
         hovering across the rail never moves the copy.
       */}
-      {!isMobile && (
+      {/*
+        With the texture on (`HOME_TEXTURE`, Nov 11 2026) it takes the leaf
+        field's place on the other tabs: the same strip, from just past the
+        copy's column to the window's right edge, the window's height, holding
+        still while the panel scrolls, as the field did. Hi carries its own,
+        in its scroller. It stays mounted across the leafy tabs, so switching
+        between them doesn't rebuild it.
+      */}
+      {!isMobile && HOME_TEXTURE && !widePanel && (
+        <HomeTexture
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: leafEdge,
+            right: 0,
+            // Sized by its two edges: the texture's wrapper is 100% wide unless told otherwise.
+            width: 'auto',
+            height: '100vh',
+            zIndex: 0,
+          }}
+        />
+      )}
+      {!isMobile && !HOME_TEXTURE && (
         <div
           style={{
             position: 'absolute',
@@ -445,7 +517,7 @@ export default function App() {
             zIndex: 0,
           }}
         >
-          <ShaderPanel shift={tab === 'me' ? LEAF_HIDE_SHIFT(leafEdge) : '0px'} />
+          <ShaderPanel shift={widePanel ? LEAF_HIDE_SHIFT(leafEdge) : '0px'} />
         </div>
       )}
 
@@ -546,7 +618,10 @@ export default function App() {
             // The only thing on the page that scrolls. `key={tab}` remounts it,
             // so a switch already starts the next panel at its top — the
             // `window.scrollTo` calls are for the project routes now.
-            height: isMobile ? undefined : `calc(100% - ${PANEL_TOP - SCROLL_BLEED}px)`,
+            // Hi's runs the window's full height (all 56 of its top inset as
+            // padding), so the texture placed against it reaches the window's
+            // top edge; the copy still starts at 56.
+            height: isMobile ? undefined : spanDark ? '100%' : `calc(100% - ${PANEL_TOP - SCROLL_BLEED}px)`,
             overflowY: isMobile ? undefined : 'auto',
             // The other axis can't stay `visible` on a scroll container, so it
             // is pinned rather than left to flash a scrollbar when a hover lift
@@ -556,15 +631,16 @@ export default function App() {
             padding: isMobile
               ? undefined
               : spanDark
-                ? `${SCROLL_BLEED}px calc(100vw - ${panelLeft} - ${panelWidth}) 80px calc(${panelLeft} - ${RAIL_SPINE}px)`
+                ? `${PANEL_TOP}px calc(100vw - ${panelLeft} - ${panelWidth}) 80px calc(${panelLeft} - ${RAIL_SPINE}px)`
                 : `${SCROLL_BLEED}px ${bleedRight}px 80px ${bleedLeft}px`,
             // The file's 56 above the panel: `SCROLL_BLEED` of it is padding
             // inside the scroller so a first-row hover lift isn't clipped, and
-            // the rest stays as margin so the copy still starts at 56.
+            // the rest stays as margin so the copy still starts at 56 (on Hi,
+            // all of it is padding; see `height`).
             margin: isMobile
               ? undefined
               : spanDark
-                ? `${PANEL_TOP - SCROLL_BLEED}px 0 0 ${RAIL_SPINE - railStop}px`
+                ? `0 0 0 ${RAIL_SPINE - railStop}px`
                 : `${PANEL_TOP - SCROLL_BLEED}px -${bleedRight}px 0 calc(${panelLeft} - ${railStop + bleedLeft}px)`,
           }}
         >

@@ -10,6 +10,7 @@ import {
   type WorkCard,
 } from '../data/workCards'
 import { useIsMobile } from '../hooks/useIsMobile'
+import { HEART_ROWS } from '../pixelFaces'
 import LeafMark from './LeafMark'
 import Popover, { type PopoverRoom } from './Popover'
 
@@ -118,15 +119,7 @@ const LEAD_ROOM = '4px'
  * squares (18 × 14), drawn at 2px a square like the rail's glyphs, in Meridial's
  * magenta (the onboarding page's accent) with two lighter squares for a shine.
  */
-const HEART = [
-  '.###.###.',
-  '##+######',
-  '#+#######',
-  '.#######.',
-  '..#####..',
-  '...###...',
-  '....#....',
-]
+const HEART = HEART_ROWS
 const HEART_INK: Record<string, string> = { '#': '#cb52b9', '+': '#e5a8dc' }
 const HEART_SQUARE = 2
 

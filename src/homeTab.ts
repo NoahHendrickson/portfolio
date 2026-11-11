@@ -4,9 +4,10 @@
  * survives refresh and Back from a project page, but a shared link always
  * opens on Me. The projects run under Me's copy, so there is no Work tab.
  */
-export type HomeTab = 'me' | 'design' | 'been' | 'contact' | 'lols'
+export type HomeTab = 'me' | 'design' | 'been' | 'contact' | 'lols' | 'texture'
 
-export const HOME_TAB_IDS: HomeTab[] = ['me', 'been', 'design', 'contact', 'lols']
+/** Texture, the pixel-texture playground, is a reference kept off the published site: dev server only. */
+export const HOME_TAB_IDS: HomeTab[] = ['me', 'been', 'design', 'contact', 'lols', ...(import.meta.env.DEV ? (['texture'] as const) : [])]
 
 const HOME_TAB_KEY = 'home-tab'
 
