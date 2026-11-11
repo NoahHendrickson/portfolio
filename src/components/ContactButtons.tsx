@@ -201,7 +201,9 @@ function CalmButton() {
     <>
       <button
         type="button"
-        aria-label={paused ? 'Play the animated pattern again' : 'Pause the animated pattern'}
+        // The visible words lead the accessible name, so a voice-control user can
+      // say what they see; the action follows for a screen reader.
+      aria-label={paused ? 'I need stimmy: play the animated pattern' : 'I’m overstimulated: pause the animated pattern'}
         onClick={() => setTexturePaused(!paused)}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
