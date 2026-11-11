@@ -8,7 +8,7 @@ import ScrollHint from './components/ScrollHint'
 import { introConfigFromUrl, markIntroSeen, shouldPlayIntro } from './intro'
 import { readHomeTab, writeHomeTab, type HomeTab } from './homeTab'
 import HomeProjects from './components/HomeProjects'
-import ContactButtons from './components/ContactButtons'
+import ContactButtons, { CalmButton } from './components/ContactButtons'
 import ShaderPanel from './components/ShaderPanel'
 import {
   LEAF_PANEL_HEIGHT_VH,
@@ -57,6 +57,8 @@ const WATERMARK_OPACITY = 0.08
  * first, behind a fade) would put tiles behind the text.
  */
 const TEXTURE_COPY_GAP = 32
+/** The pause button's distance below a tab's copy. */
+const CALM_GAP = 64
 /** Below this the box would be a sliver beside the copy; it holds here and slides under the copy's edge. */
 const TEXTURE_MIN_WIDTH = 240
 const SCROLL_HINT_BOTTOM = 32
@@ -374,16 +376,27 @@ export default function App() {
   // Every tab's copy holds the 700 measure, centred in the wider panel.
   const copy = (node: React.ReactNode) =>
     isMobile ? node : <div style={{ width: '100%', maxWidth: COPY_MAX, marginInline: 'auto' }}>{node}</div>
+  // The tabs beside the texture end on the button that pauses it, so it's in
+  // reach wherever a visitor has read to (Hi has it in its contact row).
+  const withCalm = (node: React.ReactNode) =>
+    HOME_TEXTURE ? (
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
+        {node}
+        <CalmButton style={{ alignSelf: 'flex-start', marginTop: CALM_GAP }} />
+      </div>
+    ) : (
+      node
+    )
 
   const panel =
     tab === 'design' ? (
-      copy(<DesigningNow />)
+      copy(withCalm(<DesigningNow />))
     ) : tab === 'been' ? (
-      copy(<PreviousRoles />)
+      copy(withCalm(<PreviousRoles />))
     ) : tab === 'contact' ? (
-      copy(<ContactPanel />)
+      copy(withCalm(<ContactPanel />))
     ) : tab === 'lols' ? (
-      copy(<LlmQuotes />)
+      copy(withCalm(<LlmQuotes />))
     ) : tab === 'texture' && TexturePlayground ? (
       <Suspense fallback={null}>
         <TexturePlayground />
@@ -470,7 +483,29 @@ export default function App() {
         clip. The panel keeps the seat the field gives it on every tab, so
         hovering across the rail never moves the copy.
       */}
-      {!isMobile && (
+      {/*
+        With the texture on (`HOME_TEXTURE`, Nov 11 2026) it takes the leaf
+        field's place on the other tabs: the same strip, from just past the
+        copy's column to the window's right edge, the window's height, holding
+        still while the panel scrolls, as the field did. Hi carries its own,
+        in its scroller. It stays mounted across the leafy tabs, so switching
+        between them doesn't rebuild it.
+      */}
+      {!isMobile && HOME_TEXTURE && !widePanel && (
+        <HomeTexture
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: leafEdge,
+            right: 0,
+            // Sized by its two edges: the texture's wrapper is 100% wide unless told otherwise.
+            width: 'auto',
+            height: '100vh',
+            zIndex: 0,
+          }}
+        />
+      )}
+      {!isMobile && !HOME_TEXTURE && (
         <div
           style={{
             position: 'absolute',

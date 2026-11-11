@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
 import { ArrowUpRight, Check, Copy, GithubLogo, LinkedinLogo } from '@phosphor-icons/react'
 import Button from '../design-system/Button'
 import { resolveOpacity, resolvePalette } from '../design-system/buttonStyles'
@@ -45,7 +45,7 @@ export default function ContactButtons() {
         gap: space.sm,
       }}
     >
-      <CalmButton />
+      <CalmButton divider />
       <Button
         variant="secondary"
         size="md"
@@ -185,10 +185,12 @@ function PatternTiles({ paused }: { paused: boolean }) {
  * screen so the copy can be read in peace, then offers to bring it back. The
  * outlined button of the LinkedIn / GitHub links but square-cornered, like the
  * texture's cells, led by three of them; first in the row, with a hairline
- * between it and the contact pills. Shown only where the texture is (desktop, `HOME_TEXTURE`) and
- * moving (not under reduced motion, which already holds it still).
+ * between it and the contact pills (`divider`). The other home tabs carry it
+ * too, at the foot of their copy, beside the same texture. Every copy shares
+ * one paused state. Shown only where the texture is (desktop, `HOME_TEXTURE`)
+ * and moving (not under reduced motion, which already holds it still).
  */
-function CalmButton() {
+export function CalmButton({ divider = false, style }: { divider?: boolean; style?: CSSProperties }) {
   const paused = useTexturePaused()
   const isMobile = useIsMobile()
   const still = useMediaQuery('(prefers-reduced-motion: reduce)')
@@ -202,8 +204,10 @@ function CalmButton() {
       <button
         type="button"
         // The visible words lead the accessible name, so a voice-control user can
-      // say what they see; the action follows for a screen reader.
-      aria-label={paused ? 'I need stimmy: play the animated pattern' : 'I’m overstimulated: pause the animated pattern'}
+        // say what they see; the action follows for a screen reader.
+        aria-label={
+          paused ? 'I need stimmy: play the animated pattern' : 'I’m overstimulated: pause the animated pattern'
+        }
         onClick={() => setTexturePaused(!paused)}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
@@ -224,20 +228,23 @@ function CalmButton() {
           whiteSpace: 'nowrap',
           ...type['label-l'],
           transition: 'background 150ms ease, border-color 150ms ease',
+          ...style,
         }}
       >
         <PatternTiles paused={paused} />
         {paused ? 'I need stimmy' : 'I’m overstimulated'}
       </button>
-      <span
-        aria-hidden
-        style={{
-          width: '1px',
-          height: '20px',
-          margin: `0 ${space.xs}`,
-          background: color.border.default,
-        }}
-      />
+      {divider && (
+        <span
+          aria-hidden
+          style={{
+            width: '1px',
+            height: '20px',
+            margin: `0 ${space.xs}`,
+            background: color.border.default,
+          }}
+        />
+      )}
     </>
   )
 }
