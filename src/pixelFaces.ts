@@ -82,3 +82,18 @@ export const FACE_DOTS = {
     [11, 10],
   ],
 } satisfies Record<string, [number, number][]>
+
+/**
+ * The pixel heart beside "using data, UX research, and empathy" in `Hero`:
+ * 9 × 7 squares, `#` the heart and `+` its two lighter shine squares. Here so
+ * the Texture tab's glyphs can share it.
+ */
+export const HEART_ROWS = [
+  '.###.###.',
+  '##+######',
+  '#+#######',
+  '.#######.',
+  '..#####..',
+  '...###...',
+  '....#....',
+]

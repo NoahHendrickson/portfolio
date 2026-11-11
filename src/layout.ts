@@ -170,3 +170,10 @@ export const RAIL_SPINE = 48
  * corners and the hover ring.
  */
 export const HOME_BENTO: 'ruled' | 'rounded' = 'rounded'
+
+/**
+ * Whether Hi's first screen carries the pixel texture (`HomeTexture`, Nov 11
+ * 2026): the Texture tab's Landing preset, its edge coming in from the
+ * window's right side, in place of the faint "no3y" watermark.
+ */
+export const HOME_TEXTURE = true

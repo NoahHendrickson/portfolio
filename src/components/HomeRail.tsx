@@ -87,6 +87,8 @@ const TABS: RailItem<HomeTab>[] = [
   { id: 'design', label: 'How I design', glyph: face('emoticon') },
   { id: 'contact', label: 'Contact', glyph: face('grin') },
   { id: 'lols', label: 'LOLs', glyph: face('laugh') },
+  // The pixel-texture playground (Nov 11 2026): a reference, listed on the dev server only.
+  ...(import.meta.env.DEV ? [{ id: 'texture' as const, label: 'Texture', glyph: face('eyeroll') }] : []),
 ]
 
 /**
