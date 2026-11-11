@@ -688,6 +688,8 @@ function RailList<T extends string>({
       <div
         ref={listRef}
         className="rail-list"
+        // The tabs are content the home texture's follow blob keeps off.
+        data-texture-avoid="buttons"
         data-animate={pillReady}
         data-homing={homing}
         onTransitionEnd={(e) => {

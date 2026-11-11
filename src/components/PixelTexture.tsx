@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import { useTexturePaused } from '../hooks/useTexturePaused'
-import { MARK } from '../introTimeline'
+import { LABEL, MARK } from '../introTimeline'
 import {
   DEFAULT_SWATCHES,
   FACE_GLYPHS,
@@ -193,6 +193,73 @@ const SWAY_PACE = 0.00035
 export type Taper = 'off' | 'short' | 'long'
 const TAPER_SHARE: Record<Taper, number> = { off: 0, short: 0.12, long: 0.35 }
 
+/**
+ * The "no3y" wordmark drawn into the grid (`wordmark`, Nov 11 2026): the
+ * intro's `LABEL`, each of its blocks `WORDMARK_BLOCK` cells square (the larger
+ * past `WORDMARK_BIG_COLS` columns), its foot `WORDMARK_FOOT` rows off the
+ * grid's bottom (clear of the scroll hint), and its right end reaching
+ * `WORDMARK_REACH` of the way into the Edge's frame, so the `y`'s arm runs
+ * into the shape. The field's fade (`EDGE_FADE`) spares it and the cells
+ * round it, out to `WORDMARK_HALO`.
+ */
+const WORDMARK_BLOCK = { small: 3, big: 4 }
+const WORDMARK_BIG_COLS = 100
+const WORDMARK_FOOT = 4
+const WORDMARK_REACH = 0.45
+const WORDMARK_HALO = 5
+/**
+ * The follow blob (`follow`, Nov 11 2026, prototype B on Hi): a blob of the
+ * texture that trails the pointer and sheds droplets of it. Sizes in cells,
+ * times in ms. The head eases after the pointer (`FOLLOW_EASE`, a rate a
+ * second); `FOLLOW_SATELLITES` balls circle it so its outline keeps changing;
+ * a droplet drops every `DROP_EVERY` cells it travels, and now and then while
+ * it sits still, each drifting off and shrinking away. The shape is re-read
+ * every `FOLLOW_STEP_MS`.
+ */
+const FOLLOW_RADIUS = 6.2
+const FOLLOW_EASE = 7
+/**
+ * The satellites: `[orbit x, orbit y, pace, size]` — each on its own
+ * stretched orbit at its own pace (signed for direction), so the lobes they
+ * push out never line up and the outline never settles round. Their sizes
+ * pulse a fifth either way.
+ */
+const FOLLOW_SATELLITES: [number, number, number, number][] = [
+  [3.9, 2.2, 0.0011, 3.2],
+  [2.5, 4.2, -0.0008, 2.8],
+  [4.8, 2.9, 0.0006, 2.4],
+  [3.2, 3.4, -0.0014, 2.1],
+]
+/** The space the blob is read from wobbles this far (cells), slowly, so its edge wanders like an amoeba's. */
+const FOLLOW_WARP = 1.6
+/**
+ * Content the blob keeps off (`avoid`): it fades out within `AVOID_SOFT`
+ * cells of a line of text or a button, `AVOID_PAD` short of it, so it stops
+ * in a soft edge round the copy. The faint field glyphs fade there too.
+ */
+const AVOID_PAD = 0.6
+const AVOID_SOFT = 3
+/**
+ * How far off content the blob's head settles when the pointer is over it:
+ * just past the soft edge, so the blob presses against the content and slides
+ * along it rather than fading away.
+ */
+const AVOID_SETTLE = AVOID_PAD + AVOID_SOFT + 0.5
+/** How often the content to keep off is re-read, scrolls aside (ms). */
+const AVOID_READ_MS = 250
+const FOLLOW_STEP_MS = 40
+const DROP_EVERY = 1.1
+const DROP_MAX = 40
+const DROP_LIFE: [number, number] = [900, 1700]
+const SHED_GAP: [number, number] = [320, 700]
+/** Pausing scatters every cell away from the pointer, each fading over this long (ms). */
+const DISPERSE_LIFE: [number, number] = [700, 1300]
+
+/** Rows kept clear above and below the upright wordmark, at least. */
+const UPRIGHT_MARGIN = 1
+/** The share of the Edge's frame, from its far side, the texture fades in over. */
+const EDGE_FADE = 0.12
+
 /** How often the swaying line is re-rasterised; it moves a cell at a time anyway. */
 const SWAY_STEP_MS = 110
 
@@ -201,18 +268,22 @@ const SWAY_STEP_MS = 110
  * sketch's own top only reaches 13–30% across, which in that box read as a
  * near-straight sliver. This one starts well out, throws a big lobe, notches
  * in sharply, swells again, cuts a deep inlet and runs out along a shelf before
- * settling. Shares of the box: `x` is the reach from the side, `y` down.
+ * settling. Shares of the box: `x` is the reach from the side, `y` down. The
+ * top lobe was rounded off and the second drawn back (0.76 to 0.6) the same
+ * day, both having read as spiky peaks.
  */
 const LANDING_LINE: [number, number][] = [
   [0.62, 0],
-  [0.8, 0.05],
-  [0.88, 0.11],
-  [0.68, 0.17],
-  [0.4, 0.21],
-  [0.46, 0.26],
-  [0.7, 0.31],
-  [0.76, 0.36],
-  [0.54, 0.42],
+  [0.78, 0.05],
+  [0.85, 0.1],
+  [0.8, 0.145],
+  [0.62, 0.185],
+  [0.45, 0.22],
+  [0.42, 0.26],
+  [0.52, 0.3],
+  [0.6, 0.34],
+  [0.58, 0.38],
+  [0.48, 0.43],
   [0.3, 0.47],
   [0.24, 0.53],
   [0.34, 0.57],
@@ -348,9 +419,10 @@ function channels(colour: string): [number, number, number] {
 /** How long a pause takes to drain the colour out, or a play to bring it back (ms). */
 const GREY_FADE_MS = 520
 
+/** Blends two colours, each `#rrggbb` or `rgb(r, g, b)` (a grey from `shade` is the latter). */
 function mix(a: string, b: string, t: number) {
-  const [ar, ag, ab] = hexToRgb(a)
-  const [br, bg, bb] = hexToRgb(b)
+  const [ar, ag, ab] = channels(a)
+  const [br, bg, bb] = channels(b)
   const c = (x: number, y: number) => Math.round(x + (y - x) * t)
   return `rgb(${c(ar, br)}, ${c(ag, bg)}, ${c(ab, bb)})`
 }
@@ -423,6 +495,39 @@ type TextureProps = {
   edgeLine?: EdgeLine
   /** Holds the texture still where it is (and stops the pointer stirring it), without rebuilding it. */
   paused?: boolean
+  /**
+   * The Edge's frame width (CSS px) for a box this wide and tall, when the line should
+   * span less than the whole box; it's measured from the shape's side, and
+   * the cells past its far side fade out (`EDGE_FADE`). Keep the function's
+   * identity stable (module scope), since a new one rebuilds the grid.
+   */
+  edgeWidth?: (boxWidth: number, boxHeight: number) => number
+  /**
+   * Draws the "no3y" wordmark into the grid: `foot` along the grid's foot, its
+   * right end running into the Edge (`WORDMARK_*`); `upright` turned a
+   * quarter anticlockwise (read bottom to top, the `n` at the foot), as tall as
+   * the grid allows and centred across it, on its own — the Edge's line is
+   * left out.
+   */
+  wordmark?: false | 'foot' | 'upright'
+  /**
+   * A blob of the texture follows the pointer, shedding droplets, in place of
+   * the Edge's line (`FOLLOW_*`). Pausing scatters it away from the pointer
+   * rather than greying it, and playing again grows it back under the pointer.
+   */
+  follow?: boolean
+  /**
+   * A selector for content the follow blob keeps off. A match marked
+   * `data-texture-avoid="text"` is read line by line (its text's line boxes),
+   * `"links"` link by link (the project cards), `"buttons"` button by button
+   * (the rail's tabs), `"self"` by its own box, and any other match by its
+   * row's boxes (a row of buttons; lone wrappers are stepped through). They
+   * are re-read on any scroll, since content scrolling past a canvas that
+   * holds still moves them.
+   */
+  avoid?: string
+  /** Seats the upright wordmark this far (CSS px) in from the shape's side, rather than centred. */
+  wordmarkInset?: number
 }
 
 export function TextureCanvas({
@@ -453,6 +558,11 @@ export function TextureCanvas({
   taper = 'off',
   edgeLine = 'sketch',
   paused = false,
+  edgeWidth: edgeWidthFor,
+  wordmark = false,
+  follow = false,
+  avoid,
+  wordmarkInset,
 }: TextureProps) {
   const wrapRef = useRef<HTMLDivElement | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -469,8 +579,18 @@ export function TextureCanvas({
   // of the frame as it was over a repaint and fading the copy out.
   const greyRef = useRef(paused)
   const fadeRef = useRef<HTMLCanvasElement | null>(null)
+  // The follow blob scatters and regrows instead (set by the build effect).
+  const disperseRef = useRef<(() => void) | null>(null)
+  const reformRef = useRef<(() => void) | null>(null)
   useEffect(() => {
     pausedRef.current = paused
+    if (follow) {
+      // The blob scatters; a wordmark stays and eases to grey (`greyAmount`).
+      greyRef.current = paused
+      if (paused) disperseRef.current?.()
+      else reformRef.current?.()
+      return
+    }
     if (greyRef.current === paused) return
     greyRef.current = paused
     const canvas = canvasRef.current
@@ -488,7 +608,7 @@ export function TextureCanvas({
       fade.style.opacity = '0'
     })
     return () => cancelAnimationFrame(frame)
-  }, [paused])
+  }, [paused, follow])
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -665,6 +785,14 @@ export function TextureCanvas({
 
     /** A treatment for a cell inside the shape, at light `level` (0–3); `rim` cells may break up into bare glyphs. */
     const treat = (x: number, y: number, level: number, rim: boolean): Kind => {
+      // A bare glyph would leave holes in the wordmark's letters.
+      if (word?.[y * cols + x]) {
+        const kind = treatShape(x, y, level, false)
+        return kind === 'ink' ? 'tile' : kind
+      }
+      return treatShape(x, y, level, rim)
+    }
+    const treatShape = (x: number, y: number, level: number, rim: boolean): Kind => {
       if (rim && Math.random() < 0.45) return 'ink'
       if (mixMode === 'scatter') return weighted(SCATTER)
       if (mixMode === 'patches') return seedAt(x, y).kind
@@ -699,7 +827,116 @@ export function TextureCanvas({
     // light level — brightest along the edge, darkening inwards.
     // A box the caller sized (`fill`) is the line's own frame, its full width;
     // elsewhere the line keeps near the sketch's proportions.
-    const edgeWidth = fill ? cols : Math.min(cols, rows * EDGE_STRETCH)
+    const edgeWidth = edgeWidthFor
+      ? Math.min(cols, Math.max(1, (edgeWidthFor(box.width, box.height) * dpr) / cell))
+      : fill
+        ? cols
+        : Math.min(cols, rows * EDGE_STRETCH)
+
+    // The wordmark: a fixed set of cells that are always in the shape, laid
+    // into the Edge's mask below. `wordEdge` marks its outline cells, which
+    // take the bright tones (and, under Leaf, the highlights).
+    const word = wordmark && shape === 'edge' ? new Uint8Array(cols * rows) : null
+    const wordEdge = word ? new Uint8Array(cols * rows) : null
+    const upright = wordmark === 'upright'
+    // The Edge's own line: left out under the upright word and the follow blob.
+    const lineOn = !upright && !follow
+    if (word && upright) {
+      // Blocks as large as fit the height (and the width, three across), the
+      // word turned so the label's left end lands at the foot and the tops of
+      // its letters face left.
+      const length = LABEL[0].length
+      const block = Math.max(1, Math.min(Math.floor((rows - 2 * UPRIGHT_MARGIN) / length), Math.floor(cols / LABEL.length)))
+      const tall = length * block
+      const wide = LABEL.length * block
+      const inset = wordmarkInset === undefined ? null : Math.round((wordmarkInset * dpr) / cell)
+      const left = inset === null ? Math.floor((cols - wide) / 2) : mirror ? cols - inset - wide : inset
+      const top = Math.floor((rows - tall) / 2)
+      for (let ly = 0; ly < wide; ly++) {
+        for (let lx = 0; lx < tall; lx++) {
+          if (LABEL[Math.floor(ly / block)][Math.floor(lx / block)] !== 'X') continue
+          const gx = left + ly
+          const gy = top + tall - 1 - lx
+          if (gx >= 0 && gy >= 0 && gx < cols && gy < rows) word[gy * cols + gx] = 1
+        }
+      }
+    } else if (word) {
+      const block = cols >= WORDMARK_BIG_COLS ? WORDMARK_BLOCK.big : WORDMARK_BLOCK.small
+      const wide = LABEL[0].length * block
+      const tall = LABEL.length * block
+      const frameLeft = mirror ? cols - edgeWidth : 0
+      const right = mirror ? Math.round(frameLeft + edgeWidth * WORDMARK_REACH) : Math.round(edgeWidth * (1 - WORDMARK_REACH))
+      const left = Math.max(0, mirror ? right - wide : right)
+      const top = Math.max(0, rows - WORDMARK_FOOT - tall)
+      for (let y = 0; y < tall; y++) {
+        for (let x = 0; x < wide; x++) {
+          if (LABEL[Math.floor(y / block)][Math.floor(x / block)] !== 'X') continue
+          const gx = left + x
+          const gy = top + y
+          if (gx < cols && gy < rows) word[gy * cols + gx] = 1
+        }
+      }
+    }
+    if (word && wordEdge) {
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          const i = y * cols + x
+          if (!word[i]) continue
+          const out = (nx: number, ny: number) => nx < 0 || ny < 0 || nx >= cols || ny >= rows || !word[ny * cols + nx]
+          if (out(x - 1, y) || out(x + 1, y) || out(x, y - 1) || out(x, y + 1)) wordEdge[i] = 1
+        }
+      }
+    }
+
+    // Past the Edge frame's far side the cells fade out, over its last
+    // `EDGE_FADE`, except round the wordmark (rings of neighbours out to
+    // `WORDMARK_HALO`, fading over the last few), so it and its near field
+    // stay whole. Without a narrower frame there is no fade (the caller masks).
+    let fade: Float32Array | null = null
+    if (edgeWidthFor) {
+      fade = new Float32Array(cols * rows)
+      const span = Math.max(1, edgeWidth * EDGE_FADE)
+      const start = mirror ? cols - edgeWidth : edgeWidth
+      const halo = new Uint8Array(cols * rows).fill(WORDMARK_HALO + 1)
+      if (word) {
+        let ring: number[] = []
+        word.forEach((on, i) => {
+          if (on) {
+            halo[i] = 0
+            ring.push(i)
+          }
+        })
+        for (let step = 1; step <= WORDMARK_HALO && ring.length; step++) {
+          const next: number[] = []
+          for (const i of ring) {
+            const x = i % cols
+            const y = (i - x) / cols
+            for (let dy = -1; dy <= 1; dy++) {
+              for (let dx = -1; dx <= 1; dx++) {
+                const nx = x + dx
+                const ny = y + dy
+                if (nx < 0 || ny < 0 || nx >= cols || ny >= rows) continue
+                const j = ny * cols + nx
+                if (halo[j] <= step) continue
+                halo[j] = step
+                next.push(j)
+              }
+            }
+          }
+          ring = next
+        }
+      }
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          const i = y * cols + x
+          const along = mirror ? (x + 0.5 - start) / span : (start - x - 0.5) / span
+          const ramp = Math.min(1, Math.max(0, along))
+          const near = halo[i] <= NEAR_ROWS ? 1 : Math.max(0, 1 - (halo[i] - NEAR_ROWS) / (WORDMARK_HALO - NEAR_ROWS + 1))
+          fade[i] = Math.max(ramp, near)
+        }
+      }
+    }
+
     const edgeMask = shape === 'edge' ? document.createElement('canvas') : null
     const edgeField = (phase: number) => {
       const line = EDGE_SAMPLES[edgeLine].map(([nx, ny]): [number, number] => {
@@ -716,16 +953,20 @@ export function TextureCanvas({
       edgeMask!.width = cols
       edgeMask!.height = rows
       mctx.clearRect(0, 0, cols, rows)
-      mctx.beginPath()
-      // Closed round the side the shape fills from.
-      const side = mirror ? cols + 2 : -2
-      mctx.moveTo(side, -2)
-      mctx.lineTo(line[0][0], -2)
-      for (const [x, y] of line) mctx.lineTo(x, y)
-      mctx.lineTo(line[line.length - 1][0], rows + 2)
-      mctx.lineTo(side, rows + 2)
-      mctx.closePath()
-      mctx.fill()
+      // Upright, the word stands on its own (and the follow blob is its own
+      // shape): no line, nothing filled.
+      if (lineOn) {
+        mctx.beginPath()
+        // Closed round the side the shape fills from.
+        const side = mirror ? cols + 2 : -2
+        mctx.moveTo(side, -2)
+        mctx.lineTo(line[0][0], -2)
+        for (const [x, y] of line) mctx.lineTo(x, y)
+        mctx.lineTo(line[line.length - 1][0], rows + 2)
+        mctx.lineTo(side, rows + 2)
+        mctx.closePath()
+        mctx.fill()
+      }
       const alpha = mctx.getImageData(0, 0, cols, rows).data
       const inside = new Uint8Array(cols * rows)
       const dist = new Float32Array(cols * rows)
@@ -733,7 +974,15 @@ export function TextureCanvas({
         for (let x = 0; x < cols; x++) {
           const i = y * cols + x
           inside[i] = alpha[i * 4 + 3] > 127 ? 1 : 0
-          if (!inside[i]) continue
+          if (!inside[i]) {
+            // A wordmark cell outside the line: its outline bright, its inside
+            // dim (and past the rim's 0.9, so it never breaks into bare glyphs).
+            if (word?.[i]) {
+              inside[i] = 1
+              dist[i] = wordEdge![i] ? 1 : 4
+            }
+            continue
+          }
           let best = Infinity
           for (const [lx, ly] of line) best = Math.min(best, (lx - x - 0.5) ** 2 + (ly - y - 0.5) ** 2)
           dist[i] = Math.sqrt(best)
@@ -865,6 +1114,265 @@ export function TextureCanvas({
       return (c.lit ? FAINT_LIT : FAINT) * fade
     }
     const accents = new Set<Cell>()
+
+    // Takes a new inside / distance map: cells the shape passes over come in
+    // or go out, and the ones that stay take their new light level's colour
+    // (their treatment holds, so the inside doesn't churn). The near field
+    // follows. Changed cells go into `out`.
+    const applyInside = (next: { inside: Uint8Array; dist: Float32Array }, out: Set<Cell>) => {
+      for (const c of cells) {
+        const i = c.y * cols + c.x
+        const was = c.kind !== 'field'
+        if (!next.inside[i]) {
+          if (!was) continue
+          accents.delete(c)
+          Object.assign(c, { kind: 'field', color: text, slot: -1, reroll: false, level: 0 })
+          out.add(c)
+          continue
+        }
+        const level = edgeLevel(next.dist[i])
+        if (!was) {
+          const rim = next.dist[i] < 0.9
+          const kind = treat(c.x, c.y, level, rim)
+          Object.assign(c, { kind, reroll: true, level, rim, seed: seedIndexAt(c.x, c.y) }, paintAt(c.x, c.y, level, kind))
+          if (blank(kind)) c.glyph = -1
+          out.add(c)
+        } else if (level !== c.level) {
+          c.level = level
+          Object.assign(c, paintAt(c.x, c.y, level, c.kind))
+          out.add(c)
+        }
+      }
+      if (field === 'near') for (const c of measureNear()) out.add(c)
+    }
+
+    // Content to keep off: its boxes in cells, re-read when it resizes, and
+    // each cell's clearance (0 on it, easing up to 1 `AVOID_SOFT` cells out).
+    let avoidRects: [number, number, number, number][] = []
+    const avoidMap = avoid ? new Float32Array(cols * rows).fill(1) : null
+    const clearAt = (x: number, y: number) => {
+      let d = Infinity
+      for (const [x0, y0, x1, y1] of avoidRects) {
+        const dx = Math.max(x0 - x, 0, x - x1)
+        const dy = Math.max(y0 - y, 0, y - y1)
+        d = Math.min(d, Math.hypot(dx, dy))
+      }
+      const t = Math.min(1, Math.max(0, (d - AVOID_PAD) / AVOID_SOFT))
+      return t * t * (3 - 2 * t)
+    }
+    // Re-queried on every read: the layer outlives a tab switch, which swaps
+    // the content. Cells whose clearance changed go into `out`.
+    const readAvoid = (out?: Set<Cell>) => {
+      if (!avoidMap || !avoid) return
+      const avoidRoots = Array.from(document.querySelectorAll<HTMLElement>(avoid))
+      const frame = canvas.getBoundingClientRect()
+      if (!frame.width || !frame.height) return
+      const sx = cols / frame.width
+      const sy = rows / frame.height
+      const boxes: DOMRect[] = []
+      for (const root of avoidRoots) {
+        const mode = root.dataset.textureAvoid
+        if (mode === 'links' || mode === 'buttons') {
+          // Each link's box (the project cards) or button's (the rail's tabs).
+          for (const el of root.querySelectorAll(mode === 'links' ? 'a' : 'button')) {
+            const r = el.getBoundingClientRect()
+            if (r.width && r.height) boxes.push(r)
+          }
+        } else if (mode === 'self') {
+          // The element's own box (the corner toggles).
+          const r = root.getBoundingClientRect()
+          if (r.width && r.height) boxes.push(r)
+        } else if (root.dataset.textureAvoid === 'text') {
+          // Every text fragment's line box, merged into one box a line, so a
+          // short last line leaves room beside it.
+          const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
+          const range = document.createRange()
+          const pieces: DOMRect[] = []
+          for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+            if (!node.textContent?.trim()) continue
+            range.selectNodeContents(node)
+            for (const r of range.getClientRects()) if (r.width && r.height) pieces.push(r)
+          }
+          // Inline pictures (the tags' icons) count as text too.
+          for (const img of root.querySelectorAll('img, svg')) {
+            const r = img.getBoundingClientRect()
+            if (r.width && r.height) pieces.push(r)
+          }
+          pieces.sort((a, b) => a.top - b.top)
+          const lines: { top: number; bottom: number; left: number; right: number }[] = []
+          for (const r of pieces) {
+            const line = lines.find((l) => r.top < l.bottom - 4 && r.bottom > l.top + 4)
+            if (line) {
+              line.top = Math.min(line.top, r.top)
+              line.bottom = Math.max(line.bottom, r.bottom)
+              line.left = Math.min(line.left, r.left)
+              line.right = Math.max(line.right, r.right)
+            } else lines.push({ top: r.top, bottom: r.bottom, left: r.left, right: r.right })
+          }
+          for (const l of lines) boxes.push(new DOMRect(l.left, l.top, l.right - l.left, l.bottom - l.top))
+        } else {
+          // Down through any lone wrapper (a component's own root) to the row itself.
+          let row: Element = root
+          while (row.children.length === 1) row = row.children[0]
+          for (const child of row.children) {
+            const r = child.getBoundingClientRect()
+            if (r.width && r.height) boxes.push(r)
+          }
+        }
+      }
+      avoidRects = boxes.map((r) => [
+        (r.left - frame.left) * sx,
+        (r.top - frame.top) * sy,
+        (r.right - frame.left) * sx,
+        (r.bottom - frame.top) * sy,
+      ])
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          const i = y * cols + x
+          const clear = clearAt(x + 0.5, y + 0.5)
+          if (Math.abs(clear - avoidMap[i]) > 0.01) {
+            avoidMap[i] = clear
+            out?.add(cells[i])
+          }
+        }
+      }
+    }
+    readAvoid()
+
+    // The nearest point at least `AVOID_SETTLE` off all content: straight
+    // out of a box the point is in, or on along the way it already lies from
+    // one; past that (a gap between two boxes too narrow to settle in), the
+    // nearest clear point on a ring search.
+    const distToContent = (x: number, y: number) => {
+      let d = Infinity
+      for (const [x0, y0, x1, y1] of avoidRects) {
+        d = Math.min(d, Math.hypot(Math.max(x0 - x, 0, x - x1), Math.max(y0 - y, 0, y - y1)))
+      }
+      return d
+    }
+    const pushOut = (x: number, y: number): [number, number] => {
+      if (!avoidRects.length || distToContent(x, y) >= AVOID_SETTLE) return [x, y]
+      const candidates: [number, number][] = []
+      for (const [x0, y0, x1, y1] of avoidRects) {
+        const cx = Math.min(x1, Math.max(x0, x))
+        const cy = Math.min(y1, Math.max(y0, y))
+        const d = Math.hypot(x - cx, y - cy)
+        if (d === 0) {
+          candidates.push([x0 - AVOID_SETTLE, y], [x1 + AVOID_SETTLE, y], [x, y0 - AVOID_SETTLE], [x, y1 + AVOID_SETTLE])
+        } else if (d < AVOID_SETTLE) {
+          candidates.push([cx + ((x - cx) / d) * AVOID_SETTLE, cy + ((y - cy) / d) * AVOID_SETTLE])
+        }
+      }
+      let best: [number, number] | null = null
+      let bestD = Infinity
+      for (const [cx, cy] of candidates) {
+        if (distToContent(cx, cy) < AVOID_SETTLE - 0.01) continue
+        const d = Math.hypot(cx - x, cy - y)
+        if (d < bestD) {
+          bestD = d
+          best = [cx, cy]
+        }
+      }
+      if (best) return best
+      for (let r = 0.5; r <= 40; r += 0.5) {
+        for (let k = 0; k < 32; k++) {
+          const a = (k / 32) * Math.PI * 2
+          const cx = x + Math.cos(a) * r
+          const cy = y + Math.sin(a) * r
+          if (distToContent(cx, cy) >= AVOID_SETTLE) return [cx, cy]
+        }
+      }
+      return [x, y]
+    }
+
+    // The follow blob: a head easing after the pointer with satellites
+    // circling it, and droplets it leaves behind, summed as metaballs. Its
+    // cells are brightest on the outline (a rim that breaks into bare glyphs)
+    // and dimmer inward. It waits right of centre until the pointer comes.
+    type Drop = { x: number; y: number; vx: number; vy: number; r: number; born: number; life: number }
+    const blob = follow
+      ? {
+          x: cols * 0.72,
+          y: rows * 0.45,
+          tx: cols * 0.72,
+          ty: rows * 0.45,
+          dropX: cols * 0.72,
+          dropY: rows * 0.45,
+          drops: [] as Drop[],
+          grow: pausedRef.current ? 0 : 1,
+          growTo: pausedRef.current ? 0 : 1,
+        }
+      : null
+    // The blob plus any wordmark, which always stays in.
+    const blobField = (now: number) => {
+      const next = blobOnly(now)
+      if (word) {
+        word.forEach((on, i) => {
+          if (!on || next.inside[i]) return
+          next.inside[i] = 1
+          next.dist[i] = wordEdge![i] ? 1 : 4
+        })
+      }
+      return next
+    }
+    const blobOnly = (now: number) => {
+      const inside = new Uint8Array(cols * rows)
+      const dist = new Float32Array(cols * rows)
+      if (!blob) return { inside, dist }
+      const balls: { x: number; y: number; r2: number }[] = []
+      const head = FOLLOW_RADIUS * blob.grow
+      if (head > 0.2) {
+        balls.push({ x: blob.x, y: blob.y, r2: head ** 2 })
+        FOLLOW_SATELLITES.forEach(([ox, oy, pace, size], k) => {
+          const angle = now * pace + k * 1.6
+          const tilt = k * 0.9
+          const cx = Math.cos(angle) * ox
+          const cy = Math.sin(angle) * oy
+          const r = size * (1 + 0.2 * Math.sin(now * 0.0019 + k * 1.3)) * blob.grow
+          balls.push({
+            x: blob.x + (cx * Math.cos(tilt) - cy * Math.sin(tilt)) * blob.grow,
+            y: blob.y + (cx * Math.sin(tilt) + cy * Math.cos(tilt)) * blob.grow,
+            r2: r * r,
+          })
+        })
+      }
+      for (const d of blob.drops) {
+        const left = 1 - (now - d.born) / d.life
+        if (left > 0) balls.push({ x: d.x, y: d.y, r2: (d.r * left ** 0.7) ** 2 })
+      }
+      if (!balls.length) return { inside, dist }
+      // Only the box the balls can reach is summed.
+      let x0 = cols
+      let x1 = 0
+      let y0 = rows
+      let y1 = 0
+      for (const b of balls) {
+        const reach = Math.sqrt(b.r2) * 2.5 + FOLLOW_WARP * 1.5
+        x0 = Math.min(x0, b.x - reach)
+        x1 = Math.max(x1, b.x + reach)
+        y0 = Math.min(y0, b.y - reach)
+        y1 = Math.max(y1, b.y + reach)
+      }
+      for (let y = Math.max(0, Math.floor(y0)); y < Math.min(rows, Math.ceil(y1)); y++) {
+        for (let x = Math.max(0, Math.floor(x0)); x < Math.min(cols, Math.ceil(x1)); x++) {
+          // Read at a wobbled point, so the edge wanders.
+          const wx =
+            x + 0.5 + FOLLOW_WARP * (Math.sin((y + 0.5) * 0.33 + now * 0.0009) + 0.5 * Math.sin((x + y) * 0.21 - now * 0.0013))
+          const wy =
+            y + 0.5 + FOLLOW_WARP * (Math.sin((x + 0.5) * 0.29 - now * 0.0008) + 0.5 * Math.sin((x - y) * 0.19 + now * 0.0011))
+          let sum = 0
+          for (const b of balls) sum += b.r2 / Math.max(0.01, (wx - b.x) ** 2 + (wy - b.y) ** 2)
+          // Near content the field dies away, so the edge stops short of it.
+          if (avoidMap && sum >= 1) sum *= clearAt(wx, wy)
+          if (sum < 1) continue
+          const i = y * cols + x
+          inside[i] = 1
+          dist[i] = sum < 1.3 ? 0.5 : sum < 2.2 ? 2 : sum < 4 ? 4 : 7
+        }
+      }
+      return { inside, dist }
+    }
+    if (blob && blob.grow > 0) applyInside(blobField(now0), new Set())
     if (palette === 'mono') {
       const pool = shapeCells()
       while (accents.size < Math.min(ACCENTS, pool.length)) accents.add(pool[Math.floor(Math.random() * pool.length)])
@@ -872,9 +1380,16 @@ export function TextureCanvas({
 
     // Paused, every colour turns a grey of its own brightness between the
     // ground and the text, so the patches still read, just quietly.
+    // Under `follow` the grey eases in and out (`greyAmount`, stepped by
+    // the loop over `GREY_FADE_MS`) rather than cross-fading the frame, since
+    // the scatter redraws every frame; the scattering particles keep their
+    // colour (`shadeOff`).
     const greys = new Map<string, string>()
+    let greyAmount = follow && greyRef.current ? 1 : 0
+    let shadeOff = false
     const shade = (colour: string) => {
-      if (!greyRef.current) return colour
+      const amount = follow ? greyAmount : greyRef.current ? 1 : 0
+      if (amount <= 0 || shadeOff) return colour
       let grey = greys.get(colour)
       if (!grey) {
         const [r, g, b] = channels(colour)
@@ -882,13 +1397,30 @@ export function TextureCanvas({
         grey = mix(ground, text, 0.12 + 0.3 * light)
         greys.set(colour, grey)
       }
-      return grey
+      if (amount >= 1) return grey
+      const step = Math.round(amount * 20) / 20
+      const key = `${colour}|${step}`
+      let blend = greys.get(key)
+      if (!blend) {
+        blend = mix(colour, grey, step)
+        greys.set(key, blend)
+      }
+      return blend
     }
 
     const draw = (c: Cell) => {
       const px = c.x * cell
       const py = c.y * cell
       ctx.clearRect(px, py, cell, cell)
+      // The wordmark keeps whole near content (whatever covers it, covers it).
+      const i = c.y * cols + c.x
+      const faded = (fade ? fade[i] : 1) * (avoidMap && !word?.[i] ? avoidMap[i] : 1)
+      if (faded <= 0) return
+      ctx.globalAlpha = faded
+      paintCell(c, px, py, faded)
+      ctx.globalAlpha = 1
+    }
+    const paintCell = (c: Cell, px: number, py: number, faded: number) => {
       // A leaf slot with every swatch off falls back to the text colour.
       const own = c.slot >= 0 ? (resolveSlot(swatchesRef.current, c.slot) ?? text) : c.color
       const ink = shade(accents.has(c) ? accent : c.lit ? text : own)
@@ -904,9 +1436,8 @@ export function TextureCanvas({
       if (c.kind === 'field') {
         const alpha = fieldAlpha(c)
         if (c.glyph < 0 || alpha === 0) return
-        ctx.globalAlpha = alpha
+        ctx.globalAlpha = alpha * faded
         glyphAt(sprite(c.glyph, text), px, py)
-        ctx.globalAlpha = 1
         return
       }
       if (c.kind === 'tile' || c.kind === 'solid') {
@@ -980,6 +1511,37 @@ export function TextureCanvas({
     }
     window.addEventListener('pointermove', onMove)
 
+    // The follow blob's target: the pointer, in cells (a little past the
+    // grid's edges at most). Heard on the window like the stir, and kept up
+    // while paused, so playing again grows the blob where the pointer is.
+    // The pointer's last place on screen is kept, so a scroll (which moves
+    // the canvas under a still pointer) re-aims it too.
+    let pointer: { x: number; y: number } | null = null
+    const aim = () => {
+      if (!blob || !pointer) return
+      const rect = canvas.getBoundingClientRect()
+      // Over content, the head settles on the nearest clear point beside it.
+      ;[blob.tx, blob.ty] = pushOut(
+        Math.min(cols + 2, Math.max(-2, ((pointer.x - rect.left) / rect.width) * cols)),
+        Math.min(rows + 2, Math.max(-2, ((pointer.y - rect.top) / rect.height) * rows)),
+      )
+    }
+    const onFollow = (event: PointerEvent) => {
+      pointer = { x: event.clientX, y: event.clientY }
+      aim()
+    }
+    // A scroll (captured, so one inside any scroller — Hi's panel — is heard)
+    // moves the content to keep off, or the canvas, under a still pointer:
+    // the next frame re-reads the content and re-aims.
+    let scrolled = false
+    const onScroll = () => {
+      scrolled = true
+    }
+    if (blob) {
+      window.addEventListener('pointermove', onFollow)
+      window.addEventListener('scroll', onScroll, { capture: true, passive: true })
+    }
+
     let frame = 0
     if (!still) {
       const maxD = cells.reduce((m, c) => Math.max(m, c.d), 0) + 1
@@ -992,7 +1554,93 @@ export function TextureCanvas({
       let nextFlow = now0 + FLOW_STEP_MS
       let lastFlow = now0
       let nextStreak = now0 + 600 / rate
+      let nextFollow = now0
+      let nextAvoid = now0 + AVOID_READ_MS
+      let nextShed = now0 + rand(...SHED_GAP)
       let last = now0
+
+      // The scatter on pause: every cell showing becomes a particle flung
+      // away from the blob's head (faster the nearer it was), slowing and
+      // fading out; the grid underneath is emptied, so it ends blank.
+      type Particle = { cell: Cell; x: number; y: number; vx: number; vy: number; life: number }
+      let dispersal: { parts: Particle[]; start: number } | null = null
+      const disperse = () => {
+        if (!blob) return
+        const now = performance.now()
+        const parts: Particle[] = []
+        for (const c of cells) {
+          // The wordmark stays put (it greys instead).
+          if (word?.[c.y * cols + c.x]) {
+            c.dash = null
+            continue
+          }
+          const showing = c.kind !== 'field' || (c.glyph >= 0 && fieldAlpha(c) > 0)
+          if (showing) {
+            const dx = c.x + 0.5 - blob.x
+            const dy = c.y + 0.5 - blob.y
+            const d = Math.max(0.3, Math.hypot(dx, dy))
+            const pace = rand(6, 14) * (0.7 + 2.4 / (1 + d * 0.35))
+            parts.push({
+              cell: { ...c },
+              x: c.x * cell,
+              y: c.y * cell,
+              vx: ((dx / d) * pace + rand(-1.5, 1.5)) * cell,
+              vy: ((dy / d) * pace + rand(-1.5, 1.5)) * cell,
+              life: rand(...DISPERSE_LIFE),
+            })
+          }
+          accents.delete(c)
+          Object.assign(c, { kind: 'field', color: text, slot: -1, reroll: false, level: 0, dash: null })
+          c.near = nearReach + 1
+        }
+        running.length = 0
+        blob.drops = []
+        blob.grow = 0
+        blob.growTo = 0
+        // The near field closes round what's left (the wordmark).
+        if (field === 'near') measureNear()
+        dispersal = { parts, start: now }
+      }
+      const stepDispersal = (now: number, dt: number) => {
+        if (!dispersal) return
+        // What stays (the wordmark and its near field) greying under the
+        // particles, which keep their colour.
+        greyAmount = Math.min(1, greyAmount + (dt * 1000) / GREY_FADE_MS)
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        cells.forEach(draw)
+        shadeOff = true
+        let alive = false
+        for (const p of dispersal.parts) {
+          const t = (now - dispersal.start) / p.life
+          if (t >= 1) continue
+          alive = true
+          const drag = Math.exp(-dt * 1.8)
+          p.x += p.vx * dt
+          p.y += p.vy * dt
+          p.vx *= drag
+          p.vy *= drag
+          const left = (1 - t) ** 1.5
+          ctx.globalAlpha = left
+          paintCell(p.cell, Math.round(p.x), Math.round(p.y), left)
+          ctx.globalAlpha = 1
+        }
+        shadeOff = false
+        if (!alive) {
+          dispersal = null
+          greyAmount = 1
+          ctx.clearRect(0, 0, canvas.width, canvas.height)
+          cells.forEach(draw)
+        }
+      }
+      // Playing again: the blob grows back from nothing under the pointer.
+      const reform = () => {
+        if (!blob) return
+        blob.x = blob.dropX = blob.tx
+        blob.y = blob.dropY = blob.ty
+        blob.growTo = 1
+      }
+      disperseRef.current = disperse
+      reformRef.current = reform
 
       type Streak = { y: number; head: number; from: number; len: number; speed: number; covered: Cell[] }
       const running: Streak[] = []
@@ -1018,13 +1666,26 @@ export function TextureCanvas({
       }
 
       const tick = (now: number) => {
-        if (!visibleRef.current || pausedRef.current) {
+        if (!visibleRef.current || (pausedRef.current && !dispersal)) {
           last = now
           frame = requestAnimationFrame(tick)
           return
         }
         const dt = Math.min(0.1, (now - last) / 1000)
         last = now
+        // The content to keep off is re-read on a scroll and every
+        // `AVOID_READ_MS` besides (a tab switch, a reflow, the font arriving).
+        if (scrolled || (avoidMap && now >= nextAvoid)) {
+          scrolled = false
+          nextAvoid = now + AVOID_READ_MS
+          readAvoid(dirty)
+          aim()
+        }
+        if (dispersal) {
+          stepDispersal(now, dt)
+          frame = requestAnimationFrame(tick)
+          return
+        }
         for (const c of cells) {
           if (now >= c.next) {
             flip(c)
@@ -1061,34 +1722,61 @@ export function TextureCanvas({
         // The edge sways: cells the line passes over come in or go out, and
         // the ones that stay take their new light level's colour (their
         // treatment holds, so the inside doesn't churn).
-        if (edge && sway && now >= nextSway) {
+        if (edge && sway && lineOn && now >= nextSway) {
           nextSway = now + SWAY_STEP_MS
-          const next = edgeField((now - now0) * SWAY_PACE * rate)
-          for (const c of cells) {
-            const i = c.y * cols + c.x
-            const was = c.kind !== 'field'
-            if (!next.inside[i]) {
-              if (!was) continue
-              accents.delete(c)
-              Object.assign(c, { kind: 'field', color: text, slot: -1, reroll: false, level: 0 })
-              dirty.add(c)
-              continue
-            }
-            const level = edgeLevel(next.dist[i])
-            if (!was) {
-              const rim = next.dist[i] < 0.9
-              const kind = treat(c.x, c.y, level, rim)
-              Object.assign(c, { kind, reroll: true, level, rim, seed: seedIndexAt(c.x, c.y) }, paintAt(c.x, c.y, level, kind))
-              if (blank(kind)) c.glyph = -1
-              dirty.add(c)
-            } else if (level !== c.level) {
-              c.level = level
-              Object.assign(c, paintAt(c.x, c.y, level, c.kind))
-              dirty.add(c)
-            }
+          applyInside(edgeField((now - now0) * SWAY_PACE * rate), dirty)
+        }
+        // The follow blob: the head eases after the pointer every frame, it
+        // drops a droplet every `DROP_EVERY` cells it travels (left behind,
+        // drifting off) and sheds one now and then while still (thrown out
+        // from its edge); the shape is re-read every `FOLLOW_STEP_MS`.
+        if (blob) {
+          // Playing again, the wordmark's grey eases back out.
+          if (greyAmount > 0) {
+            greyAmount = Math.max(0, greyAmount - (dt * 1000) / GREY_FADE_MS)
+            for (const c of cells) if (c.kind !== 'field') dirty.add(c)
           }
-          // The near field follows the line.
-          if (field === 'near') for (const c of measureNear()) dirty.add(c)
+          const ease = 1 - Math.exp(-dt * FOLLOW_EASE)
+          blob.x += (blob.tx - blob.x) * ease
+          blob.y += (blob.ty - blob.y) * ease
+          blob.grow += (blob.growTo - blob.grow) * (1 - Math.exp(-dt * 5))
+          const drop = (x: number, y: number, vx: number, vy: number, r: number) => {
+            blob.drops.push({ x, y, vx, vy, r, born: now, life: rand(...DROP_LIFE) / rate })
+            if (blob.drops.length > DROP_MAX) blob.drops.shift()
+          }
+          const moved = Math.hypot(blob.x - blob.dropX, blob.y - blob.dropY)
+          if (blob.grow > 0.5 && moved > DROP_EVERY) {
+            const nx = (blob.x - blob.dropX) / moved
+            const ny = (blob.y - blob.dropY) / moved
+            const side = rand(-1, 1) * FOLLOW_RADIUS * 0.6
+            drop(blob.x - nx * FOLLOW_RADIUS * 0.5 - ny * side, blob.y - ny * FOLLOW_RADIUS * 0.5 + nx * side, -nx * rand(0.5, 1.5), -ny * rand(0.5, 1.5), rand(1.3, 2.2))
+            blob.dropX = blob.x
+            blob.dropY = blob.y
+          }
+          if (blob.grow > 0.5 && now >= nextShed) {
+            nextShed = now + rand(...SHED_GAP) / rate
+            const angle = rand(0, Math.PI * 2)
+            const pace = rand(1.5, 3)
+            drop(
+              blob.x + Math.cos(angle) * FOLLOW_RADIUS * 0.8,
+              blob.y + Math.sin(angle) * FOLLOW_RADIUS * 0.8,
+              Math.cos(angle) * pace,
+              Math.sin(angle) * pace,
+              rand(1, 1.7),
+            )
+          }
+          for (const d of blob.drops) {
+            d.x += d.vx * dt
+            d.y += d.vy * dt
+            const drag = Math.exp(-dt * 0.8)
+            d.vx *= drag
+            d.vy *= drag
+          }
+          blob.drops = blob.drops.filter((d) => now - d.born < d.life)
+          if (now >= nextFollow) {
+            nextFollow = now + FOLLOW_STEP_MS
+            applyInside(blobField(now), dirty)
+          }
         }
         // Streaks: start a few (sometimes two or three rows together, the way
         // they come in the recording), slide each one's run of bars along its
@@ -1177,10 +1865,14 @@ export function TextureCanvas({
 
     return () => {
       repaintRef.current = null
+      disperseRef.current = null
+      reformRef.current = null
       cancelAnimationFrame(frame)
       window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointermove', onFollow)
+      window.removeEventListener('scroll', onScroll, { capture: true })
     }
-  }, [box, shape, glyphs, palette, mixMode, size, fit, colors, outline, faceWeight, speed, ripple, rippleFrom, sway, streaks, flow, patchSize, bleed, mirror, field, taper, edgeLine, fill, still, themeVersion])
+  }, [box, shape, glyphs, palette, mixMode, size, fit, colors, outline, faceWeight, speed, ripple, rippleFrom, sway, streaks, flow, patchSize, bleed, mirror, field, taper, edgeLine, fill, edgeWidthFor, wordmark, follow, avoid, wordmarkInset, still, themeVersion])
 
   return (
     <div
@@ -1226,18 +1918,51 @@ export function TextureCanvas({
  * width, and the box's far edge is softened (`mask`) so the field doesn't
  * stop on a hard line.
  */
-export function HomeTexture({ style }: { style?: CSSProperties }) {
+export function HomeTexture({
+  style,
+  edgeWidth,
+  wordmark = false,
+  follow = false,
+  avoid,
+  wordmarkInset,
+}: {
+  style?: CSSProperties
+  /** As `TextureCanvas`'s: the Edge spans this much of a wider box, which then fades in-canvas rather than by mask. */
+  edgeWidth?: (boxWidth: number, boxHeight: number) => number
+  wordmark?: false | 'foot' | 'upright'
+  /** As `TextureCanvas`'s: a blob that follows the pointer instead of the Edge (no fade, since it goes anywhere). */
+  follow?: boolean
+  /** As `TextureCanvas`'s: content the follow blob keeps off. */
+  avoid?: string
+  /** As `TextureCanvas`'s: the upright wordmark's distance in from the right. */
+  wordmarkInset?: number
+}) {
   const paused = useTexturePaused()
+  const mask = edgeWidth || follow ? null : 'linear-gradient(to right, transparent 0, #000 12%)'
   return (
     <TextureCanvas
       {...LANDING_SETTINGS}
       paused={paused}
       mirror
       fill
-      label="A wavering edge of pixel faces, leaves and shapes"
+      edgeWidth={edgeWidth}
+      wordmark={wordmark}
+      follow={follow}
+      avoid={avoid}
+      wordmarkInset={wordmarkInset}
+      label={
+        follow && wordmark
+          ? 'The word no3y standing upright, and a blob that follows the pointer, built of pixel faces, leaves and shapes'
+          : follow
+          ? 'A blob of pixel faces, leaves and shapes that follows the pointer'
+          : wordmark === 'upright'
+          ? 'The word no3y, standing upright, built of pixel faces, leaves and shapes'
+          : wordmark
+            ? 'The word no3y and a wavering edge, built of pixel faces, leaves and shapes'
+            : 'A wavering edge of pixel faces, leaves and shapes'
+      }
       wrapStyle={{
-        maskImage: 'linear-gradient(to right, transparent 0, #000 12%)',
-        WebkitMaskImage: 'linear-gradient(to right, transparent 0, #000 12%)',
+        ...(mask ? { maskImage: mask, WebkitMaskImage: mask } : null),
         ...style,
       }}
     />

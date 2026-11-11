@@ -87,6 +87,8 @@ export default function ThemeToggle() {
     <button
       type="button"
       className="theme-toggle"
+      // Kept clear by the home texture's follow blob.
+      data-texture-avoid="self"
       onClick={() => setTheme(next)}
       aria-label={`Switch to ${next} mode`}
       style={{
