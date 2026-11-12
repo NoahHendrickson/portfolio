@@ -55,7 +55,7 @@ const CARD_ASPECT = '905 / 500'
  */
 const NO3Y_ART: RowArt = {
   src: '/work/no3y-code/collage/new-agent.webp',
-  alt: 'no3y Code — the new-agent screen on the Glass theme, over a fluted gradient',
+  alt: 'no3y Code: the new-agent screen on the Glass theme, over a fluted gradient',
   aspect: '2544 / 1640',
 }
 
@@ -166,7 +166,7 @@ const TUNES: Record<string, Tune> = {
       src: '/work/bento/card-d2-window.jpg',
       srcSet:
         '/work/bento/card-d2-window-620.jpg 620w, /work/bento/card-d2-window-890.jpg 890w, /work/bento/card-d2-window.jpg 1240w',
-      alt: 'D2 Conflux — the builds column, a list of stat builds, on yellow',
+      alt: 'D2 Conflux: the builds column, a list of stat builds, on yellow',
       aspect: '1240 / 920',
     },
   },
@@ -182,6 +182,17 @@ const TUNES: Record<string, Tune> = {
   '/work/how-to-pc': { ring: ['#00a2a2', '#de1440'], shape: '1 / 1', fit: 'inset', bg: '#00a2a2', width: 110, anchor: 'center' },
   // Drawn live (`LIVE_ART`), so `fit` only sizes the box. The ring is the chips' own green and blue.
   '/work/thinking-states': { ring: ['#4ade80', '#60a5fa', '#f472b6'], shape: '3 / 2', fit: 'cover' },
+  // Made for the card at its own 3 / 2, so it fills it whole. The ring is the leaf colours.
+  '/work/noey-brand': {
+    ring: ['#26b846', '#fcb01a', '#f95b1c', '#44aaf8'],
+    shape: '3 / 2',
+    fit: 'cover',
+    art: {
+      src: '/work/brand/card-thumbnail.webp',
+      alt: 'Noey brand: the leaf mark and word on a dark surface with the moving texture, glyph tiles, and two bright social posts in a notch',
+      aspect: '1500 / 1000',
+    },
+  },
 }
 
 /** Cards drawn live in place of their art: Thinking States' chips run on the card itself. */
@@ -213,7 +224,8 @@ type Placed = { card: WorkCard; tune: Tune }
  * new one) goes to the shorter column.
  */
 const PLACEMENT: [string[], string[]] = [
-  ['/work/no3y-code', '/work/invisible/apply', '/work/crisp', '/work/how-to-pc'],
+  // The brand page (Nov 12 2026) after Apply: at 3 / 2 it leaves the columns closest to level.
+  ['/work/no3y-code', '/work/invisible/apply', '/work/noey-brand', '/work/crisp', '/work/how-to-pc'],
   [
     '/work/invisible/onboarding',
     '/work/stat-builder',
@@ -497,7 +509,7 @@ function ProjectCard({
       href={card.href}
       className="home-project"
       data-ruled={ruled || undefined}
-      aria-label={`${card.title} — ${card.subtitle}`}
+      aria-label={`${card.title}: ${card.subtitle}`}
       style={{
         display: 'flex',
         flexDirection: 'column',

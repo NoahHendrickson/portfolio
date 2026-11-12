@@ -189,7 +189,7 @@ function PlugTooltip({ plug }: { plug: Plug }) {
     <span style={{ display: 'flex', flexDirection: 'column', gap: 4, maxWidth: 256 }}>
       <span>
         <span style={{ fontWeight: 500 }}>{plug.name}</span>
-        {plug.suffix && <span style={{ color: FG_MUTED }}> — {plug.suffix}</span>}
+        {plug.suffix && <span style={{ color: FG_MUTED }}> ({plug.suffix})</span>}
       </span>
       {plug.stats && <span>{plug.stats}</span>}
       {plug.description && <span style={{ color: FG_MUTED }}>{plug.description}</span>}

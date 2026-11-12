@@ -84,7 +84,7 @@ const no3y: WorkCard = {
   // window runs off the right and the foot.
   art: zoomed(
     '/work/bento/card-no3y-agent.jpg',
-    'no3y Code — the new-agent screen on the Glass theme, over a fluted gradient',
+    'no3y Code: the new-agent screen on the Glass theme, over a fluted gradient',
   ),
   extra: { label: 'Download from GitHub', href: NO3Y_CODE_DOWNLOAD },
   feature: { blurb: projects['no3y-code'].tagline },
@@ -96,7 +96,7 @@ const crisp: WorkCard = {
   subtitle: 'Zoom editor for screen recordings',
   art: {
     src: '/work/bento/card-crisp.webp',
-    alt: 'Crisp — the circular mark and wordmark on magenta',
+    alt: 'Crisp: the circular mark and wordmark on magenta',
   },
 }
 
@@ -113,7 +113,7 @@ const statBuilder: WorkCard = {
   // headless Chrome, JPEG 4:4:4 so the small UI type holds.
   art: zoomed(
     '/work/bento/card-d2-builds.jpg',
-    'D2 Conflux — the builds column, a list of stat builds, on yellow',
+    'D2 Conflux: the builds column, a list of stat builds, on yellow',
   ),
   extra: { label: 'View the site', href: STAT_BUILDER_SITE },
 }
@@ -125,7 +125,7 @@ const onboarding: WorkCard = {
   art: {
     src: '/work/bento/card-invisible-onboarding.webp',
     srcSet: cuts('/work/bento/card-invisible-onboarding.webp'),
-    alt: 'Meridial — the onboarding profile step in a browser, on mauve',
+    alt: 'Meridial: the onboarding profile step in a browser, on mauve',
   },
   extra: { label: '@ Invisible Technologies' },
   // The study's "Measureable outcomes", from its 50/50 experiment.
@@ -149,7 +149,7 @@ const synapse: WorkCard = {
   // placement to the pixel.
   art: zoomed(
     '/work/bento/card-invisible-synapse.webp',
-    'Synapse — three model responses beside the task panel, on purple',
+    'Synapse: three model responses beside the task panel, on purple',
   ),
   extra: { label: '@ Invisible Technologies' },
 }
@@ -161,7 +161,7 @@ const apply: WorkCard = {
   art: {
     src: '/work/bento/card-invisible-apply.webp',
     srcSet: cuts('/work/bento/card-invisible-apply.webp'),
-    alt: 'Meridial — Explore split view in a browser, on a light-blue field',
+    alt: 'Meridial: Explore split view in a browser, on a light-blue field',
   },
   extra: { label: '@ Invisible Technologies' },
 }
@@ -177,9 +177,25 @@ const thinkingStates: WorkCard = {
   subtitle: 'Fun loading animations, made with Opus',
   art: {
     src: '/work/thinking-states/icon.svg',
-    alt: 'Thinking States — animated loader chips on a dark field',
+    alt: 'Thinking States: animated loader chips on a dark field',
   },
   extra: { label: 'View the repo', href: THINKING_STATES_REPO },
+}
+
+/**
+ * The Noey brand guidelines (`/work/noey-brand`, Nov 12 2026): a hand-built page
+ * with no `projects` entry. Its card art is a thumbnail made for it in the
+ * brand file (`Thumbnail · Noey brand` on the Social page, 1500 × 1000): the
+ * page's hero in small, the surface with its notch and two posts in it.
+ */
+const brand: WorkCard = {
+  href: '/work/noey-brand',
+  title: 'Noey brand',
+  subtitle: 'Brand guidelines and social posts',
+  art: {
+    src: '/work/brand/card-thumbnail.webp',
+    alt: 'Noey brand: the leaf mark and word on a dark surface with the moving texture, glyph tiles, and two bright social posts in a notch',
+  },
 }
 
 const nachoBox: WorkCard = {
@@ -188,7 +204,7 @@ const nachoBox: WorkCard = {
   subtitle: 'Packaging and graphic design project',
   art: {
     src: '/work/nacho-box/thumbnail.webp',
-    alt: 'Nacho Box — the “Lime” lockup on a chip-pattern yellow',
+    alt: 'Nacho Box: the “Lime” lockup on a chip-pattern yellow',
   },
 }
 
@@ -198,7 +214,7 @@ const howToPc: WorkCard = {
   subtitle: 'Graphic design project',
   art: {
     src: '/work/bento/card-how-to-pc.webp',
-    alt: 'How to Build a PC — the title and graphics-card illustration on teal',
+    alt: 'How to Build a PC: the title and graphics-card illustration on teal',
   },
   // A flat field in the infographic's own teal (#00A5A5), not the Figma
   // card's magenta gradient. The old card's placement: the title art centred
@@ -227,7 +243,7 @@ export type WorkFilter = 'all' | 'fun' | 'career' | 'graphic'
 const SECTIONS: { id: Exclude<WorkFilter, 'all'>; label: string; cards: WorkCard[] }[] = [
   { id: 'career', label: 'Case studies', cards: [onboarding, synapse, apply] },
   { id: 'fun', label: 'Personal projects', cards: [crisp, no3y, statBuilder, thinkingStates] },
-  { id: 'graphic', label: 'Graphic design', cards: [pixelArt, nachoBox, howToPc] },
+  { id: 'graphic', label: 'Graphic design', cards: [brand, pixelArt, nachoBox, howToPc] },
 ]
 
 /**

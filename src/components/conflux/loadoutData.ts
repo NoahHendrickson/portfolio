@@ -44,7 +44,7 @@ export interface Piece {
 
 /** A plug's plain label (alt / aria-label): the name, kind, then the stat line. */
 export const plugLabel = (p: Plug) => {
-  const title = p.suffix ? `${p.name} — ${p.suffix}` : p.name
+  const title = p.suffix ? `${p.name} (${p.suffix})` : p.name
   return p.stats ? `${title}\n${p.stats}` : title
 }
 

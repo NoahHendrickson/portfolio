@@ -187,7 +187,7 @@ export default function D2Conflux() {
                   <SheetImg
                     shot={{
                       src: `${ASSET}/weapon-search.jpg`,
-                      alt: 'Weapon search: the full catalog of 1,335 weapons as coloured nameplates by element, and Fatebringer (Timelost) open in three cards: its stats, its perk grid with the most popular roll picked, and how popular each perk and combo is',
+                      alt: 'Weapon search: the full catalog of 1,335 weapons as colored nameplates by element, and Fatebringer (Timelost) open in three cards: its stats, its perk grid with the most popular roll picked, and how popular each perk and combo is',
                       aspect: '3200 / 1800',
                     }}
                   />

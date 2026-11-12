@@ -19,7 +19,7 @@ type Clipping = {
 const clippings: Clipping[] = [
   {
     src: '/work/llm-wall-claude.jpeg',
-    alt: 'Claude replying “Hell yes — that’s the fix.”',
+    alt: 'Claude replying “Hell yes, that’s the fix.”',
     width: 153,
     aspect: '153 / 46',
     crop: { width: '110.46%', left: '-10.46%', height: '130.43%', top: '-30.43%' },

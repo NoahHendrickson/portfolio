@@ -642,7 +642,7 @@ export const projects: Record<string, Project> = {
           },
           {
             src: '/work/stat-builder/feedback-table-page.jpg',
-            alt: '“omg the table page is so good, thank you — this is a dope site, good job, ill add it to #helpful-links”',
+            alt: '“omg the table page is so good, thank you, this is a dope site, good job, ill add it to #helpful-links”',
             width: 171,
             aspect: '606 / 259',
             pad: 6,
@@ -650,7 +650,7 @@ export const projects: Record<string, Project> = {
           },
           {
             src: '/work/stat-builder/feedback-helpful-links.jpg',
-            alt: 'The app linked in the server’s helpful-links channel — “check available builds and excellent armor filtering”',
+            alt: 'The app linked in the server’s helpful-links channel: “check available builds and excellent armor filtering”',
             width: 342,
             aspect: '554 / 146',
             pad: 3,
@@ -658,7 +658,7 @@ export const projects: Record<string, Project> = {
           },
           {
             src: '/work/stat-builder/feedback-works-great.jpg',
-            alt: '“oh wow! that is absolutely amazing, it seems to work great — thank you so much for implementing”',
+            alt: '“oh wow! that is absolutely amazing, it seems to work great, thank you so much for implementing”',
             width: 230,
             aspect: '352 / 97',
             pad: 6,
@@ -666,7 +666,7 @@ export const projects: Record<string, Project> = {
           },
           {
             src: '/work/stat-builder/feedback-best-one.jpg',
-            alt: '“Hey dude, I really love your app, its so good and quick — easily the best one out there”',
+            alt: '“Hey dude, I really love your app, its so good and quick, easily the best one out there”',
             width: 283,
             aspect: '996 / 251',
             pad: 6,
@@ -715,7 +715,7 @@ export const projects: Record<string, Project> = {
         label: 'the problem',
         heading: 'Armor 3.0 turned build-crafting into a constraint-satisfaction problem.',
         paragraphs: [
-          'Six stats, set bonuses, tuning, fragments, mod costs, and one exotic — all interacting, all pulling from a vault of hundreds of pieces. Players solve it today with spreadsheets, or by eyeballing it and settling.',
+          'Six stats, set bonuses, tuning, fragments, mod costs, and one exotic, all interacting and all pulling from a vault of hundreds of pieces. Players solve it today with spreadsheets, or by eyeballing it and settling.',
           'The interesting design problem isn’t the math. It’s that the answer is only useful if you trust it, which means the UI has to show its work: which constraint is binding, what you gave up, and why this loadout beat the next one.',
         ],
       },
@@ -742,7 +742,7 @@ export const projects: Record<string, Project> = {
         label: 'the craft',
         heading: 'Designing for a player who will absolutely check your math.',
         paragraphs: [
-          'The benchmark was D2ArmorPicker and DIM’s Loadout Optimizer — tools this audience already trusts. Anything I shipped got cross-checked against them roll for roll, which meant the design couldn’t hand-wave a single number.',
+          'The benchmark was D2ArmorPicker and DIM’s Loadout Optimizer, tools this audience already trusts. Anything I shipped got cross-checked against them roll for roll, which meant the design couldn’t hand-wave a single number.',
           'So the UI leans on progressive disclosure: a simple target-setting surface up front, with every derived value traceable back to the piece and mod that produced it. Loading is its own designed state, because a first-run manifest sync is genuinely slow and pretending otherwise reads as broken.',
         ],
       },
@@ -761,7 +761,7 @@ export const projects: Record<string, Project> = {
       { label: 'Manifest pipeline with IndexedDB cache', state: 'shipped' },
       { label: 'Inventory ingestion including vault', state: 'shipped' },
       { label: 'Core optimizer + results UI', state: 'shipped' },
-      { label: 'Full constraints — mods, set bonuses, exotics, tuning, fragments', state: 'building' },
+      { label: 'Full constraints: mods, set bonuses, exotics, tuning, fragments', state: 'building' },
       { label: 'Polish + deploy', state: 'next' },
     ],
     cta: {
@@ -823,7 +823,7 @@ export const projects: Record<string, Project> = {
       { value: 'client', label: 'side fuzzy search, no round trip' },
     ],
     heroShot: {
-      label: 'Weapon detail — perk columns with every possible roll',
+      label: 'Weapon detail: perk columns with every possible roll',
       caption: 'The view the game itself never gives you.',
     },
     sections: [
@@ -832,7 +832,7 @@ export const projects: Record<string, Project> = {
         heading: 'The community lost its reference tool and went back to wikis.',
         paragraphs: [
           'D2Foundry answered two questions better than anything else: what can this weapon roll, and what rolls this perk. When it went away, players fell back to scattered wikis and spreadsheets that go stale every season.',
-          'I rebuilt the parts that mattered on a modern stack, then added the one thing those tools couldn’t do — pointing the same search at your own inventory.',
+          'I rebuilt the parts that mattered on a modern stack, then added the one thing those tools couldn’t do: pointing the same search at your own inventory.',
         ],
       },
       {
@@ -842,13 +842,13 @@ export const projects: Record<string, Project> = {
         ],
         bullets: [
           'Filter by element, weapon type, ammo, rarity, frame, and perk',
-          'My Vault — sign in with Bungie and search the weapons you own, at the exact rolls you have',
-          'My Armor — owned armor by slot, class, rarity, and equipped mods',
+          'My Vault: sign in with Bungie and search the weapons you own, at the exact rolls you have',
+          'My Armor: owned armor by slot, class, rarity, and equipped mods',
           'Fuzzy search that runs client-side, so results land as you type',
         ],
         shots: [
           { label: 'Weapon search results grid', caption: 'Search' },
-          { label: 'Perk-first results — every weapon that rolls it', caption: 'Inverted search' },
+          { label: 'Perk-first results: every weapon that rolls it', caption: 'Inverted search' },
           { label: 'My Vault, signed in', caption: 'Owned rolls' },
           { label: 'Filter rail', tall: true, caption: 'Filters' },
         ],
@@ -857,7 +857,7 @@ export const projects: Record<string, Project> = {
         label: 'the craft',
         heading: 'A design system first, an app second.',
         paragraphs: [
-          'The component library is its own package documented in Storybook, with play-function tests running in a real browser alongside the unit suite. Building the primitives first meant the dense parts — perk columns, filter rails, owned-roll badges — could stay consistent instead of drifting per screen.',
+          'The component library is its own package documented in Storybook, with play-function tests running in a real browser alongside the unit suite. Building the primitives first meant the dense parts (perk columns, filter rails, owned-roll badges) could stay consistent instead of drifting per screen.',
           'The data layer takes the Bungie manifest and compiles it into weapon and armor indexes ahead of time, so search is a local fuzzy match rather than a network request. That one decision is what makes the interface feel instant, and it shaped how the whole search UI got designed.',
         ],
       },
@@ -1099,7 +1099,7 @@ export const projects: Record<string, Project> = {
           heading: 'Design mode',
           body: [
             'I’ve long wanted a design mode that works alongside coding agents, regardless of which harness I’m using. The feature is still a work in progress, but I prioritized a functional version so I could test it in my own workflow.',
-            'My motivation was that, as a designer, I still see enormous value in getting my hands dirty. Sometimes I need to compare variations—16 px or 24 px—and design mode lets me test both before applying the one that works.',
+            'My motivation was that, as a designer, I still see enormous value in getting my hands dirty. Sometimes I need to compare variations (16 px or 24 px), and design mode lets me test both before applying the one that works.',
             'Canvas mode was another feature I knew I wanted. It lets users pan around the page, focus on specific areas, and preview the page at different sizes.',
           ],
           copyWidth: 700,
@@ -1122,7 +1122,7 @@ export const projects: Record<string, Project> = {
       'This is the culmination of a few projects and ideas. I wanted to edit code with the precision of Figma’s design mode inside an agentic coding tool and tackle issues I have with most tools’ sidebar UX.',
     accent: PURPLE,
     accentIsDark: true,
-    links: [{ label: 'T3 Code — upstream', href: T3_CODE }],
+    links: [{ label: 'T3 Code (upstream)', href: T3_CODE }],
     stats: [],
     heroShot: {
       label: 'Thread sidebar, an agent session, and design mode open over a project',
@@ -1144,7 +1144,7 @@ export const projects: Record<string, Project> = {
       {
         label: 'design mode',
         paragraphs: [
-          'A design mode that works alongside coding agents and whatever harness I prefer at the time. Very much a work in progress, and built from scratch — it was important to get it functional so I could actually use and test it out.',
+          'A design mode that works alongside coding agents and whatever harness I prefer at the time. Very much a work in progress, and built from scratch. It was important to get it functional so I could actually use and test it out.',
         ],
       },
     ],
@@ -1161,7 +1161,7 @@ export const projects: Record<string, Project> = {
     slug: 'crisp',
     title: 'Crisp',
     eyebrow: ['Side project', '2026', 'Screen recording'],
-    tagline: 'A zoom editor for screen recordings — pin the viewport, speed up the boring bits, and let an AI subscription you already pay for polish the cut.',
+    tagline: 'A zoom editor for screen recordings: pin the viewport, speed up the boring bits, and let an AI subscription you already pay for polish the cut.',
     bento: {
       eyebrow: 'Zoom editor for screen recordings',
       cover: '/work/crisp/pin-viewport-poster.jpg',
@@ -1284,7 +1284,7 @@ export const projects: Record<string, Project> = {
     title: 'How to Build a PC',
     eyebrow: ['Graphic Design', '2019', 'Infographic'],
     tagline:
-      'A supplemental infographic for building a custom PC — an overview of the parts and the order to install them in.',
+      'A supplemental infographic for building a custom PC: an overview of the parts and the order to install them in.',
     bento: {
       eyebrow: 'Graphic Design',
       cover: '/work/how-to-pc/thumbnail.webp',
@@ -1313,7 +1313,7 @@ export const projects: Record<string, Project> = {
           frame: { left: 0, top: 0, width: 1272 },
           shot: {
             src: '/work/how-to-pc/infographic.svg',
-            alt: 'How to Build a PC — a parts legend, then CPU, RAM, AIO cooler, motherboard, PSU and GPU installation steps, ending with the cable-connection checklist',
+            alt: 'How to Build a PC: a parts legend, then CPU, RAM, AIO cooler, motherboard, PSU and GPU installation steps, ending with the cable-connection checklist',
             aspect: '1378.6 / 5951.8',
             frame: 'plain',
           },
@@ -1328,7 +1328,7 @@ export const projects: Record<string, Project> = {
     links: [],
     stats: [],
     heroShot: {
-      label: 'How to Build a PC — the full infographic',
+      label: 'How to Build a PC: the full infographic',
     },
     sections: [
       {
@@ -1353,7 +1353,7 @@ export const projects: Record<string, Project> = {
     title: 'Nacho Box',
     eyebrow: ['Graphic Design', '2019', 'Packaging'],
     tagline:
-      'A chips-and-salsa box for parties — hand-drawn lettering, icons and patterns, carried through to the dieline.',
+      'A chips-and-salsa box for parties: hand-drawn lettering, icons and patterns, carried through to the dieline.',
     bento: {
       eyebrow: 'Graphic Design',
       cover: '/work/nacho-box/thumbnail.webp',
@@ -1370,11 +1370,11 @@ export const projects: Record<string, Project> = {
       flow: 'continuous',
       hero: {
         body: [
-          'A packaging project I made in college. The goal was to design a convenient chips-and-salsa container for parties and get-togethers—one box, three salsas, and four flavors. I like to showcase this mostly for the graphics and illustrations, as I am really proud of the style I captured.',
+          'A packaging project I made in college. The goal was to design a convenient chips-and-salsa container for parties and get-togethers: one box, three salsas, and four flavors. I like to showcase this mostly for the graphics and illustrations, as I am really proud of the style I captured.',
         ],
         shot: {
           src: '/work/nacho-box/covers.svg',
-          alt: 'Four pack fronts side by side — Original, Kick of Jalapeño, Hint of Lime and Kick of Chile — each over a tortilla-chip pattern with hot, guac and mild bowls along the bottom',
+          alt: 'Four pack fronts side by side (Original, Kick of Jalapeño, Hint of Lime and Kick of Chile), each over a tortilla-chip pattern with hot, guac and mild bowls along the bottom',
           aspect: '1000 / 500',
         },
         shotWidth: 1272,
@@ -1402,7 +1402,7 @@ export const projects: Record<string, Project> = {
               width: 620,
               shot: {
                 src: '/work/nacho-box/lettering-clean.jpg',
-                alt: 'The same sheet after scanning — the notebook and shadows gone, the linework left clean on white',
+                alt: 'The same sheet after scanning: the notebook and shadows gone, the linework left clean on white',
                 aspect: '4 / 3',
               },
               caption: 'The same sheet, scanned and traced.',
@@ -1429,7 +1429,7 @@ export const projects: Record<string, Project> = {
         {
           kind: 'copy',
           heading: 'Icons for the patterns',
-          body: 'The icons took the same approach — sketched first, then redrawn and tiled into a pattern for each flavor.',
+          body: 'The icons took the same approach: sketched first, then redrawn and tiled into a pattern for each flavor.',
         },
         {
           kind: 'shot',
@@ -1438,7 +1438,7 @@ export const projects: Record<string, Project> = {
           frame: { left: 0, top: 0, width: 1272 },
           shot: {
             src: '/work/nacho-box/icon-sketches.jpg',
-            alt: 'Four sketchbook pages in a row — avocados, tomatoes and tomato slices, chile peppers, and a scatter of tortilla chips beside mild, guac and hot labels',
+            alt: 'Four sketchbook pages in a row: avocados, tomatoes and tomato slices, chile peppers, and a scatter of tortilla chips beside mild, guac and hot labels',
             aspect: '2560 / 720',
           },
         },
@@ -1449,7 +1449,7 @@ export const projects: Record<string, Project> = {
           frame: { left: 191, top: 0, width: 890 },
           shot: {
             src: '/work/nacho-box/icon-banner.svg',
-            alt: 'The ten finished icons in a line — tomato, avocado, chile, lime wedge, jalapeño slice, tortilla chip, salsa bowl, pepper, lime slice and a second chip',
+            alt: 'The ten finished icons in a line: tomato, avocado, chile, lime wedge, jalapeño slice, tortilla chip, salsa bowl, pepper, lime slice and a second chip',
             aspect: '999.2 / 105.8',
           },
         },
@@ -1460,14 +1460,14 @@ export const projects: Record<string, Project> = {
           frame: { left: 0, top: 0, width: 1272 },
           shot: {
             src: '/work/nacho-box/patterns.svg',
-            alt: 'Eight pattern sets laid out in a grid, each shown in three colorways — chips, chips with lime, chips with jalapeño, chips with chile, chiles, avocados, tomatoes and limes',
+            alt: 'Eight pattern sets laid out in a grid, each shown in three colorways: chips, chips with lime, chips with jalapeño, chips with chile, chiles, avocados, tomatoes and limes',
             aspect: '1000 / 509.4',
           },
         },
         {
           kind: 'copy',
           heading: 'The box itself',
-          body: 'Flat dielines for two of the four flavors — the pattern runs over the side panels, and THREE SALSAS INSIDE sits on the flap that opens.',
+          body: 'Flat dielines for two of the four flavors. The pattern runs over the side panels, and THREE SALSAS INSIDE sits on the flap that opens.',
         },
         {
           kind: 'columns',
@@ -1477,7 +1477,7 @@ export const projects: Record<string, Project> = {
               width: 620,
               shot: {
                 src: '/work/nacho-box/package-jalapeno.svg',
-                alt: 'The Kick of Jalapeño box laid flat on terracotta — front panel in yellow, side panels in the chip-and-jalapeño pattern, THREE SALSAS INSIDE along the bottom flap',
+                alt: 'The Kick of Jalapeño box laid flat on terracotta: front panel in yellow, side panels in the chip-and-jalapeño pattern, THREE SALSAS INSIDE along the bottom flap',
                 aspect: '1 / 1',
               },
               caption: 'Kick of Jalapeño.',
@@ -1497,12 +1497,12 @@ export const projects: Record<string, Project> = {
     },
     /* Generic-landing fields; unused because `landing` is set. */
     summary:
-      'A packaging project from college — a chips-and-salsa box for parties, with three salsas inside. The lettering, icons and patterns were all drawn by hand and rebuilt in Illustrator.',
+      'A packaging project from college: a chips-and-salsa box for parties, with three salsas inside. The lettering, icons and patterns were all drawn by hand and rebuilt in Illustrator.',
     accent: LIME,
     links: [],
     stats: [],
     heroShot: {
-      label: 'Nacho Box — the four pack fronts',
+      label: 'Nacho Box: the four pack fronts',
     },
     sections: [
       {

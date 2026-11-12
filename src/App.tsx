@@ -28,6 +28,7 @@ import InvisibleSynapse from './components/InvisibleSynapse'
 import ProjectLanding from './components/ProjectLanding'
 import ProjectStory from './components/ProjectStory'
 import ThinkingStates from './components/ThinkingStates'
+import BrandGuidelines from './components/BrandGuidelines'
 import { projects } from './data/projects'
 import { useHomePrototype } from './hooks/useHomePrototype'
 import { useIsMobile } from './hooks/useIsMobile'
@@ -335,6 +336,11 @@ export default function App() {
   // Hand-built around its live chips; it has no `projects` entry.
   if (route === '/work/thinking-states') {
     return <ThinkingStates />
+  }
+
+  // The brand guidelines, laid out as interlocking surfaces; no `projects` entry either.
+  if (route === '/work/noey-brand') {
+    return <BrandGuidelines />
   }
 
   // Routes are pathnames like '/work/no3y-code'.

@@ -352,7 +352,7 @@ function SharedControls({
       <MultiSegmented label="Glyphs" value={settings.glyphs} onChange={set('glyphs')} options={GLYPH_SET_OPTIONS} />
       <Segmented label="Faces" value={settings.faceWeight} onChange={set('faceWeight')} options={FACE_WEIGHT_OPTIONS} />
       <Segmented
-        label="Colour"
+        label="Color"
         value={settings.palette}
         onChange={set('palette')}
         options={[
@@ -510,7 +510,7 @@ function SwatchPopover({
   return (
     <div
       role="dialog"
-      aria-label={`${name} colour`}
+      aria-label={`${name} color`}
       style={{
         position: 'absolute',
         top: 'calc(100% + 8px)',
@@ -530,7 +530,7 @@ function SwatchPopover({
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         <input
           type="color"
-          aria-label={`Pick the ${name.toLowerCase()} colour`}
+          aria-label={`Pick the ${name.toLowerCase()} color`}
           value={value}
           onChange={(event) => apply(event.target.value)}
           style={{
@@ -574,7 +574,7 @@ function SwatchPopover({
         colours={recents}
         current={value}
         onPick={apply}
-        empty="Colours you replace show up here."
+        empty="Colors you replace show up here."
       />
     </div>
   )
@@ -634,8 +634,8 @@ function SwatchPicker({
   }, [open])
 
   return (
-    <div role="group" aria-label="Colours" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-      <span style={{ ...type['label-s'], color: color.text.muted, minWidth: '48px' }}>Colours</span>
+    <div role="group" aria-label="Colors" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+      <span style={{ ...type['label-s'], color: color.text.muted, minWidth: '48px' }}>Colors</span>
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
         {[0, 2, 4, 6].map((first) => (
           <div key={first} style={{ display: 'flex', gap: '4px' }}>
@@ -659,7 +659,7 @@ function SwatchPicker({
                 >
                   <button
                     type="button"
-                    aria-label={`Change the ${name.toLowerCase()} colour`}
+                    aria-label={`Change the ${name.toLowerCase()} color`}
                     aria-expanded={isOpen}
                     aria-haspopup="dialog"
                     title={value}
@@ -682,8 +682,8 @@ function SwatchPicker({
                   <button
                     type="button"
                     aria-pressed={on}
-                    aria-label={`Use the ${name.toLowerCase()} colour`}
-                    title={on ? 'Leave this colour out' : 'Use this colour'}
+                    aria-label={`Use the ${name.toLowerCase()} color`}
+                    title={on ? 'Leave this color out' : 'Use this color'}
                     onClick={() => update(i, { on: !on })}
                     style={{
                       width: '22px',
