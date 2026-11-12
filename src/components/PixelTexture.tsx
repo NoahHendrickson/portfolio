@@ -253,12 +253,17 @@ const DROP_MAX = 40
 const DROP_LIFE: [number, number] = [900, 1700]
 const SHED_GAP: [number, number] = [320, 700]
 /**
- * The pointer trail (`trail`): the cells the pointer passes over light up (the
- * ripple front's colours) and go back after `TRAIL_MS`, within `TRAIL_REACH`
- * cells of it (times the grain).
+ * The pointer trail (`trail`): the pointer clears a hole in the texture,
+ * `TRAIL_REACH` cells round it (times the grain), ringed by a cell of the
+ * accent (`TRAIL_RIM`), something the texture never does on its own, so the
+ * pointer reads against the motion. Once the pointer moves on, each cell comes
+ * back with a new glyph after `TRAIL_MS` plus up to `TRAIL_SCATTER`, so the
+ * hole fills in a cell at a time.
  */
-const TRAIL_MS = 650
-const TRAIL_REACH = 2.2
+const TRAIL_MS = 350
+const TRAIL_SCATTER = 700
+const TRAIL_REACH = 2.4
+const TRAIL_RIM = 1
 /** Pausing scatters every cell away from the pointer, each fading over this long (ms). */
 const DISPERSE_LIFE: [number, number] = [700, 1300]
 
@@ -396,8 +401,8 @@ type Cell = {
   ripple: number
   /** Under the ripple's front, drawn brighter. */
   lit: boolean
-  /** Under the pointer's trail, drawn brighter like `lit`. */
-  warm: boolean
+  /** Under the pointer's trail: 1 cleared, 2 on the hole's accent rim. */
+  warm: 0 | 1 | 2
   touched: number
   /** How many cells out from the shape (0 inside it), for a `near` field. */
   near: number
@@ -537,7 +542,7 @@ type TextureProps = {
   avoid?: string
   /** Seats the upright wordmark this far (CSS px) in from the shape's side, rather than centred. */
   wordmarkInset?: number
-  /** The cells the pointer passes over light up for a moment (`TRAIL_*`), on top of the stir. */
+  /** The pointer clears a hole with an accent rim that fills back in (`TRAIL_*`), in place of the stir. */
   trail?: boolean
 }
 
@@ -1062,7 +1067,7 @@ export function TextureCanvas({
           d: rippleDistance(ripple, rippleFrom, x, y, cols, rows),
           ripple: 0,
           lit: false,
-          warm: false,
+          warm: 0,
           touched: 0,
           near: 0,
           rim,
@@ -1121,10 +1126,10 @@ export function TextureCanvas({
     /** A field cell's strength, or 0 where the field doesn't reach. */
     const fieldAlpha = (c: Cell) => {
       if (field === 'none') return 0
-      if (field === 'full') return c.lit || c.warm ? FAINT_LIT : FAINT
+      if (field === 'full') return c.lit ? FAINT_LIT : FAINT
       if (c.near > nearReach) return 0
       const fade = nearReach > 1 ? 1 - ((c.near - 1) / (nearReach - 1)) * (1 - NEAR_FADE) : 1
-      return (c.lit || c.warm ? FAINT_LIT : FAINT) * fade
+      return (c.lit ? FAINT_LIT : FAINT) * fade
     }
     const accents = new Set<Cell>()
 
@@ -1428,7 +1433,7 @@ export function TextureCanvas({
       // The wordmark keeps whole near content (whatever covers it, covers it).
       const i = c.y * cols + c.x
       const faded = (fade ? fade[i] : 1) * (avoidMap && !word?.[i] ? avoidMap[i] : 1)
-      if (faded <= 0) return
+      if (faded <= 0 || c.warm === 1) return
       ctx.globalAlpha = faded
       paintCell(c, px, py, faded)
       ctx.globalAlpha = 1
@@ -1436,7 +1441,7 @@ export function TextureCanvas({
     const paintCell = (c: Cell, px: number, py: number, faded: number) => {
       // A leaf slot with every swatch off falls back to the text colour.
       const own = c.slot >= 0 ? (resolveSlot(swatchesRef.current, c.slot) ?? text) : c.color
-      const ink = shade(accents.has(c) ? accent : c.lit || c.warm ? text : own)
+      const ink = shade(accents.has(c) || c.warm === 2 ? accent : c.lit ? text : own)
       const side = cell - 2 * inset
       if (c.dash && c.kind !== 'field') {
         const bar = Math.max(u, Math.round(cell * STREAK_BAR))
@@ -1496,7 +1501,8 @@ export function TextureCanvas({
       warmUntil.forEach((until, c) => {
         if (now < until) return
         warmUntil.delete(c)
-        c.warm = false
+        c.warm = 0
+        flip(c)
         dirty.add(c)
       })
     }
@@ -1525,18 +1531,24 @@ export function TextureCanvas({
       const gy = ((event.clientY - rect.top) / rect.height) * rows
       const t = performance.now()
       const radius = (trail ? TRAIL_REACH : 1.8) * grain
-      const reach = Math.ceil(radius)
+      const outer = trail ? radius + TRAIL_RIM * grain : radius
+      const reach = Math.ceil(outer)
       for (let y = Math.floor(gy - reach); y <= gy + reach; y++) {
         for (let x = Math.floor(gx - reach); x <= gx + reach; x++) {
           if (x < 0 || y < 0 || x >= cols || y >= rows) continue
-          if (Math.hypot(x + 0.5 - gx, y + 0.5 - gy) > radius) continue
+          const dist = Math.hypot(x + 0.5 - gx, y + 0.5 - gy)
+          if (dist > outer) continue
           const c = cells[y * cols + x]
           if (trail) {
-            warmUntil.set(c, t + TRAIL_MS)
-            if (!c.warm) {
-              c.warm = true
+            // Cleared inside, rimmed outside; a cleared cell stays cleared
+            // until it comes back, rather than turning rim as the pointer leaves.
+            const warm = dist <= radius ? 1 : c.warm === 1 ? 1 : 2
+            warmUntil.set(c, t + TRAIL_MS + Math.random() * TRAIL_SCATTER)
+            if (warm !== c.warm) {
+              c.warm = warm
               dirty.add(c)
             }
+            continue
           }
           if (t - c.touched < 300) continue
           c.touched = t
