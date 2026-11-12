@@ -193,7 +193,7 @@ const brand: WorkCard = {
   title: 'Noey brand',
   subtitle: 'Brand guidelines and social posts',
   art: {
-    src: '/work/brand/card-thumbnail.webp',
+    src: '/work/brand/card-thumbnail-edge.webp',
     alt: 'Noey brand: the leaf mark and word on a dark surface with the moving texture, glyph tiles, and two bright social posts in a notch',
   },
 }

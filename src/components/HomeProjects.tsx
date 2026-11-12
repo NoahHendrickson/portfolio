@@ -188,7 +188,7 @@ const TUNES: Record<string, Tune> = {
     shape: '3 / 2',
     fit: 'cover',
     art: {
-      src: '/work/brand/card-thumbnail.webp',
+      src: '/work/brand/card-thumbnail-edge.webp',
       alt: 'Noey brand: the leaf mark and word on a dark surface with the moving texture, glyph tiles, and two bright social posts in a notch',
       aspect: '1500 / 1000',
     },
