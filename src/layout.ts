@@ -174,6 +174,15 @@ export const HOME_BENTO: 'ruled' | 'rounded' = 'rounded'
 /**
  * Whether Hi's first screen carries the pixel texture (`HomeTexture`, Nov 11
  * 2026): the Texture tab's Landing preset, its edge coming in from the
- * window's right side, in place of the faint "no3y" watermark.
+ * window's right side (and, with `HOME_WORDMARK`, the "no3y" wordmark).
  */
 export const HOME_TEXTURE = true
+
+/**
+ * Draws Hi's "no3y" wordmark into the texture (Nov 11 2026): the texture's
+ * canvas spans the whole first screen, its Edge kept to the strip right of the
+ * copy, and the word laid into the same grid at the screen's foot, left of the
+ * Edge with the `y` running into it, so it takes the patches, streaks and
+ * stir. Off, the faint solid `LogoWatermark` shows over the texture instead.
+ */
+export const HOME_WORDMARK = true

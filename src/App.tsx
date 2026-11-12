@@ -29,10 +29,11 @@ import ProjectLanding from './components/ProjectLanding'
 import ProjectStory from './components/ProjectStory'
 import ThinkingStates from './components/ThinkingStates'
 import { projects } from './data/projects'
+import { useHomePrototype } from './hooks/useHomePrototype'
 import { useIsMobile } from './hooks/useIsMobile'
 import { useMediaQuery } from './hooks/useMediaQuery'
 import { getRoute, navigate, subscribeToRoute } from './navigation'
-import { HOME_TEXTURE, pageGutter, RAIL_SPINE, TABLET_MAX } from './layout'
+import { HOME_TEXTURE, HOME_WORDMARK, pageGutter, RAIL_SPINE, TABLET_MAX } from './layout'
 
 const BG = 'var(--color-bg-primary)'
 
@@ -57,6 +58,28 @@ const WATERMARK_OPACITY = 0.08
  * first, behind a fade) would put tiles behind the text.
  */
 const TEXTURE_COPY_GAP = 32
+/**
+ * With the wordmark on, the texture's box is Hi's whole scroller, and the Edge
+ * keeps to the strip it had on its own: from the box's right edge to
+ * `TEXTURE_COPY_GAP` short of the copy, which is centred on the box (the
+ * scroller spans the dark area the panel centres on). Module scope, so its
+ * identity holds and the grid doesn't rebuild on every render.
+ */
+const homeEdgeWidth = (boxWidth: number, boxHeight: number) =>
+  Math.max(
+    TEXTURE_MIN_WIDTH,
+    Math.min(boxWidth / 2 - COPY_MAX / 2 - TEXTURE_COPY_GAP, boxHeight * TEXTURE_ASPECT_MAX),
+  )
+/**
+ * The widest the Edge's strip runs, as a share of its height. The Landing line
+ * was drawn for a tall, narrow strip (about 0.41 on a laptop); on a big screen
+ * the room right of the copy grows faster than the height, which stretched its
+ * lobes into sharp peaks (Nov 11 2026), so past this it stays the laptop's
+ * shape and sits further right instead.
+ */
+const TEXTURE_ASPECT_MAX = 0.42
+/** Prototype B's upright wordmark sits this far in from the window's right edge. */
+const UPRIGHT_INSET = 40
 /** The pause button's distance below a tab's copy. */
 const CALM_GAP = 64
 /** Below this the box would be a sliver beside the copy; it holds here and slides under the copy's edge. */
@@ -225,6 +248,9 @@ function isLegacyWorkRoute(route: string) {
 export default function App() {
   const route = useSyncExternalStore(subscribeToRoute, getRoute)
   const isMobile = useIsMobile()
+  // Hi's prototype (the switch is dev-only; production runs B): B swaps the
+  // Edge and wordmark for a blob that follows the pointer.
+  const follow = useHomePrototype() === 'follow'
   const stillOnly = useMediaQuery('(prefers-reduced-motion: reduce)')
   const legacyWork = isLegacyWorkRoute(route)
   // There is no Work tab on this branch: the projects run under Hi's copy, so
@@ -378,9 +404,10 @@ export default function App() {
     isMobile ? node : <div style={{ width: '100%', maxWidth: COPY_MAX, marginInline: 'auto' }}>{node}</div>
   // The tabs beside the texture end on the button that pauses it, so it's in
   // reach wherever a visitor has read to (Hi has it in its contact row).
+  // Marked as content prototype B's blob keeps off, read line by line.
   const withCalm = (node: React.ReactNode) =>
     HOME_TEXTURE ? (
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <div data-texture-avoid="text" style={{ display: 'flex', flexDirection: 'column' }}>
         {node}
         <CalmButton style={{ alignSelf: 'flex-start', marginTop: CALM_GAP }} />
       </div>
@@ -406,26 +433,33 @@ export default function App() {
       // it, on the panel's full width. On desktop the copy fills at least the
       // first screen, so the projects start just past the fold.
       <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-        {!isMobile && HOME_TEXTURE && (
-          // Against the scroller like the watermark it replaces, so it fills
+        {!isMobile && HOME_TEXTURE && !follow && (
+          // Against the scroller like the watermark, so it fills
           // the first screen and scrolls away with it: from the window's right
           // edge to just short of the copy's, behind everything.
+          // With the wordmark it spans the whole scroller, the Edge still in
+          // its strip and the word at the foot (`HOME_WORDMARK`). Prototype B
+          // (`useHomePrototype`) draws its own, outside the scroller.
           <HomeTexture
+            edgeWidth={HOME_WORDMARK ? homeEdgeWidth : undefined}
+            wordmark={HOME_WORDMARK && 'foot'}
             style={{
               position: 'absolute',
               top: 0,
               right: 0,
               zIndex: -1,
-              width: `max(${TEXTURE_MIN_WIDTH}px, calc(100vw - ${CENTRE} - ${COPY_MAX / 2}px - ${TEXTURE_COPY_GAP}px))`,
+              width: HOME_WORDMARK
+                ? '100%'
+                : `max(${TEXTURE_MIN_WIDTH}px, calc(100vw - ${CENTRE} - ${COPY_MAX / 2}px - ${TEXTURE_COPY_GAP}px))`,
               height: '100%',
             }}
           />
         )}
-        {!isMobile && !HOME_TEXTURE && (
+        {!isMobile && !(HOME_TEXTURE && (HOME_WORDMARK || follow)) && (
           // Placed against the scroller itself (nothing between is positioned):
           // its bottom edge is the window's at any height, and the logo still
           // scrolls away with the content. Behind the copy if a short window
-          // brings the two together.
+          // brings the two together; over the texture, which comes first.
           <LogoWatermark
             style={{
               position: 'absolute',
@@ -441,12 +475,17 @@ export default function App() {
         <div style={isMobile ? undefined : { minHeight: `calc(100vh - ${PANEL_TOP}px)` }}>
           {copy(
             <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-              <Hero />
-              <ContactButtons />
+              {/* What prototype B's blob keeps off: the copy line by line, the buttons box by box. */}
+              <div data-texture-avoid="text">
+                <Hero />
+              </div>
+              <div data-texture-avoid="boxes">
+                <ContactButtons />
+              </div>
             </div>,
           )}
         </div>
-        <div style={{ marginTop: '48px' }}>
+        <div data-texture-avoid="links" style={{ marginTop: '48px' }}>
           <HomeProjects />
         </div>
       </div>
@@ -491,8 +530,11 @@ export default function App() {
         in its scroller. It stays mounted across the leafy tabs, so switching
         between them doesn't rebuild it.
       */}
-      {!isMobile && HOME_TEXTURE && !widePanel && (
+      {!isMobile && HOME_TEXTURE && !widePanel && !follow && (
+        // How I design trades the Edge for the "no3y" wordmark stood upright,
+        // the window's height (Nov 11 2026); the switch rebuilds the grid.
         <HomeTexture
+          wordmark={tab === 'design' && 'upright'}
           style={{
             position: 'absolute',
             top: 0,
@@ -502,6 +544,34 @@ export default function App() {
             width: 'auto',
             height: '100vh',
             zIndex: 0,
+          }}
+        />
+      )}
+      {/*
+        Prototype B's texture (`useHomePrototype`), on every tab but the
+        Texture playground: the follow blob and the "no3y" wordmark stood
+        upright at the window's right edge, the window's height, on one layer
+        holding still over the whole dark area while the panel scrolls under
+        it, so the blob comes down the page with the pointer. Mounted across
+        the tabs, so a switch doesn't rebuild it. It keeps off each tab's copy,
+        Hi's buttons and project cards (`[data-texture-avoid]`), re-read as they
+        scroll past or a tab swaps them, so it moves round them into the
+        margins and any gap wide enough. Over the column fill (1), under the
+        rail and panel (2, later in the order).
+      */}
+      {!isMobile && HOME_TEXTURE && follow && tab !== 'texture' && (
+        <HomeTexture
+          follow
+          wordmark="upright"
+          wordmarkInset={UPRIGHT_INSET}
+          avoid="[data-texture-avoid]"
+          style={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            width: `calc(100vw - ${RAIL_SPINE}px)`,
+            height: '100vh',
+            zIndex: 2,
           }}
         />
       )}
