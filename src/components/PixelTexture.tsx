@@ -252,6 +252,13 @@ const DROP_EVERY = 1.1
 const DROP_MAX = 40
 const DROP_LIFE: [number, number] = [900, 1700]
 const SHED_GAP: [number, number] = [320, 700]
+/**
+ * The pointer trail (`trail`): the cells the pointer passes over light up (the
+ * ripple front's colours) and go back after `TRAIL_MS`, within `TRAIL_REACH`
+ * cells of it (times the grain).
+ */
+const TRAIL_MS = 650
+const TRAIL_REACH = 2.2
 /** Pausing scatters every cell away from the pointer, each fading over this long (ms). */
 const DISPERSE_LIFE: [number, number] = [700, 1300]
 
@@ -389,6 +396,8 @@ type Cell = {
   ripple: number
   /** Under the ripple's front, drawn brighter. */
   lit: boolean
+  /** Under the pointer's trail, drawn brighter like `lit`. */
+  warm: boolean
   touched: number
   /** How many cells out from the shape (0 inside it), for a `near` field. */
   near: number
@@ -528,6 +537,8 @@ type TextureProps = {
   avoid?: string
   /** Seats the upright wordmark this far (CSS px) in from the shape's side, rather than centred. */
   wordmarkInset?: number
+  /** The cells the pointer passes over light up for a moment (`TRAIL_*`), on top of the stir. */
+  trail?: boolean
 }
 
 export function TextureCanvas({
@@ -563,6 +574,7 @@ export function TextureCanvas({
   follow = false,
   avoid,
   wordmarkInset,
+  trail = false,
 }: TextureProps) {
   const wrapRef = useRef<HTMLDivElement | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -1050,6 +1062,7 @@ export function TextureCanvas({
           d: rippleDistance(ripple, rippleFrom, x, y, cols, rows),
           ripple: 0,
           lit: false,
+          warm: false,
           touched: 0,
           near: 0,
           rim,
@@ -1108,10 +1121,10 @@ export function TextureCanvas({
     /** A field cell's strength, or 0 where the field doesn't reach. */
     const fieldAlpha = (c: Cell) => {
       if (field === 'none') return 0
-      if (field === 'full') return c.lit ? FAINT_LIT : FAINT
+      if (field === 'full') return c.lit || c.warm ? FAINT_LIT : FAINT
       if (c.near > nearReach) return 0
       const fade = nearReach > 1 ? 1 - ((c.near - 1) / (nearReach - 1)) * (1 - NEAR_FADE) : 1
-      return (c.lit ? FAINT_LIT : FAINT) * fade
+      return (c.lit || c.warm ? FAINT_LIT : FAINT) * fade
     }
     const accents = new Set<Cell>()
 
@@ -1423,7 +1436,7 @@ export function TextureCanvas({
     const paintCell = (c: Cell, px: number, py: number, faded: number) => {
       // A leaf slot with every swatch off falls back to the text colour.
       const own = c.slot >= 0 ? (resolveSlot(swatchesRef.current, c.slot) ?? text) : c.color
-      const ink = shade(accents.has(c) ? accent : c.lit ? text : own)
+      const ink = shade(accents.has(c) ? accent : c.lit || c.warm ? text : own)
       const side = cell - 2 * inset
       if (c.dash && c.kind !== 'field') {
         const bar = Math.max(u, Math.round(cell * STREAK_BAR))
@@ -1475,6 +1488,25 @@ export function TextureCanvas({
       c.glyph = blank(c.kind) ? -1 : pick(c.glyph)
     }
     const dirty = new Set<Cell>()
+    // The trail's lit cells and when each goes back. Cleared by the frame
+    // loop, or under reduced motion (no loop) by a timer.
+    const warmUntil = new Map<Cell, number>()
+    let coolTimer = 0
+    const cool = (now: number) => {
+      warmUntil.forEach((until, c) => {
+        if (now < until) return
+        warmUntil.delete(c)
+        c.warm = false
+        dirty.add(c)
+      })
+    }
+    const coolStill = () => {
+      coolTimer = 0
+      cool(performance.now())
+      dirty.forEach(draw)
+      dirty.clear()
+      if (warmUntil.size) coolTimer = window.setTimeout(coolStill, 60)
+    }
 
     // The pointer stirs the cells it passes over — a direct response, so it
     // runs under reduced motion too.
@@ -1492,12 +1524,20 @@ export function TextureCanvas({
       const gx = ((event.clientX - rect.left) / rect.width) * cols
       const gy = ((event.clientY - rect.top) / rect.height) * rows
       const t = performance.now()
-      const reach = 2 * grain
+      const radius = (trail ? TRAIL_REACH : 1.8) * grain
+      const reach = Math.ceil(radius)
       for (let y = Math.floor(gy - reach); y <= gy + reach; y++) {
         for (let x = Math.floor(gx - reach); x <= gx + reach; x++) {
           if (x < 0 || y < 0 || x >= cols || y >= rows) continue
-          if (Math.hypot(x + 0.5 - gx, y + 0.5 - gy) > 1.8 * grain) continue
+          if (Math.hypot(x + 0.5 - gx, y + 0.5 - gy) > radius) continue
           const c = cells[y * cols + x]
+          if (trail) {
+            warmUntil.set(c, t + TRAIL_MS)
+            if (!c.warm) {
+              c.warm = true
+              dirty.add(c)
+            }
+          }
           if (t - c.touched < 300) continue
           c.touched = t
           flip(c)
@@ -1507,6 +1547,7 @@ export function TextureCanvas({
       if (still) {
         dirty.forEach(draw)
         dirty.clear()
+        if (warmUntil.size && !coolTimer) coolTimer = window.setTimeout(coolStill, 60)
       }
     }
     window.addEventListener('pointermove', onMove)
@@ -1696,6 +1737,7 @@ export function TextureCanvas({
           frame = requestAnimationFrame(tick)
           return
         }
+        if (warmUntil.size) cool(now)
         for (const c of cells) {
           if (now >= c.next) {
             flip(c)
@@ -1890,6 +1932,7 @@ export function TextureCanvas({
 
     return () => {
       window.clearInterval(stillTimer)
+      window.clearTimeout(coolTimer)
       cancelAnimationFrame(stillFrame)
       repaintRef.current = null
       disperseRef.current = null
@@ -1899,7 +1942,7 @@ export function TextureCanvas({
       window.removeEventListener('pointermove', onFollow)
       window.removeEventListener('scroll', onScroll, { capture: true })
     }
-  }, [box, shape, glyphs, palette, mixMode, size, fit, colors, outline, faceWeight, speed, ripple, rippleFrom, sway, streaks, flow, patchSize, bleed, mirror, field, taper, edgeLine, fill, edgeWidthFor, wordmark, follow, avoid, wordmarkInset, still, themeVersion])
+  }, [box, shape, glyphs, palette, mixMode, size, fit, colors, outline, faceWeight, speed, ripple, rippleFrom, sway, streaks, flow, patchSize, bleed, mirror, field, taper, edgeLine, fill, edgeWidthFor, wordmark, follow, avoid, wordmarkInset, trail, still, themeVersion])
 
   return (
     <div

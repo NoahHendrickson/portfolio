@@ -470,6 +470,7 @@ export default function BrandGuidelines() {
                   {...DEFAULT_SETTINGS}
                   shape="circle"
                   paused={paused}
+                  trail
                   fill
                   label="A live circle of the texture: pixel faces, leaves and shapes in patches of color"
                   wrapStyle={{ position: 'absolute', inset: 16, width: 'auto', height: 'auto', justifyContent: 'center', alignItems: 'center' }}
