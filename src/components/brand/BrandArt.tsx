@@ -397,8 +397,11 @@ export function SpinePost() {
       aria-label="A spine with three pills growing out of it, a face in each, cut into deep blue"
       style={{ display: 'block', width: '100%', height: 'auto' }}
     >
-      <rect width={1080} height={1080} fill="#0D81DE" />
-      <path d={SPINE_POST_PATH} fill="var(--color-bg-primary)" />
+      {/* The blue is the frame with the spine cut out of it (evenodd), not cream
+          laid over blue: where the two shared an edge, the blue's anti-aliasing
+          showed through as a hairline down the spine and round its corners. */}
+      <rect width={1080} height={1080} fill="var(--color-bg-primary)" />
+      <path d={`M0 0H1080V1080H0Z${SPINE_POST_PATH}`} fill="#0D81DE" fillRule="evenodd" />
       {faces.map(([face, color, y]) => (
         <path key={face} d={RAIL_FACES[face]} fill={color} transform={`translate(170 ${y}) scale(10)`} />
       ))}
