@@ -1534,8 +1534,18 @@ export function TextureCanvas({
     // moves the content to keep off, or the canvas, under a still pointer:
     // the next frame re-reads the content and re-aims.
     let scrolled = false
+    // Under reduced motion there's no loop to pick a scroll up, so it asks
+    // for a refresh of its own (`stillRefresh`, set below), once a frame.
+    let stillRefresh: (() => void) | null = null
+    let stillFrame = 0
     const onScroll = () => {
       scrolled = true
+      if (stillRefresh && !stillFrame) {
+        stillFrame = requestAnimationFrame(() => {
+          stillFrame = 0
+          stillRefresh?.()
+        })
+      }
     }
     if (blob) {
       window.addEventListener('pointermove', onFollow)
@@ -1863,7 +1873,24 @@ export function TextureCanvas({
       frame = requestAnimationFrame(tick)
     }
 
+    // Reduced motion: no loop, but the content to keep off still scrolls and
+    // swaps with the tab. Re-read it on a scroll and every `AVOID_READ_MS`,
+    // reshape the (still) blob to it and redraw what changed, so the blob
+    // and the near field never stay behind copy that has moved in front.
+    let stillTimer = 0
+    if (still && avoidMap) {
+      stillRefresh = () => {
+        const changed = new Set<Cell>()
+        readAvoid(changed)
+        if (blob && blob.grow > 0) applyInside(blobField(now0), changed)
+        changed.forEach(draw)
+      }
+      stillTimer = window.setInterval(stillRefresh, AVOID_READ_MS)
+    }
+
     return () => {
+      window.clearInterval(stillTimer)
+      cancelAnimationFrame(stillFrame)
       repaintRef.current = null
       disperseRef.current = null
       reformRef.current = null
