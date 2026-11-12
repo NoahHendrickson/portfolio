@@ -1718,7 +1718,7 @@ function SidebarPanel({ settings, onSettingsChange, width, height, hoverCards, o
                 <div style={{ position: 'relative', display: 'flex', flexShrink: 0, alignItems: 'center', marginRight: -12 }}>
                   <button
                     type="button"
-                    aria-label="Sort projects — Last user message"
+                    aria-label="Sort projects: Last user message"
                     className="n3sb-icon-button"
                     style={{ ...ICON_BUTTON, width: 32, height: 32, borderRadius: 10, color: MUTED }}
                   >

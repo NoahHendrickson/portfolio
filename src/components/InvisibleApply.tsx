@@ -117,7 +117,7 @@ export default function InvisibleApply() {
                     <SheetImg
                       shot={{
                         src: media.invitations,
-                        alt: 'The old invitations tool — a table of project invites with status, dates and a search field',
+                        alt: 'The old invitations tool: a table of project invites with status, dates and a search field',
                         aspect: MEDIA_ASPECT.invitations,
                       }}
                     />
@@ -173,7 +173,7 @@ export default function InvisibleApply() {
               media={
                 <MediaPanel
                   src={media.home}
-                  alt="Meridial home in a browser — Apply to projects and Refer and earn over a Projects for you row"
+                  alt="Meridial home in a browser: Apply to projects and Refer and earn over a Projects for you row"
                   aspect={MEDIA_ASPECT.home}
                 />
               }
@@ -192,7 +192,7 @@ export default function InvisibleApply() {
               media={
                 <MediaPanel
                   src={media.explore}
-                  alt="Meridial Explore in a browser — a grid of project cards with Best match, Language and Expertise filters"
+                  alt="Meridial Explore in a browser: a grid of project cards with Best match, Language and Expertise filters"
                   aspect={MEDIA_ASPECT.explore}
                 />
               }
@@ -212,7 +212,7 @@ export default function InvisibleApply() {
               media={
                 <MediaPanel
                   src={media.detail}
-                  alt="Explore split view in a browser — project list on the left, application progress and job details on the right"
+                  alt="Explore split view in a browser: project list on the left, application progress and job details on the right"
                   aspect={MEDIA_ASPECT.detail}
                 />
               }
@@ -232,7 +232,7 @@ export default function InvisibleApply() {
               media={
                 <MediaPanel
                   src={media.apply}
-                  alt="Thank you for applying modal in a browser — next steps for ID, address and a security video, plus apply to more projects"
+                  alt="Thank you for applying modal in a browser: next steps for ID, address and a security video, plus apply to more projects"
                   aspect={MEDIA_ASPECT.apply}
                 />
               }
@@ -265,7 +265,7 @@ function Showcase() {
   const front = (
     <ShowcaseWindow
       src={media.explore}
-      alt="Meridial Explore in a browser — a grid of project cards with Best match, Language and Expertise filters"
+      alt="Meridial Explore in a browser: a grid of project cards with Best match, Language and Expertise filters"
       aspect={MEDIA_ASPECT.explore}
     />
   )
@@ -297,7 +297,7 @@ function Showcase() {
       <div style={at(540, 52, 700)}>
         <ShowcaseWindow
           src={media.detail}
-          alt="Explore split view in a browser — project list on the left, application progress and job details on the right"
+          alt="Explore split view in a browser: project list on the left, application progress and job details on the right"
           aspect={MEDIA_ASPECT.detail}
         />
       </div>

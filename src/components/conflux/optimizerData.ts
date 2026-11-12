@@ -149,7 +149,7 @@ export const BUILD = {
 } as const
 
 export const TITLES = {
-  gearPower: "Gear power — the game's average over these pieces (and your weapons, if entered)",
+  gearPower: "Gear power: the game's average over these pieces (and your weapons, if entered)",
   notMasterworked: 'Some pieces are not fully masterworked',
   unknownCost: 'Some pieces have an unknown upgrade cost',
   power: 'Power',

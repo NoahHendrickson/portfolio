@@ -73,7 +73,7 @@ export default function InvisibleSynapse() {
                 priority
                 shot={{
                   src: media.blueprint,
-                  alt: 'Two RLHF task windows side by side — a Step 1 tooltip on the prompt composer, a Step 2 tooltip on annotating a pair of model responses',
+                  alt: 'Two RLHF task windows side by side: a Step 1 tooltip on the prompt composer, a Step 2 tooltip on annotating a pair of model responses',
                   aspect: '1328 / 586',
                 }}
               />
@@ -91,7 +91,7 @@ export default function InvisibleSynapse() {
               media={
                 <InsetImg
                   src={media.library}
-                  alt="The Figma component library — header, tooling group and panel components beside the prompt, response and review-response sets, over a board of task composites"
+                  alt="The Figma component library: header, tooling group and panel components beside the prompt, response and review-response sets, over a board of task composites"
                   width={2554}
                   height={1682}
                   inset={LIBRARY_INSET}

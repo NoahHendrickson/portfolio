@@ -158,7 +158,7 @@ function Playground({ isMobile }: { isMobile: boolean }) {
           <Control label="Label" htmlFor="ts-label">
             <input id="ts-label" className="ts-label-input" value={label} maxLength={28} onChange={(e) => setLabel(e.target.value)} />
           </Control>
-          <Control label="Colour">
+          <Control label="Color">
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: space.sm }}>
               {swatches.map((swatch) => (
                 <button

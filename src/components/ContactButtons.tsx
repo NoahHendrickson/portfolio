@@ -190,12 +190,24 @@ function PatternTiles({ paused }: { paused: boolean }) {
  * one paused state. Shown only where the texture is (desktop, `HOME_TEXTURE`)
  * and moving (not under reduced motion, which already holds it still).
  */
-export function CalmButton({ divider = false, style }: { divider?: boolean; style?: CSSProperties }) {
+export function CalmButton({
+  divider = false,
+  style,
+  always = false,
+}: {
+  divider?: boolean
+  style?: CSSProperties
+  /**
+   * Shown whatever the screen or motion setting, for a page that runs the texture
+   * everywhere (the brand page, on a phone too), so it can always be paused or resumed.
+   */
+  always?: boolean
+}) {
   const paused = useTexturePaused()
   const isMobile = useIsMobile()
   const still = useMediaQuery('(prefers-reduced-motion: reduce)')
   const [hovered, setHovered] = useState(false)
-  if (!HOME_TEXTURE || isMobile || still) return null
+  if (!always && (!HOME_TEXTURE || isMobile || still)) return null
 
   const state = hovered ? 'hover' : 'default'
   const palette = resolvePalette('ghost', state)
