@@ -233,7 +233,7 @@ export default function BrandGuidelines() {
                 ]}
               >
                 <div>
-                  <CalmButton />
+                  <CalmButton always />
                 </div>
               </Copy>
             </Piece>
