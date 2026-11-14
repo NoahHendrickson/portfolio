@@ -31,6 +31,7 @@ import ThinkingStates from './components/ThinkingStates'
 import BrandGuidelines from './components/BrandGuidelines'
 import { projects } from './data/projects'
 import { useHomePrototype } from './hooks/useHomePrototype'
+import { useHomeScrollMemory } from './hooks/useHomeScrollMemory'
 import { useIsMobile } from './hooks/useIsMobile'
 import { useMediaQuery } from './hooks/useMediaQuery'
 import { getRoute, navigate, subscribeToRoute } from './navigation'
@@ -294,9 +295,15 @@ export default function App() {
     if (legacyWork) setTab('me')
   }
 
+  // Home is every route that doesn't render a project page: `/` and the legacy
+  // `/work` routes, which redirect to it.
+  const isHome = !route.startsWith('/work/') || legacyWork
+  const resetHomeScroll = useHomeScrollMemory(isHome, tab, isMobile, panelRef)
+
   const selectTab = (next: HomeTab) => {
     setTab(next)
     writeHomeTab(next)
+    resetHomeScroll(next)
     // The panels replace each other wholesale, so a switch made while scrolled
     // deep in Hi's projects or Previous roles starts the next tab at its top.
     window.scrollTo({ top: 0 })
@@ -313,8 +320,10 @@ export default function App() {
       navigate('/', { replace: true })
       return
     }
-    window.scrollTo({ top: 0 })
-  }, [route, legacyWork])
+    // Home sets its own scroll: back where it was, or the top
+    // (`useHomeScrollMemory`).
+    if (!isHome) window.scrollTo({ top: 0 })
+  }, [route, legacyWork, isHome])
 
   if (route === '/work/invisible/onboarding') {
     return <InvisibleOnboarding />
