@@ -2,6 +2,7 @@ import { useSyncExternalStore } from 'react'
 import { color } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
 import { RAIL_SPINE } from '../layout'
+import { getRoute, subscribeToRoute } from '../navigation'
 import { pixelPath } from '../pixelFaces'
 import { getTheme, setTheme, subscribeToTheme } from '../theme'
 
@@ -39,6 +40,12 @@ const SEGMENT_W = 40
 const SEGMENT_H = 36
 /** On the rail's labels: its rows pad 12 in from the spine. */
 const DESKTOP_LEFT = RAIL_SPINE + 12
+/**
+ * Off home there's no rail, so the switch keeps to the window's corner, out in
+ * the gutter beside the page's column rather than over its cards; square with
+ * the bottom inset.
+ */
+const PAGE_LEFT = 24
 const MOBILE_LEFT = 16
 const BOTTOM = 24
 
@@ -81,6 +88,8 @@ function Glyph({ rows, active }: { rows: string[]; active: boolean }) {
 export default function ThemeToggle() {
   const theme = useSyncExternalStore(subscribeToTheme, getTheme)
   const isMobile = useIsMobile()
+  const route = useSyncExternalStore(subscribeToRoute, getRoute)
+  const left = isMobile ? MOBILE_LEFT : route === '/' ? DESKTOP_LEFT : PAGE_LEFT
   const next = theme === 'dark' ? 'light' : 'dark'
 
   return (
@@ -93,7 +102,7 @@ export default function ThemeToggle() {
       aria-label={`Switch to ${next} mode`}
       style={{
         position: 'fixed',
-        left: isMobile ? MOBILE_LEFT : DESKTOP_LEFT,
+        left,
         bottom: BOTTOM,
         // Over the page's content, under the intro splash.
         zIndex: 900,
