@@ -18,8 +18,11 @@ import {
   Treatments,
   WordmarkConstruction,
 } from './brand/BrandArt'
+import { PetalBot } from './brand/PetalBot'
+import { BOT_ART } from '../petalBots'
 import { radius, space } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
+import { useMediaQuery } from '../hooks/useMediaQuery'
 import { useTexturePaused } from '../hooks/useTexturePaused'
 import { CURVED_BODY_SIZE, TEXT_SOFT, sheetGap } from '../sheetStyle'
 import { DEFAULT_SETTINGS, LANDING_SETTINGS } from '../textureSettings'
@@ -168,8 +171,21 @@ const NEUTRALS: [string, string][] = [
   ['Cream', '#F5EFE0'],
 ]
 
+/** How long each bot waits before it looks, scattered so a row turns like a crowd rather than in order. */
+const BOT_LAG = BOT_ART.map((_, i) => (i * 47) % 130)
+
+/** The cream the bots are drawn for (the light theme's page), whichever theme is on. */
+function CreamGround({ children, style }: { children: ReactNode; style?: CSSProperties }) {
+  return (
+    <div data-theme="light" style={{ background: 'var(--color-bg-primary)', color: 'var(--color-text-primary)', ...style }}>
+      {children}
+    </div>
+  )
+}
+
 export default function BrandGuidelines() {
   const isMobile = useIsMobile()
+  const touch = useMediaQuery('(hover: none)')
   const paused = useTexturePaused()
   const gap = sheetGap(isMobile)
 
@@ -445,6 +461,42 @@ export default function BrandGuidelines() {
                 <Copy
                   heading="Everything is squares"
                   body="Every glyph fits a 16-square cell, so a face, a leaf and an arrow can trade places in the texture. One flat color per shape, whole squares only."
+                />
+              </Piece>
+            </Interlock>
+          </Wide>
+        </Reveal>
+
+        {/*
+          Bots: the avatars top right and the copy bottom left, overlapping by two columns so the
+          surface steps down between them on concave curves. Their eyes follow the pointer.
+        */}
+        <Reveal>
+          <Wide>
+            <Interlock
+              {...layout(
+                isMobile,
+                [
+                  '. . . . tiles tiles tiles tiles tiles tiles tiles tiles',
+                  'copy copy copy copy copy copy . . . . . .',
+                ],
+                ['tiles', 'copy'],
+              )}
+            >
+              <Piece area="tiles">
+                <Caption>{touch ? 'Live / they look around' : 'Live / they follow your pointer'}</Caption>
+                <div style={{ display: 'grid', gridTemplateColumns: `repeat(${isMobile ? 4 : 7}, minmax(0, 1fr))`, gap: space.md }}>
+                  {BOT_ART.map((bot, i) => (
+                    <CreamGround key={bot.name} style={{ borderRadius: radius.lg, padding: '8%' }}>
+                      <PetalBot index={i} square={4} lag={BOT_LAG[i]} paused={paused} style={{ width: '100%' }} />
+                    </CreamGround>
+                  ))}
+                </div>
+              </Piece>
+              <Piece area="copy">
+                <Copy
+                  heading="Petal bots"
+                  body="The leaf, grown into characters and given eyes. The leaf bots keep the mark’s one-square black outline, a base color and a highlight along the upper right, with the midrib running up to the face. The petal bots follow the same pixel rules, softer: petals instead of leaves, veins in a deeper tone of the petal instead of black, and a blush under the eyes."
                 />
               </Piece>
             </Interlock>
