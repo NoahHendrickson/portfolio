@@ -7,10 +7,12 @@ import {
   type CSSProperties,
   type ReactNode,
 } from 'react'
-import { color, radius } from '../design-system/tokens'
+import Button from '../design-system/Button'
+import { color, radius, space } from '../design-system/tokens'
 import type { HomeTab } from '../homeTab'
 import { RAIL_SPINE } from '../layout'
 import { FACE_DOTS } from '../pixelFaces'
+import HungMenu, { MenuRow } from './HungMenu'
 
 const ORANGE = color.accent.default
 /** Spine, active pill and Work card — cream, same as the rest of the light surfaces. */
@@ -71,8 +73,9 @@ function PixelGlyph({ dots, width, height }: { dots: [number, number][]; width: 
 }
 
 
+// `--rail-face` lets the mobile menu draw a face in its rows' ink, on the accent.
 const face = (name: keyof typeof FACE_DOTS) => (
-  <span style={{ color: ORANGE, display: 'flex' }}>
+  <span style={{ color: `var(--rail-face, ${ORANGE})`, display: 'flex' }}>
     <PixelGlyph dots={FACE_DOTS[name]} width={16} height={16} />
   </span>
 )
@@ -148,8 +151,7 @@ const MAIN_PALETTE: RailPalette = { pill: PILL, ink: color.text.inverse, idle: c
  * is laid *over* an idle row rather than replacing it, and the two labels have
  * to land on the same pixel; the properties only a pill can show (the radius,
  * the gap before the arrow) sit here rather than on `pillStyle` because an
- * idle tab is transparent and holds its arrow slot open anyway. The mobile
- * dropdown uses the two as ordinary button styles.
+ * idle tab is transparent and holds its arrow slot open anyway.
  */
 const tabBase: CSSProperties = {
   position: 'relative',
@@ -277,27 +279,6 @@ function Fillet({ side, fill }: { side: 'top' | 'bottom'; fill: string }) {
       }}
     />
   )
-}
-
-/**
- * The mobile menu's surface, on `ContactMenu`'s conventions — the raised
- * surface, the default border, the 2xl radius and an 8px pad — so the two
- * dropdowns on the site read as the same object.
- */
-const MENU_SURFACE: CSSProperties = {
-  position: 'absolute',
-  top: 'calc(100% + 8px)',
-  left: 0,
-  minWidth: '220px',
-  maxWidth: 'calc(100vw - 40px)',
-  backgroundColor: 'var(--color-bg-raised)',
-  border: '1px solid var(--color-border-default)',
-  borderRadius: 'var(--radius-2xl)',
-  padding: 'var(--space-sm)',
-  display: 'flex',
-  flexDirection: 'column',
-  boxShadow: '0 20px 24px -4px rgba(0,0,0,0.4), 0 8px 8px -4px rgba(0,0,0,0.3)',
-  zIndex: 10,
 }
 
 /**
@@ -827,24 +808,7 @@ export default function HomeRail({
   onSelect: (tab: HomeTab) => void
   isMobile: boolean
 }) {
-  const [isOpen, setIsOpen] = useState(false)
   const railRef = useRef<HTMLElement | null>(null)
-
-  useEffect(() => {
-    if (!isOpen) return
-    const onClickOutside = (e: MouseEvent) => {
-      if (railRef.current && !railRef.current.contains(e.target as Node)) setIsOpen(false)
-    }
-    const onEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setIsOpen(false)
-    }
-    document.addEventListener('mousedown', onClickOutside)
-    document.addEventListener('keydown', onEscape)
-    return () => {
-      document.removeEventListener('mousedown', onClickOutside)
-      document.removeEventListener('keydown', onEscape)
-    }
-  }, [isOpen])
 
   /*
    * The arrow keys walk the tabs from anywhere on the page, so the rail does
@@ -861,7 +825,6 @@ export default function HomeRail({
       const step = e.key === 'ArrowDown' ? 1 : -1
       const i = TABS.findIndex((tab) => tab.id === active)
       const neighbour = TABS[(i + step + TABS.length) % TABS.length].id
-      setIsOpen(false)
       onSelect(neighbour)
     }
     window.addEventListener('keydown', onKey)
@@ -873,67 +836,51 @@ export default function HomeRail({
    * wrapped into rows ate a third of a phone screen before the panel started,
    * and the rail's whole affordance — hover to preview — has no meaning on
    * touch anyway, so the closed state shows only where you are. The trigger is
-   * the active item's pill, carrying the file's stacked caret pair in place of
-   * the rail's travel arrow — it stays put on open, since the glyph says
-   * unfoldable rather than pointing anywhere.
+   * an accent pill naming the active tab, carrying the file's stacked caret pair
+   * in place of the rail's travel arrow — it stays put on open, since the glyph
+   * says unfoldable rather than pointing anywhere.
    */
   if (isMobile) {
     const activeLabel = TABS.find((tab) => tab.id === active)?.label ?? TABS[0].label
+    // Hung from the trigger like Contact's menu on the project pages (Nov 15 2026):
+    // one accent shape, flush with the trigger's left side, the faces in the rows' ink.
     return (
-      <div
-        ref={(el) => {
-          railRef.current = el
-        }}
-        style={{ position: 'relative', alignSelf: 'flex-start' }}
-      >
-        <button
-          type="button"
-          onClick={() => setIsOpen((open) => !open)}
-          aria-haspopup="menu"
-          aria-expanded={isOpen}
-          aria-label={`${activeLabel}. Open sections`}
-          style={{
-            ...pillStyle(MAIN_PALETTE),
-            width: 'max-content',
-            borderRadius: 'var(--radius-md)',
-          }}
-        >
-          {activeLabel}
-          <span style={{ color: ORANGE, display: 'flex' }}>
-            <PixelCaretPair />
-          </span>
-        </button>
-        {isOpen && (
-          <div role="menu" style={MENU_SURFACE}>
-            {TABS.map((tab) => {
-              const isActive = tab.id === active
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  role="menuitem"
-                  aria-current={isActive || undefined}
-                  onClick={() => {
-                    setIsOpen(false)
-                    onSelect(tab.id)
-                  }}
-                  style={{
-                    ...(isActive ? pillStyle(MAIN_PALETTE) : idleStyle(MAIN_PALETTE)),
-                    width: '100%',
-                    justifyContent: 'space-between',
-                    // Menu is 2xl (24) with an 8 pad; 16 nests the highlight
-                    // in that curve instead of the rail's 6.
-                    borderRadius: 'var(--radius-xl)',
-                  }}
-                >
-                  {tab.label}
-                  {tab.glyph}
-                </button>
-              )
-            })}
-          </div>
+      <HungMenu
+        align="left"
+        minWidth={220}
+        style={{ alignSelf: 'flex-start' }}
+        trigger={({ isOpen, toggle, held }) => (
+          <Button
+            variant="primary"
+            size="sm"
+            trailingIcon={<PixelCaretPair />}
+            onClick={toggle}
+            aria-haspopup="menu"
+            aria-expanded={isOpen}
+            aria-label={`${activeLabel}. Open sections`}
+            style={{ paddingInline: space.md, position: 'relative', zIndex: 10, ...held }}
+          >
+            {activeLabel}
+          </Button>
         )}
-      </div>
+      >
+        {(close) =>
+          TABS.map((tab) => (
+            <MenuRow
+              key={tab.id}
+              current={tab.id === active}
+              onClick={() => {
+                close()
+                onSelect(tab.id)
+              }}
+              style={{ justifyContent: 'space-between', ['--rail-face' as string]: 'currentColor' }}
+            >
+              {tab.label}
+              {tab.glyph}
+            </MenuRow>
+          ))
+        }
+      </HungMenu>
     )
   }
 
