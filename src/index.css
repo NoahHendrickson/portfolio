@@ -800,3 +800,26 @@ html:has(.showcase-lightbox[open]) {
   outline: 2px solid var(--color-orange);
   outline-offset: 2px;
 }
+
+/* no3y Code's Glass / Inlet switch: the thumb slides under the picked theme. */
+.mock-theme-thumb {
+  transition: transform 280ms cubic-bezier(0.3, 0.8, 0.3, 1);
+}
+[role='radiogroup'][aria-label='Mockup theme'] button:focus-visible {
+  outline: 2px solid var(--color-orange);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mock-theme-thumb {
+    transition: none;
+  }
+}
+
+/* no3y Code's hero compare slider: its grip takes the focus ring. */
+.compare-grip {
+  outline: none;
+}
+.compare-grip:focus-visible {
+  outline: 2px solid var(--color-orange);
+  outline-offset: 3px;
+}

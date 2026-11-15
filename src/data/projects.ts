@@ -262,6 +262,11 @@ export type StorySection =
       /** CSS clip around the media — background defaults to `--color-bg-tint`. */
       panel?: { background?: string }
       /**
+       * The curved card's own fill in place of the page's opposite, and the theme its
+       * copy reads in on it (no3y Code's Petals card, in a green off the texture).
+       */
+      card?: { surface: string; theme: 'light' | 'dark'; only?: 'glass' | 'inlet' }
+      /**
        * Runs the body at 18px on the primary ink instead of 16 on the secondary,
        * which is how the July D2 frame sets its one row.
        */
@@ -466,6 +471,17 @@ export type Landing = {
   showcase?: {
     /** A looping clip above `shot`, at the same width — no3y Code's hero video. */
     video?: LandingVideo
+    /**
+     * Two aligned pictures with a draggable divider between them (`CompareSlider`), in place of
+     * `video` — no3y Code's hero: the new agent screen in Glass and in Inlet. Not swapped by the
+     * page's mockup switch, since it shows both.
+     */
+    compare?: {
+      before: { src: string; srcSet?: string; label: string }
+      after: { src: string; srcSet?: string; label: string }
+      alt: string
+      aspect: string
+    }
     shot?: ShowcaseImage
     grid?: ShowcaseImage[]
     /** A heading and body leading the media — no3y Code's "How I work". */
@@ -936,10 +952,22 @@ export const projects: Record<string, Project> = {
       // Captures of the desktop app on the Glass theme, baked over the fluted
       // wallpaper.
       showcase: {
-        video: {
-          src: '/work/no3y-code/focus-mode-split.mp4',
-          poster: '/work/no3y-code/focus-mode-split-poster.jpg',
-          alt: 'Focus mode in no3y Code on the Glass theme: a working thread opens from the status-grouped sidebar, the sidebar collapses into tabs filtered to its project, and a second working thread is dragged onto it to split the view',
+        // The hero (Nov 15 2026): the new agent screen in Glass and in Inlet, captured from the
+        // same seeded state and placed identically on the Figma wallpaper (gTkJR0HHtaPzrWmgSYkC1g
+        // 500:1620), split by a divider the visitor drags (`CompareSlider`). It replaced the
+        // focus-mode opener clip; scripts in ~/.t3-fork/scratch/no3y-capture/hero/.
+        compare: {
+          before: {
+            src: '/work/no3y-code/hero-glass.webp',
+            srcSet: '/work/no3y-code/hero-glass-1280.webp 1280w, /work/no3y-code/hero-glass-1920.webp 1920w, /work/no3y-code/hero-glass.webp 2560w',
+            label: 'Glass',
+          },
+          after: {
+            src: '/work/no3y-code/hero-inlet.webp',
+            srcSet: '/work/no3y-code/hero-inlet-1280.webp 1280w, /work/no3y-code/hero-inlet-1920.webp 1920w, /work/no3y-code/hero-inlet.webp 2560w',
+            label: 'Inlet',
+          },
+          alt: 'The new agent screen in no3y Code, split between the Glass theme on the left and the Inlet Black theme on the right, with a divider to drag between them',
           aspect: '16 / 9',
         },
         // The new-agent still that used to stand under the clip was dropped
@@ -1091,6 +1119,32 @@ export const projects: Record<string, Project> = {
             alt: 'Creating a scheduled task: a title, the project, agent instructions with worktree and branch, a weekday schedule, and the model',
             aspect: '1272 / 620',
             frame: 'plain',
+          },
+        },
+        // Petals, the fork's bots (Nov 15 2026): a faked run of the dev app (no
+        // model was prompted). Glass here, on the fluted wallpaper like the other
+        // Glass clips; the switch swaps in the Inlet take on the Cool fade
+        // backdrop (`no3yInlet.ts`). Takes: inlet/takes/bot-return.mjs (THEME=glass).
+        {
+          kind: 'feature',
+          gap: 80,
+          heading: 'Petals',
+          // The texture's deep green (LANDING_SWATCHES), the copy in the light text,
+          // with the Inlet mockups only; on Glass it's the page's usual ink / cream
+          // card (Nov 15 2026). The bright #26b846 with dark ink read too loud.
+          card: { surface: '#008755', theme: 'dark', only: 'inlet' },
+          body: [
+            'Petals are my version of GrokBot, or projects in Cursor and Claude Code: one long-running thread that I talk to, and it spins up other threads and subagents to get the work done.',
+            'A Petal is a chunk of work, like a feature or a project I’m working on. I tell it what its job is in a prompt, like keeping an eye on feedback and session recordings for bugs to fix, and then I work with it in that one long-running thread. It spins up threads in the right project, and everything stays with that Petal, so I can see all the threads it’s started and finished.',
+            'A long chat eventually forgets things, so a Petal keeps its memory in a small folder of files. One file holds its job, which only changes when I ask. Another holds where it left off: what it’s waiting on, what it already told me, and a short log of what it did. Every time it wakes up it starts fresh and reads those files first, so it picks up where it was.',
+          ],
+          copyWidth: 700,
+          stack: true,
+          video: {
+            src: '/work/no3y-code/petals.mp4',
+            poster: '/work/no3y-code/petals-poster.jpg',
+            alt: 'Petals in no3y Code on the Glass theme: the UX feedback bot finishes its work and its card turns blue, its report says the shipping step is ready for review, a dev server link comes back for checking it, and after the go-ahead to merge the pull request turns purple and the thread moves to Idle',
+            aspect: '16 / 9',
           },
         },
         {

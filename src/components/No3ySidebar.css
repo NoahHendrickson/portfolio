@@ -11,6 +11,11 @@
   Resting colours ride the elements' inline styles, so the hover states below
   are `!important` — an inline style outranks any selector otherwise.
 
+  Two skins (Nov 15 2026): the stage carries `data-n3sb-skin` (glass | inlet)
+  and the palette as `--n3sb-*` custom properties, so the hover states here
+  read the skin's own values; the open card's glass is Glass-only, and Inlet's
+  open card is the cream pill with the panel's bridge drawn by its li.
+
   `@media (hover: hover)` is Tailwind v4's own gate on `hover:` and the app's
   `group-any-hover`, so a touch tap never strands a row in its hover state.
 */
@@ -30,7 +35,7 @@
 .n3sb-header-pill:focus-visible,
 .n3sb-menu-item:focus-visible {
   outline: none;
-  box-shadow: inset 0 0 0 2px rgb(255 255 255 / 30%);
+  box-shadow: inset 0 0 0 2px var(--n3sb-ring);
 }
 
 /* The open thread as a pane of glass (the fork's theme.custom.glass-surfaces.css,
@@ -39,7 +44,7 @@
    it — an inline shadow would outrank it and leave the open card with no
    visible keyboard focus. The shadow is a dark 1px halo, a tight sheen inside
    the top and bottom runs and two soft inner glows. */
-.n3sb-card[data-active] {
+[data-n3sb-skin='glass'] .n3sb-card[data-active] {
   box-shadow:
     0 0 2px 1px rgb(0 0 0 / 25%),
     inset 0 2px 3px -2px rgb(255 255 255 / 6%),
@@ -50,7 +55,7 @@
 
 /* Focused while open: the same ring every row takes, first in the list so it
    draws over the glass, as the app keeps Tailwind's ring ahead of its glass. */
-.n3sb-card[data-active]:focus-visible {
+[data-n3sb-skin='glass'] .n3sb-card[data-active]:focus-visible {
   box-shadow:
     inset 0 0 0 2px rgb(255 255 255 / 30%),
     0 0 2px 1px rgb(0 0 0 / 25%),
@@ -63,7 +68,7 @@
 /* The rest needs pseudo-elements. The glint: two inset hairlines nudged 1px
    in, each a crescent that thins to nothing round the corners. It sits over
    the reflection band, which would otherwise blur it away. */
-.n3sb-card[data-active]::before {
+[data-n3sb-skin='glass'] .n3sb-card[data-active]::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -79,7 +84,7 @@
    project icon and status mark tint the glass near them. Masked to the top and
    bottom 4px, short of the content's padding, so no text is under the blur.
    Above the content's z-10 layer, or its backdrop would hold only the fill. */
-.n3sb-card[data-active]::after {
+[data-n3sb-skin='glass'] .n3sb-card[data-active]::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -94,7 +99,7 @@
 /* The dark edge, the glint's complement: darkest at the middle of each end and
    easing out toward the top and bottom. The card clips past its edge and both
    its pseudo-elements are taken, so its li draws it, 1px proud of the card. */
-li:has(> .n3sb-card[data-active])::before {
+[data-n3sb-skin='glass'] li:has(> .n3sb-card[data-active])::before {
   content: '';
   position: absolute;
   inset: -1px;
@@ -116,8 +121,34 @@ li:has(> .n3sb-card[data-active])::before {
   pointer-events: none;
 }
 
-li:has(> .n3sb-card[data-active][data-compact])::before {
+[data-n3sb-skin='glass'] li:has(> .n3sb-card[data-active][data-compact])::before {
   border-radius: 13px;
+}
+
+/* Inlet's open card runs on into the chat panel: its li draws the bridge, 8px past the card to
+   the sidebar's edge, with the panel's concave 9px corners above and below (the app's own
+   gradients, read off the running app). */
+[data-n3sb-skin='inlet'] li:has(> .n3sb-card[data-active])::after {
+  content: '';
+  position: absolute;
+  top: -9px;
+  right: -8px;
+  bottom: -9px;
+  width: 8px;
+  background:
+    radial-gradient(circle at 0px 0px, rgba(0, 0, 0, 0) 8.5px, #f8f3d8 9.5px) 100% 0% / 9px 9px no-repeat,
+    radial-gradient(circle at 0px 100%, rgba(0, 0, 0, 0) 8.5px, #f8f3d8 9.5px) 100% 100% / 9px 9px no-repeat,
+    linear-gradient(#f8f3d8, #f8f3d8) 0px 9px / 100% calc(100% - 18px) no-repeat;
+  pointer-events: none;
+}
+
+/* On the cream pill a working bot's breath is drawn in black, as the app's light surfaces draw it. */
+[data-n3sb-skin='inlet'] .n3sb-card[data-active] .n3sb-pulse {
+  background-color: #000000;
+}
+
+[data-n3sb-skin='inlet'] .n3sb-card[data-active]:focus-visible {
+  box-shadow: inset 0 0 0 2px rgb(28 28 26 / 30%);
 }
 
 /* The hover actions hold no width at rest, so the title runs the card's full
@@ -175,12 +206,12 @@ li:has(> .n3sb-card[data-active][data-compact])::before {
 
 @media (hover: hover) {
   .n3sb-card:not([data-active]):hover {
-    background-color: rgb(255 255 255 / 5%) !important;
-    color: #e8e8e8 !important;
+    background-color: var(--n3sb-hover) !important;
+    color: var(--n3sb-hover-fg) !important;
   }
 
   .n3sb-card:hover .n3sb-title[data-recedes] {
-    color: oklab(0.930993 0.0000424981 0.0000185966) !important;
+    color: var(--n3sb-hover-title) !important;
   }
 
   .n3sb-card:hover .n3sb-actions {
@@ -204,21 +235,21 @@ li:has(> .n3sb-card[data-active][data-compact])::before {
 
   .n3sb-chrome:hover,
   .n3sb-header-pill:hover {
-    background-color: rgb(255 255 255 / 5%) !important;
+    background-color: var(--n3sb-hover) !important;
   }
 
-  .n3sb-icon-button:hover {
-    background-color: rgb(255 255 255 / 5%) !important;
-    color: #e8e8e8 !important;
+  .n3sb-icon-button:not([data-open]):hover {
+    background-color: var(--n3sb-hover) !important;
+    color: var(--n3sb-hover-fg) !important;
   }
 
-  .n3sb-icon-button:hover svg {
-    color: #e8e8e8 !important;
+  .n3sb-icon-button:not([data-open]):hover svg {
+    color: var(--n3sb-hover-fg) !important;
   }
 
   .n3sb-project-header:hover .n3sb-header-mark,
   .n3sb-project-header:hover .n3sb-header-label {
-    color: #e8e8e8 !important;
+    color: var(--n3sb-hover-fg) !important;
   }
 
   .n3sb-project-header:hover .n3sb-header-mark .n3sb-folder {
@@ -230,7 +261,7 @@ li:has(> .n3sb-card[data-active][data-compact])::before {
   }
 
   .n3sb-menu-item:hover {
-    background-color: oklab(0.930993 0.0000424981 0.0000185966 / 0.08) !important;
+    background-color: var(--n3sb-menu-hover) !important;
   }
 }
 
@@ -259,6 +290,22 @@ li:has(> .n3sb-card[data-active][data-compact])::before {
   }
 }
 
+/* Inlet's working mark: a strip of baked frames stepped through its clip (the app's
+   sidebar-v2-film). Duration, steps and delay ride inline. */
+.n3sb-film {
+  animation-name: n3sb-film;
+  animation-iteration-count: infinite;
+}
+
+@keyframes n3sb-film {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-100%);
+  }
+}
+
 /* The working rain's cells. Duration and delay ride inline per cell; the name
    stays in a class so reduced motion can still win. */
 .n3sb-rain-0 { animation: n3sb-rain-0 linear infinite; }
@@ -268,6 +315,7 @@ li:has(> .n3sb-card[data-active][data-compact])::before {
 .n3sb-rain-4 { animation: n3sb-rain-4 linear infinite; }
 
 @media (prefers-reduced-motion: reduce) {
+  .n3sb-film,
   .n3sb-pulse,
   .n3sb-rain-0,
   .n3sb-rain-1,

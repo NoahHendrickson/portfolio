@@ -15,6 +15,7 @@ import {
 import { createPortal } from 'react-dom'
 import autoAnimate, { getTransitionSizes, type AutoAnimationPlugin } from '@formkit/auto-animate'
 import {
+  SIDEBAR_BOTS,
   SIDEBAR_INITIAL_ACTIVE,
   SIDEBAR_MACHINE,
   SIDEBAR_PROJECT_ORDER,
@@ -24,6 +25,7 @@ import {
   SIDEBAR_THREADS,
   STATUS_LABEL,
   statusSection,
+  type SidebarBot,
   type SidebarGrouping,
   type SidebarPlaygroundOption,
   type SidebarProjectId,
@@ -64,6 +66,8 @@ import {
   Zap,
 } from './no3ySidebarIcons'
 import { useMediaQuery } from '../hooks/useMediaQuery'
+import { useMockTheme } from '../mockTheme'
+import { BEAD_RING_PERIOD, bakeBeadRingFilm } from './no3yBeadRing'
 import './No3ySidebar.css'
 
 /*
@@ -90,31 +94,134 @@ import './No3ySidebar.css'
 
 // ── Palette (read off the running app) ─────────────────────────────────────
 
+/*
+  The panel's colours ride CSS custom properties set per skin on the stage
+  (`SKIN_VARS`), so one set of components draws both the Glass replica and the
+  Inlet Black one the page's mockup switch picks (Nov 15 2026). Glass keeps the
+  literals it always had; Inlet's are read off the running app the same way
+  (Inlet Black, dark sidebar on the cream panel).
+*/
+type Skin = 'glass' | 'inlet'
+const SkinContext = createContext<Skin>('glass')
+const useSkin = () => useContext(SkinContext)
+
+const v = (name: string) => `var(--n3sb-${name})`
 /** `--foreground` after the appearance-contrast mix. */
-const FG = 'oklab(0.930993 0.0000424981 0.0000185966)'
+const FG = v('fg')
 const fgA = (alpha: number) => `oklab(0.930993 0.0000424981 0.0000185966 / ${alpha})`
 /** `--sidebar-foreground`. */
-const SIDEBAR_FG = '#e8e8e8'
+const SIDEBAR_FG = v('sidebar-fg')
 /** The sidebar's muted channel as the card meta and the Threads label paint it. */
-const MUTED = 'rgba(255, 255, 255, 0.65)'
+const MUTED = v('muted')
 /** `--muted-foreground` inside the panel: section labels, the idle ring, action glyphs. */
-const MUTED_GREY = 'oklab(0.633425 0.0000287592 0.0000126958)'
-const mutedGreyA = (alpha: number) => `oklab(0.633425 0.0000287592 0.0000126958 / ${alpha})`
+const MUTED_GREY = v('muted-grey')
+const mutedGreyA = (alpha: number) => `color-mix(in oklab, ${MUTED_GREY} ${alpha * 100}%, transparent)`
 /** A receded card's own text (`text-sidebar-muted-foreground/75`). */
-const RECEDED_ROW = 'oklab(0.867412 -0.00337383 -0.00388575 / 0.75)'
+const RECEDED_ROW = v('receded-row')
 /** `--fork-sidebar-card-title-receded`. */
-const RECEDED_TITLE = 'rgb(174, 178, 182)'
+const RECEDED_TITLE = v('receded-title')
 /** The footer and toggle glyphs. */
-const QUIET_ICON = 'rgb(138, 138, 138)'
-const QUIET_BUTTON = 'oklab(0.867412 -0.00337383 -0.00388575 / 0.8)'
-/**
- * The pinned divider and the Settled rule. The app draws `--sidebar-border`
- * at 60%, an opaque grey that reads flat over the glass; white at 8% lands at
- * the same weight and lets the wallpaper through like the panel's other lines.
- */
-const RULE = 'rgba(255, 255, 255, 0.08)'
-/** The open thread's fill: the app's 6% white, under the panel's glass only. */
-const ROW_ACTIVE = 'rgba(255, 255, 255, 0.06)'
+const QUIET_ICON = v('quiet-icon')
+const QUIET_BUTTON = v('quiet-button')
+/** The pinned divider and the Settled rule (see `SKIN_VARS`). */
+const RULE = v('rule')
+/** The open thread's fill. */
+const ROW_ACTIVE = v('row-active')
+
+const STATUS = {
+  working: v('status-working'),
+  done: v('status-done'),
+  amber: v('status-amber'),
+  failed: v('status-failed'),
+}
+
+const PR_TONE = {
+  open: v('pr-open'),
+  merged: 'oklab(0.811 0.0443873 -0.101739 / 0.9)',
+  draft: 'oklab(0.705 0.00415142 -0.0144141 / 0.8)',
+}
+
+const SKIN_VARS: Record<Skin, Record<string, string>> = {
+  glass: {
+    fg: 'oklab(0.930993 0.0000424981 0.0000185966)',
+    'sidebar-fg': '#e8e8e8',
+    muted: 'rgba(255, 255, 255, 0.65)',
+    'muted-grey': 'oklab(0.633425 0.0000287592 0.0000126958)',
+    'receded-row': 'oklab(0.867412 -0.00337383 -0.00388575 / 0.75)',
+    'receded-title': 'rgb(174, 178, 182)',
+    // A bot card's receded name is the muted white, not the thread cards' grey.
+    'bot-receded-title': 'rgba(255, 255, 255, 0.65)',
+    'quiet-icon': 'rgb(138, 138, 138)',
+    'quiet-button': 'oklab(0.867412 -0.00337383 -0.00388575 / 0.8)',
+    // The app draws `--sidebar-border` at 60%, an opaque grey that reads flat over the glass;
+    // white at 8% lands at the same weight and lets the wallpaper through.
+    rule: 'rgba(255, 255, 255, 0.08)',
+    // The app's 6% white, under the panel's glass only.
+    'row-active': 'rgba(255, 255, 255, 0.06)',
+    sep: 'oklab(0.930993 0.0000424981 0.0000185966 / 0.12)',
+    'status-working': '#24fe8a',
+    'status-done': '#2498fe',
+    'status-amber': '#ffcd59',
+    'status-failed': '#ff6b60',
+    'pr-open': 'oklab(0.845 -0.138113 0.0370641 / 0.9)',
+    // Status headers take the Threads label's white at 65% (count at 39%) rather than the
+    // app's opaque grey, which read flatter than Threads over the glass (Nov 4 2026).
+    'status-label': 'rgba(255, 255, 255, 0.65)',
+    'status-count': 'rgba(255, 255, 255, 0.39)',
+    shelf: 'oklab(0.633425 0.0000287592 0.0000126958 / 0.5)',
+    hover: 'rgb(255 255 255 / 5%)',
+    'hover-fg': '#e8e8e8',
+    'hover-title': 'oklab(0.930993 0.0000424981 0.0000185966)',
+    'menu-hover': 'oklab(0.930993 0.0000424981 0.0000185966 / 0.08)',
+    ring: 'rgb(255 255 255 / 30%)',
+  },
+  inlet: {
+    fg: 'oklab(0.930993 0.0000424981 0.0000185966)',
+    'sidebar-fg': '#e8e8e8',
+    muted: 'oklab(0.686218 0.0000311732 0.0000137091)',
+    'muted-grey': 'oklab(0.686218 0.0000311732 0.0000137091)',
+    'receded-row': 'oklab(0.873016 0.0000399053 0.0000174642 / 0.75)',
+    'receded-title': 'rgb(176, 176, 176)',
+    'bot-receded-title': 'rgb(176, 176, 176)',
+    'quiet-icon': '#9a9a9a',
+    'quiet-button': 'oklab(0.873016 0.0000399053 0.0000174642 / 0.8)',
+    rule: 'oklab(0.890759 -0.0059571 0.0344398 / 0.6)',
+    'row-active': '#f8f3d8',
+    sep: 'oklab(0.930993 0.0000424981 0.0000185966 / 0.12)',
+    'status-working': '#24fe8a',
+    'status-done': '#2498fe',
+    'status-amber': '#ffcd59',
+    'status-failed': '#ff6b60',
+    'pr-open': 'oklch(0.765 0.177 163.223)',
+    'status-label': 'oklab(0.686218 0.0000311732 0.0000137091)',
+    'status-count': 'oklab(0.686218 0.0000311732 0.0000137091 / 0.6)',
+    shelf: 'oklab(0.873016 0.0000399053 0.0000174642 / 0.6)',
+    hover: 'rgb(39, 39, 39)',
+    'hover-fg': '#e8e8e8',
+    'hover-title': 'rgb(232, 232, 232)',
+    'menu-hover': 'rgb(228, 224, 199)',
+    ring: 'rgb(255 255 255 / 30%)',
+  },
+}
+
+/** Inlet's open card is the cream pill the panel bridges into: its ink and marks turn dark. */
+const INLET_ACTIVE_VARS = {
+  '--n3sb-fg': '#1c1c1a',
+  '--n3sb-sidebar-fg': '#1c1c1a',
+  '--n3sb-muted': '#6c6a5e',
+  '--n3sb-muted-grey': '#6c6a5e',
+  '--n3sb-receded-title': '#1c1c1a',
+  '--n3sb-sep': 'oklab(0.225667 -0.0010801 0.00363898 / 0.12)',
+  '--n3sb-status-working': '#047857',
+  '--n3sb-status-done': '#1d4ed8',
+  '--n3sb-status-amber': '#e0a526',
+  '--n3sb-status-failed': '#b91c1c',
+  '--n3sb-pr-open': 'oklch(0.508 0.118 165.612)',
+} as CSSProperties
+
+const skinStyle = (skin: Skin) =>
+  Object.fromEntries(Object.entries(SKIN_VARS[skin]).map(([name, value]) => [`--n3sb-${name}`, value])) as CSSProperties
+
 /** A glass popup's drop shadow and halo (the app's `--fork-glass-halo` on `.dropdown-glass`). */
 const POPUP_SHADOW = '0 2px 16px rgb(0 0 0 / 25%), 0 0 2px 1px rgb(0 0 0 / 25%)'
 /**
@@ -128,19 +235,6 @@ const POPUP_SHEEN = [
   'inset 0 -14px 16px -8px rgb(255 255 255 / 3%)',
 ].join(', ')
 
-const STATUS = {
-  working: '#24fe8a',
-  done: '#2498fe',
-  amber: '#ffcd59',
-  failed: '#ff6b60',
-}
-
-const PR_TONE = {
-  open: 'oklab(0.845 -0.138113 0.0370641 / 0.9)',
-  merged: 'oklab(0.811 0.0443873 -0.101739 / 0.9)',
-  draft: 'oklab(0.705 0.00415142 -0.0144141 / 0.8)',
-}
-
 const NOTICE_TONE = {
   error: 'rgb(251, 65, 74)',
   warning: 'oklch(0.769 0.188 70.08)',
@@ -149,9 +243,32 @@ const NOTICE_TONE = {
 const SNOOZED_TONE = 'oklch(0.707 0.165 254.624)'
 const SNOOZED_RULE = 'oklab(0.623 -0.0378409 -0.210628 / 0.2)'
 
+// ── Inlet surfaces (read off the running app) ─────────────────────────────
+
+/** The sidebar's solid fill, `--sidebar`. */
+const INLET_SIDEBAR = '#141414'
+/** The chat panel the open card bridges into, and Inlet's hung menus. */
+const INLET_CREAM = '#f8f3d8'
+const INLET_INK = 'oklab(0.225667 -0.0010801 0.00363898)'
+const INLET_RULE = 'color(srgb 0.878431 0.862745 0.760784)'
+/** A hover card: the hover fill, its text and the muted channel. */
+const INLET_TIP_FILL = 'rgb(39, 39, 39)'
+const INLET_TIP_FG = 'rgb(232, 232, 232)'
+const INLET_TIP_MUTED = 'rgb(154, 154, 154)'
+/** How much of the cream chat panel shows right of the sidebar, so the open card has something to bridge into. */
+const INLET_STRIP = 40
+/** The cream panel's inset from the window and its corner. */
+const INLET_PANEL_INSET = 8
+const INLET_PANEL_RADIUS = 8
+/** The concave join where a hung menu meets its button (the app's `--fork-inlet-fillet`). */
+const INLET_FILLET = 9
+
 // ── Glass ───────────────────────────────────────────────────────────────────
 
 const SIDEBAR_WALLPAPER = '/work/no3y-code/sidebar-wallpaper.jpg'
+/** Inlet's stage: the brand texture's Cool fade (Figma h7PWAQCOhl8NwRoFTs3Cbu 119:539), the
+    clips' backdrop, cut to the wallpaper's 2400 × 1556. */
+const INLET_BACKDROP = '/work/no3y-inlet/sidebar-backdrop.jpg'
 const GLASS_FILTER = 'blur(48px) saturate(1.35) brightness(0.62)'
 /** The panel's `rgb(22 22 22 / 73%)`, its transmission scaled 1.3×. */
 const PANEL_TINT = 'rgba(22, 22, 22, 0.649)'
@@ -384,9 +501,9 @@ function Rain({ seed }: { seed: string }) {
             width={RAIN_CELL}
             height={RAIN_CELL}
             rx={RAIN_CELL * 0.28}
-            fill={STATUS.working}
             className={`n3sb-rain-${row}`}
             style={{
+              fill: STATUS.working,
               opacity: rainAlpha((((0.6 + offset) * column.speed + column.phase) % RAIN_SPAN) - 1.5 - row),
               animationDuration: `${(RAIN_SPAN / column.speed).toFixed(4)}s`,
               animationDelay: `${(-column.phase / column.speed - offset).toFixed(4)}s`,
@@ -398,12 +515,51 @@ function Rain({ seed }: { seed: string }) {
   )
 }
 
+/* Inlet's working mark: the app's bead ring (the mark its Inlet captures run with), one loop baked
+   into a mask, frame under frame, and a strip stepped through it by one transform animation, as the
+   app's FilmStrip does. 114 frames over 1.9s, baked at 3x the 15px box. */
+const BEAD_RING_FRAMES = 114
+let beadRingFilm: string | null = null
+
+function BeadRing({ seed }: { seed: string }) {
+  beadRingFilm ??= bakeBeadRingFilm(BEAD_RING_FRAMES, 45)
+  const start = rainOffsetSeconds(seed) % BEAD_RING_PERIOD
+  return (
+    <span
+      aria-hidden
+      style={{ position: 'relative', display: 'block', width: 15, height: 15, margin: '-0.5px -1.5px', flexShrink: 0, overflow: 'hidden' }}
+    >
+      <span
+        className="n3sb-film"
+        style={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          top: 0,
+          height: `${BEAD_RING_FRAMES * 100}%`,
+          background: STATUS.working,
+          maskImage: beadRingFilm,
+          WebkitMaskImage: beadRingFilm,
+          maskSize: '100% 100%',
+          WebkitMaskSize: '100% 100%',
+          maskRepeat: 'no-repeat',
+          WebkitMaskRepeat: 'no-repeat',
+          animationDuration: `${BEAD_RING_PERIOD}s`,
+          animationTimingFunction: `steps(${BEAD_RING_FRAMES})`,
+          animationDelay: `${(-start).toFixed(4)}s`,
+        }}
+      />
+    </span>
+  )
+}
+
 function StatusMark({ thread }: { thread: SidebarThread }) {
+  const skin = useSkin()
   const label = STATUS_LABEL[thread.status]
   let mark: ReactNode
   switch (thread.status) {
     case 'working':
-      mark = <Rain seed={thread.id} />
+      mark = skin === 'inlet' ? <BeadRing seed={thread.id} /> : <Rain seed={thread.id} />
       break
     case 'waiting':
       mark = (
@@ -555,7 +711,7 @@ function CardMeta({ thread, projectTitleHidden }: { thread: SidebarThread; proje
           <Laptop size={12} />
           <span
             aria-hidden
-            style={{ width: 1, height: 8, flexShrink: 0, borderRadius: 9999, background: fgA(0.12) }}
+            style={{ width: 1, height: 8, flexShrink: 0, borderRadius: 9999, background: v('sep') }}
           />
           {projectTitleHidden ? (
             <span style={SR_ONLY}>{SIDEBAR_PROJECTS[thread.project].title}</span>
@@ -575,7 +731,7 @@ function CardMeta({ thread, projectTitleHidden }: { thread: SidebarThread; proje
 }
 
 /** Pin, snooze and settle — the hover actions. Inert here: the page shows them, it doesn't act on them. */
-function HoverActions({ thread }: { thread: SidebarThread }) {
+function HoverActions({ thread }: { thread: Pick<SidebarThread, 'pinned' | 'status'> }) {
   // Threads blocked on you can't be snoozed (the app's canSnooze).
   const snoozable = thread.status !== 'input' && thread.status !== 'approval'
   const actions: { label: string; icon: ReactNode }[] = [
@@ -614,6 +770,13 @@ function HoverActions({ thread }: { thread: SidebarThread }) {
   )
 }
 
+/** A card's corners: Glass rounds 20 (12 compact); Inlet 10, and its open card goes square on the
+    right where the panel bridges into it. */
+function cardRadius(skin: Skin, compact: boolean, active: boolean) {
+  if (skin === 'inlet') return active ? '10px 0 0 10px' : 10
+  return compact ? 12 : 20
+}
+
 type CardProps = {
   thread: SidebarThread
   compact: boolean
@@ -627,6 +790,7 @@ type CardProps = {
 }
 
 function ThreadCard({ thread, compact, projectTitleHidden, active, recedes, startedAt, onOpen, onHover }: CardProps) {
+  const skin = useSkin()
   const project = SIDEBAR_PROJECTS[thread.project]
   const label = [thread.title, STATUS_LABEL[thread.status], project.title].filter(Boolean).join(', ')
   const title = (
@@ -673,10 +837,11 @@ function ThreadCard({ thread, compact, projectTitleHidden, active, recedes, star
         overflow: 'hidden',
         textAlign: 'left',
         userSelect: 'none',
-        borderRadius: compact ? 12 : 20,
+        borderRadius: cardRadius(skin, compact, active),
         outline: 'none',
         background: active ? ROW_ACTIVE : 'transparent',
         color: active ? SIDEBAR_FG : recedes ? RECEDED_ROW : SIDEBAR_FG,
+        ...(active && skin === 'inlet' ? INLET_ACTIVE_VARS : {}),
       }}
     >
       <div
@@ -692,9 +857,27 @@ function ThreadCard({ thread, compact, projectTitleHidden, active, recedes, star
         <div style={{ display: 'flex', height: 18, minHeight: 18, minWidth: 0, alignItems: 'center', gap: 16 }}>
           {compact && !projectTitleHidden ? (
             <span style={{ display: 'flex', flex: '1 1 0%', minWidth: 0, alignItems: 'center', gap: 8 }}>
-              <span style={{ display: 'flex', width: 16, height: 16, flexShrink: 0, alignItems: 'center', justifyContent: 'center' }}>
-                <Favicon project={thread.project} size={16} />
-              </span>
+              {skin === 'inlet' ? (
+                // Inlet sets the project's icon in a chip: 18px at the ink's 12%, the icon 12px.
+                <span
+                  style={{
+                    display: 'flex',
+                    width: 18,
+                    height: 18,
+                    flexShrink: 0,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: 5,
+                    background: v('sep'),
+                  }}
+                >
+                  <Favicon project={thread.project} size={12} />
+                </span>
+              ) : (
+                <span style={{ display: 'flex', width: 16, height: 16, flexShrink: 0, alignItems: 'center', justifyContent: 'center' }}>
+                  <Favicon project={thread.project} size={16} />
+                </span>
+              )}
               {title}
             </span>
           ) : (
@@ -769,6 +952,214 @@ function ThreadCard({ thread, compact, projectTitleHidden, active, recedes, star
         </div>
         {!compact && <CardMeta thread={thread} projectTitleHidden={projectTitleHidden} />}
       </div>
+    </div>
+  )
+}
+
+// ── Petals (the app's bots) ─────────────────────────────────────────────────
+
+/** A bot's mascot, its pixel cells fitted into a 22px box (the app's `BotMascot` with `fit`). */
+function Mascot({ bot }: { bot: SidebarBot }) {
+  const { width, height, paths } = bot.mascot.sprite
+  const cell = Math.min(22 / width, 22 / height)
+  return (
+    <svg
+      aria-hidden
+      width={width * cell}
+      height={height * cell}
+      viewBox={`0 0 ${width} ${height}`}
+      shapeRendering="crispEdges"
+      style={{ display: 'block', flexShrink: 0 }}
+    >
+      {paths.map((path) => (
+        <path key={path.fill} d={path.d} fill={path.fill} />
+      ))}
+    </svg>
+  )
+}
+
+/**
+ * A bot's card (the app's `SidebarV2BotCardBody`): the mascot beside two lines, the name and what
+ * it is doing, with the trailing time, hover actions and status mark centred on both. 6 + 16 + 2 +
+ * 14 + 6 = 44. Compact cards leave bots as they are (the app keeps its own compact-bots setting).
+ * An idle bot recedes; a working one wears the monitoring breath, its mascot showing the work.
+ */
+function BotCard({
+  bot,
+  active,
+  startedAt,
+  onOpen,
+}: {
+  bot: SidebarBot
+  active: boolean
+  startedAt: number | undefined
+  onOpen: (id: string) => void
+}) {
+  const skin = useSkin()
+  const working = bot.status === 'working'
+  const recedes = !working && !active
+  const onKeyDown = (event: ReactKeyboardEvent) => {
+    if (event.target !== event.currentTarget) return
+    if (event.key !== 'Enter' && event.key !== ' ') return
+    event.preventDefault()
+    onOpen(bot.id)
+  }
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      aria-label={`${bot.name}, ${working ? 'Working' : 'Idle'}`}
+      aria-current={active ? 'page' : undefined}
+      className="n3sb-card"
+      data-active={active || undefined}
+      onClick={() => onOpen(bot.id)}
+      onKeyDown={onKeyDown}
+      style={{
+        position: 'relative',
+        width: '100%',
+        cursor: 'pointer',
+        overflow: 'hidden',
+        textAlign: 'left',
+        userSelect: 'none',
+        borderRadius: cardRadius(skin, false, active),
+        outline: 'none',
+        background: active ? ROW_ACTIVE : 'transparent',
+        color: recedes ? RECEDED_ROW : SIDEBAR_FG,
+        ...(active && skin === 'inlet' ? INLET_ACTIVE_VARS : {}),
+      }}
+    >
+      <div
+        style={{
+          position: 'relative',
+          zIndex: 10,
+          display: 'grid',
+          gridTemplateColumns: '22px minmax(0, 1fr) auto',
+          gridTemplateRows: '16px 14px',
+          alignItems: 'center',
+          columnGap: 8,
+          rowGap: 2,
+          padding: '6px 12px',
+        }}
+      >
+        <span style={{ gridRow: 'span 2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Mascot bot={bot} />
+        </span>
+        <span style={{ display: 'flex', height: 16, minWidth: 0, alignItems: 'center' }}>
+          <span
+            className="n3sb-title"
+            data-recedes={recedes || undefined}
+            style={{
+              ...TRUNCATE,
+              flex: '1 1 0%',
+              fontSize: 14,
+              lineHeight: '18px',
+              fontWeight: 400,
+              color: recedes ? v('bot-receded-title') : FG,
+            }}
+          >
+            {bot.name}
+          </span>
+        </span>
+        <span style={{ gridRow: 'span 2', display: 'flex', alignItems: 'center', gap: 6, marginLeft: 8 }}>
+          <span
+            style={{
+              display: 'grid',
+              height: 24,
+              flexShrink: 0,
+              gridTemplateColumns: 'minmax(0, 1fr)',
+              alignItems: 'center',
+              justifyItems: 'end',
+            }}
+          >
+            {startedAt !== undefined && (
+              <span
+                className="n3sb-timer"
+                style={{ pointerEvents: 'none', gridColumn: 1, gridRow: 1, display: 'flex', alignItems: 'center', paddingRight: 4 }}
+              >
+                <span aria-hidden style={{ fontSize: 11, lineHeight: '15px', color: FG, fontVariantNumeric: 'tabular-nums' }}>
+                  <WorkingDuration startedAt={startedAt} />
+                </span>
+              </span>
+            )}
+            <HoverActions thread={{ status: working ? 'working' : 'idle' }} />
+          </span>
+          <span
+            style={{
+              pointerEvents: 'none',
+              display: 'flex',
+              width: 12,
+              height: 14,
+              flexShrink: 0,
+              alignItems: 'center',
+              justifyContent: 'center',
+              overflow: 'hidden',
+              marginRight: -2,
+            }}
+          >
+            <span role={working ? 'status' : undefined} style={SR_ONLY}>
+              {working ? 'Working' : 'Idle'}
+            </span>
+            {working ? (
+              <span aria-hidden style={MARK_SLOT}>
+                <span className="n3sb-pulse" style={{ width: 10, height: 10, borderRadius: '50%' }} />
+              </span>
+            ) : (
+              <span aria-hidden style={MARK_SLOT}>
+                <span style={{ width: 10, height: 10, borderRadius: '50%', border: `1px solid ${MUTED}`, boxSizing: 'border-box' }} />
+              </span>
+            )}
+          </span>
+        </span>
+        <div style={{ ...TRUNCATE, fontSize: 12, lineHeight: '14px', color: MUTED }}>{bot.line}</div>
+      </div>
+    </div>
+  )
+}
+
+/** The Petals section, between the rows above it and Threads: its row (label, count, the bots'
+    settings and a new bot) over the three cards. */
+function PetalsSection({
+  active,
+  starts,
+  onOpen,
+}: {
+  active: string
+  starts: Map<string, number>
+  onOpen: (id: string) => void
+}) {
+  return (
+    <div style={{ position: 'relative', marginTop: 24, padding: '0 8px' }}>
+      <div style={{ display: 'flex', height: 32, alignItems: 'center', gap: 6, padding: '0 12px' }}>
+        <span role="heading" aria-level={2} style={{ display: 'flex', flex: '1 1 0%', minWidth: 0, alignItems: 'center', gap: 6 }}>
+          <span style={{ ...TRUNCATE, fontSize: 13, lineHeight: '16px', fontWeight: 600, color: MUTED_GREY }}>Petals</span>
+          <span style={{ flexShrink: 0, fontSize: 13, lineHeight: '16px', fontWeight: 600, color: mutedGreyA(0.6), fontVariantNumeric: 'tabular-nums' }}>
+            {SIDEBAR_BOTS.length}
+          </span>
+        </span>
+        <div style={{ display: 'flex', flexShrink: 0, alignItems: 'center', marginRight: -12 }}>
+          {[
+            { label: 'Petal settings', icon: <Settings size={16} style={{ color: MUTED_GREY }} /> },
+            { label: 'New Petal', icon: <Plus size={16} style={{ color: MUTED_GREY }} /> },
+          ].map((action) => (
+            <button
+              key={action.label}
+              type="button"
+              aria-label={action.label}
+              className="n3sb-icon-button"
+              style={{ ...ICON_BUTTON, width: 32, height: 32, borderRadius: 10, color: MUTED_GREY }}
+            >
+              {action.icon}
+            </button>
+          ))}
+        </div>
+      </div>
+      <ul style={{ display: 'flex', flexDirection: 'column', gap: 2, margin: '4px 0 0', padding: 0, listStyle: 'none' }}>
+        {SIDEBAR_BOTS.map((bot) => (
+          <li key={bot.id} style={{ position: 'relative', listStyle: 'none' }}>
+            <BotCard bot={bot} active={bot.id === active} startedAt={starts.get(bot.id)} onOpen={onOpen} />
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }
@@ -926,8 +1317,8 @@ function StatusHeader({
         grey, which read flatter than Threads over the glass (Nov 4 2026). The
         count keeps its 60% of the label: white at 39%.
       */}
-      <span style={{ ...TRUNCATE, fontWeight: 600, color: MUTED }}>{label}</span>
-      <span style={{ flexShrink: 0, fontWeight: 600, color: 'rgba(255, 255, 255, 0.39)', fontVariantNumeric: 'tabular-nums' }}>
+      <span style={{ ...TRUNCATE, fontWeight: 600, color: v('status-label') }}>{label}</span>
+      <span style={{ flexShrink: 0, fontWeight: 600, color: v('status-count'), fontVariantNumeric: 'tabular-nums' }}>
         {count}
       </span>
     </button>
@@ -935,7 +1326,7 @@ function StatusHeader({
 }
 
 function Shelf({ label, count, tone }: { label: string; count: number; tone: 'snoozed' | 'settled' }) {
-  const color = tone === 'snoozed' ? SNOOZED_TONE : mutedGreyA(0.5)
+  const color = tone === 'snoozed' ? SNOOZED_TONE : v('shelf')
   return (
     <button
       type="button"
@@ -1038,7 +1429,33 @@ function recedes(thread: SidebarThread, active: boolean, section: SidebarStatusS
 
 // ── Gear menu ───────────────────────────────────────────────────────────────
 
+/** Inlet's radio and check boxes: cream with the menu's rule round them, filled in the ink when on. */
+const INLET_MARK_ON = 'rgb(28, 28, 26)'
+
 function MenuRadio({ checked }: { checked: boolean }) {
+  const inlet = useSkin() === 'inlet'
+  if (inlet) {
+    return (
+      <span
+        aria-hidden
+        style={{
+          display: 'flex',
+          width: 16,
+          height: 16,
+          flexShrink: 0,
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxSizing: 'border-box',
+          borderRadius: '50%',
+          border: `1px solid ${checked ? INLET_MARK_ON : INLET_RULE}`,
+          background: checked ? INLET_MARK_ON : INLET_CREAM,
+          boxShadow: checked ? undefined : '0 1px 2px 0 oklab(0 0 0 / 0.05)',
+        }}
+      >
+        {checked && <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#ffffff' }} />}
+      </span>
+    )
+  }
   return (
     <span
       aria-hidden
@@ -1062,6 +1479,30 @@ function MenuRadio({ checked }: { checked: boolean }) {
 }
 
 function MenuCheckbox({ checked }: { checked: boolean }) {
+  const inlet = useSkin() === 'inlet'
+  if (inlet) {
+    return (
+      <span
+        aria-hidden
+        style={{
+          display: 'flex',
+          width: 16,
+          height: 16,
+          flexShrink: 0,
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxSizing: 'border-box',
+          borderRadius: 4,
+          border: `1px solid ${checked ? INLET_MARK_ON : INLET_RULE}`,
+          background: checked ? INLET_MARK_ON : INLET_CREAM,
+          color: '#ffffff',
+          boxShadow: checked ? undefined : '0 1px 2px 0 oklab(0 0 0 / 0.05)',
+        }}
+      >
+        {checked && <Check size={12} />}
+      </span>
+    )
+  }
   return (
     <span
       aria-hidden
@@ -1102,12 +1543,21 @@ const MENU_ITEM: CSSProperties = {
 }
 
 function MenuSeparator() {
-  return <div role="separator" style={{ height: 1, margin: '8px -4px', background: 'color(srgb 0.909804 0.909804 0.909804 / 0.12)' }} />
+  const inlet = useSkin() === 'inlet'
+  return (
+    <div
+      role="separator"
+      style={{ height: 1, margin: '8px -4px', background: inlet ? INLET_RULE : 'color(srgb 0.909804 0.909804 0.909804 / 0.12)' }}
+    />
+  )
 }
 
+/** Where the gear menu sits: Glass drops it 4 under the gear; Inlet hangs it from the gear, below or
+    (without the room) above, flush, the gear filled in as the tab between them. */
+type MenuPlacement = { top?: number; bottom?: number; right: number; hang: 'below' | 'above' }
+
 function GearMenu({
-  top,
-  right,
+  placement,
   anchor,
   settings,
   onChange,
@@ -1115,8 +1565,7 @@ function GearMenu({
   onFilter,
   onClose,
 }: {
-  top: number
-  right: number
+  placement: MenuPlacement
   anchor: RefObject<HTMLElement | null>
   settings: SidebarSettings
   onChange: (settings: SidebarSettings) => void
@@ -1152,6 +1601,8 @@ function GearMenu({
   ]
   const toggleProject = (project: SidebarProjectId) =>
     onFilter(filter.includes(project) ? filter.filter((id) => id !== project) : [...filter, project])
+  const inlet = useSkin() === 'inlet'
+  const item: CSSProperties = inlet ? { ...MENU_ITEM, color: INLET_INK, borderRadius: 5 } : MENU_ITEM
 
   return (
     <div
@@ -1161,21 +1612,28 @@ function GearMenu({
       className="n3sb-popup"
       style={{
         position: 'absolute',
-        top,
-        right,
+        top: placement.top,
+        bottom: placement.bottom,
+        right: placement.right,
         zIndex: 30,
         width: 224,
         boxSizing: 'border-box',
-        borderRadius: 12,
-        boxShadow: POPUP_SHADOW,
-        color: SIDEBAR_FG,
+        // Inlet's menu and its gear are one shape: the corner at the gear goes square.
+        borderRadius: inlet ? (placement.hang === 'below' ? '10px 0 10px 10px' : '10px 10px 0 10px') : 12,
+        boxShadow: inlet ? undefined : POPUP_SHADOW,
+        background: inlet ? INLET_CREAM : undefined,
+        color: inlet ? INLET_INK : SIDEBAR_FG,
         fontSize: 16,
         lineHeight: '24px',
       }}
     >
-      <GlassFill tint={POPUP_TINT} />
-      <div aria-hidden style={{ position: 'absolute', inset: 0, borderRadius: 'inherit', boxShadow: POPUP_SHEEN, pointerEvents: 'none' }} />
-      <div style={{ position: 'relative', padding: 4 }}>
+      {!inlet && (
+        <>
+          <GlassFill tint={POPUP_TINT} />
+          <div aria-hidden style={{ position: 'absolute', inset: 0, borderRadius: 'inherit', boxShadow: POPUP_SHEEN, pointerEvents: 'none' }} />
+        </>
+      )}
+      <div style={{ position: 'relative', padding: inlet ? 5 : 4 }}>
         {groupings.map((option) => (
           <button
             key={option.value}
@@ -1184,7 +1642,7 @@ function GearMenu({
             aria-checked={settings.grouping === option.value}
             className="n3sb-menu-item"
             onClick={() => onChange({ ...settings, grouping: option.value })}
-            style={MENU_ITEM}
+            style={item}
           >
             <span style={TRUNCATE}>{option.label}</span>
             <MenuRadio checked={settings.grouping === option.value} />
@@ -1197,7 +1655,7 @@ function GearMenu({
           aria-checked={settings.compact}
           className="n3sb-menu-item"
           onClick={() => onChange({ ...settings, compact: !settings.compact })}
-          style={MENU_ITEM}
+          style={item}
         >
           <span style={TRUNCATE}>Compact cards</span>
           <MenuCheckbox checked={settings.compact} />
@@ -1209,7 +1667,7 @@ function GearMenu({
           aria-checked={filter.length === 0}
           className="n3sb-menu-item"
           onClick={() => onFilter([])}
-          style={{ ...MENU_ITEM, justifyContent: 'flex-start', gap: 8 }}
+          style={{ ...item, justifyContent: 'flex-start', gap: 8 }}
         >
           <MenuCheckbox checked={filter.length === 0} />
           <Folder size={16} />
@@ -1223,7 +1681,7 @@ function GearMenu({
             aria-checked={filter.includes(project)}
             className="n3sb-menu-item"
             onClick={() => toggleProject(project)}
-            style={{ ...MENU_ITEM, justifyContent: 'flex-start', gap: 8 }}
+            style={{ ...item, justifyContent: 'flex-start', gap: 8 }}
           >
             <MenuCheckbox checked={filter.includes(project)} />
             <Favicon project={project} size={16} />
@@ -1239,7 +1697,7 @@ function GearMenu({
                 alignItems: 'center',
                 justifyContent: 'center',
                 borderRadius: 8,
-                color: 'oklab(0.999994 0.0000455678 0.0000200868 / 0.5)',
+                color: inlet ? 'oklab(0.522445 -0.00294474 0.0182579)' : 'oklab(0.999994 0.0000455678 0.0000200868 / 0.5)',
               }}
             >
               <EllipsisVertical size={16} />
@@ -1302,6 +1760,10 @@ function placeTip(a: TipAnchor, w: number, h: number, bounds: { width: number; h
 }
 
 function ThreadHoverCard({ thread, anchor }: { thread: SidebarThread; anchor: TipAnchor }) {
+  const inlet = useSkin() === 'inlet'
+  // Inlet's hover card is the row's hover fill, opaque, with its own text and muted channel.
+  const tipFg = inlet ? INLET_TIP_FG : FG
+  const tipMuted = inlet ? INLET_TIP_MUTED : TIP_MUTED
   const ref = useRef<HTMLDivElement>(null)
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null)
   useLayoutEffect(() => {
@@ -1327,20 +1789,21 @@ function ThreadHoverCard({ thread, anchor }: { thread: SidebarThread; anchor: Ti
         display: 'flex',
         maxWidth: 320,
         boxSizing: 'border-box',
-        borderRadius: 8,
-        border: '1px solid rgba(255, 255, 255, 0.08)',
-        boxShadow: 'rgba(0, 0, 0, 0.25) 0px 2px 16px 0px',
+        borderRadius: inlet ? 10 : 8,
+        border: inlet ? '1px solid transparent' : '1px solid rgba(255, 255, 255, 0.08)',
+        boxShadow: inlet ? undefined : 'rgba(0, 0, 0, 0.25) 0px 2px 16px 0px',
+        background: inlet ? INLET_TIP_FILL : undefined,
         pointerEvents: 'none',
         fontSize: 12,
         lineHeight: '16.5px',
-        color: FG,
+        color: tipFg,
       }}
     >
-      {pos && <GlassFill key={`${pos.top},${pos.left}`} tint={POPUP_TINT} />}
+      {pos && !inlet && <GlassFill key={`${pos.top},${pos.left}`} tint={POPUP_TINT} />}
       <div style={{ position: 'relative', padding: '4px 8px' }}>
         <div style={{ display: 'flex', maxWidth: 320 - 18, minWidth: 0, flexDirection: 'column', gap: 8, padding: '8px 4px' }}>
-          <div style={{ ...TRUNCATE, fontWeight: 500, lineHeight: '15px', color: FG }}>{thread.title}</div>
-          <div style={{ display: 'grid', gap: 6, paddingLeft: 2, lineHeight: '16px', color: TIP_MUTED }}>
+          <div style={{ ...TRUNCATE, fontWeight: 500, lineHeight: '15px', color: tipFg }}>{thread.title}</div>
+          <div style={{ display: 'grid', gap: 6, paddingLeft: 2, lineHeight: '16px', color: tipMuted }}>
             <TipRow icon={<Favicon project={thread.project} size={12} />}>
               <div style={{ ...TRUNCATE, color: fgA(0.75) }}>{SIDEBAR_PROJECTS[thread.project].title}</div>
             </TipRow>
@@ -1393,7 +1856,7 @@ function ThreadHoverCard({ thread, anchor }: { thread: SidebarThread; anchor: Ti
                 paddingLeft: 2,
                 borderTop: '1px solid oklab(0.999994 0.0000455678 0.0000200868 / 0.048)',
                 lineHeight: '16px',
-                color: TIP_MUTED,
+                color: tipMuted,
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -1417,12 +1880,14 @@ function ThreadHoverCard({ thread, anchor }: { thread: SidebarThread; anchor: Ti
 
 // ── The panel ───────────────────────────────────────────────────────────────
 
+/* The app's rows since Nov 2026: Pull requests moved up from the footer, Add a project down to
+   the Threads row. */
 const CHROME_ROWS: { label: string; icon: ReactNode }[] = [
   { label: 'Search', icon: <Search size={16} /> },
   { label: 'New agent', icon: <NavigationArrow size={16} /> },
-  { label: 'Add a project', icon: <FolderPlus size={16} /> },
   { label: 'Usage', icon: <ChartDonut size={16} /> },
   { label: 'Automations', icon: <Zap size={16} /> },
+  { label: 'Pull requests', icon: <GitPullRequest size={16} /> },
 ]
 
 /** The macOS window controls, drawn the way the collage drew them: on the toggle's row, red on the icon column. */
@@ -1457,6 +1922,9 @@ function useStartTimes() {
     for (const thread of SIDEBAR_THREADS) {
       if (thread.workingFor !== undefined) starts.set(thread.id, now - thread.workingFor * 60_000 - 20_000)
     }
+    for (const bot of SIDEBAR_BOTS) {
+      if (bot.workingFor !== undefined) starts.set(bot.id, now - bot.workingFor * 60_000 - 20_000)
+    }
     return starts
   })
   return starts
@@ -1477,7 +1945,9 @@ type SidebarPanelProps = {
 
 function SidebarPanel({ settings, onSettingsChange, width, height, hoverCards, overlay }: SidebarPanelProps) {
   const [active, setActive] = useState(SIDEBAR_INITIAL_ACTIVE)
-  const [menu, setMenu] = useState<{ top: number; right: number } | null>(null)
+  const skin = useSkin()
+  const inlet = skin === 'inlet'
+  const [menu, setMenu] = useState<(MenuPlacement & { gear: { left: number; top: number; bottom: number } }) | null>(null)
   const menuOpen = menu !== null
   const [filter, setFilter] = useState<ProjectFilter>([])
   const [collapsedProjects, setCollapsedProjects] = useState<Set<SidebarProjectId>>(new Set())
@@ -1552,8 +2022,17 @@ function SidebarPanel({ settings, onSettingsChange, width, height, hoverCards, o
     setNudge(false)
     const g = gear.getBoundingClientRect()
     const p = panel.getBoundingClientRect()
-    // Under the gear with their right edges aligned (align "end", offset 4).
-    setMenu({ top: g.bottom - p.top + 4, right: p.right - g.right })
+    const right = p.right - g.right
+    const at = { left: g.left - p.left, top: g.top - p.top, bottom: g.bottom - p.top }
+    if (!inlet) {
+      // Under the gear with their right edges aligned (align "end", offset 4).
+      setMenu({ top: g.bottom - p.top + 4, right, hang: 'below', gear: at })
+      return
+    }
+    // Inlet hangs it flush off the gear, below if it fits, else above (as the app flipped it).
+    const height = 5 * 2 + 32 * (3 + 1 + 1 + SIDEBAR_PROJECT_ORDER.length) + 17 * 2
+    if (p.bottom - g.bottom >= height + 8) setMenu({ top: g.bottom - p.top, right, hang: 'below', gear: at })
+    else setMenu({ bottom: p.bottom - g.top, right, hang: 'above', gear: at })
   }
 
   const toggleProject = (project: SidebarProjectId) =>
@@ -1596,7 +2075,7 @@ function SidebarPanel({ settings, onSettingsChange, width, height, hoverCards, o
         ref={panelRef}
         style={{
           position: 'relative',
-          width,
+          width: width + (inlet ? INLET_STRIP : 0),
           height,
           borderRadius: WINDOW_RADIUS,
           boxShadow: WINDOW_SHADOW,
@@ -1609,16 +2088,41 @@ function SidebarPanel({ settings, onSettingsChange, width, height, hoverCards, o
           textAlign: 'left',
         }}
       >
-        <div style={{ position: 'absolute', inset: 0, borderRadius: WINDOW_RADIUS, overflow: 'hidden' }}>
-          <GlassFill tint={PANEL_TINT} />
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            borderRadius: WINDOW_RADIUS,
+            overflow: 'hidden',
+            background: inlet ? INLET_SIDEBAR : undefined,
+          }}
+        >
+          {inlet ? (
+            // Inlet's sidebar is solid, and the window shows the start of the cream chat panel the
+            // open card bridges into.
+            <div
+              style={{
+                position: 'absolute',
+                left: width,
+                top: INLET_PANEL_INSET,
+                right: INLET_PANEL_INSET,
+                bottom: INLET_PANEL_INSET,
+                borderRadius: INLET_PANEL_RADIUS,
+                background: INLET_CREAM,
+              }}
+            />
+          ) : (
+            <GlassFill tint={PANEL_TINT} />
+          )}
         </div>
         <div
           style={{
             position: 'relative',
             display: 'flex',
+            width: inlet ? width : undefined,
             height: '100%',
             flexDirection: 'column',
-            borderRight: '1px solid rgba(64, 64, 64, 0.6)',
+            borderRight: inlet ? undefined : '1px solid rgba(64, 64, 64, 0.6)',
             borderRadius: WINDOW_RADIUS,
           }}
         >
@@ -1692,7 +2196,7 @@ function SidebarPanel({ settings, onSettingsChange, width, height, hoverCards, o
                     padding: '6px 12px',
                     height: 32,
                     boxSizing: 'border-box',
-                    borderRadius: 12,
+                    borderRadius: inlet ? 10 : 9999,
                     fontSize: 14,
                     lineHeight: '20px',
                     color: SIDEBAR_FG,
@@ -1705,7 +2209,9 @@ function SidebarPanel({ settings, onSettingsChange, width, height, hoverCards, o
               ))}
             </div>
 
-            {/* The Threads row: sort and the settings gear. */}
+            <PetalsSection active={active} starts={starts} onOpen={openThread} />
+
+            {/* The Threads row: add a project, sort and the settings gear. */}
             <div style={{ position: 'relative', marginTop: 24, padding: '0 8px' }}>
               <div style={{ display: 'flex', height: 32, alignItems: 'center', gap: 6, padding: '0 12px' }}>
                 <span
@@ -1716,6 +2222,14 @@ function SidebarPanel({ settings, onSettingsChange, width, height, hoverCards, o
                   Threads
                 </span>
                 <div style={{ position: 'relative', display: 'flex', flexShrink: 0, alignItems: 'center', marginRight: -12 }}>
+                  <button
+                    type="button"
+                    aria-label="Add a project"
+                    className="n3sb-icon-button"
+                    style={{ ...ICON_BUTTON, width: 32, height: 32, borderRadius: 10, color: MUTED }}
+                  >
+                    <FolderPlus size={16} style={{ color: MUTED }} />
+                  </button>
                   <button
                     type="button"
                     aria-label="Sort projects: Last user message"
@@ -1732,7 +2246,17 @@ function SidebarPanel({ settings, onSettingsChange, width, height, hoverCards, o
                     className="n3sb-icon-button"
                     ref={gearRef}
                     onClick={toggleMenu}
-                    style={{ ...ICON_BUTTON, position: 'relative', width: 32, height: 32, borderRadius: 10, color: MUTED }}
+                    data-open={(inlet && menuOpen) || undefined}
+                    style={{
+                      ...ICON_BUTTON,
+                      position: 'relative',
+                      width: 32,
+                      height: 32,
+                      borderRadius: inlet && menu ? (menu.hang === 'below' ? '10px 10px 0 0' : '0 0 10px 10px') : 10,
+                      color: MUTED,
+                      // Inlet's open gear is the tab the menu hangs from, in the menu's cream.
+                      ...(inlet && menuOpen ? { background: INLET_CREAM, zIndex: 31, ['--n3sb-muted' as string]: INLET_INK } : {}),
+                    }}
                   >
                     {nudge && (
                       <>
@@ -1828,10 +2352,7 @@ function SidebarPanel({ settings, onSettingsChange, width, height, hoverCards, o
           {/* Footer: Settings and pull requests. */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '4px 8px', flexShrink: 0 }}>
             <ul style={{ display: 'flex', alignItems: 'center', gap: 4, margin: 0, padding: 0, listStyle: 'none' }}>
-              {[
-                { label: 'Settings', icon: <Settings size={16} style={{ color: QUIET_ICON }} /> },
-                { label: 'Pull requests', icon: <GitPullRequest size={16} style={{ color: QUIET_ICON }} /> },
-              ].map((item) => (
+              {[{ label: 'Settings', icon: <Settings size={16} style={{ color: QUIET_ICON }} /> }].map((item) => (
                 <li key={item.label} style={{ position: 'relative', listStyle: 'none' }}>
                   <button
                     type="button"
@@ -1848,10 +2369,25 @@ function SidebarPanel({ settings, onSettingsChange, width, height, hoverCards, o
         </div>
 
         {/* The gear menu hangs off the Threads row, right-aligned to the gear. */}
+        {menu && inlet && (
+          // The concave join where the hung menu meets its gear.
+          <div
+            aria-hidden
+            style={{
+              position: 'absolute',
+              left: menu.gear.left - INLET_FILLET,
+              top: menu.hang === 'below' ? menu.gear.bottom - INLET_FILLET : menu.gear.top,
+              width: INLET_FILLET,
+              height: INLET_FILLET,
+              zIndex: 30,
+              pointerEvents: 'none',
+              background: `radial-gradient(circle at ${menu.hang === 'below' ? '0 0' : '0 100%'}, transparent ${INLET_FILLET - 0.5}px, ${INLET_CREAM} ${INLET_FILLET + 0.5}px)`,
+            }}
+          />
+        )}
         {menu && (
           <GearMenu
-            top={menu.top}
-            right={menu.right}
+            placement={menu}
             anchor={gearRef}
             settings={settings}
             onChange={onSettingsChange}
@@ -1927,6 +2463,7 @@ export default function SidebarPlayground({
   radius: string
   isMobile: boolean
 }) {
+  const skin: Skin = useMockTheme()
   const [settings, setSettings] = useState<SidebarSettings>({ grouping: 'project', compact: false })
   const [stageWidth, setStageWidth] = useState(0)
   const stageRef = useRef<HTMLDivElement>(null)
@@ -1946,11 +2483,12 @@ export default function SidebarPlayground({
   const pad = isMobile ? 24 : 40
   const panelHeight = isMobile ? 640 : 820
   const stageHeight = panelHeight + pad * 2
-  const panelWidth = Math.min(SIDEBAR_WIDTH, Math.max(208, stageWidth - 32))
+  const strip = skin === 'inlet' ? INLET_STRIP : 0
+  const panelWidth = Math.min(SIDEBAR_WIDTH, Math.max(208, stageWidth - 32 - strip))
   // Centred on the wallpaper, on whole pixels so the panel's text lands on the
   // pixel grid as it does in the app. A hover card without room beside it flips
   // under its card (`placeTip`).
-  const panelLeft = Math.round((stageWidth - panelWidth) / 2)
+  const panelLeft = Math.round((stageWidth - panelWidth - strip) / 2)
   const wallWidth = Math.max(stageWidth, stageHeight * WALL_ASPECT) * WALL_ZOOM
   const wallHeight = wallWidth / WALL_ASPECT
 
@@ -1965,7 +2503,8 @@ export default function SidebarPlayground({
     <div
       ref={stageRef}
       data-theme="dark"
-      style={{ position: 'relative', height: stageHeight, borderRadius: radius, overflow: 'hidden', isolation: 'isolate' }}
+      data-n3sb-skin={skin}
+      style={{ ...skinStyle(skin), position: 'relative', height: stageHeight, borderRadius: radius, overflow: 'hidden', isolation: 'isolate' }}
     >
       <div
         ref={wallRef}
@@ -1976,23 +2515,25 @@ export default function SidebarPlayground({
           top: (stageHeight - wallHeight) / 2,
           width: wallWidth,
           height: wallHeight,
-          backgroundImage: `url(${SIDEBAR_WALLPAPER})`,
+          backgroundImage: `url(${skin === 'inlet' ? INLET_BACKDROP : SIDEBAR_WALLPAPER})`,
           backgroundSize: '100% 100%',
         }}
       />
       {stageWidth > 0 && (
-        <WallContext.Provider value={wallRef}>
-          <div style={{ position: 'absolute', top: pad, left: panelLeft }}>
-            <SidebarPanel
-              settings={settings}
-              onSettingsChange={setSettings}
-              width={panelWidth}
-              height={panelHeight}
-              hoverCards={canHover}
-              overlay={stageRef}
-            />
-          </div>
-        </WallContext.Provider>
+        <SkinContext.Provider value={skin}>
+          <WallContext.Provider value={wallRef}>
+            <div style={{ position: 'absolute', top: pad, left: panelLeft }}>
+              <SidebarPanel
+                settings={settings}
+                onSettingsChange={setSettings}
+                width={panelWidth}
+                height={panelHeight}
+                hoverCards={canHover}
+                overlay={stageRef}
+              />
+            </div>
+          </WallContext.Provider>
+        </SkinContext.Provider>
       )}
     </div>
   )

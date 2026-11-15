@@ -30,12 +30,13 @@ export const CURVED_INNER = radius.xl
 export const curvedInset = (isMobile: boolean) => (isMobile ? 20 : 32)
 
 /**
- * The curved page's column, set off the window's height so a 16:9 clip and its
- * copy fit on one screen (about 995 on a 16-inch MacBook), up to the sheet's
- * 1128 on a tall monitor. 440 is what the card's padding, a typical tab and some
- * air take; the 16 is the card's padding across.
+ * The curved page's column, set off the window's height so a 16:9 clip shows whole with the top of
+ * its tab under it: about 1020 on a 14-inch MacBook, about 1260 on a 16-inch, capped at 1280 on
+ * anything bigger. 300 is the room kept for the card's padding, the top of its tab and some air;
+ * the 16 is the card's padding across. History (Nov 15 2026): 440 under the sheet's 1128 cap
+ * (820 on a 14-inch, about 995 on a 16-inch), then 360, then this, as the mockups read small.
  */
-export const CURVED_MAX = `clamp(820px, calc((100vh - 440px) * 16 / 9 + 16px), ${SHEET_MAX}px)`
+export const CURVED_MAX = `clamp(820px, calc((100vh - 300px) * 16 / 9 + 16px), 1280px)`
 
 /** The open space between sections — 96, 48 on a phone. */
 export const sheetGap = (isMobile: boolean) => (isMobile ? 48 : 96)

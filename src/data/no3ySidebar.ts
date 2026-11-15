@@ -322,3 +322,93 @@ export const STATUS_LABEL: Record<SidebarStatus, string | null> = {
   woke: 'Woke from snooze',
   idle: null,
 }
+
+/**
+ * The Petals section: the app's bots (Nov 15 2026), the three the Inlet clips show. Each card is
+ * the app's bot card (`SidebarV2BotCardBody`): the mascot, the name, a status line in words, and
+ * the trailing time and status mark. A working bot's mark is the monitoring breath, not the
+ * working rain or ring, since its mascot already shows the work. Mascots are the app's own
+ * sprites (`botMascotArt.ts`), copied off the running app's SVGs as path data.
+ */
+export type SidebarBotSprite = {
+  width: number
+  height: number
+  /** One path per fill, cells on a 1-unit grid. */
+  paths: { d: string; fill: string }[]
+}
+
+export type SidebarBot = {
+  id: string
+  name: string
+  status: 'idle' | 'working'
+  /** The card's second line. */
+  line: string
+  /** Minutes the run had been going when the page loaded; working bots only. */
+  workingFor?: number
+  /** The mascot's shape and mood, as the app names them. */
+  mascot: { shape: string; mood: string; sprite: SidebarBotSprite }
+}
+
+export const SIDEBAR_BOTS: SidebarBot[] = [
+  {
+    id: 'bot:flake-hunter',
+    name: "Flake hunter",
+    status: 'idle',
+    line: "Next check in 2h",
+    mascot: {
+      shape: 'Ginkgo',
+      mood: 'Sleeping',
+      sprite: {
+        width: 17,
+        height: 14,
+        paths: [
+          { fill: '#000000', d: 'M1 0h6v1h-6zM10 0h6v1h-6zM0 1h1v1h-1zM7 1h1v1h-1zM9 1h1v1h-1zM16 1h1v1h-1zM0 2h1v1h-1zM8 2h1v1h-1zM16 2h1v1h-1zM0 3h1v1h-1zM16 3h1v1h-1zM1 4h1v1h-1zM15 4h1v1h-1zM2 5h1v1h-1zM14 5h1v1h-1zM3 6h1v1h-1zM5 6h3v1h-3zM9 6h3v1h-3zM13 6h1v1h-1zM4 7h1v1h-1zM12 7h1v1h-1zM5 8h1v1h-1zM11 8h1v1h-1zM6 9h1v1h-1zM8 9h1v1h-1zM10 9h1v1h-1zM7 10h3v1h-3zM8 11h1v1h-1zM8 12h1v1h-1zM8 13h1v1h-1z' },
+          { fill: '#fcb01a', d: 'M1 1h6v1h-6zM1 2h7v1h-7zM10 2h5v1h-5zM1 3h14v1h-14zM2 4h12v1h-12zM3 5h10v1h-10zM4 6h1v1h-1zM8 6h1v1h-1zM5 7h7v1h-7zM6 8h5v1h-5zM7 9h1v1h-1zM9 9h1v1h-1z' },
+          { fill: '#ffd233', d: 'M10 1h6v1h-6zM9 2h1v1h-1zM15 2h1v1h-1zM15 3h1v1h-1zM14 4h1v1h-1zM13 5h1v1h-1zM12 6h1v1h-1z' },
+        ],
+      },
+    },
+  },
+  {
+    id: 'bot:release-scout',
+    name: "Release scout",
+    status: 'idle',
+    line: "Next check in 2h",
+    mascot: {
+      shape: 'Sakura',
+      mood: 'Sleeping',
+      sprite: {
+        width: 13,
+        height: 15,
+        paths: [
+          { fill: '#000000', d: 'M2 0h3v1h-3zM8 0h3v1h-3zM1 1h1v1h-1zM5 1h1v1h-1zM7 1h1v1h-1zM11 1h1v1h-1zM0 2h1v1h-1zM6 2h1v1h-1zM12 2h1v1h-1zM0 3h1v1h-1zM12 3h1v1h-1zM0 4h1v1h-1zM12 4h1v1h-1zM0 5h1v1h-1zM12 5h1v1h-1zM0 6h1v1h-1zM12 6h1v1h-1zM1 7h1v1h-1zM3 7h3v1h-3zM7 7h3v1h-3zM11 7h1v1h-1zM1 8h1v1h-1zM11 8h1v1h-1zM2 9h1v1h-1zM10 9h1v1h-1zM3 10h1v1h-1zM9 10h1v1h-1zM4 11h1v1h-1zM8 11h1v1h-1zM5 12h3v1h-3zM6 13h1v1h-1zM6 14h1v1h-1z' },
+          { fill: '#ff4f95', d: 'M2 1h3v1h-3zM1 2h5v1h-5zM8 2h3v1h-3zM1 3h10v1h-10zM1 4h10v1h-10zM1 5h10v1h-10zM1 6h10v1h-10zM2 7h1v1h-1zM6 7h1v1h-1zM4 8h5v1h-5zM3 9h7v1h-7zM4 10h2v1h-2zM7 10h2v1h-2zM5 11h1v1h-1zM7 11h1v1h-1z' },
+          { fill: '#ff8ab8', d: 'M8 1h3v1h-3zM7 2h1v1h-1zM11 2h1v1h-1zM11 3h1v1h-1zM11 4h1v1h-1zM11 5h1v1h-1zM11 6h1v1h-1zM10 7h1v1h-1z' },
+          { fill: '#ffc2d9', d: 'M2 8h2v1h-2zM9 8h2v1h-2z' },
+          { fill: '#d8357a', d: 'M6 10h1v1h-1zM6 11h1v1h-1z' },
+        ],
+      },
+    },
+  },
+  {
+    id: 'bot:dependabot',
+    name: "Dependabot",
+    status: 'working',
+    line: "Working on it…",
+    workingFor: 3,
+    mascot: {
+      shape: 'Oak',
+      mood: 'Thinking',
+      sprite: {
+        width: 13,
+        height: 19,
+        paths: [
+          { fill: '#000000', d: 'M5 0h3v1h-3zM4 1h1v1h-1zM8 1h1v1h-1zM3 2h1v1h-1zM9 2h1v1h-1zM2 3h1v1h-1zM10 3h1v1h-1zM1 4h1v1h-1zM11 4h1v1h-1zM1 5h1v1h-1zM11 5h1v1h-1zM2 6h1v1h-1zM10 6h1v1h-1zM1 7h1v1h-1zM4 7h1v1h-1zM8 7h1v1h-1zM11 7h1v1h-1zM0 8h1v1h-1zM4 8h2v1h-2zM8 8h2v1h-2zM12 8h1v1h-1zM0 9h1v1h-1zM12 9h1v1h-1zM1 10h1v1h-1zM11 10h1v1h-1zM0 11h1v1h-1zM12 11h1v1h-1zM0 12h1v1h-1zM6 12h1v1h-1zM12 12h1v1h-1zM1 13h1v1h-1zM4 13h1v1h-1zM6 13h1v1h-1zM8 13h1v1h-1zM11 13h1v1h-1zM2 14h1v1h-1zM5 14h3v1h-3zM10 14h1v1h-1zM3 15h1v1h-1zM6 15h1v1h-1zM9 15h1v1h-1zM4 16h5v1h-5zM6 17h1v1h-1zM6 18h1v1h-1z' },
+          { fill: '#008755', d: 'M5 1h2v1h-2zM4 2h4v1h-4zM3 3h6v1h-6zM2 4h8v1h-8zM2 5h8v1h-8zM3 6h6v1h-6zM2 7h2v1h-2zM6 7h2v1h-2zM1 8h3v1h-3zM6 8h2v1h-2zM10 8h1v1h-1zM1 9h10v1h-10zM2 10h9v1h-9zM1 11h11v1h-11zM1 12h5v1h-5zM7 12h5v1h-5zM2 13h2v1h-2zM5 13h1v1h-1zM7 13h1v1h-1zM9 13h2v1h-2zM3 14h2v1h-2zM8 14h2v1h-2zM4 15h2v1h-2zM7 15h2v1h-2z' },
+          { fill: '#08b776', d: 'M7 1h1v1h-1zM8 2h1v1h-1zM9 3h1v1h-1zM10 4h1v1h-1zM10 5h1v1h-1zM9 6h1v1h-1zM10 7h1v1h-1zM11 8h1v1h-1zM11 9h1v1h-1z' },
+          { fill: '#f5efe0', d: 'M5 7h1v1h-1zM9 7h1v1h-1z' },
+        ],
+      },
+    },
+  },
+]

@@ -184,14 +184,20 @@ export function CurvedCard({
   copy,
   side,
   holdClip = false,
+  tone,
 }: {
   media: ReactNode
   copy: ReactNode
   side?: ReactNode
   holdClip?: boolean
+  /** A fill of the card's own, and the theme its copy reads in on it. */
+  tone?: { surface: string; theme: Theme }
 }) {
   const isMobile = useIsMobile()
-  const { theme: cardTheme, vars } = useCardTheme()
+  const cardDefault = useCardTheme()
+  const { theme: cardTheme, vars } = tone
+    ? { theme: tone.theme, vars: { '--curved-surface': tone.surface } as CSSProperties }
+    : cardDefault
   const rootRef = useRef<HTMLElement>(null)
   const [tabGrown, setTabGrown] = useState(false)
   const markGrown = useCallback(() => setTabGrown(true), [])
