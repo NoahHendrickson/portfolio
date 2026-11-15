@@ -29,6 +29,12 @@ const MENU_RADIUS = 20
 /** Rows sit 8 in, with corners parallel to the menu's. */
 const MENU_INSET = 8
 const ROW_RADIUS = MENU_RADIUS - MENU_INSET
+/**
+ * Room round the shape for its drop shadow (10 down, 18 blur). The SVG is sized to the
+ * shape plus this rather than left 1 × 1 with `overflow: visible`: Safari bounds a CSS
+ * filter by the element's own box, which cut the shadow off along the menu's foot.
+ */
+const SHADOW_ROOM = 48
 const OPEN_MS = 300
 const CLOSE_MS = 280
 
@@ -119,7 +125,7 @@ export default function HungMenu({
   /** Mounted while open and until the shape has folded home. */
   const [shown, setShown] = useState(false)
   const [progress, setProgress] = useState(0)
-  const [path, setPath] = useState('')
+  const [shape, setShape] = useState({ d: '', x: 0, y: 0, w: 0, h: 0 })
   const rootRef = useRef<HTMLDivElement>(null)
   const listRef = useRef<HTMLDivElement>(null)
   const progressRef = useRef(0)
@@ -149,7 +155,15 @@ export default function HungMenu({
     const B = { l: t.left - frame.left - PAD, t: t.top - frame.top - PAD, r: t.right - frame.left + PAD, b: t.bottom - frame.top + PAD }
     const M = { l: m.left - frame.left, t: m.top - frame.top, r: m.right - frame.left, b: m.bottom - frame.top }
     const radius = parseFloat(getComputedStyle(button).borderTopLeftRadius) || 0
-    setPath(hungShape(B, M, p, Math.min(radius, (t.bottom - t.top) / 2)))
+    const x = Math.min(B.l, M.l) - SHADOW_ROOM
+    const y = B.t - SHADOW_ROOM
+    setShape({
+      d: hungShape(B, M, p, Math.min(radius, (t.bottom - t.top) / 2)),
+      x,
+      y,
+      w: Math.max(B.r, M.r) + SHADOW_ROOM - x,
+      h: Math.max(B.b, M.b) + SHADOW_ROOM - y,
+    })
   }, [])
 
   useLayoutEffect(() => {
@@ -222,12 +236,13 @@ export default function HungMenu({
       {shown && (
         <svg
           aria-hidden
-          width={1}
-          height={1}
+          width={shape.w}
+          height={shape.h}
+          viewBox={`${shape.x} ${shape.y} ${shape.w} ${shape.h}`}
           style={{
             position: 'absolute',
-            left: 0,
-            top: 0,
+            left: shape.x,
+            top: shape.y,
             overflow: 'visible',
             pointerEvents: 'none',
             zIndex: 9,
@@ -236,7 +251,7 @@ export default function HungMenu({
             filter: 'drop-shadow(0 10px 18px rgb(0 0 0 / 0.3))',
           }}
         >
-          <path d={path} style={{ fill: ACCENT }} />
+          <path d={shape.d} style={{ fill: ACCENT }} />
         </svg>
       )}
       {trigger({ isOpen, toggle: () => (isOpen ? close() : open()), held: shown ? HELD : null })}
