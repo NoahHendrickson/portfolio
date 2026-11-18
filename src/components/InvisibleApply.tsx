@@ -127,7 +127,7 @@ export default function InvisibleApply() {
               copy={
                 <CurvedCopy
                   heading="The problem"
-                  body="At Invisible, we use Greenhouse and external job boards to recruit people for AI training projects. This became a prominent bottleneck for our hiring team and a bad experience for our existing users because they could not find new or more work on the platform. The hiring team had to do a lot of manual work to ensure there weren't duplicate users applying through Greenhouse who already had accounts. We needed a simple and efficient way for our current users to find and apply to new projects so that we could meet the demand of our clients."
+                  body="At Invisible, we use Greenhouse and external job boards to recruit people for AI training projects. This became a prominent bottleneck for our hiring team and a bad experience for our existing users because they could not find new or more work on the platform. The hiring team had to do a lot of manual work to ensure there weren’t duplicate users applying through Greenhouse who already had accounts. We needed a simple and efficient way for our current users to find and apply to new projects so that we could meet the demand of our clients."
                 >
                   <Part heading="The jobs to be done">
                     <ol style={listStyle}>
@@ -220,7 +220,8 @@ export default function InvisibleApply() {
                 <CurvedCopy
                   body={[
                     'Selecting a project turns the Explore page into a split view, with the project list on the left and project details on the right.',
-                    "I ordered the sections of the panel to reflect what we would like users to do and what I think users would want to know. So the actions they can take on that project are at the top, and second would be the application progress and then the project description. I put the application progress section above the project description because users may have progress toward an application that they've never even clicked on because the assessments and some of the application steps are shared between projects. And so they may actually be very close to completing an application without having done anything for that one specifically. So I wanted to surface that ahead of the job description.",
+                    'I ordered the panel by what we wanted users to do and what they’d want to know: the actions they can take on the project first, then their application progress, then the project description.',
+                    'Progress sits above the description because the assessments and some application steps are shared between projects. A user can be close to finishing an application for a project they’ve never opened, so I wanted them to see that first.',
                   ]}
                 />
               }
@@ -239,7 +240,7 @@ export default function InvisibleApply() {
               copy={
                 <CurvedCopy
                   body={[
-                    "After a user submits their application they'll get a confirmation modal and a quick explainer of the next steps on what they can do.",
+                    'After a user submits their application, they’ll get a confirmation modal and a quick explainer of what to do next.',
                   ]}
                 />
               }

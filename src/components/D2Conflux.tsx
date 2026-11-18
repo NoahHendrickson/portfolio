@@ -82,7 +82,7 @@ export default function D2Conflux() {
           title={project.title}
           helper={project.eyebrow}
           description={[
-            "Hardcore Destiny 2 players rely heavily on third-party tools and websites while playing. Finding armor, finding weapons and build-crafting aren't supported well in-game.",
+            "Hardcore Destiny 2 players rely heavily on third-party tools and websites while playing. Finding armor, finding weapons and build-crafting aren’t supported well in-game.",
           ]}
           links={[
             { label: 'Website', href: STAT_BUILDER_SITE },
@@ -169,7 +169,7 @@ export default function D2Conflux() {
               copy={
                 <CurvedCopy
                   heading="Sort your armor"
-                  body="Armor 3.0 simplified how stats are distributed on a piece of armor, with finite combinations. That changed how players thought about armor, but none of the previous armor management tools accounted for it. A table view with quick filters that matched players' mental model made it easy and intuitive to search, filter and delete the armor you own."
+                  body="Armor 3.0 simplified how stats are distributed on a piece of armor, with finite combinations. That changed how players thought about armor, but none of the previous armor management tools accounted for it. A table view with quick filters that matched players’ mental model made it easy and intuitive to search, filter and delete the armor you own."
                 />
               }
             />
@@ -218,7 +218,7 @@ export default function D2Conflux() {
               copy={
                 <CurvedCopy
                   heading="Save it, then equip it in one click"
-                  body="Any build saves as a loadout with its subclass, mods, weapons and artifact. Equip pulls every piece out of the vault, slots the mods and swaps the exotic. Activity sets write a whole group of loadouts into the game's own loadout slots at once."
+                  body="Any build saves as a loadout with its subclass, mods, weapons and artifact. Equip pulls every piece out of the vault, slots the mods and swaps the exotic. Activity sets write a whole group of loadouts into the game’s own loadout slots at once."
                 />
               }
             />
@@ -231,7 +231,7 @@ export default function D2Conflux() {
                 copy={
                   <CurvedCopy
                     heading="Component library"
-                    body="The app's own components, running live from d2conflux.com. Change their props, force hover, focus and pressed states, switch themes, and copy the code."
+                    body="The app’s own components, running live from d2conflux.com. Change their props, force hover, focus and pressed states, switch themes, and copy the code."
                   >
                     <SheetLinks links={[{ label: 'Open full screen', href: PLAYGROUND }]} />
                   </CurvedCopy>
@@ -265,7 +265,7 @@ export default function D2Conflux() {
 
           <Reveal>
             <CurvedPanel style={{ padding: curvedInset(isMobile), display: 'flex', flexDirection: 'column', gap: space.xl }}>
-              <CurvedCopy heading="Try it with your own vault" body="Sign in with Bungie. It's free, and it works on your phone too.">
+              <CurvedCopy heading="Try it with your own vault" body="Sign in with Bungie. It’s free, and it works on your phone too.">
                 <SheetLinks
                   links={[
                     { label: 'Open D2 Conflux', href: STAT_BUILDER_SITE },

@@ -50,7 +50,7 @@ export default function PrototypeToggle() {
       onClick={() => setHomePrototype(next)}
       data-texture-avoid="self"
       aria-label={`Prototype ${prototype === 'wordmark' ? 'A, the wordmark' : 'B, the follow blob'}. Switch to ${next === 'wordmark' ? 'A' : 'B'}`}
-      title="Hi's prototype: A wordmark, B follow blob"
+      title="Hi’s prototype: A wordmark, B follow blob"
       style={{
         position: 'fixed',
         left: LEFT,

@@ -641,7 +641,7 @@ export default function Hero() {
       </p>
 
       <p style={{ ...body, color: TEXT }}>
-        I&rsquo;ve worked on consumer facing products and features like onboarding
+        I&rsquo;ve worked on consumer-facing products and features like onboarding
         users, driving engagement and simple flows. I also got to design
         complex workflows, admin tools and user management systems. Using words,
         diagrams and research, I laid out clear conceptual models that served as
@@ -650,7 +650,7 @@ export default function Hero() {
 
       <p style={{ ...body, color: TEXT }}>
         I spend much of my free time gaming, hanging with friends and exercising. I
-        have been a hard-core gamer for more than a decade. My most played and
+        have been a hardcore gamer for more than a decade. My most played and
         favorite game is Destiny 2. Participating in World First races and other PvE
         challenges requires a lot of optimization. So I designed and{' '}
         <span style={{ marginLeft: LEAD_ROOM }}>
