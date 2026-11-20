@@ -83,7 +83,8 @@ export function SheetPage({ children }: { children: ReactNode }) {
 /**
  * The intro, on the page with no fill: the icon (if the project has one) and title, the
  * helper entries joined by " / ", the description, anything the page adds
- * (`children` — onboarding's Role / Team / Partners), then any label-only links.
+ * (`children` — onboarding's Role / Team / Partners), then any label-only links, then `after`
+ * (no3y Code's theme switch, under Repo / Download since Nov 16 2026).
  */
 export function SheetIntro({
   icon,
@@ -95,6 +96,7 @@ export function SheetIntro({
   bodySize = '16px',
   iconSize = 36,
   children,
+  after,
 }: {
   /** The side padding, where it isn't the top and bottom's. */
   inset?: number
@@ -107,6 +109,8 @@ export function SheetIntro({
   description: string[]
   links?: { label: string; href: string }[]
   children?: ReactNode
+  /** Laid out after the links. */
+  after?: ReactNode
 }) {
   const isMobile = useIsMobile()
   const entries = helper === undefined ? [] : typeof helper === 'string' ? [helper] : helper
@@ -146,6 +150,7 @@ export function SheetIntro({
       ))}
       {children}
       {!!links?.length && <SheetLinks links={links} />}
+      {after}
     </header>
   )
 }

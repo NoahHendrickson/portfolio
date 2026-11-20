@@ -67,6 +67,7 @@ import {
 } from './no3ySidebarIcons'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import { useMockTheme } from '../mockTheme'
+import { IconFill } from './no3ySidebarIconFill'
 import { BEAD_RING_PERIOD, bakeBeadRingFilm } from './no3yBeadRing'
 import './No3ySidebar.css'
 
@@ -99,9 +100,11 @@ import './No3ySidebar.css'
   (`SKIN_VARS`), so one set of components draws both the Glass replica and the
   Inlet Black one the page's mockup switch picks (Nov 15 2026). Glass keeps the
   literals it always had; Inlet's are read off the running app the same way
-  (Inlet Black, dark sidebar on the cream panel).
+  (Inlet Black, dark sidebar on the cream panel). Basic (Nov 16 2026, the fork's
+  default theme, in its Neutral Dark tone) was read the same way: Glass's layout
+  on a solid #2b2b2b panel, 8px cards, 10px rows and a plain 8% open card.
 */
-type Skin = 'glass' | 'inlet'
+type Skin = 'glass' | 'inlet' | 'basic'
 const SkinContext = createContext<Skin>('glass')
 const useSkin = () => useContext(SkinContext)
 
@@ -202,6 +205,33 @@ const SKIN_VARS: Record<Skin, Record<string, string>> = {
     'menu-hover': 'rgb(228, 224, 199)',
     ring: 'rgb(255 255 255 / 30%)',
   },
+  basic: {
+    fg: 'oklab(0.930993 0.0000424981 0.0000185966)',
+    'sidebar-fg': 'oklab(0.930993 0.0000424981 0.0000185966)',
+    muted: 'oklab(0.686218 0.0000311732 0.0000137091)',
+    'muted-grey': 'oklab(0.686218 0.0000311732 0.0000137091)',
+    'receded-row': 'oklab(0.7731 0.0000351667 0.0000154972 / 0.75)',
+    'receded-title': 'rgb(181, 181, 181)',
+    'bot-receded-title': 'rgb(181, 181, 181)',
+    'quiet-icon': 'color(srgb 0.628627 0.628628 0.628627)',
+    'quiet-button': 'oklab(0.7731 0.0000351667 0.0000154972 / 0.8)',
+    rule: 'oklab(0.999994 0.0000455678 0.0000200868 / 0.048)',
+    'row-active': 'rgba(255, 255, 255, 0.08)',
+    sep: 'oklab(0.930993 0.0000424981 0.0000185966 / 0.12)',
+    'status-working': '#24fe8a',
+    'status-done': '#2498fe',
+    'status-amber': '#ffcd59',
+    'status-failed': '#ff6b60',
+    'pr-open': 'oklab(0.845 -0.138113 0.0370641 / 0.9)',
+    'status-label': 'oklab(0.686218 0.0000311732 0.0000137091)',
+    'status-count': 'oklab(0.686218 0.0000311732 0.0000137091 / 0.6)',
+    shelf: 'oklab(0.7731 0.0000351667 0.0000154972 / 0.6)',
+    hover: 'rgba(255, 255, 255, 0.04)',
+    'hover-fg': 'oklab(0.930993 0.0000424981 0.0000185966)',
+    'hover-title': 'oklab(0.930993 0.0000424981 0.0000185966)',
+    'menu-hover': 'oklab(0.930993 0.0000424981 0.0000185966 / 0.08)',
+    ring: 'rgb(255 255 255 / 30%)',
+  },
 }
 
 /** Inlet's open card is the cream pill the panel bridges into: its ink and marks turn dark. */
@@ -263,12 +293,29 @@ const INLET_PANEL_RADIUS = 8
 /** The concave join where a hung menu meets its button (the app's `--fork-inlet-fillet`). */
 const INLET_FILLET = 9
 
+// ── Basic surfaces (read off the running app, Neutral Dark) ─────────────────
+
+/** The sidebar's surface, `--basic-base`. The replica shows the sidebar alone, like Glass: no
+    stage beside it (Nov 17 2026; a 40px strip of it showed at first, like Inlet's panel). */
+const BASIC_BASE = '#2b2b2b'
+/** Its hairlines (the sidebar's right edge, the menus' and hover cards' borders): white at 8%. */
+const BASIC_RULE = 'rgba(255, 255, 255, 0.08)'
+/** Menus and hover cards: the ink flattened over the base, solid. */
+const BASIC_POPUP = 'rgb(60, 60, 60)'
+const BASIC_POPUP_SHADOW = 'rgba(0, 0, 0, 0.16) 0px 1px 2px 0px, rgba(0, 0, 0, 0.24) 0px 8px 24px 0px'
+const BASIC_MUTED = 'oklab(0.686218 0.0000311732 0.0000137091)'
+/** Basic's header rows are 44, not 52, and the window buttons ride their axis. */
+const BASIC_TOPBAR = 44
+
 // ── Glass ───────────────────────────────────────────────────────────────────
 
 const SIDEBAR_WALLPAPER = '/work/no3y-code/sidebar-wallpaper.jpg'
-/** Inlet's stage: the brand texture's Cool fade (Figma h7PWAQCOhl8NwRoFTs3Cbu 119:539), the
-    clips' backdrop, cut to the wallpaper's 2400 × 1556. */
-const INLET_BACKDROP = '/work/no3y-inlet/sidebar-backdrop.jpg'
+/** Inlet's and Basic's stage (Nov 19 2026): the brand texture's Cool fade generated for this stage
+    (`sidebar.mjs` in ~/.t3-fork/scratch/no3y-capture/inlet/backdrops/variants/, 3456 × 2240, the
+    wall's 2400 × 1556 proportion): the stage shows only the wall's middle, so its two small floods
+    sit at that window's top-right and bottom-left corners. Basic stood on Glass's fluted wallpaper
+    until then; it now matches Inlet, as its screenshots do. */
+const TEXTURE_BACKDROP = '/work/no3y-inlet/sidebar-backdrop.jpg'
 const GLASS_FILTER = 'blur(48px) saturate(1.35) brightness(0.62)'
 /** The panel's `rgb(22 22 22 / 73%)`, its transmission scaled 1.3×. */
 const PANEL_TINT = 'rgba(22, 22, 22, 0.649)'
@@ -771,9 +818,10 @@ function HoverActions({ thread }: { thread: Pick<SidebarThread, 'pinned' | 'stat
 }
 
 /** A card's corners: Glass rounds 20 (12 compact); Inlet 10, and its open card goes square on the
-    right where the panel bridges into it. */
+    right where the panel bridges into it; Basic 8. */
 function cardRadius(skin: Skin, compact: boolean, active: boolean) {
   if (skin === 'inlet') return active ? '10px 0 0 10px' : 10
+  if (skin === 'basic') return 8
   return compact ? 12 : 20
 }
 
@@ -857,8 +905,8 @@ function ThreadCard({ thread, compact, projectTitleHidden, active, recedes, star
         <div style={{ display: 'flex', height: 18, minHeight: 18, minWidth: 0, alignItems: 'center', gap: 16 }}>
           {compact && !projectTitleHidden ? (
             <span style={{ display: 'flex', flex: '1 1 0%', minWidth: 0, alignItems: 'center', gap: 8 }}>
-              {skin === 'inlet' ? (
-                // Inlet sets the project's icon in a chip: 18px at the ink's 12%, the icon 12px.
+              {skin !== 'glass' ? (
+                // Inlet and Basic set the project's icon in a chip: 18px at the ink's 12%, the icon 12px.
                 <span
                   style={{
                     display: 'flex',
@@ -958,6 +1006,12 @@ function ThreadCard({ thread, compact, projectTitleHidden, active, recedes, star
 
 // ── Petals (the app's bots) ─────────────────────────────────────────────────
 
+/** Each mascot shape's body colour (`botMascotBaseColor` in the app's botMascotArt.ts), which tints its tile. */
+const MASCOT_COLOR: Record<string, string> = {
+  Classic: '#26b846', Round: '#f95b1c', Willow: '#008755', Heart: '#fcb01a', Maple: '#f95b1c', Oak: '#008755', Ginkgo: '#fcb01a',
+  Monstera: '#26b846', Sakura: '#ff4f95', Spoon: '#3cb5fc', Tulip: '#f95b1c', Drop: '#7970f9', Bell: '#c841fa', Bud: '#fcb01a',
+}
+
 /** A bot's mascot, its pixel cells fitted into a 22px box (the app's `BotMascot` with `fit`). */
 function Mascot({ bot }: { bot: SidebarBot }) {
   const { width, height, paths } = bot.mascot.sprite
@@ -979,10 +1033,37 @@ function Mascot({ bot }: { bot: SidebarBot }) {
 }
 
 /**
+ * The mascot on a 32px tile in its body colour at half strength, 8px corners, behind a 1px white
+ * 24% inset edge (the app's `BotMascotTile`, custom 8916c0e81c / 5bba8f2a11; every skin's sidebar
+ * is dark, so the edge is the white one), filling the card's two text lines.
+ */
+function MascotTile({ bot }: { bot: SidebarBot }) {
+  return (
+    <span
+      aria-hidden
+      style={{
+        display: 'flex',
+        width: 32,
+        height: 32,
+        flexShrink: 0,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 8,
+        boxShadow: 'inset 0 0 0 1px rgb(255 255 255 / 0.24)',
+        backgroundColor: `color-mix(in srgb, ${MASCOT_COLOR[bot.mascot.shape] ?? '#26b846'} 50%, transparent)`,
+      }}
+    >
+      <Mascot bot={bot} />
+    </span>
+  )
+}
+
+/**
  * A bot's card (the app's `SidebarV2BotCardBody`): the mascot beside two lines, the name and what
  * it is doing, with the trailing time, hover actions and status mark centred on both. 6 + 16 + 2 +
  * 14 + 6 = 44. Compact cards leave bots as they are (the app keeps its own compact-bots setting).
- * An idle bot recedes; a working one wears the monitoring breath, its mascot showing the work.
+ * An idle bot recedes; a working one wears the working mark every card does (custom bdd28ba5db,
+ * Nov 17 2026: the monitoring breath before), its mascot showing the work.
  */
 function BotCard({
   bot,
@@ -1033,7 +1114,7 @@ function BotCard({
           position: 'relative',
           zIndex: 10,
           display: 'grid',
-          gridTemplateColumns: '22px minmax(0, 1fr) auto',
+          gridTemplateColumns: '32px minmax(0, 1fr) auto',
           gridTemplateRows: '16px 14px',
           alignItems: 'center',
           columnGap: 8,
@@ -1042,7 +1123,7 @@ function BotCard({
         }}
       >
         <span style={{ gridRow: 'span 2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Mascot bot={bot} />
+          <MascotTile bot={bot} />
         </span>
         <span style={{ display: 'flex', height: 16, minWidth: 0, alignItems: 'center' }}>
           <span
@@ -1100,9 +1181,7 @@ function BotCard({
               {working ? 'Working' : 'Idle'}
             </span>
             {working ? (
-              <span aria-hidden style={MARK_SLOT}>
-                <span className="n3sb-pulse" style={{ width: 10, height: 10, borderRadius: '50%' }} />
-              </span>
+              skin === 'inlet' ? <BeadRing seed={bot.id} /> : <Rain seed={bot.id} />
             ) : (
               <span aria-hidden style={MARK_SLOT}>
                 <span style={{ width: 10, height: 10, borderRadius: '50%', border: `1px solid ${MUTED}`, boxSizing: 'border-box' }} />
@@ -1433,7 +1512,10 @@ function recedes(thread: SidebarThread, active: boolean, section: SidebarStatusS
 const INLET_MARK_ON = 'rgb(28, 28, 26)'
 
 function MenuRadio({ checked }: { checked: boolean }) {
-  const inlet = useSkin() === 'inlet'
+  const skin = useSkin()
+  const inlet = skin === 'inlet'
+  // The mark inside a checked control is the panel's own colour.
+  const dark = skin === 'basic' ? BASIC_BASE : 'rgb(20, 22, 24)'
   if (inlet) {
     return (
       <span
@@ -1473,13 +1555,14 @@ function MenuRadio({ checked }: { checked: boolean }) {
         boxShadow: checked ? undefined : '0 1px 2px 0 oklab(0 0 0 / 0.05)',
       }}
     >
-      {checked && <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'rgb(20, 22, 24)' }} />}
+      {checked && <span style={{ width: 6, height: 6, borderRadius: '50%', background: dark }} />}
     </span>
   )
 }
 
 function MenuCheckbox({ checked }: { checked: boolean }) {
-  const inlet = useSkin() === 'inlet'
+  const skin = useSkin()
+  const inlet = skin === 'inlet'
   if (inlet) {
     return (
       <span
@@ -1517,7 +1600,7 @@ function MenuCheckbox({ checked }: { checked: boolean }) {
         borderRadius: 4,
         border: `1px solid ${checked ? '#ffffff' : fgA(0.24)}`,
         background: checked ? '#ffffff' : 'transparent',
-        color: 'rgb(20, 22, 24)',
+        color: skin === 'basic' ? BASIC_BASE : 'rgb(20, 22, 24)',
         boxShadow: checked ? undefined : '0 1px 2px 0 oklab(0 0 0 / 0.05)',
       }}
     >
@@ -1601,8 +1684,10 @@ function GearMenu({
   ]
   const toggleProject = (project: SidebarProjectId) =>
     onFilter(filter.includes(project) ? filter.filter((id) => id !== project) : [...filter, project])
-  const inlet = useSkin() === 'inlet'
-  const item: CSSProperties = inlet ? { ...MENU_ITEM, color: INLET_INK, borderRadius: 5 } : MENU_ITEM
+  const skin = useSkin()
+  const inlet = skin === 'inlet'
+  const basic = skin === 'basic'
+  const item: CSSProperties = inlet ? { ...MENU_ITEM, color: INLET_INK, borderRadius: 5 } : basic ? { ...MENU_ITEM, borderRadius: 4 } : MENU_ITEM
 
   return (
     <div
@@ -1619,15 +1704,17 @@ function GearMenu({
         width: 224,
         boxSizing: 'border-box',
         // Inlet's menu and its gear are one shape: the corner at the gear goes square.
-        borderRadius: inlet ? (placement.hang === 'below' ? '10px 0 10px 10px' : '10px 10px 0 10px') : 12,
-        boxShadow: inlet ? undefined : POPUP_SHADOW,
-        background: inlet ? INLET_CREAM : undefined,
+        // Basic's is a plain solid menu: 8 corners, a hairline and a soft drop.
+        borderRadius: inlet ? (placement.hang === 'below' ? '10px 0 10px 10px' : '10px 10px 0 10px') : basic ? 8 : 12,
+        border: basic ? `1px solid ${BASIC_RULE}` : undefined,
+        boxShadow: inlet ? undefined : basic ? BASIC_POPUP_SHADOW : POPUP_SHADOW,
+        background: inlet ? INLET_CREAM : basic ? BASIC_POPUP : undefined,
         color: inlet ? INLET_INK : SIDEBAR_FG,
         fontSize: 16,
         lineHeight: '24px',
       }}
     >
-      {!inlet && (
+      {skin === 'glass' && (
         <>
           <GlassFill tint={POPUP_TINT} />
           <div aria-hidden style={{ position: 'absolute', inset: 0, borderRadius: 'inherit', boxShadow: POPUP_SHEEN, pointerEvents: 'none' }} />
@@ -1697,7 +1784,7 @@ function GearMenu({
                 alignItems: 'center',
                 justifyContent: 'center',
                 borderRadius: 8,
-                color: inlet ? 'oklab(0.522445 -0.00294474 0.0182579)' : 'oklab(0.999994 0.0000455678 0.0000200868 / 0.5)',
+                color: inlet ? 'oklab(0.522445 -0.00294474 0.0182579)' : basic ? BASIC_MUTED : 'oklab(0.999994 0.0000455678 0.0000200868 / 0.5)',
               }}
             >
               <EllipsisVertical size={16} />
@@ -1760,10 +1847,13 @@ function placeTip(a: TipAnchor, w: number, h: number, bounds: { width: number; h
 }
 
 function ThreadHoverCard({ thread, anchor }: { thread: SidebarThread; anchor: TipAnchor }) {
-  const inlet = useSkin() === 'inlet'
-  // Inlet's hover card is the row's hover fill, opaque, with its own text and muted channel.
+  const skin = useSkin()
+  const inlet = skin === 'inlet'
+  const basic = skin === 'basic'
+  // Inlet's hover card is the row's hover fill, opaque, with its own text and muted channel;
+  // Basic's is its solid popup surface.
   const tipFg = inlet ? INLET_TIP_FG : FG
-  const tipMuted = inlet ? INLET_TIP_MUTED : TIP_MUTED
+  const tipMuted = inlet ? INLET_TIP_MUTED : basic ? BASIC_MUTED : TIP_MUTED
   const ref = useRef<HTMLDivElement>(null)
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null)
   useLayoutEffect(() => {
@@ -1789,17 +1879,17 @@ function ThreadHoverCard({ thread, anchor }: { thread: SidebarThread; anchor: Ti
         display: 'flex',
         maxWidth: 320,
         boxSizing: 'border-box',
-        borderRadius: inlet ? 10 : 8,
+        borderRadius: inlet ? 10 : basic ? 6 : 8,
         border: inlet ? '1px solid transparent' : '1px solid rgba(255, 255, 255, 0.08)',
-        boxShadow: inlet ? undefined : 'rgba(0, 0, 0, 0.25) 0px 2px 16px 0px',
-        background: inlet ? INLET_TIP_FILL : undefined,
+        boxShadow: inlet ? undefined : basic ? BASIC_POPUP_SHADOW : 'rgba(0, 0, 0, 0.25) 0px 2px 16px 0px',
+        background: inlet ? INLET_TIP_FILL : basic ? BASIC_POPUP : undefined,
         pointerEvents: 'none',
         fontSize: 12,
         lineHeight: '16.5px',
         color: tipFg,
       }}
     >
-      {pos && !inlet && <GlassFill key={`${pos.top},${pos.left}`} tint={POPUP_TINT} />}
+      {pos && skin === 'glass' && <GlassFill key={`${pos.top},${pos.left}`} tint={POPUP_TINT} />}
       <div style={{ position: 'relative', padding: '4px 8px' }}>
         <div style={{ display: 'flex', maxWidth: 320 - 18, minWidth: 0, flexDirection: 'column', gap: 8, padding: '8px 4px' }}>
           <div style={{ ...TRUNCATE, fontWeight: 500, lineHeight: '15px', color: tipFg }}>{thread.title}</div>
@@ -1891,13 +1981,13 @@ const CHROME_ROWS: { label: string; icon: ReactNode }[] = [
 ]
 
 /** The macOS window controls, drawn the way the collage drew them: on the toggle's row, red on the icon column. */
-function TrafficLights() {
+function TrafficLights({ cy = 26 }: { cy?: number }) {
   return (
     <svg
       aria-hidden
-      viewBox="0 0 90 52"
+      viewBox={`0 0 90 ${cy * 2}`}
       width={90}
-      height={52}
+      height={cy * 2}
       style={{ position: 'absolute', left: 0, top: 0, overflow: 'visible', pointerEvents: 'none' }}
     >
       {[
@@ -1906,8 +1996,8 @@ function TrafficLights() {
         ['#28c840', 68],
       ].map(([fill, cx]) => (
         <g key={fill}>
-          <circle cx={cx} cy={26} r={6} fill={fill as string} />
-          <circle cx={cx} cy={26} r={5.75} fill="none" stroke="rgba(0,0,0,.18)" strokeWidth={0.5} />
+          <circle cx={cx} cy={cy} r={6} fill={fill as string} />
+          <circle cx={cx} cy={cy} r={5.75} fill="none" stroke="rgba(0,0,0,.18)" strokeWidth={0.5} />
         </g>
       ))}
     </svg>
@@ -1947,6 +2037,8 @@ function SidebarPanel({ settings, onSettingsChange, width, height, hoverCards, o
   const [active, setActive] = useState(SIDEBAR_INITIAL_ACTIVE)
   const skin = useSkin()
   const inlet = skin === 'inlet'
+  const basic = skin === 'basic'
+  const topbar = basic ? BASIC_TOPBAR : TOPBAR
   const [menu, setMenu] = useState<(MenuPlacement & { gear: { left: number; top: number; bottom: number } }) | null>(null)
   const menuOpen = menu !== null
   const [filter, setFilter] = useState<ProjectFilter>([])
@@ -2094,10 +2186,10 @@ function SidebarPanel({ settings, onSettingsChange, width, height, hoverCards, o
             inset: 0,
             borderRadius: WINDOW_RADIUS,
             overflow: 'hidden',
-            background: inlet ? INLET_SIDEBAR : undefined,
+            background: inlet ? INLET_SIDEBAR : basic ? BASIC_BASE : undefined,
           }}
         >
-          {inlet ? (
+          {basic ? null : inlet ? (
             // Inlet's sidebar is solid, and the window shows the start of the cream chat panel the
             // open card bridges into.
             <div
@@ -2119,16 +2211,16 @@ function SidebarPanel({ settings, onSettingsChange, width, height, hoverCards, o
           style={{
             position: 'relative',
             display: 'flex',
-            width: inlet ? width : undefined,
+            width: inlet || basic ? width : undefined,
             height: '100%',
             flexDirection: 'column',
-            borderRight: inlet ? undefined : '1px solid rgba(64, 64, 64, 0.6)',
+            borderRight: inlet ? undefined : basic ? `1px solid ${BASIC_RULE}` : '1px solid rgba(64, 64, 64, 0.6)',
             borderRadius: WINDOW_RADIUS,
           }}
         >
           {/* Top bar: the window controls' gutter, the panel toggle, the logo. */}
-          <div style={{ position: 'relative', display: 'flex', height: TOPBAR, flexShrink: 0, alignItems: 'center', gap: 8 }}>
-            <TrafficLights />
+          <div style={{ position: 'relative', display: 'flex', height: topbar, flexShrink: 0, alignItems: 'center', gap: 8 }}>
+            <TrafficLights cy={topbar / 2} />
             <div style={{ display: 'flex', alignItems: 'center', paddingLeft: CONTROLS_LEFT }}>
               <button
                 type="button"
@@ -2196,7 +2288,7 @@ function SidebarPanel({ settings, onSettingsChange, width, height, hoverCards, o
                     padding: '6px 12px',
                     height: 32,
                     boxSizing: 'border-box',
-                    borderRadius: inlet ? 10 : 9999,
+                    borderRadius: skin === 'glass' ? 9999 : 10,
                     fontSize: 14,
                     lineHeight: '20px',
                     color: SIDEBAR_FG,
@@ -2463,10 +2555,11 @@ export default function SidebarPlayground({
   radius: string
   isMobile: boolean
 }) {
-  const skin: Skin = useMockTheme()
   const [settings, setSettings] = useState<SidebarSettings>({ grouping: 'project', compact: false })
   const [stageWidth, setStageWidth] = useState(0)
   const stageRef = useRef<HTMLDivElement>(null)
+  // The page's mockup theme picks the skin.
+  const skin: Skin = useMockTheme()
   const wallRef = useRef<HTMLDivElement>(null)
   const canHover = useMediaQuery('(hover: hover) and (pointer: fine)')
 
@@ -2515,24 +2608,26 @@ export default function SidebarPlayground({
           top: (stageHeight - wallHeight) / 2,
           width: wallWidth,
           height: wallHeight,
-          backgroundImage: `url(${skin === 'inlet' ? INLET_BACKDROP : SIDEBAR_WALLPAPER})`,
+          backgroundImage: `url(${skin === 'glass' ? SIDEBAR_WALLPAPER : TEXTURE_BACKDROP})`,
           backgroundSize: '100% 100%',
         }}
       />
       {stageWidth > 0 && (
         <SkinContext.Provider value={skin}>
-          <WallContext.Provider value={wallRef}>
-            <div style={{ position: 'absolute', top: pad, left: panelLeft }}>
-              <SidebarPanel
-                settings={settings}
-                onSettingsChange={setSettings}
-                width={panelWidth}
-                height={panelHeight}
-                hoverCards={canHover}
-                overlay={stageRef}
-              />
-            </div>
-          </WallContext.Provider>
+          <IconFill.Provider value={skin !== 'glass'}>
+            <WallContext.Provider value={wallRef}>
+              <div style={{ position: 'absolute', top: pad, left: panelLeft }}>
+                <SidebarPanel
+                  settings={settings}
+                  onSettingsChange={setSettings}
+                  width={panelWidth}
+                  height={panelHeight}
+                  hoverCards={canHover}
+                  overlay={stageRef}
+                />
+              </div>
+            </WallContext.Provider>
+          </IconFill.Provider>
         </SkinContext.Provider>
       )}
     </div>

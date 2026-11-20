@@ -11,7 +11,7 @@
   Resting colours ride the elements' inline styles, so the hover states below
   are `!important` — an inline style outranks any selector otherwise.
 
-  Two skins (Nov 15 2026): the stage carries `data-n3sb-skin` (glass | inlet)
+  Three skins (Nov 15 2026; Basic Nov 16): the stage carries `data-n3sb-skin` (glass | inlet | basic)
   and the palette as `--n3sb-*` custom properties, so the hover states here
   read the skin's own values; the open card's glass is Glass-only, and Inlet's
   open card is the cream pill with the panel's bridge drawn by its li.

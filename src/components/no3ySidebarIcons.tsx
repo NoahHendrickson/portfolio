@@ -5,13 +5,25 @@
  * behind the solid one), so they are not the portfolio's own `@phosphor-icons`
  * set at its default weight, and a few (the provider marks, the pixel logo) are
  * not Phosphor at all. Each takes the box it is drawn in; colour rides
- * `currentColor` except where the app hard-codes a fill.
+ * `currentColor` except where the app hard-codes a fill. Under the Inlet and Basic skins the
+ * duotone ones draw at fill weight instead, as the app does (`no3ySidebarIconFill.ts`).
  */
-import type { CSSProperties } from 'react'
+import { useContext, type CSSProperties } from 'react'
+import { FILL_PATHS, IconFill } from './no3ySidebarIconFill'
 
 type IconProps = { size?: number; width?: number; height?: number; style?: CSSProperties }
 
+function Filled({ d, size = 16, width, height, style }: IconProps & { d: string }) {
+  return (
+    <svg aria-hidden viewBox="0 0 256 256" width={width ?? size} height={height ?? size} fill="currentColor" style={{ display: 'block', flexShrink: 0, ...style }}>
+      <path d={d} />
+    </svg>
+  )
+}
+
 export function PanelLeft({ size = 16, width, height, style }: IconProps) {
+  const fill = useContext(IconFill)
+  if (fill) return <Filled d={FILL_PATHS.PanelLeft} size={size} width={width} height={height} style={style} />
   return (
     <svg aria-hidden viewBox="0 0 256 256" width={width ?? size} height={height ?? size} fill="currentColor"  style={{ display: 'block', flexShrink: 0, ...style }}>
       <path d="M88,48V208H40a8,8,0,0,1-8-8V56a8,8,0,0,1,8-8Z" opacity="0.2" /><path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40ZM40,56H80V200H40ZM216,200H96V56H216V200Z" />
@@ -20,6 +32,8 @@ export function PanelLeft({ size = 16, width, height, style }: IconProps) {
 }
 
 export function Search({ size = 16, width, height, style }: IconProps) {
+  const fill = useContext(IconFill)
+  if (fill) return <Filled d={FILL_PATHS.Search} size={size} width={width} height={height} style={style} />
   return (
     <svg aria-hidden viewBox="0 0 256 256" width={width ?? size} height={height ?? size} fill="currentColor"  style={{ display: 'block', flexShrink: 0, ...style }}>
       <path d="M192,112a80,80,0,1,1-80-80A80,80,0,0,1,192,112Z" opacity="0.2" /><path d="M229.66,218.34,179.6,168.28a88.21,88.21,0,1,0-11.32,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z" />
@@ -28,6 +42,8 @@ export function Search({ size = 16, width, height, style }: IconProps) {
 }
 
 export function NavigationArrow({ size = 16, width, height, style }: IconProps) {
+  const fill = useContext(IconFill)
+  if (fill) return <Filled d={FILL_PATHS.NavigationArrow} size={size} width={width} height={height} style={style} />
   return (
     <svg aria-hidden viewBox="0 0 256 256" width={width ?? size} height={height ?? size} fill="currentColor"  style={{ display: 'block', flexShrink: 0, ...style }}>
       <path d="M234.35,129,152,152,129,234.35a8,8,0,0,1-15.21.27l-65.28-176A8,8,0,0,1,58.63,48.46l176,65.28A8,8,0,0,1,234.35,129Z" opacity="0.2" /><path d="M237.33,106.21,61.41,41l-.16-.05A16,16,0,0,0,40.9,61.25a1,1,0,0,0,.05.16l65.26,175.92A15.77,15.77,0,0,0,121.28,248h.3a15.77,15.77,0,0,0,15-11.29l.06-.2,21.84-78,78-21.84.2-.06a16,16,0,0,0,.62-30.38ZM149.84,144.3a8,8,0,0,0-5.54,5.54L121.3,232l-.06-.17L56,56l175.82,65.22.16.06Z" />
@@ -36,6 +52,8 @@ export function NavigationArrow({ size = 16, width, height, style }: IconProps) 
 }
 
 export function FolderPlus({ size = 16, width, height, style }: IconProps) {
+  const fill = useContext(IconFill)
+  if (fill) return <Filled d={FILL_PATHS.FolderPlus} size={size} width={width} height={height} style={style} />
   return (
     <svg aria-hidden viewBox="0 0 256 256" width={width ?? size} height={height ?? size} fill="currentColor"  style={{ display: 'block', flexShrink: 0, ...style }}>
       <path d="M128,80H32V56a8,8,0,0,1,8-8H92.69a8,8,0,0,1,5.65,2.34Z" opacity="0.2" /><path d="M216,72H131.31L104,44.69A15.86,15.86,0,0,0,92.69,40H40A16,16,0,0,0,24,56V200.62A15.4,15.4,0,0,0,39.38,216H216.89A15.13,15.13,0,0,0,232,200.89V88A16,16,0,0,0,216,72ZM92.69,56l16,16H40V56ZM216,200H40V88H216Zm-88-88a8,8,0,0,1,8,8v16h16a8,8,0,0,1,0,16H136v16a8,8,0,0,1-16,0V152H104a8,8,0,0,1,0-16h16V120A8,8,0,0,1,128,112Z" />
@@ -44,6 +62,8 @@ export function FolderPlus({ size = 16, width, height, style }: IconProps) {
 }
 
 export function ChartDonut({ size = 16, width, height, style }: IconProps) {
+  const fill = useContext(IconFill)
+  if (fill) return <Filled d={FILL_PATHS.ChartDonut} size={size} width={width} height={height} style={style} />
   return (
     <svg aria-hidden viewBox="0 0 256 256" width={width ?? size} height={height ?? size} fill="currentColor"  style={{ display: 'block', flexShrink: 0, ...style }}>
       <path d="M224,128a96,96,0,0,1-96,96V168a40,40,0,0,0,0-80V32A96,96,0,0,1,224,128Z" opacity="0.2" /><path d="M128,24a8,8,0,0,0-8,8V88a8,8,0,0,0,8,8,32,32,0,1,1-27.72,16,8,8,0,0,0-2.93-10.93l-48.5-28A8,8,0,0,0,37.92,76,104,104,0,1,0,128,24ZM48.09,91.1,83,111.26A48.09,48.09,0,0,0,80,128c0,1.53.08,3,.22,4.52L41.28,143A88.16,88.16,0,0,1,48.09,91.1Zm-2.67,67.31,39-10.44A48.1,48.1,0,0,0,120,175.32v40.31A88.2,88.2,0,0,1,45.42,158.41ZM136,215.63V175.32a48,48,0,0,0,0-94.65V40.36a88,88,0,0,1,0,175.27Z" />
@@ -52,6 +72,8 @@ export function ChartDonut({ size = 16, width, height, style }: IconProps) {
 }
 
 export function Zap({ size = 16, width, height, style }: IconProps) {
+  const fill = useContext(IconFill)
+  if (fill) return <Filled d={FILL_PATHS.Zap} size={size} width={width} height={height} style={style} />
   return (
     <svg aria-hidden viewBox="0 0 256 256" width={width ?? size} height={height ?? size} fill="currentColor"  style={{ display: 'block', flexShrink: 0, ...style }}>
       <path d="M96,240l16-80L48,136,160,16,144,96l64,24Z" opacity="0.2" /><path d="M215.79,118.17a8,8,0,0,0-5-5.66L153.18,90.9l14.66-73.33a8,8,0,0,0-13.69-7l-112,120a8,8,0,0,0,3,13l57.63,21.61L88.16,238.43a8,8,0,0,0,13.69,7l112-120A8,8,0,0,0,215.79,118.17ZM109.37,214l10.47-52.38a8,8,0,0,0-5-9.06L62,132.71l84.62-90.66L136.16,94.43a8,8,0,0,0,5,9.06l52.8,19.8Z" />
@@ -68,6 +90,8 @@ export function ArrowUpDown({ size = 16, width, height, style }: IconProps) {
 }
 
 export function Settings({ size = 16, width, height, style }: IconProps) {
+  const fill = useContext(IconFill)
+  if (fill) return <Filled d={FILL_PATHS.Settings} size={size} width={width} height={height} style={style} />
   return (
     <svg aria-hidden viewBox="0 0 256 256" width={width ?? size} height={height ?? size} fill="currentColor"  style={{ display: 'block', flexShrink: 0, ...style }}>
       <path d="M207.86,123.18l16.78-21a99.14,99.14,0,0,0-10.07-24.29l-26.7-3a81,81,0,0,0-6.81-6.81l-3-26.71a99.43,99.43,0,0,0-24.3-10l-21,16.77a81.59,81.59,0,0,0-9.64,0l-21-16.78A99.14,99.14,0,0,0,77.91,41.43l-3,26.7a81,81,0,0,0-6.81,6.81l-26.71,3a99.43,99.43,0,0,0-10,24.3l16.77,21a81.59,81.59,0,0,0,0,9.64l-16.78,21a99.14,99.14,0,0,0,10.07,24.29l26.7,3a81,81,0,0,0,6.81,6.81l3,26.71a99.43,99.43,0,0,0,24.3,10l21-16.77a81.59,81.59,0,0,0,9.64,0l21,16.78a99.14,99.14,0,0,0,24.29-10.07l3-26.7a81,81,0,0,0,6.81-6.81l26.71-3a99.43,99.43,0,0,0,10-24.3l-16.77-21A81.59,81.59,0,0,0,207.86,123.18ZM128,168a40,40,0,1,1,40-40A40,40,0,0,1,128,168Z" opacity="0.2" /><path d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Zm88-29.84q.06-2.16,0-4.32l14.92-18.64a8,8,0,0,0,1.48-7.06,107.6,107.6,0,0,0-10.88-26.25,8,8,0,0,0-6-3.93l-23.72-2.64q-1.48-1.56-3-3L186,40.54a8,8,0,0,0-3.94-6,107.29,107.29,0,0,0-26.25-10.86,8,8,0,0,0-7.06,1.48L130.16,40Q128,40,125.84,40L107.2,25.11a8,8,0,0,0-7.06-1.48A107.6,107.6,0,0,0,73.89,34.51a8,8,0,0,0-3.93,6L67.32,64.27q-1.56,1.49-3,3L40.54,70a8,8,0,0,0-6,3.94,107.71,107.71,0,0,0-10.87,26.25,8,8,0,0,0,1.49,7.06L40,125.84Q40,128,40,130.16L25.11,148.8a8,8,0,0,0-1.48,7.06,107.6,107.6,0,0,0,10.88,26.25,8,8,0,0,0,6,3.93l23.72,2.64q1.49,1.56,3,3L70,215.46a8,8,0,0,0,3.94,6,107.71,107.71,0,0,0,26.25,10.87,8,8,0,0,0,7.06-1.49L125.84,216q2.16.06,4.32,0l18.64,14.92a8,8,0,0,0,7.06,1.48,107.21,107.21,0,0,0,26.25-10.88,8,8,0,0,0,3.93-6l2.64-23.72q1.56-1.48,3-3L215.46,186a8,8,0,0,0,6-3.94,107.71,107.71,0,0,0,10.87-26.25,8,8,0,0,0-1.49-7.06Zm-16.1-6.5a73.93,73.93,0,0,1,0,8.68,8,8,0,0,0,1.74,5.48l14.19,17.73a91.57,91.57,0,0,1-6.23,15L187,173.11a8,8,0,0,0-5.1,2.64,74.11,74.11,0,0,1-6.14,6.14,8,8,0,0,0-2.64,5.1l-2.51,22.58a91.32,91.32,0,0,1-15,6.23l-17.74-14.19a8,8,0,0,0-5-1.75h-.48a73.93,73.93,0,0,1-8.68,0,8.06,8.06,0,0,0-5.48,1.74L100.45,215.8a91.57,91.57,0,0,1-15-6.23L82.89,187a8,8,0,0,0-2.64-5.1,74.11,74.11,0,0,1-6.14-6.14,8,8,0,0,0-5.1-2.64L46.43,170.6a91.32,91.32,0,0,1-6.23-15l14.19-17.74a8,8,0,0,0,1.74-5.48,73.93,73.93,0,0,1,0-8.68,8,8,0,0,0-1.74-5.48L40.2,100.45a91.57,91.57,0,0,1,6.23-15L69,82.89a8,8,0,0,0,5.1-2.64,74.11,74.11,0,0,1,6.14-6.14A8,8,0,0,0,82.89,69L85.4,46.43a91.32,91.32,0,0,1,15-6.23l17.74,14.19a8,8,0,0,0,5.48,1.74,73.93,73.93,0,0,1,8.68,0,8.06,8.06,0,0,0,5.48-1.74L155.55,40.2a91.57,91.57,0,0,1,15,6.23L173.11,69a8,8,0,0,0,2.64,5.1,74.11,74.11,0,0,1,6.14,6.14,8,8,0,0,0,5.1,2.64l22.58,2.51a91.32,91.32,0,0,1,6.23,15l-14.19,17.74A8,8,0,0,0,199.87,123.66Z" />
@@ -76,6 +100,8 @@ export function Settings({ size = 16, width, height, style }: IconProps) {
 }
 
 export function PinOff({ size = 16, width, height, style }: IconProps) {
+  const fill = useContext(IconFill)
+  if (fill) return <Filled d={FILL_PATHS.PinOff} size={size} width={width} height={height} style={style} />
   return (
     <svg aria-hidden viewBox="0 0 256 256" width={width ?? size} height={height ?? size} fill="currentColor"  style={{ display: 'block', flexShrink: 0, ...style }}>
       <path d="M229.66,98.34,172.39,155.8c11.46,22.93-1.72,45.86-10.11,57a8,8,0,0,1-12,.83L42.34,105.76A8,8,0,0,1,43,93.85c29.65-23.92,57.4-10,57.4-10l57.27-57.46a8,8,0,0,1,11.31,0L229.66,87A8,8,0,0,1,229.66,98.34Z" opacity="0.2" /><path d="M53.92,34.62A8,8,0,1,0,42.08,45.38L67.37,73.2A69.82,69.82,0,0,0,38,87.63a16,16,0,0,0-1.29,23.78L85,159.71,42.34,202.34a8,8,0,0,0,11.32,11.32L96.29,171l48.29,48.29A16,16,0,0,0,155.9,224c.38,0,.75,0,1.13,0a15.93,15.93,0,0,0,11.64-6.33,89.75,89.75,0,0,0,11.58-20.27l21.84,24a8,8,0,1,0,11.84-10.76ZM155.9,208,48,100.08C58.23,91.83,69.2,87.72,80.66,87.81l87.16,95.88C165.59,193.56,160.24,202.23,155.9,208Zm79.42-104-44.64,44.79a8,8,0,1,1-11.33-11.3L224,92.7,163.32,32,122.1,73.35a8,8,0,0,1-11.33-11.29L152,20.7a16,16,0,0,1,22.63,0l60.69,60.68A16,16,0,0,1,235.32,104Z" />
@@ -84,6 +110,8 @@ export function PinOff({ size = 16, width, height, style }: IconProps) {
 }
 
 export function Clock({ size = 16, width, height, style }: IconProps) {
+  const fill = useContext(IconFill)
+  if (fill) return <Filled d={FILL_PATHS.Clock} size={size} width={width} height={height} style={style} />
   return (
     <svg aria-hidden viewBox="0 0 256 256" width={width ?? size} height={height ?? size} fill="currentColor"  style={{ display: 'block', flexShrink: 0, ...style }}>
       <path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2" /><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm64-88a8,8,0,0,1-8,8H128a8,8,0,0,1-8-8V72a8,8,0,0,1,16,0v48h48A8,8,0,0,1,192,128Z" />
@@ -100,6 +128,8 @@ export function Check({ size = 16, width, height, style }: IconProps) {
 }
 
 export function Pin({ size = 16, width, height, style }: IconProps) {
+  const fill = useContext(IconFill)
+  if (fill) return <Filled d={FILL_PATHS.Pin} size={size} width={width} height={height} style={style} />
   return (
     <svg aria-hidden viewBox="0 0 256 256" width={width ?? size} height={height ?? size} fill="currentColor"  style={{ display: 'block', flexShrink: 0, ...style }}>
       <path d="M229.66,98.34,172.39,155.8c11.46,22.93-1.72,45.86-10.11,57a8,8,0,0,1-12,.83L42.34,105.76A8,8,0,0,1,43,93.85c29.65-23.92,57.4-10,57.4-10l57.27-57.46a8,8,0,0,1,11.31,0L229.66,87A8,8,0,0,1,229.66,98.34Z" opacity="0.2" /><path d="M235.32,81.37,174.63,20.69a16,16,0,0,0-22.63,0L98.37,74.49c-10.66-3.34-35-7.37-60.4,13.14a16,16,0,0,0-1.29,23.78L85,159.71,42.34,202.34a8,8,0,0,0,11.32,11.32L96.29,171l48.29,48.29A16,16,0,0,0,155.9,224c.38,0,.75,0,1.13,0a15.93,15.93,0,0,0,11.64-6.33c19.64-26.1,17.75-47.32,13.19-60L235.33,104A16,16,0,0,0,235.32,81.37ZM224,92.69h0l-57.27,57.46a8,8,0,0,0-1.49,9.22c9.46,18.93-1.8,38.59-9.34,48.62L48,100.08c12.08-9.74,23.64-12.31,32.48-12.31A40.13,40.13,0,0,1,96.81,91a8,8,0,0,0,9.25-1.51L163.32,32,224,92.68Z" />
@@ -108,6 +138,8 @@ export function Pin({ size = 16, width, height, style }: IconProps) {
 }
 
 export function Laptop({ size = 16, width, height, style }: IconProps) {
+  const fill = useContext(IconFill)
+  if (fill) return <Filled d={FILL_PATHS.Laptop} size={size} width={width} height={height} style={style} />
   return (
     <svg aria-hidden viewBox="0 0 256 256" width={width ?? size} height={height ?? size} fill="currentColor"  style={{ display: 'block', flexShrink: 0, ...style }}>
       <path d="M216,72V176H40V72A16,16,0,0,1,56,56H200A16,16,0,0,1,216,72Z" opacity="0.2" /><path d="M232,168h-8V72a24,24,0,0,0-24-24H56A24,24,0,0,0,32,72v96H24a8,8,0,0,0-8,8v16a24,24,0,0,0,24,24H216a24,24,0,0,0,24-24V176A8,8,0,0,0,232,168ZM48,72a8,8,0,0,1,8-8H200a8,8,0,0,1,8,8v96H48ZM224,192a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8v-8H224ZM152,88a8,8,0,0,1-8,8H112a8,8,0,0,1,0-16h32A8,8,0,0,1,152,88Z" />
@@ -124,6 +156,8 @@ export function Worktree({ size = 16, width, height, style }: IconProps) {
 }
 
 export function GitMerge({ size = 16, width, height, style }: IconProps) {
+  const fill = useContext(IconFill)
+  if (fill) return <Filled d={FILL_PATHS.GitMerge} size={size} width={width} height={height} style={style} />
   return (
     <svg aria-hidden viewBox="0 0 256 256" width={width ?? size} height={height ?? size} fill="currentColor"  style={{ display: 'block', flexShrink: 0, ...style }}>
       <path d="M104,56A24,24,0,1,1,80,32,24,24,0,0,1,104,56Z" opacity="0.2" /><path d="M208,112a32.05,32.05,0,0,0-30.69,23l-42.21-6a8,8,0,0,1-4.95-2.71L94.43,84.55A32,32,0,1,0,72,87v82a32,32,0,1,0,16,0V101.63l30,35a24,24,0,0,0,14.83,8.14l44,6.28A32,32,0,1,0,208,112ZM64,56A16,16,0,1,1,80,72,16,16,0,0,1,64,56ZM96,200a16,16,0,1,1-16-16A16,16,0,0,1,96,200Zm112-40a16,16,0,1,1,16-16A16,16,0,0,1,208,160Z" />
@@ -132,6 +166,8 @@ export function GitMerge({ size = 16, width, height, style }: IconProps) {
 }
 
 export function GitPullRequest({ size = 16, width, height, style }: IconProps) {
+  const fill = useContext(IconFill)
+  if (fill) return <Filled d={FILL_PATHS.GitPullRequest} size={size} width={width} height={height} style={style} />
   return (
     <svg aria-hidden viewBox="0 0 256 256" width={width ?? size} height={height ?? size} fill="currentColor"  style={{ display: 'block', flexShrink: 0, ...style }}>
       <path d="M96,64A24,24,0,1,1,72,40,24,24,0,0,1,96,64ZM200,168a24,24,0,1,0,24,24A24,24,0,0,0,200,168Z" opacity="0.2" /><path d="M104,64A32,32,0,1,0,64,95v66a32,32,0,1,0,16,0V95A32.06,32.06,0,0,0,104,64ZM56,64A16,16,0,1,1,72,80,16,16,0,0,1,56,64ZM88,192a16,16,0,1,1-16-16A16,16,0,0,1,88,192Zm120-31V110.63a23.85,23.85,0,0,0-7-17L163.31,56H192a8,8,0,0,0,0-16H144a8,8,0,0,0-8,8V96a8,8,0,0,0,16,0V67.31L189.66,105a8,8,0,0,1,2.34,5.66V161a32,32,0,1,0,16,0Zm-8,47a16,16,0,1,1,16-16A16,16,0,0,1,200,208Z" />
@@ -140,6 +176,8 @@ export function GitPullRequest({ size = 16, width, height, style }: IconProps) {
 }
 
 export function GitPullRequestDraft({ size = 16, width, height, style }: IconProps) {
+  const fill = useContext(IconFill)
+  if (fill) return <Filled d={FILL_PATHS.GitPullRequestDraft} size={size} width={width} height={height} style={style} />
   return (
     <svg aria-hidden viewBox="0 0 256 256" width={width ?? size} height={height ?? size} fill="currentColor"  style={{ display: 'block', flexShrink: 0, ...style }}>
       <path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2" /><path d="M96.26,37A8,8,0,0,1,102,27.29a104.11,104.11,0,0,1,52,0,8,8,0,0,1-2,15.75,8.15,8.15,0,0,1-2-.26,88.09,88.09,0,0,0-44,0A8,8,0,0,1,96.26,37ZM53.79,55.14a104,104,0,0,0-26,45,8,8,0,1,0,15.42,4.26,87.91,87.91,0,0,1,22-38.08A8,8,0,0,0,53.79,55.14ZM43.21,151.55a8,8,0,1,0-15.42,4.28,104,104,0,0,0,26,45,8,8,0,1,0,11.41-11.21A88.14,88.14,0,0,1,43.21,151.55ZM150,213.22a88,88,0,0,1-44,0,8,8,0,1,0-4,15.49,104.11,104.11,0,0,0,52,0,8,8,0,0,0-4-15.49ZM222.65,146a8,8,0,0,0-9.85,5.57,87.88,87.88,0,0,1-22,38.09,8,8,0,1,0,11.42,11.21,104.05,104.05,0,0,0,26-45A8,8,0,0,0,222.65,146Zm-9.86-41.54a8,8,0,0,0,15.42-4.28,104,104,0,0,0-26-45,8,8,0,1,0-11.41,11.21A88.14,88.14,0,0,1,212.79,104.45Z" />
@@ -148,6 +186,8 @@ export function GitPullRequestDraft({ size = 16, width, height, style }: IconPro
 }
 
 export function FolderOpen({ size = 16, width, height, style }: IconProps) {
+  const fill = useContext(IconFill)
+  if (fill) return <Filled d={FILL_PATHS.FolderOpen} size={size} width={width} height={height} style={style} />
   return (
     <svg aria-hidden viewBox="0 0 256 256" width={width ?? size} height={height ?? size} fill="currentColor"  style={{ display: 'block', flexShrink: 0, ...style }}>
       <path d="M208,88v24H69.77a8,8,0,0,0-7.59,5.47L32,208V64a8,8,0,0,1,8-8H93.33a8,8,0,0,1,4.8,1.6L128,80h72A8,8,0,0,1,208,88Z" opacity="0.2" /><path d="M245,110.64A16,16,0,0,0,232,104H216V88a16,16,0,0,0-16-16H130.67L102.94,51.2a16.14,16.14,0,0,0-9.6-3.2H40A16,16,0,0,0,24,64V208a8,8,0,0,0,8,8H211.1a8,8,0,0,0,7.59-5.47l28.49-85.47A16.05,16.05,0,0,0,245,110.64ZM93.34,64,123.2,86.4A8,8,0,0,0,128,88h72v16H69.77a16,16,0,0,0-15.18,10.94L40,158.7V64Zm112,136H43.1l26.67-80H232Z" />
@@ -156,6 +196,8 @@ export function FolderOpen({ size = 16, width, height, style }: IconProps) {
 }
 
 export function FolderClosed({ size = 16, width, height, style }: IconProps) {
+  const fill = useContext(IconFill)
+  if (fill) return <Filled d={FILL_PATHS.FolderClosed} size={size} width={width} height={height} style={style} />
   return (
     <svg aria-hidden viewBox="0 0 256 256" width={width ?? size} height={height ?? size} fill="currentColor"  style={{ display: 'block', flexShrink: 0, ...style }}>
       <path d="M128,80H32V56a8,8,0,0,1,8-8H92.69a8,8,0,0,1,5.65,2.34Z" opacity="0.2" /><path d="M216,72H131.31L104,44.69A15.86,15.86,0,0,0,92.69,40H40A16,16,0,0,0,24,56V200.62A15.4,15.4,0,0,0,39.38,216H216.89A15.13,15.13,0,0,0,232,200.89V88A16,16,0,0,0,216,72ZM92.69,56l16,16H40V56ZM216,200H40V88H216Z" />
@@ -204,6 +246,8 @@ export function CircleAlertFill({ size = 16, width, height, style }: IconProps) 
 }
 
 export function AlarmClock({ size = 16, width, height, style }: IconProps) {
+  const fill = useContext(IconFill)
+  if (fill) return <Filled d={FILL_PATHS.AlarmClock} size={size} width={width} height={height} style={style} />
   return (
     <svg aria-hidden viewBox="0 0 256 256" width={width ?? size} height={height ?? size} fill="currentColor"  style={{ display: 'block', flexShrink: 0, ...style }}>
       <path d="M216,136a88,88,0,1,1-88-88A88,88,0,0,1,216,136Z" opacity="0.2" /><path d="M128,40a96,96,0,1,0,96,96A96.11,96.11,0,0,0,128,40Zm0,176a80,80,0,1,1,80-80A80.09,80.09,0,0,1,128,216ZM61.66,37.66l-32,32A8,8,0,0,1,18.34,58.34l32-32A8,8,0,0,1,61.66,37.66Zm176,32a8,8,0,0,1-11.32,0l-32-32a8,8,0,0,1,11.32-11.32l32,32A8,8,0,0,1,237.66,69.66ZM184,128a8,8,0,0,1,0,16H128a8,8,0,0,1-8-8V80a8,8,0,0,1,16,0v48Z" />
@@ -212,6 +256,8 @@ export function AlarmClock({ size = 16, width, height, style }: IconProps) {
 }
 
 export function Folder({ size = 16, width, height, style }: IconProps) {
+  const fill = useContext(IconFill)
+  if (fill) return <Filled d={FILL_PATHS.Folder} size={size} width={width} height={height} style={style} />
   return (
     <svg aria-hidden viewBox="0 0 256 256" width={width ?? size} height={height ?? size} fill="currentColor"  style={{ display: 'block', flexShrink: 0, ...style }}>
       <path d="M128,80H32V56a8,8,0,0,1,8-8H92.69a8,8,0,0,1,5.65,2.34Z" opacity="0.2" /><path d="M216,72H131.31L104,44.69A15.86,15.86,0,0,0,92.69,40H40A16,16,0,0,0,24,56V200.62A15.4,15.4,0,0,0,39.38,216H216.89A15.13,15.13,0,0,0,232,200.89V88A16,16,0,0,0,216,72ZM92.69,56l16,16H40V56ZM216,200H40V88H216Z" />
@@ -220,6 +266,8 @@ export function Folder({ size = 16, width, height, style }: IconProps) {
 }
 
 export function CircleAlert({ size = 16, width, height, style }: IconProps) {
+  const fill = useContext(IconFill)
+  if (fill) return <Filled d={FILL_PATHS.CircleAlert} size={size} width={width} height={height} style={style} />
   return (
     <svg aria-hidden viewBox="0 0 256 256" width={width ?? size} height={height ?? size} fill="currentColor"  style={{ display: 'block', flexShrink: 0, ...style }}>
       <path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2" /><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm-8-80V80a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0Zm20,36a12,12,0,1,1-12-12A12,12,0,0,1,140,172Z" />

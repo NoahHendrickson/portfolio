@@ -1,28 +1,41 @@
-import { createContext, useContext, type ReactNode } from 'react'
+import { createContext, useContext, type ComponentProps, type ReactNode } from 'react'
 import SidebarPlayground from './No3ySidebar'
 import ArtGallery from './ArtGallery'
 import { CurvedCard, CurvedCluster, CurvedCopy, CurvedFacts, CurvedMedia, CurvedPanel, CurvedSteps } from './Curved'
 import CompareSlider from './CompareSlider'
 import HeroVideo from './HeroVideo'
 import MockThemeSwitch from './MockThemeSwitch'
+import No3yDesignSystem from './No3yDesignSystem'
+import No3yDesignSystemStory from './No3yDesignSystemStory'
+import { ComposerShowcase, ParallelWorkflowCard, type ComposerStateItem, type WorkflowFeature } from './No3yStoryExtras'
 import Reveal from './Reveal'
+import SwapClip from './SwapClip'
 import { SheetClip, SheetImg, SheetIntro, SheetPage } from './Sheet'
 import { radius, space } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
+import { useNo3yPrototype } from '../hooks/useNo3yPrototype'
 import { CURVED_BODY_SIZE, CURVED_INNER, LEADING, TEXT_SOFT, accentTheme, curvedInset, sheetGap } from '../sheetStyle'
 import type { LandingShot, Project, StorySection } from '../data/projects'
+import { NO3Y_BASIC } from '../data/no3yBasic'
 import { NO3Y_INLET, type InletMedia } from '../data/no3yInlet'
-import { useMockTheme } from '../mockTheme'
+import { MOCK_THEMES, useMockTheme, type MockTheme } from '../mockTheme'
 
 /*
-  no3y Code's mockups come in two themes (Nov 14 2026): Glass, as the page was built, and
-  Inlet Black. `Swap` hands each mockup the Inlet file in its place when the switch says so;
-  a mockup with no Inlet version yet keeps its Glass one. Other projects have no swaps.
+  no3y Code's mockups come in themes (Nov 14 2026): Glass, as the page was built, Inlet Black,
+  and since Nov 16 2026 Basic (Neutral Dark). `Swap` resolves each mockup to its version in each
+  theme it has, and `Themed` shows whichever the switch says; a theme with no version yet shows
+  the Glass one. Other projects have no swaps.
 */
-const SWAPS: Record<string, Record<string, InletMedia>> = { 'no3y-code': NO3Y_INLET }
-type SwapFn = <T extends { src: string }>(media: T) => T
-const Swap = createContext<SwapFn>((media) => media)
-const useSwap = () => useContext(Swap)
+const SWAPS: Record<string, Partial<Record<MockTheme, Record<string, InletMedia>>>> = { 'no3y-code': { basic: NO3Y_BASIC, inlet: NO3Y_INLET } }
+type Versions<T> = { glass: T } & Partial<Record<MockTheme, T>>
+type Resolve = <T extends { src: string }>(media: T) => Versions<T>
+const Swap = createContext<Resolve>((media) => ({ glass: media }))
+
+function Themed<T extends { src: string }>({ media, render }: { media: T; render: (media: T) => ReactNode }) {
+  const theme = useMockTheme()
+  const versions = useContext(Swap)(media)
+  return <>{render(versions[theme] ?? versions.glass)}</>
+}
 
 /*
   Every project page with `landing` data (no3y Code, Moonfang Armory, Pixel art, How
@@ -55,20 +68,23 @@ function Rounded({ corner = CURVED_INNER, children }: { corner?: string; childre
 }
 
 function Shot({ shot }: { shot: LandingShot }) {
-  const s = useSwap()(shot)
-  return <SheetImg key={s.src} shot={{ src: s.src, alt: s.alt, aspect: s.aspect }} />
+  return <Themed media={shot} render={(s) => <SheetImg key={s.src} shot={{ src: s.src, alt: s.alt, aspect: s.aspect }} />} />
 }
 
-/** A clip, or its other theme's; keyed by file so a swap loads the new one. */
+/**
+ * A clip in every version the switch can pick, the picked one showing (`SwapClip`: the others
+ * play along unseen, so a switch is instant and carries on from the same moment).
+ */
 function Clip({ video, priority = false }: { video: Parameters<typeof SheetClip>[0]['video']; priority?: boolean }) {
-  const v = useSwap()(video)
-  return <SheetClip key={v.src} video={v} priority={priority} />
+  const theme = useMockTheme()
+  const versions = useContext(Swap)(video)
+  const videos = MOCK_THEMES.map((t) => versions[t]).filter((v, i, all): v is typeof video => !!v && all.findIndex((w) => w?.src === v.src) === i)
+  return <SwapClip videos={videos} active={(versions[theme] ?? versions.glass).src} priority={priority} />
 }
 
 /** A still passed through as-is (the grid tiles), or its other theme's. */
 function Img({ shot, priority = false }: { shot: Parameters<typeof SheetImg>[0]['shot']; priority?: boolean }) {
-  const s = useSwap()(shot)
-  return <SheetImg key={s.src} shot={s} priority={priority} />
+  return <Themed media={shot} render={(s) => <SheetImg key={s.src} shot={s} priority={priority} />} />
 }
 
 /** A shot with its caption under it, on the card. */
@@ -154,6 +170,8 @@ function OwnSection({ section }: { section: StorySection }) {
   // gallery's `heading` stays as its accessible name.
   if (section.kind === 'gallery') return <ArtGallery heading={section.heading} items={section.items} />
 
+  if (section.kind === 'designSystem') return <No3yDesignSystem />
+
   if (section.kind !== 'feature') return null
 
   // The live sidebar keeps its own layout, copy and controls beside the stage.
@@ -213,28 +231,216 @@ function Block({ group }: { group: Group }) {
   )
 }
 
+const NO3Y_STORY_OPENER_BODY = [
+  'As I moved into using LLMs and agentic coding tools more and more for design work, I wanted to design my own. I forked an open source project I really liked but couldn’t stand to look at, around a few pillars I wanted to push.',
+  'First, how I actually work as a designer: I wanted more context at a glance across threads—project, model, worktree—though as models got better I abstracted a lot of that away into long-running bots. I also have multiple edits in my head at once instead of waiting turn by turn, and sometimes I still want the precision of Figma’s editor.',
+  'The other pillar was the UI and system itself. I wanted to embrace liquid glass with a touch of old-school iOS nostalgia, explore multiple themes and a real component library on the fly with agents, and sweat the everyday micro-UX—usage limits, customizing the sidebar, local dictation, and more.',
+]
+
+/** Prototype B's hero (Nov 20 2026): the new agent screen in Glass with lumen picked from its launchpad
+    (the launchpad's project list and suggestions before the pick were the first take), on its Jolly
+    Petal background, 3D on
+    "Selected items only", the bead ring, compact cards and threads by status, the whole window on the
+    user's Jolly Petal piece (~/Noey Brand/jolly-petal-6-2-3456x2234.png) mirrored, its glass blended over
+    a frost baked from that same piece (blur 48, saturate 1.35, brightness .55, as bake.mjs does).
+    Built off custom 8a1c055a30 plus the user's uncommitted dev-only showcase PRs in DraftLaunchpad.tsx
+    (applied to the scratch worktree from their dev checkout, ../devapp-uncommitted.patch).
+    Capture: inlet/takes/hero-capture.mjs LUMEN_GIT=1 TYPE="Do an audit of our Storybook and Figma
+    and look for any discrepancies" ONLY=glass PICK=lumen GLASS_BACKDROP=jollyPetal
+    HERO_NAME=glass-launchpad-lumen (LUMEN_GIT gives lumen the dev home's git story, hero/lumen-git-state.mjs,
+    so "Start something new" lists its git suggestions; run it with --reset afterwards; TYPE types the
+    prompt, unsent, behind the send-blocking puppet, then steps to another thread and back so the
+    sidebar's draft card takes the prompt as its title, as it does in the app once you click away); compose: SRC=glass-launchpad-lumen.png BACKDROP=<that png> FLIP=1 WIN_W=1940 SHADOW=deep
+    hero/hero-glass-solo.mjs (the window a touch smaller than the 2070 it filled, on a heavier drop) (both in ~/.t3-fork/scratch/no3y-capture/).
+    The Basic version (basic-launchpad.png through hero-basic-solo.mjs glass, hero-basic-solo*.webp)
+    came first the same day. Tried Nov 19 and dropped: the Dither backdrop on the screen, white, the
+    Cool fade, a flat sky blue and the user's Dither Studio piece behind it (over white, then dark), a
+    window running off the frame's foot, the opener wider than the column, and the bare window
+    floating on the page. */
+const NO3Y_STORY_HERO = {
+  src: '/work/no3y-code/hero-glass-solo.webp',
+  srcSet: '/work/no3y-code/hero-glass-solo-1280.webp 1280w, /work/no3y-code/hero-glass-solo-1920.webp 1920w, /work/no3y-code/hero-glass-solo.webp 2560w, /work/no3y-code/hero-glass-solo-3840.webp 3840w',
+  alt: 'The new agent screen in no3y Code on the Glass theme: the frosted sidebar with three Petals and threads grouped by status, the draft titled with the typed prompt, and the composer on the lumen project\'s feat/pricing-v2 branch with "Do an audit of our Storybook and Figma and look for any discrepancies" typed in, over suggestions to commit 3 changed files, pull 2 new commits and open a pull request, on the Jolly Petal background, the window standing on the same piece mirrored',
+  aspect: '16 / 9',
+}
+
+/** Prototype B's cohesive story layout for `/work/no3y-code`, reusing the page's existing media and copy. */
+function No3yStorySections({ sections, compare }: { sections: StorySection[]; compare?: ComponentProps<typeof CompareSlider> }) {
+  const features = sections.filter((s): s is Extract<StorySection, { kind: 'feature' }> => s.kind === 'feature')
+  const byHeading = (heading: string) => features.find((s) => s.heading === heading)
+  const grid = sections.find((s): s is Extract<StorySection, { kind: 'grid' }> => s.kind === 'grid')
+  const shotBy = (suffix: string) => grid?.shots.find((shot) => shot.src.endsWith(suffix))
+
+  const petals = byHeading('Petals')
+  const sidebar = byHeading('Customize your sidebar')
+  const focus = byHeading('Focus mode')
+  const split = byHeading('Quickly start a new agent in the same branch or worktree')
+  const scheduled = byHeading('Scheduled tasks')
+  const designMode = byHeading('Design mode')
+
+  // Screenshots, not clips (Nov 19 2026): each clip's end state as a still, in every theme
+  // (`no3yInlet.ts` / `no3yBasic.ts` hold the Inlet and Basic versions).
+  const workflowFeatures: WorkflowFeature[] = []
+  if (focus) {
+    workflowFeatures.push({
+      id: 'focus',
+      heading: focus.heading,
+      body: focus.body ?? '',
+      media: (
+        <Shot
+          shot={{
+            src: '/work/no3y-code/focus-mode-still.jpg',
+            alt: 'Focus mode in no3y Code on the Glass theme: the sidebar collapsed into a row of thread tabs, and two threads split side by side, the second asking a question',
+            aspect: '16 / 9',
+          }}
+        />
+      ),
+    })
+  }
+  if (split) {
+    workflowFeatures.push({
+      id: 'split',
+      heading: split.heading,
+      body: split.body ?? '',
+      media: (
+        <Shot
+          shot={{
+            src: '/work/no3y-code/split-agent-still.jpg',
+            alt: 'Split agent in no3y Code on the Glass theme: the pricing cards thread still working beside a second agent on the same branch that added a savings badge, the sidebar pairing the two on one row',
+            aspect: '16 / 9',
+          }}
+        />
+      ),
+    })
+  }
+  if (scheduled?.shot) {
+    workflowFeatures.push({ id: 'scheduled', heading: scheduled.heading, body: scheduled.body ?? '', media: <Shot shot={scheduled.shot} />, wide: true })
+  }
+
+  const usageShot = shotBy('/usage.webp')
+  const modelShot = shotBy('/model.webp')
+  const queueShot = shotBy('/queue.webp')
+  const questionShot = shotBy('/question.webp')
+  const dictationShot = shotBy('/dictation-wide.webp')
+
+  const composerStates: ComposerStateItem[] = []
+  if (usageShot) {
+    composerStates.push({
+      id: 'usage',
+      label: 'Usage limits',
+      caption: 'Session and weekly quotas for Codex and Claude right off the composer’s meter.',
+      media: <Img shot={usageShot} />,
+    })
+  }
+  if (modelShot) {
+    composerStates.push({
+      id: 'model',
+      label: 'Model & reasoning',
+      caption: 'A provider rail, searchable models, a reasoning effort slider, and an Ultracode toggle.',
+      media: <Img shot={modelShot} />,
+    })
+  }
+  if (queueShot) {
+    composerStates.push({
+      id: 'queue',
+      label: 'Queue & steer',
+      caption: 'Line up your next thought while the agent works—edit it, drop it, or steer mid-turn.',
+      media: <Img shot={queueShot} />,
+    })
+  }
+  if (questionShot) {
+    composerStates.push({
+      id: 'question',
+      label: 'Agent questions',
+      caption: 'Clarifying prompts replace the composer with quick picks and a custom fallback.',
+      media: <Img shot={questionShot} />,
+    })
+  }
+
+  return (
+    <>
+      {petals && (
+        <Reveal>
+          <OwnSection section={petals} />
+        </Reveal>
+      )}
+      <Reveal>
+        <No3yDesignSystemStory compare={compare} />
+      </Reveal>
+      {sidebar && (
+        <Reveal>
+          <OwnSection section={sidebar} />
+        </Reveal>
+      )}
+      {workflowFeatures.length > 0 && (
+        <Reveal>
+          <ParallelWorkflowCard features={workflowFeatures} />
+        </Reveal>
+      )}
+      {composerStates.length > 0 && (
+        <Reveal>
+          <ComposerShowcase
+            states={composerStates}
+            dictation={
+              dictationShot
+                ? {
+                    media: <Img shot={dictationShot} />,
+                    caption: 'Built-in speech-to-text with a live level timeline right inside the input bar.',
+                  }
+                : undefined
+            }
+          />
+        </Reveal>
+      )}
+      {designMode && (
+        <Reveal>
+          <OwnSection section={designMode} />
+        </Reveal>
+      )}
+    </>
+  )
+}
+
 export default function ProjectCurved({ project }: { project: Project }) {
   const isMobile = useIsMobile()
-  const mockTheme = useMockTheme()
+  const no3yPrototype = useNo3yPrototype()
   const landing = project.landing
   if (!landing) return null
+  const isNo3yStory = project.slug === 'no3y-code' && no3yPrototype === 'story'
   const { sheet, showcase, hero } = landing
   const facts = sheet?.facts ?? []
   const links = [...(hero.cta ? [{ label: hero.cta.label, href: hero.cta.href }] : []), ...(hero.links ?? [])]
   const swaps = SWAPS[project.slug]
-  const swap: SwapFn = (media) =>
-    swaps && mockTheme === 'inlet' && swaps[media.src] ? { ...media, ...swaps[media.src] } : media
+  const resolve: Resolve = (media) => {
+    const versions: Versions<typeof media> = { glass: media }
+    for (const theme of MOCK_THEMES) {
+      const other = theme === 'glass' ? undefined : swaps?.[theme]?.[media.src]
+      // A theme's clip takes only its own HEVC (Nov 20 2026): spread over the Glass one, it would
+      // otherwise inherit Glass's `hevc` and play the Glass video wherever HEVC is supported.
+      if (other) versions[theme] = { ...media, ...other, ...('hevc' in media ? { hevc: other.hevc } : {}) }
+    }
+    return versions
+  }
 
-  const openerMedia = showcase ? (
+  const openerMedia = isNo3yStory ? (
+    // Prototype B (Nov 19 2026): one Basic still, the theme slider having moved to the design-system
+    // section. Basic is the fork's default, so it isn't switched with the page's theme pill.
+    <img
+      src={NO3Y_STORY_HERO.src}
+      srcSet={NO3Y_STORY_HERO.srcSet}
+      // Eager, so the browser can't size it by its box: the column's width (CURVED_MAX's 1280 cap).
+      sizes="(max-width: 900px) 100vw, 1280px"
+      alt={NO3Y_STORY_HERO.alt}
+      loading="eager"
+      fetchPriority="high"
+      decoding="async"
+      style={{ display: 'block', width: '100%', height: 'auto', aspectRatio: NO3Y_STORY_HERO.aspect }}
+    />
+  ) : showcase ? (
     <>
+      {/* The hero isn't switched: it shows every theme on dividers of its own. */}
       {showcase.compare && (
-        <CompareSlider
-          before={showcase.compare.before}
-          after={showcase.compare.after}
-          alt={showcase.compare.alt}
-          aspect={showcase.compare.aspect}
-          priority
-        />
+        <CompareSlider layers={showcase.compare.layers} alt={showcase.compare.alt} aspect={showcase.compare.aspect} priority />
       )}
       {showcase.video && !showcase.compare && <Clip video={showcase.video} priority />}
       {showcase.shot && <Img shot={showcase.shot} priority />}
@@ -245,17 +451,25 @@ export default function ProjectCurved({ project }: { project: Project }) {
     <SheetImg shot={{ src: hero.shot.src, alt: hero.shot.alt, aspect: hero.shot.aspect }} priority />
   ) : null
 
-  const opener =
+  const openerCard =
     openerMedia &&
     (showcase?.copy ? (
       <CurvedCard
         media={openerMedia}
-        copy={<CurvedCopy heading={showcase.copy.heading} body={showcase.copy.body} />}
+        copy={
+          <CurvedCopy
+            heading={showcase.copy.heading}
+            body={isNo3yStory ? NO3Y_STORY_OPENER_BODY : showcase.copy.body}
+          />
+        }
         side={facts.length > 0 ? <CurvedFacts facts={facts} /> : undefined}
       />
     ) : (
       <CurvedMedia>{openerMedia}</CurvedMedia>
     ))
+  // Prototype B's opener sits on the column like the rest of the page (it ran wider, to 1320 and then
+  // 75% of the window, which read far too big).
+  const opener = openerCard
 
   return (
     <div style={accentTheme(landing.accent)}>
@@ -270,22 +484,25 @@ export default function ProjectCurved({ project }: { project: Project }) {
           links={links}
           inset={0}
           bodySize={CURVED_BODY_SIZE}
-        >
-          {swaps && <MockThemeSwitch />}
-        </SheetIntro>
-        <Swap.Provider value={swap}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: sheetGap(isMobile) }}>
+          after={swaps && <MockThemeSwitch />}
+        />
+        <Swap.Provider value={resolve}>
+          <div key={isNo3yStory ? 'story' : 'current'} style={{ display: 'flex', flexDirection: 'column', gap: sheetGap(isMobile) }}>
             {opener}
-            {groupSections(landing.sections).map((group, i) =>
-              // With no opener the first block is the hero, which is there from the start. A
-              // cluster springs its cards in one by one itself.
-              (!opener && i === 0) || isCluster(group) ? (
-                <Block key={i} group={group} />
-              ) : (
-                <Reveal key={i}>
-                  <Block group={group} />
-                </Reveal>
-              ),
+            {isNo3yStory ? (
+              <No3yStorySections sections={landing.sections} compare={showcase?.compare} />
+            ) : (
+              groupSections(landing.sections).map((group, i) =>
+                // With no opener the first block is the hero, which is there from the start. A
+                // cluster springs its cards in one by one itself.
+                (!opener && i === 0) || isCluster(group) ? (
+                  <Block key={i} group={group} />
+                ) : (
+                  <Reveal key={i}>
+                    <Block group={group} />
+                  </Reveal>
+                ),
+              )
             )}
           </div>
         </Swap.Provider>

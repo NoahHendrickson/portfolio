@@ -1,7 +1,10 @@
+import { useSyncExternalStore } from 'react'
 import { color } from '../design-system/tokens'
 import { useHomePrototype, setHomePrototype } from '../hooks/useHomePrototype'
+import { useNo3yPrototype, setNo3yPrototype } from '../hooks/useNo3yPrototype'
 import { useIsMobile } from '../hooks/useIsMobile'
 import { RAIL_SPINE } from '../layout'
+import { getRoute, subscribeToRoute } from '../navigation'
 import { pixelPath } from '../pixelFaces'
 
 const A = ['.XXX.', 'X...X', 'X...X', 'XXXXX', 'X...X', 'X...X', 'X...X']
@@ -12,7 +15,9 @@ const SQUARE = 2
 const FRAME = 2
 const SEGMENT_W = 40
 const SEGMENT_H = 36
-const LEFT = RAIL_SPINE + 12
+const DESKTOP_LEFT = RAIL_SPINE + 12
+const PAGE_LEFT = 24
+const MOBILE_LEFT = 16
 /** Over the theme switch: its 24 off the foot, its two segments and frame, and 8 between. */
 const BOTTOM = 24 + SEGMENT_H * 2 + FRAME * 2 + 8
 
@@ -33,27 +38,29 @@ function Letter({ rows, active }: { rows: string[]; active: boolean }) {
   )
 }
 
-/**
- * Switches Hi between its prototypes (`useHomePrototype`): A, the Edge with
- * the wordmark, and B, the blob that follows the pointer. Drawn like the
- * theme switch under it (the cut-out over the current pick), and mounted on
- * the dev server only, so it never ships. Desktop only, like the texture.
- */
-export default function PrototypeToggle() {
-  const prototype = useHomePrototype()
-  const isMobile = useIsMobile()
-  if (isMobile) return null
-  const next = prototype === 'wordmark' ? 'follow' : 'wordmark'
+function SwitchButton({
+  active,
+  left,
+  ariaLabel,
+  title,
+  onToggle,
+}: {
+  active: 'A' | 'B'
+  left: number
+  ariaLabel: string
+  title: string
+  onToggle: () => void
+}) {
   return (
     <button
       type="button"
-      onClick={() => setHomePrototype(next)}
+      onClick={onToggle}
       data-texture-avoid="self"
-      aria-label={`Prototype ${prototype === 'wordmark' ? 'A, the wordmark' : 'B, the follow blob'}. Switch to ${next === 'wordmark' ? 'A' : 'B'}`}
-      title="Hi's prototype: A wordmark, B follow blob"
+      aria-label={ariaLabel}
+      title={title}
       style={{
         position: 'fixed',
-        left: LEFT,
+        left,
         bottom: BOTTOM,
         zIndex: 900,
         display: 'flex',
@@ -76,11 +83,52 @@ export default function PrototypeToggle() {
           height: SEGMENT_H,
           borderRadius: 'var(--radius-sm)',
           background: color.bg.primary,
-          transform: `translateY(${prototype === 'follow' ? SEGMENT_H : 0}px)`,
+          transform: `translateY(${active === 'B' ? SEGMENT_H : 0}px)`,
         }}
       />
-      <Letter rows={A} active={prototype === 'wordmark'} />
-      <Letter rows={B} active={prototype === 'follow'} />
+      <Letter rows={A} active={active === 'A'} />
+      <Letter rows={B} active={active === 'B'} />
     </button>
   )
+}
+
+/**
+ * Dev-only A / B prototype switch stacked over the light / dark toggle:
+ * - On `/` (desktop): Hi's prototypes (`useHomePrototype`: A wordmark, B follow blob).
+ * - On `/work/no3y-code`: the page's story prototypes (`useNo3yPrototype`: A current, B cohesive story).
+ */
+export default function PrototypeToggle() {
+  const route = useSyncExternalStore(subscribeToRoute, getRoute)
+  const homePrototype = useHomePrototype()
+  const no3yPrototype = useNo3yPrototype()
+  const isMobile = useIsMobile()
+
+  if (route === '/') {
+    if (isMobile) return null
+    const next = homePrototype === 'wordmark' ? 'follow' : 'wordmark'
+    return (
+      <SwitchButton
+        active={homePrototype === 'wordmark' ? 'A' : 'B'}
+        left={DESKTOP_LEFT}
+        ariaLabel={`Prototype ${homePrototype === 'wordmark' ? 'A, the wordmark' : 'B, the follow blob'}. Switch to ${next === 'wordmark' ? 'A' : 'B'}`}
+        title="Hi’s prototype: A wordmark, B follow blob"
+        onToggle={() => setHomePrototype(next)}
+      />
+    )
+  }
+
+  if (route === '/work/no3y-code') {
+    const next = no3yPrototype === 'current' ? 'story' : 'current'
+    return (
+      <SwitchButton
+        active={no3yPrototype === 'current' ? 'A' : 'B'}
+        left={isMobile ? MOBILE_LEFT : PAGE_LEFT}
+        ariaLabel={`no3y Code prototype ${no3yPrototype === 'current' ? 'A, current layout' : 'B, cohesive story'}. Switch to ${next === 'current' ? 'A' : 'B'}`}
+        title="no3y Code prototype: A current layout, B cohesive story"
+        onToggle={() => setNo3yPrototype(next)}
+      />
+    )
+  }
+
+  return null
 }

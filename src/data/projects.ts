@@ -280,6 +280,8 @@ export type StorySection =
     }
   /** A centered 688px heading + body block, standing between shots — D2 Stat Builder. */
   | { kind: 'copy'; heading: string; body: Prose }
+  /** no3y Code's design system: the Figma kit, its Storybook and the Code Connect between them (`No3yDesignSystem.tsx`). */
+  | { kind: 'designSystem' }
   /**
    * Heading and first-player copy over that shot, final-player copy over
    * the five-track shot, then a labelled row per timeline track — Crisp.
@@ -472,13 +474,12 @@ export type Landing = {
     /** A looping clip above `shot`, at the same width — no3y Code's hero video. */
     video?: LandingVideo
     /**
-     * Two aligned pictures with a draggable divider between them (`CompareSlider`), in place of
-     * `video` — no3y Code's hero: the new agent screen in Glass and in Inlet. Not swapped by the
-     * page's mockup switch, since it shows both.
+     * Aligned pictures with draggable dividers between them (`CompareSlider`), in place of
+     * `video` — no3y Code's hero: the new agent screen in Basic, Glass and Inlet, left to right.
+     * Not swapped by the page's mockup switch, since it shows them all.
      */
     compare?: {
-      before: { src: string; srcSet?: string; label: string }
-      after: { src: string; srcSet?: string; label: string }
+      layers: { src: string; srcSet?: string; label: string; theme: 'basic' | 'glass' | 'inlet' }[]
       alt: string
       aspect: string
     }
@@ -953,21 +954,33 @@ export const projects: Record<string, Project> = {
       // wallpaper.
       showcase: {
         // The hero (Nov 15 2026): the new agent screen in Glass and in Inlet, captured from the
-        // same seeded state and placed identically on the Figma wallpaper (gTkJR0HHtaPzrWmgSYkC1g
-        // 500:1620), split by a divider the visitor drags (`CompareSlider`). It replaced the
-        // focus-mode opener clip; scripts in ~/.t3-fork/scratch/no3y-capture/hero/.
+        // same seeded state and placed identically on the fluted wallpaper the Glass clips below use
+        // (two Figma wallpapers were tried first), split by a divider the visitor drags
+        // (`CompareSlider`). It replaced the focus-mode opener clip; scripts in
+        // ~/.t3-fork/scratch/no3y-capture/hero/. Basic (Neutral Dark, the fork's default theme)
+        // joined it Nov 16 2026, all three recaptured off custom at 7f1fe1fc9e, on two dividers.
         compare: {
-          before: {
-            src: '/work/no3y-code/hero-glass.webp',
-            srcSet: '/work/no3y-code/hero-glass-1280.webp 1280w, /work/no3y-code/hero-glass-1920.webp 1920w, /work/no3y-code/hero-glass.webp 2560w',
-            label: 'Glass',
-          },
-          after: {
-            src: '/work/no3y-code/hero-inlet.webp',
-            srcSet: '/work/no3y-code/hero-inlet-1280.webp 1280w, /work/no3y-code/hero-inlet-1920.webp 1920w, /work/no3y-code/hero-inlet.webp 2560w',
-            label: 'Inlet',
-          },
-          alt: 'The new agent screen in no3y Code, split between the Glass theme on the left and the Inlet Black theme on the right, with a divider to drag between them',
+          layers: [
+            {
+              theme: 'basic',
+              src: '/work/no3y-code/hero-basic.webp',
+              srcSet: '/work/no3y-code/hero-basic-1280.webp 1280w, /work/no3y-code/hero-basic-1920.webp 1920w, /work/no3y-code/hero-basic.webp 2560w',
+              label: 'Basic',
+            },
+            {
+              theme: 'glass',
+              src: '/work/no3y-code/hero-glass.webp',
+              srcSet: '/work/no3y-code/hero-glass-1280.webp 1280w, /work/no3y-code/hero-glass-1920.webp 1920w, /work/no3y-code/hero-glass.webp 2560w',
+              label: 'Glass',
+            },
+            {
+              theme: 'inlet',
+              src: '/work/no3y-code/hero-inlet.webp',
+              srcSet: '/work/no3y-code/hero-inlet-1280.webp 1280w, /work/no3y-code/hero-inlet-1920.webp 1920w, /work/no3y-code/hero-inlet.webp 2560w',
+              label: 'Inlet',
+            },
+          ],
+          alt: 'The new agent screen in no3y Code, split three ways: the Basic theme on the left, Glass in the middle and Inlet Black on the right, with dividers to drag between them',
           aspect: '16 / 9',
         },
         // The new-agent still that used to stand under the clip was dropped
@@ -993,6 +1006,44 @@ export const projects: Record<string, Project> = {
         ],
       },
       sections: [
+        // Petals, the fork's bots (Nov 15 2026; the page's second section, right under
+        // the opener, since Nov 16 2026): a faked run of the dev app (no
+        // model was prompted). Glass here, on the fluted wallpaper like the other
+        // Glass clips; the switch swaps in the Inlet take on the Cool fade
+        // backdrop (`no3yInlet.ts`). Takes: inlet/takes/bot-return.mjs (THEME=glass).
+        {
+          kind: 'feature',
+          gap: 80,
+          heading: 'Petals',
+          body: [
+            'Petals are my version of GrokBot, or projects in Cursor and Claude Code: one long-running thread that I talk to, and it spins up other threads and subagents to get the work done.',
+            'A Petal is a chunk of work, like a feature or a project I’m working on. I tell it what its job is in a prompt, like keeping an eye on feedback and session recordings for bugs to fix, and then I work with it in that one long-running thread. It spins up threads in the right project, and everything stays with that Petal, so I can see all the threads it’s started and finished.',
+            'A long chat eventually forgets things, so a Petal keeps its memory in a small folder of files. One file holds its job, which only changes when I ask. Another holds where it left off: what it’s waiting on, what it already told me, and a short log of what it did. Every time it wakes up it starts fresh and reads those files first, so it picks up where it was.',
+            'Alongside those files, a Petal keeps a digest that shows above its composer. It has a status line, like whether it’s waiting on me and when it checks in next, and a card for each thing it needs me to decide, written as a question with quick answers like Merge or Hold. Clicking an answer sends it back to the Petal, so I can usually reply without typing anything.',
+          ],
+          copyWidth: 700,
+          stack: true,
+          video: {
+            src: '/work/no3y-code/petals.mp4',
+            // 10-bit HEVC first where it plays (Nov 20 2026): 8-bit H.264 bands the dark glass's gradients.
+            hevc: '/work/no3y-code/petals-hevc.mp4',
+            poster: '/work/no3y-code/petals-poster.jpg',
+            alt: 'Petals in no3y Code on the Glass theme: the UX feedback bot finishes and its card turns blue, its report says the shipping step is ready for review, and above its composer it asks two things; after a dev server link comes back, Merge on the first ask merges the pull request, which turns purple, and First error answers the second, leaving the digest all quiet, the window on the Jolly Petal piece',
+            aspect: '16 / 9',
+          },
+        },
+        // The themes (Nov 16 2026): copy only for now, a first draft for the user to rewrite. The
+        // theme names are the app's own labels (forkTheme.ts in the fork, at origin/custom 7f1fe1fc9e:
+        // Basic, Glass and Inlet; Westworld and the Neutrals were folded into Basic's tones).
+        {
+          kind: 'copy',
+          heading: 'Themes',
+          body: [
+            'no3y Code has three themes. Basic is the default, a plain look that comes in five tones from light to dark. Glass lets the wallpaper show through the window, and Inlet comes in six colors. Drag the dividers on the picture at the top to compare them, and use the theme switch, which follows you down the page, to change every mockup.',
+            'Keeping more than one theme around used to be a lot of work. Every new screen had to be built and checked in each one, and the themes you weren’t using would quietly fall behind. With AI doing most of that work, I can try a whole new UI style in the same app and keep the others working as the app changes. It also makes cleaning up easy: I used to have a few more themes, and folding them into Basic’s tones was a quick change instead of a project.',
+            'It also changes how I explore. Instead of mocking up a new look in Figma, I can build it for real, use it for a few days, and switch back if it doesn’t hold up. Glass and Inlet feel like two different apps, but they run on the same features underneath.',
+          ],
+        },
         {
           kind: 'feature',
           gap: 80,
@@ -1035,7 +1086,7 @@ export const projects: Record<string, Project> = {
           video: {
             src: '/work/no3y-code/focus-mode.mp4',
             poster: '/work/no3y-code/focus-mode-poster.jpg',
-            alt: 'Focus mode in no3y Code on the Glass theme: the sidebar collapses into a row of thread tabs, switching tabs moves between working threads, and a second thread opens beside the first in a split view',
+            alt: 'Focus mode in no3y Code on the Glass theme: the sidebar collapses into a row of thread tabs, switching tabs moves between working threads in different projects, the tabs filter to one project, and a second thread is dragged onto the first to split the view',
             aspect: '16 / 9',
           },
         },
@@ -1049,7 +1100,7 @@ export const projects: Record<string, Project> = {
           video: {
             src: '/work/no3y-code/split-agent.mp4',
             poster: '/work/no3y-code/split-agent-poster.jpg',
-            alt: 'Split agent in no3y Code: a second agent opens beside a working thread, the sidebar pairs the two threads on one row, and one thread floats as a window over the chat',
+            alt: 'Split agent in no3y Code on the Glass theme: while a thread builds the pricing cards, Split agent opens a second agent beside it on the same branch, a quick follow-up idea is sent there, and the second agent finishes while the first keeps working, the sidebar pairing the two on one row',
             aspect: '16 / 9',
           },
         },
@@ -1121,32 +1172,6 @@ export const projects: Record<string, Project> = {
             frame: 'plain',
           },
         },
-        // Petals, the fork's bots (Nov 15 2026): a faked run of the dev app (no
-        // model was prompted). Glass here, on the fluted wallpaper like the other
-        // Glass clips; the switch swaps in the Inlet take on the Cool fade
-        // backdrop (`no3yInlet.ts`). Takes: inlet/takes/bot-return.mjs (THEME=glass).
-        {
-          kind: 'feature',
-          gap: 80,
-          heading: 'Petals',
-          // The texture's deep green (LANDING_SWATCHES), the copy in the light text,
-          // with the Inlet mockups only; on Glass it's the page's usual ink / cream
-          // card (Nov 15 2026). The bright #26b846 with dark ink read too loud.
-          card: { surface: '#008755', theme: 'dark', only: 'inlet' },
-          body: [
-            'Petals are my version of GrokBot, or projects in Cursor and Claude Code: one long-running thread that I talk to, and it spins up other threads and subagents to get the work done.',
-            'A Petal is a chunk of work, like a feature or a project I’m working on. I tell it what its job is in a prompt, like keeping an eye on feedback and session recordings for bugs to fix, and then I work with it in that one long-running thread. It spins up threads in the right project, and everything stays with that Petal, so I can see all the threads it’s started and finished.',
-            'A long chat eventually forgets things, so a Petal keeps its memory in a small folder of files. One file holds its job, which only changes when I ask. Another holds where it left off: what it’s waiting on, what it already told me, and a short log of what it did. Every time it wakes up it starts fresh and reads those files first, so it picks up where it was.',
-          ],
-          copyWidth: 700,
-          stack: true,
-          video: {
-            src: '/work/no3y-code/petals.mp4',
-            poster: '/work/no3y-code/petals-poster.jpg',
-            alt: 'Petals in no3y Code on the Glass theme: the UX feedback bot finishes its work and its card turns blue, its report says the shipping step is ready for review, a dev server link comes back for checking it, and after the go-ahead to merge the pull request turns purple and the thread moves to Idle',
-            aspect: '16 / 9',
-          },
-        },
         {
           kind: 'feature',
           gap: 80,
@@ -1161,10 +1186,11 @@ export const projects: Record<string, Project> = {
           video: {
             src: '/work/no3y-code/design-mode-glass.mp4',
             poster: '/work/no3y-code/design-mode-glass-poster.jpg',
-            alt: 'Design mode in no3y Code on the Glass theme: the preview opens beside the thread, a button and a heading are edited in the properties panel, canvas mode previews the page at another size, and the changes attach to the composer for the agent',
+            alt: 'Design mode in no3y Code on the Glass theme: design mode turns on over the preview, the Start a scene button gets more padding and the heading is centered in the properties panel, canvas mode previews the page at MacBook 14 inch size, and the changes attach to the composer for the agent',
             aspect: '16 / 9',
           },
         },
+        { kind: 'designSystem' },
       ],
     },
     /*
