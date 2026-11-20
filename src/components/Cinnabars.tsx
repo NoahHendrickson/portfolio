@@ -1,7 +1,7 @@
 import type { CSSProperties, ReactNode } from 'react'
 import { Interlock, Piece } from './Interlock'
 import Reveal from './Reveal'
-import { Chip, SheetClip, SheetLinks, SheetPage } from './Sheet'
+import { SheetClip, SheetPage } from './Sheet'
 import { useIsMobile } from '../hooks/useIsMobile'
 
 /*
@@ -41,13 +41,6 @@ const THEME = {
   '--color-orange-hover': '#2449d9',
   '--color-on-accent': PAPER,
 } as CSSProperties
-
-const FACTS = [
-  { heading: 'Tools', items: ['Claude Code', 'React', 'Capacitor', 'Supabase'] },
-  { heading: 'Skills', items: ['iOS app design', 'Design engineering', 'Motion design'] },
-]
-
-const SITE = 'https://cinnabars.vercel.app'
 
 type Screen = 'log' | 'history' | 'timer' | 'timer-setup' | 'trend-pink' | 'logging' | 'themes'
 
@@ -155,40 +148,14 @@ export default function Cinnabars() {
                 </Tile>
               </Piece>
 
-              <Piece
-                area="why"
-                pad={pad}
-                style={{
-                  color: INK,
-                  display: 'grid',
-                  gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 3fr) minmax(0, 2fr)',
-                  gap: isMobile ? 28 : 48,
-                  alignItems: 'end',
-                }}
-              >
+              <Piece area="why" pad={pad} style={{ color: INK, display: 'flex', alignItems: 'flex-end' }}>
                 <Copy
-                  heading="Low effort on purpose"
+                  heading="Why I built it"
                   body={[
-                    "A super simple way to track my workouts. I’m not chasing PRs, I just want a well-rounded week, and I kept forgetting what I’d trained and how long ago.",
+                    'I wanted a super simple way to track my workouts. I’m not chasing PRs, I just want a well-rounded week, and I kept forgetting what I’d trained.',
                     'So you tap what you did today, and everything else shows how many days it’s been.',
                   ]}
-                >
-                  <SheetLinks links={[{ label: 'Website', href: SITE }]} />
-                </Copy>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                  {FACTS.map((fact) => (
-                    <div key={fact.heading} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                      <Mono>{fact.heading}</Mono>
-                      <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                        {fact.items.map((item) => (
-                          <li key={item}>
-                            <Chip filled>{item}</Chip>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-                </div>
+                />
               </Piece>
 
               {/* Log out front, History and the running timer either side. */}
@@ -215,9 +182,9 @@ export default function Cinnabars() {
 
               <Piece area="taps" pad={pad} style={{ color: INK, display: 'flex', alignItems: 'flex-end' }}>
                 <Copy
-                  heading="Two taps"
+                  heading="Two taps and you’re done"
                   body={[
-                    'Tap a group, then pick a full or half session. Push-ups and pull-ups get a dial for reps, cardio gets one for miles. It saves as you go.',
+                    'Tap a muscle group and the half and full bubbles pop right out of the pill. Push-ups and pull-ups bring up a rep dial, cardio gets one for miles or minutes, and everything saves as you go.',
                   ]}
                 />
               </Piece>
@@ -244,13 +211,20 @@ export default function Cinnabars() {
               </Piece>
 
               <Piece area="yours" pad={pad} style={{ color: INK, display: 'flex', alignItems: 'flex-end' }}>
-                <Copy heading="Make it yours" body={['Pick any background and ink. I keep mine on blue.']} />
+                <Copy
+                  heading="Custom themes"
+                  body={[
+                    'Dark and light mode are there, or you can pick whatever background and ink combo you want.',
+                  ]}
+                />
               </Piece>
 
               <Piece area="clock" pad={pad} style={{ color: INK, display: 'flex', alignItems: 'flex-end' }}>
                 <Copy
-                  heading="And a timer"
-                  body={['Rounds, work and rest. It keeps going with the phone locked, on the lock screen and in the Dynamic Island.']}
+                  heading="Built-in interval timer"
+                  body={[
+                    'Set your rounds, work, and rest right in the app so you don’t have to switch mid-workout. It keeps going with your phone locked, on the lock screen and in the Dynamic Island.',
+                  ]}
                 />
               </Piece>
 

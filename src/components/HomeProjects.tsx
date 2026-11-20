@@ -193,6 +193,17 @@ const TUNES: Record<string, Tune> = {
       aspect: '1500 / 1000',
     },
   },
+  // Made for the card at 4 / 5: the Today screen in an iPhone rising from the foot on electric blue.
+  '/work/cinnabars': {
+    ring: ['#2f5bff', '#f2f0eb'],
+    shape: '4 / 5',
+    fit: 'cover',
+    art: {
+      src: '/work/cinnabars/card-thumbnail.webp',
+      alt: 'Cinnabars: the Today screen in an iPhone on electric blue, showing logged muscle-group pills and days since each group was last trained',
+      aspect: '1200 / 1500',
+    },
+  },
 }
 
 /** Cards drawn live in place of their art: Thinking States' chips run on the card itself. */
@@ -224,14 +235,14 @@ type Placed = { card: WorkCard; tune: Tune }
  * new one) goes to the shorter column.
  */
 const PLACEMENT: [string[], string[]] = [
-  // The brand page (Nov 12 2026) after Apply: at 3 / 2 it leaves the columns closest to level.
-  ['/work/no3y-code', '/work/invisible/apply', '/work/noey-brand', '/work/crisp', '/work/how-to-pc'],
+  // Six cards per column, ending near level once Cinnabars sits under D2 Conflux on the right.
+  ['/work/no3y-code', '/work/invisible/apply', '/work/noey-brand', '/work/crisp', '/work/pixel-art', '/work/how-to-pc'],
   [
     '/work/invisible/onboarding',
     '/work/stat-builder',
+    '/work/cinnabars',
     '/work/thinking-states',
     '/work/invisible/synapse',
-    '/work/pixel-art',
     '/work/nacho-box',
   ],
 ]
