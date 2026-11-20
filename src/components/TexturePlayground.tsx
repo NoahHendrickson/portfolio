@@ -26,7 +26,7 @@ const FACE_WEIGHT_OPTIONS: { id: FaceWeight; label: string }[] = [
 ]
 
 const RIPPLE_FROM_OPTIONS: { id: RippleFrom; label: string }[] = [
-  { id: 'centre', label: 'Centre' },
+  { id: 'centre', label: 'Center' },
   { id: 'top', label: 'Top' },
   { id: 'bottom', label: 'Bottom' },
   { id: 'left', label: 'Left' },

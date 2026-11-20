@@ -12,10 +12,10 @@ import ThinkingChip from './ThinkingChip'
 
 /**
  * Each chip, with a label or colour where it takes another than its own: the helix
- * reads Analysing, Compiling's rain takes the project's purple.
+ * reads Analyzing, Compiling's rain takes the project's purple.
  */
 const PICKS: { chip: Chip; label?: string; color?: string }[] = [
-  { chip: chipById('dna-helix')!, label: 'Analysing' },
+  { chip: chipById('dna-helix')!, label: 'Analyzing' },
   { chip: chipById('wave')! },
   { chip: chipById('rain-bare4')!, color: '#A78BFA' },
   { chip: chipById('dna')! },

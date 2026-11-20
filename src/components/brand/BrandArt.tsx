@@ -116,7 +116,7 @@ export function LeavesApart({ square = 12, spread = 4 }: { square?: number; spre
       width={span * square}
       height={span * square}
       role="img"
-      aria-label="The mark's four leaves, pulled apart: green top, orange right, yellow bottom, teal left"
+      aria-label="The mark’s four leaves, pulled apart: green top, orange right, yellow bottom, teal left"
       style={FIT}
     >
       {leaves.map(({ leaf, inks }) => (

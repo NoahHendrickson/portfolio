@@ -607,7 +607,7 @@ export const DOT_CHIPS: ChipDef<"pix", PixUtils>[] = [
   {
     system: "pix",
     id: "dotwave",
-    label: "Analysing",
+    label: "Analyzing",
     name: "Wave",
     color: "#60A5FA",
     group: "dots",
@@ -824,7 +824,7 @@ export const DOT_CHIPS: ChipDef<"pix", PixUtils>[] = [
   {
     system: "pix",
     id: "zigzag",
-    label: "Optimising",
+    label: "Optimizing",
     name: "Zigzag",
     color: "#FBBF24",
     group: "dots",

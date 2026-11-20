@@ -120,10 +120,10 @@ type DesignNote = {
 
 const designNotes: DesignNote[] = [
   {
-    title: 'AI tools have become a core part of my design process. I use Claude Code, Cursor, Codex every day when building and designing.',
+    title: 'AI tools have become a core part of my design process. I use Claude Code, Cursor, and Codex every day when building and designing.',
     paragraphs: [
       'Jumping between Figma and these AI coding tools allows me to iterate much faster. In the past, as a designer you needed to make assumptions when designing in Figma. You couldn’t actually see or feel the designs in the environment that your users would experience them in.',
-      'Figma continues to be a staple for me as it is so useful across the different phases. Using low-fi design to test interactions to high-fidelity mockups that an agent can implement. Beautiful design requires Figma (and a human) most of the time.',
+      'Figma continues to be a staple for me as it is so useful across the different phases. From lo-fi designs that test interactions to high-fidelity mockups an agent can implement. Beautiful design requires Figma (and a human) most of the time.',
     ],
   },
   {
@@ -152,8 +152,8 @@ const entries: Entry[] = [
     role: 'Product Designer @',
     detail: 'Invisible Technologies / Aug 2022 - July 2026',
     paragraphs: [
-      'I joined Invisible as an Associate Product Designer, working across a range of surfaces and products with very different users. I grew into owning design for one of our core platforms, contributing to our design ops, driving adoption of new AI tools and workflows and serving as the connective tissue for 5+ teams.',
-      "As Design Lead on Meridial, Invisible's talent marketplace for AI training projects, I owned end-to-end user flows, research, wireframes, and high-fidelity specs alongside multiple PMs and engineers. The product cut across the business, so I partnered closely with Legal, Compliance, Hiring & Recruiting, and Operations.",
+      'I joined Invisible as an Associate Product Designer, working across a range of surfaces and products with very different users. I grew into owning design for one of our core platforms, contributing to our design ops, driving adoption of new AI tools and workflows, and serving as the connective tissue for 5+ teams.',
+      "As Design Lead on Meridial, Invisible’s talent marketplace for AI training projects, I owned end-to-end user flows, research, wireframes, and high-fidelity specs alongside multiple PMs and engineers. The product cut across the business, so I partnered closely with Legal, Compliance, Hiring & Recruiting, and Operations.",
       'I led the design effort for launching our new AI training interfaces. The team had built the foundation in a scrappy sprint, then brought me in to own the UX and visual design. I created reusable components and high-fidelity mockups for several AI training use cases.',
     ],
     bullets: [
@@ -176,13 +176,13 @@ const entries: Entry[] = [
     role: 'Area Manager L5 @',
     detail: 'Amazon Logistics / 2019 - 2021',
     paragraphs: [
-      "I started at Amazon just to get a job after college. I didn't really have any expectations, but my work ethic said otherwise and I left as an L5 Area Manager. What got me there was learning to make calls off data instead of vibes, and finding out I could pick up something completely foreign and get good at it fast. That's the confidence I still run on. I had mentors who invested in me, and I learned to pass that down as well, helping four members of my team earn promotions.",
+      "I started at Amazon just to get a job after college. I didn’t really have any expectations, but my work ethic said otherwise and I left as an L5 Area Manager. What got me there was learning to make calls off data instead of vibes, and finding out I could pick up something completely foreign and get good at it fast. That’s the confidence I still run on. I had mentors who invested in me, and I learned to pass that down as well, helping four members of my team earn promotions.",
     ],
     bullets: [
       'Led nightly shifts of 30 to 150 associates unloading, sorting, and staging 20,000 to 100,000 packages for driver dispatch.',
       'Coached and promoted 4 associates and shift assistants into higher-level roles.',
       'Owned hard deadlines where every miss meant a customer did not receive a package.',
-      'Increased my sort shift’s productivity by 29% from 42 to 55 units per hour in summer 2020.',
+      'Increased my sort shift’s productivity by 31% from 42 to 55 units per hour in summer 2020.',
       'Maintained 62 UPH against a goal of 58, approximately 7% above target, for the first 18 weeks of 2021.',
     ],
   },

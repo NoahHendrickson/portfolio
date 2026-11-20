@@ -14,7 +14,7 @@ import { CURVED_BODY_SIZE, CURVED_INNER, SHEET_BODY, TEXT_SOFT, curvedInset, she
 /*
   `/work/thinking-states`, hand-built on the curved cards the other project pages run
   (`Curved.tsx`, Nov 9 2026; it was on the ruled sheet until then): the intro, a live
-  field of chips as the hero with "What's in here" on its tab and Tools / Skills as a
+  field of chips as the hero with "What’s in here" on its tab and Tools / Skills as a
   card of its own, then a playground (one chip on a stage beside the project's own
   controls, over every chip by family, each a button that picks it) on a plain card.
   The chips stand on dark stages, the project's
@@ -78,7 +78,7 @@ export default function ThinkingStates() {
             }
             copy={
               <CurvedCopy
-                heading="What's in here"
+                heading="What’s in here"
                 body={[
                   'I wanted a set of variations I could tweak, changing the color, size and shape, and copy straight into other projects.',
                 ]}

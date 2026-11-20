@@ -50,7 +50,7 @@ function Wide({ children }: { children: ReactNode }) {
 type Post = { src: string; alt: string; w: number; h: number }
 const POSTS = {
   smirk: { src: 'post-01-smirk', alt: 'The rail’s smirk face, huge, in lime on hot pink with a violet echo', w: 1080, h: 1080 },
-  pinwheel: { src: 'post-02-pinwheel', alt: 'The mark’s four leaves, huge, spinning out from the centre on sky blue with violet echoes', w: 1080, h: 1080 },
+  pinwheel: { src: 'post-02-pinwheel', alt: 'The mark’s four leaves, huge, spinning out from the center on sky blue with violet echoes', w: 1080, h: 1080 },
   stickers: { src: 'post-03-stickers', alt: 'A four by four sheet of colored tiles, each with a glyph cut in, on purple', w: 1080, h: 1080 },
   joined: { src: 'post-04-joined', alt: 'Orange, magenta and lime shapes joined with concave curves on cream', w: 1080, h: 1080 },
   flood: { src: 'post-05-flood', alt: 'The texture flooding the frame in patches of bright color', w: 1080, h: 1350 },
@@ -583,7 +583,7 @@ export default function BrandGuidelines() {
               <Piece area="rule">
                 <Copy
                   heading="Round the surface, never the pixel"
-                  body="Outer corners round at 24 and inside corners turn concave at 24, so neighbouring surfaces read as one piece. This page is laid out that way. The pixel art inside keeps its hard square edges."
+                  body="Outer corners round at 24 and inside corners turn concave at 24, so neighboring surfaces read as one piece. This page is laid out that way. The pixel art inside keeps its hard square edges."
                 />
               </Piece>
               <Piece area="radius">
