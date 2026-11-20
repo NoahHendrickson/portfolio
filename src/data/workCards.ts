@@ -46,6 +46,12 @@ export type WorkCard = {
    * each; a card without results carries a `blurb` instead.
    */
   feature?: { blurb?: string; results?: string[] }
+  /**
+   * What the project is about, in a few words each (Nov 19 2026): pills over the title in the
+   * home card's hover caption, so a visitor gets a taste before opening it. Not the page's
+   * Tools / Skills.
+   */
+  tags?: string[]
 }
 
 /**
@@ -76,6 +82,7 @@ function zoomed(src: string, alt: string) {
 
 const no3y: WorkCard = {
   href: '/work/no3y-code',
+  tags: ['Design systems', 'Dev & design tooling'],
   title: projects['no3y-code'].title,
   subtitle: 'Agent orchestration tool',
   // Not a Figma export: the page's hero shot (`collage/new-agent.webp`, the
@@ -92,6 +99,7 @@ const no3y: WorkCard = {
 
 const crisp: WorkCard = {
   href: '/work/crisp',
+  tags: ['Creative tools', 'Interaction design'],
   title: projects.crisp.title,
   subtitle: 'Zoom editor for screen recordings',
   art: {
@@ -102,6 +110,7 @@ const crisp: WorkCard = {
 
 const statBuilder: WorkCard = {
   href: '/work/stat-builder',
+  tags: ['Data-heavy UI', 'Community tools'],
   title: projects['stat-builder'].title,
   subtitle: 'Community tool for Destiny 2',
   // Not a Figma export: the optimizer's builds column alone, every card
@@ -120,6 +129,7 @@ const statBuilder: WorkCard = {
 
 const onboarding: WorkCard = {
   href: '/work/invisible/onboarding',
+  tags: ['Onboarding UX', 'Growth', 'A/B testing'],
   title: 'Meridial’s Onboarding Redesign',
   subtitle: 'Research & Product Design',
   art: {
@@ -141,6 +151,7 @@ const onboarding: WorkCard = {
 
 const synapse: WorkCard = {
   href: '/work/invisible/synapse',
+  tags: ['0-to-1 launch', 'AI data tooling'],
   title: 'Launching Synapse',
   subtitle: 'Annotation platform for AI training',
   // The file's card only ever came out at 2x, so it was rebuilt at 4x: the
@@ -156,6 +167,7 @@ const synapse: WorkCard = {
 
 const apply: WorkCard = {
   href: '/work/invisible/apply',
+  tags: ['Marketplace UX', 'Search & discovery'],
   title: 'Meridial’s Explore & Apply',
   subtitle: 'Finding and applying to AI projects',
   art: {
@@ -173,6 +185,7 @@ const apply: WorkCard = {
  */
 const thinkingStates: WorkCard = {
   href: '/work/thinking-states',
+  tags: ['Motion design', 'AI-assisted design'],
   title: 'Thinking States',
   subtitle: 'Fun loading animations, made with Opus',
   art: {
@@ -190,6 +203,7 @@ const thinkingStates: WorkCard = {
  */
 const brand: WorkCard = {
   href: '/work/noey-brand',
+  tags: ['Brand identity', 'Social'],
   title: 'Noey brand',
   subtitle: 'Brand guidelines and social posts',
   art: {
@@ -200,6 +214,7 @@ const brand: WorkCard = {
 
 const nachoBox: WorkCard = {
   href: '/work/nacho-box',
+  tags: ['Packaging', 'Print'],
   title: projects['nacho-box'].title,
   subtitle: 'Packaging and graphic design project',
   art: {
@@ -210,6 +225,7 @@ const nachoBox: WorkCard = {
 
 const howToPc: WorkCard = {
   href: '/work/how-to-pc',
+  tags: ['Infographic', 'Print'],
   title: projects['how-to-pc'].title,
   subtitle: 'Graphic design project',
   art: {
@@ -224,6 +240,7 @@ const howToPc: WorkCard = {
 
 const pixelArt: WorkCard = {
   href: '/work/pixel-art',
+  tags: ['Pixel art', 'Illustration'],
   title: projects['pixel-art'].title,
   subtitle: 'Destiny 2 gear, one pixel at a time',
   art: {

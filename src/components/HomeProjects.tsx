@@ -509,7 +509,7 @@ function ProjectCard({
       href={card.href}
       className="home-project"
       data-ruled={ruled || undefined}
-      aria-label={`${card.title}: ${card.subtitle}`}
+      aria-label={`${card.title}: ${card.subtitle}${card.tags?.length ? ` (${card.tags.join(', ')})` : ''}`}
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -649,6 +649,31 @@ function ProjectCard({
 function Caption({ card, onScrim = false }: { card: WorkCard; onScrim?: boolean }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+      {/* What the project is about (Nov 19 2026), over the title in the hover caption only. */}
+      {onScrim && card.tags && card.tags.length > 0 && (
+        <span aria-hidden style={{ display: 'flex', flexWrap: 'wrap', gap: space.xs, marginBottom: space.sm }}>
+          {card.tags.map((tag) => (
+            <span
+              key={tag}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                height: 22,
+                padding: `0 ${space.sm}`,
+                borderRadius: radius.full,
+                background: `color-mix(in srgb, ${color.text.primary} 10%, transparent)`,
+                color: color.text.secondary,
+                fontSize: 12,
+                lineHeight: '16px',
+                fontWeight: 500,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {tag}
+            </span>
+          ))}
+        </span>
+      )}
       <span style={{ ...type['body-l'], fontWeight: 500, color: color.text.primary }}>{card.title}</span>
       <span
         style={{
