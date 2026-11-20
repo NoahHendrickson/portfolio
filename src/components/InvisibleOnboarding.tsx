@@ -18,6 +18,8 @@ import { isUnlocked } from '../workGate'
   the process's four steps and the key findings stand apart as cards of their own
   under the media they sit beside, and the process is split into two cards, its first half under the
   research board and its second under the journey map it describes.
+  After the design, three copy-only cards (no media yet): the design system,
+  the product copy (over a row of its three principles) and the taxonomy.
 
   The page is the site's like every other, but what it shows takes its
   colour from the product it describes — Meridial's pale-blue panel, white
@@ -205,6 +207,51 @@ export default function InvisibleOnboarding() {
                   />
                 }
               />
+            </Reveal>
+          </div>
+
+          <div id="design-system">
+            <Reveal>
+              <CopyPanel>
+                <CurvedCopy
+                  heading="Owning the design system"
+                  body={[
+                    'I owned Meridial’s design system. I also worked with marketing on the brand, so I knew what it needed to feel like, and the product had to carry it as well as the marketing site did.',
+                    'I built the system on shadcn/ui. Our engineers already knew the components, and the brand came through in how we themed them, so the product and the marketing site read as one thing.',
+                  ]}
+                />
+              </CopyPanel>
+            </Reveal>
+          </div>
+
+          <div id="copy" style={{ display: 'flex', flexDirection: 'column', gap: space.xl }}>
+            <Reveal>
+              <CopyPanel>
+                <CurvedCopy
+                  heading="Writing the product copy"
+                  body={[
+                    'I worked with product marketing on the copy across the flow. Some of the old copy set the wrong expectations, especially around verification, so we went through it screen by screen.',
+                    'We held every line to three things.',
+                  ]}
+                />
+              </CopyPanel>
+            </Reveal>
+            <Reveal>
+              <Principles />
+            </Reveal>
+          </div>
+
+          <div id="taxonomy">
+            <Reveal>
+              <CopyPanel>
+                <CurvedCopy
+                  heading="Taxonomy"
+                  body={[
+                    'I also helped with the product’s taxonomy: the names we use for things. When the same thing goes by different names on different screens, people can’t tell whether it’s the same thing.',
+                    'Agreeing on one set of terms kept our messaging to users clear, in the product and in what marketing sent them.',
+                  ]}
+                />
+              </CopyPanel>
             </Reveal>
           </div>
 
@@ -687,6 +734,58 @@ function PrototypeViewer() {
         </div>
       </div>
     </figure>
+  )
+}
+
+/** A section with no media yet: its copy on a plain card. */
+function CopyPanel({ children }: { children: ReactNode }) {
+  const isMobile = useIsMobile()
+  return (
+    <CurvedPanel style={{ padding: curvedInset(isMobile), display: 'flex', flexDirection: 'column', gap: space.xl }}>
+      {children}
+    </CurvedPanel>
+  )
+}
+
+/** What the product copy was held to, a row of cards under its section (stacked on a phone). */
+function Principles() {
+  const isMobile = useIsMobile()
+  const principles = [
+    {
+      title: 'Welcoming',
+      body: 'People were signing up to work with us. The copy should make them feel invited in, not screened out.',
+    },
+    {
+      title: 'Truthful',
+      body: 'Say what each step asks for and why, so nothing comes out of nowhere.',
+    },
+    {
+      title: 'Compliant',
+      body: 'Verification asks for ID and proof of address, so the copy around it was checked with Legal and Compliance.',
+    },
+  ]
+  return (
+    <ul
+      style={{
+        margin: 0,
+        padding: 0,
+        listStyle: 'none',
+        display: 'grid',
+        gridTemplateColumns: isMobile ? 'minmax(0, 1fr)' : 'repeat(3, minmax(0, 1fr))',
+        gap: isMobile ? space.md : space.xl,
+      }}
+    >
+      {principles.map(({ title, body }) => (
+        <CurvedPanel
+          as="li"
+          key={title}
+          style={{ padding: curvedInset(isMobile), display: 'flex', flexDirection: 'column', gap: space.md }}
+        >
+          <span style={{ ...SHEET_HEADING, fontSize: '18px', color: MERIDIAL.accent }}>{title}</span>
+          <span style={{ ...SHEET_BODY, fontSize: CURVED_BODY_SIZE, color: TEXT_SOFT }}>{body}</span>
+        </CurvedPanel>
+      ))}
+    </ul>
   )
 }
 
