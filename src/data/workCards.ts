@@ -90,6 +90,16 @@ const no3y: WorkCard = {
   feature: { blurb: projects['no3y-code'].tagline },
 }
 
+const cinnabars: WorkCard = {
+  href: '/work/cinnabars',
+  title: 'Cinnabars',
+  subtitle: 'iOS workout tracker',
+  art: {
+    src: '/work/cinnabars/card-thumbnail.webp',
+    alt: 'Cinnabars: the Today screen in an iPhone on electric blue, showing logged muscle-group pills and days since each group was last trained',
+  },
+}
+
 const crisp: WorkCard = {
   href: '/work/crisp',
   title: projects.crisp.title,
@@ -242,7 +252,7 @@ export type WorkFilter = 'all' | 'fun' | 'career' | 'graphic'
 
 const SECTIONS: { id: Exclude<WorkFilter, 'all'>; label: string; cards: WorkCard[] }[] = [
   { id: 'career', label: 'Case studies', cards: [onboarding, synapse, apply] },
-  { id: 'fun', label: 'Personal projects', cards: [crisp, no3y, statBuilder, thinkingStates] },
+  { id: 'fun', label: 'Personal projects', cards: [cinnabars, crisp, no3y, statBuilder, thinkingStates] },
   { id: 'graphic', label: 'Graphic design', cards: [brand, pixelArt, nachoBox, howToPc] },
 ]
 

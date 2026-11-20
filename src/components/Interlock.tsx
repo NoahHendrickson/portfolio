@@ -38,6 +38,10 @@ export function Interlock({
   rows,
   gap = 16,
   join = true,
+  fill = 'var(--color-bg-primary)',
+  theme: themeOverride,
+  radius = OUTER,
+  bareRadius = POST_RADIUS,
   children,
   style,
 }: {
@@ -48,12 +52,21 @@ export function Interlock({
   gap?: number
   /** Merge neighbouring pieces into one surface; off, each piece is its own rounded card. */
   join?: boolean
+  /** The surface's paint, where it isn't the other theme's page colour (Cinnabars' blue). */
+  fill?: string
+  /** The theme the surface's copy reads in, where `fill` sets a colour of its own. */
+  theme?: 'light' | 'dark'
+  /** Every corner's curve, outside and in; the site's 24 unless a page wants it larger. */
+  radius?: number
+  /** A bare piece's own corner, which the notch round it stays concentric with. */
+  bareRadius?: number
   children: ReactNode
   style?: CSSProperties
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const [shape, setShape] = useState({ d: '', w: 0, h: 0 })
-  const theme = useSurfaceTheme()
+  const surfaceTheme = useSurfaceTheme()
+  const theme = themeOverride ?? surfaceTheme
 
   useLayoutEffect(() => {
     const root = ref.current
@@ -74,6 +87,8 @@ export function Interlock({
         const top = piece.offsetTop
         const right = left + piece.offsetWidth
         const bottom = top + piece.offsetHeight
+        // Off the surface altogether: copy sitting in a cove the surface already leaves.
+        if (piece.dataset.off !== undefined) continue
         if (piece.dataset.bare !== undefined) {
           // A post keeps a whole gap clear of the surface, the same as from its neighbours.
           if (join) carve.push({ x: left - gap, y: top - gap, w: right - left + gap * 2, h: bottom - top + gap * 2 })
@@ -87,15 +102,15 @@ export function Interlock({
         boxes.push({ x: round(x0), y: round(y0), w: round(x1) - round(x0), h: round(y1) - round(y0) })
       }
       // A notch round a post curves concentric with the post's own corner: its 16 plus the gap.
-      const notch = POST_RADIUS + gap
+      const notch = bareRadius + gap
       const corners = carve.flatMap((c) => [
         [c.x, c.y],
         [c.x + c.w, c.y],
         [c.x, c.y + c.h],
         [c.x + c.w, c.y + c.h],
       ])
-      const concave = (x: number, y: number) => (corners.some(([cx, cy]) => Math.abs(cx - x) < 1 && Math.abs(cy - y) < 1) ? notch : OUTER)
-      const d = join ? unionPath(boxes, OUTER, concave, carve) : boxes.map((b) => unionPath([b], OUTER)).join('')
+      const concave = (x: number, y: number) => (corners.some(([cx, cy]) => Math.abs(cx - x) < 1 && Math.abs(cy - y) < 1) ? notch : radius)
+      const d = join ? unionPath(boxes, radius, concave, carve) : boxes.map((b) => unionPath([b], radius)).join('')
       setShape((prev) => (prev.d === d && prev.w === w && prev.h === h ? prev : { d, w, h }))
     }
     measure()
@@ -103,7 +118,7 @@ export function Interlock({
     observer.observe(root)
     for (const piece of root.querySelectorAll(':scope > [data-piece]')) observer.observe(piece)
     return () => observer.disconnect()
-  }, [join, gap, areas])
+  }, [join, gap, areas, radius, bareRadius])
 
   return (
     <div
@@ -128,7 +143,7 @@ export function Interlock({
         viewBox={`0 0 ${shape.w || 1} ${shape.h || 1}`}
         style={{ position: 'absolute', inset: 0, overflow: 'visible', pointerEvents: 'none' }}
       >
-        <path d={shape.d} fill="var(--color-bg-primary)" fillRule="nonzero" />
+        <path d={shape.d} fill={fill} fillRule="nonzero" />
       </svg>
       {children}
     </div>
@@ -139,12 +154,14 @@ export function Interlock({
 const round = (v: number) => Math.round(v * 2) / 2
 
 /**
- * One cell of an `Interlock`: on the surface (padded, unless `flush`), or `bare`,
- * standing on the page with the surface wrapped round it.
+ * One cell of an `Interlock`: on the surface (padded, unless `flush`), `bare`,
+ * standing on the page with the surface wrapped round it, or `off`, on the page in
+ * room the surface leaves anyway, without cutting into it.
  */
 export function Piece({
   area,
   bare = false,
+  off = false,
   flush = false,
   pad = 32,
   children,
@@ -152,6 +169,7 @@ export function Piece({
 }: {
   area: string
   bare?: boolean
+  off?: boolean
   flush?: boolean
   pad?: number
   children?: ReactNode
@@ -162,13 +180,14 @@ export function Piece({
     <div
       data-piece
       data-bare={bare || undefined}
-      data-theme={bare ? pageTheme : undefined}
+      data-off={off || undefined}
+      data-theme={bare || off ? pageTheme : undefined}
       style={{
         gridArea: area,
         position: 'relative',
         minWidth: 0,
         boxSizing: 'border-box',
-        padding: bare || flush ? 0 : pad,
+        padding: bare || off || flush ? 0 : pad,
         ...style,
       }}
     >

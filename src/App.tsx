@@ -29,6 +29,7 @@ import ProjectLanding from './components/ProjectLanding'
 import ProjectStory from './components/ProjectStory'
 import ThinkingStates from './components/ThinkingStates'
 import BrandGuidelines from './components/BrandGuidelines'
+import Cinnabars from './components/Cinnabars'
 import { projects } from './data/projects'
 import { useHomePrototype } from './hooks/useHomePrototype'
 import { useHomeScrollMemory } from './hooks/useHomeScrollMemory'
@@ -350,6 +351,11 @@ export default function App() {
   // The brand guidelines, laid out as interlocking surfaces; no `projects` entry either.
   if (route === '/work/noey-brand') {
     return <BrandGuidelines />
+  }
+
+  // The iOS workout log, hand-built round its phone screenshots; no `projects` entry.
+  if (route === '/work/cinnabars') {
+    return <Cinnabars />
   }
 
   // Routes are pathnames like '/work/no3y-code'.
