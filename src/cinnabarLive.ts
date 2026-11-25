@@ -5,14 +5,16 @@
  * URL. The Studio recompiles both Cinnabar families after every edit and announces each version over
  * server-sent events: Cinnabar Interface (the UI face no3y Code ships) and Cinnabar Sans (the same
  * letters with thicker strokes). Each time, this fetches the chosen family's upright and italic files
- * and registers them under the site's sans family ('Geist Variable'). Faces added through
- * document.fonts come after the stylesheet's, so they win wherever the site asks for Geist, with no
- * change to the site's CSS. Without the flag, and in production builds, this does nothing.
+ * and registers them under the site's typeface ('Cinnabar Interface'). Faces added through
+ * document.fonts come after the stylesheet's, so they replace the bundled files with the Studio's
+ * latest, with no change to the site's CSS. Without the flag, and in production builds, this does
+ * nothing.
  *
- * FontSwitch (components/FontSwitch.tsx) picks Cinnabar Interface, Cinnabar Sans or the site's own
- * Geist, for comparison; the choice is remembered in this browser.
+ * FontSwitch (components/FontSwitch.tsx) picks Cinnabar Interface, Cinnabar Sans or Geist (the
+ * site's previous typeface, still loaded as the fallback), for comparison; the choice is remembered
+ * in this browser.
  */
-const FAMILY = 'Geist Variable'
+const FAMILY = 'Cinnabar Interface'
 const STORAGE_KEY = 'cinnabar-live:font'
 const STYLES = ['upright', 'italic'] as const
 
@@ -40,13 +42,24 @@ function readStored(): LiveFont {
   }
 }
 
-/** Only the chosen family's faces are in document.fonts; Geist is what's left without them. */
+/** Geist for comparison: the site's text set in its fallback instead of Cinnabar. */
+let geistStyle: HTMLStyleElement | null = null
+
+/** Only the chosen family's faces are in document.fonts; for Geist, none are, and the text is set in it. */
 function applyFaces(): void {
   for (const family of ['interface', 'sans'] as const) {
     for (const face of faces[family]) {
       if (family === current) document.fonts.add(face)
       else document.fonts.delete(face)
     }
+  }
+  if (current === 'geist' && !geistStyle) {
+    geistStyle = document.createElement('style')
+    geistStyle.textContent = "html, body { font-family: 'Geist Variable', sans-serif !important; }"
+    document.head.appendChild(geistStyle)
+  } else if (current !== 'geist' && geistStyle) {
+    geistStyle.remove()
+    geistStyle = null
   }
 }
 
@@ -100,6 +113,7 @@ export function subscribeLiveFont(listener: () => void): () => void {
 
 export function startCinnabarLive(): void {
   if (!cinnabarLiveEnabled || typeof EventSource === 'undefined') return
+  applyFaces() // a remembered Geist choice applies before the first Studio version arrives
 
   // EventSource retries a dropped connection on its own, but gives up for good on an HTTP error
   // (for example the Studio not running yet), so reconnect from scratch then.

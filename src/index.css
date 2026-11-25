@@ -1,5 +1,24 @@
 @import "tailwindcss";
+/* Geist stays loaded: it's the fallback behind Cinnabar Interface, and the D2 Conflux and no3y Code
+   replicas set their own Geist on purpose. */
 @import "@fontsource-variable/geist";
+
+/* Cinnabar Interface, the site's typeface (Noah's own, OFL: ./assets/fonts/cinnabar-interface/OFL.txt).
+   One variable file per style, each spanning 100–900, so no weight or italic is ever synthesized. */
+@font-face {
+  font-family: 'Cinnabar Interface';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('./assets/fonts/cinnabar-interface/CinnabarInterface-Variable.woff2') format('woff2-variations');
+}
+@font-face {
+  font-family: 'Cinnabar Interface';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('./assets/fonts/cinnabar-interface/CinnabarInterface-Italic-Variable.woff2') format('woff2-variations');
+}
 
 /* Design tokens — mirrors the "Mini Design System" page of the July 2026 Figma
    file. Keep the two in sync: variable names here match the `codeSyntax` on each
@@ -120,7 +139,7 @@ html, body {
   padding: 0;
   background-color: var(--color-bg-primary);
   color: var(--color-text-primary);
-  font-family: 'Geist Variable', sans-serif;
+  font-family: 'Cinnabar Interface', 'Geist Variable', sans-serif;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
