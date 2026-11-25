@@ -22,7 +22,7 @@ createRoot(document.getElementById('root')!).render(
       <ThemeToggle />
       {/* Hi's A / B prototype switch, on the dev server only. */}
       {import.meta.env.DEV && <PrototypeToggle />}
-      {/* Live Cinnabar Interface / Cinnabar Sans / Geist, on a dev server started with VITE_CINNABAR_LIVE only. */}
+      {/* Live Cinnabar Interface / Geist, on a dev server started with VITE_CINNABAR_LIVE only. */}
       {cinnabarLiveEnabled && <FontSwitch />}
     </IconContext.Provider>
     <Analytics />

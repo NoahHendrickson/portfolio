@@ -1,24 +1,23 @@
 @import "tailwindcss";
-/* Geist stays loaded: it's the fallback behind Cinnabar Sans, and the D2 Conflux and no3y Code
+/* Geist stays loaded: it's the fallback behind Cinnabar Interface, and the D2 Conflux and no3y Code
    replicas set their own Geist on purpose. */
 @import "@fontsource-variable/geist";
 
-/* Cinnabar Sans, the site's typeface (Noah's own, OFL: ./assets/fonts/cinnabar-sans/OFL.txt): the same
-   letters as Cinnabar Interface, the UI face no3y Code uses, set a little tighter for text on the web.
-   One variable file per style, each spanning 100–900, so no weight or italic is ever synthesized. */
+/* Cinnabar Interface, the site's typeface (Noah's own, OFL: ./assets/fonts/cinnabar-interface/OFL.txt),
+   the same face no3y Code uses. One variable file per style, each spanning 100–900, so no weight or italic is ever synthesized. */
 @font-face {
-  font-family: 'Cinnabar Sans';
+  font-family: 'Cinnabar Interface';
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
-  src: url('./assets/fonts/cinnabar-sans/CinnabarSans-Variable.woff2') format('woff2-variations');
+  src: url('./assets/fonts/cinnabar-interface/CinnabarInterface-Variable.woff2') format('woff2-variations');
 }
 @font-face {
-  font-family: 'Cinnabar Sans';
+  font-family: 'Cinnabar Interface';
   font-style: italic;
   font-weight: 100 900;
   font-display: swap;
-  src: url('./assets/fonts/cinnabar-sans/CinnabarSans-Italic-Variable.woff2') format('woff2-variations');
+  src: url('./assets/fonts/cinnabar-interface/CinnabarInterface-Italic-Variable.woff2') format('woff2-variations');
 }
 
 /* Design tokens — mirrors the "Mini Design System" page of the July 2026 Figma
@@ -140,7 +139,7 @@ html, body {
   padding: 0;
   background-color: var(--color-bg-primary);
   color: var(--color-text-primary);
-  font-family: 'Cinnabar Sans', 'Geist Variable', sans-serif;
+  font-family: 'Cinnabar Interface', 'Geist Variable', sans-serif;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

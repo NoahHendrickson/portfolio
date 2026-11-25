@@ -6,12 +6,10 @@ import { pixelPath } from '../pixelFaces'
 import { getLiveFont, setLiveFont, subscribeLiveFont, type LiveFont } from '../cinnabarLive'
 
 const I = ['XXX', '.X.', '.X.', '.X.', '.X.', '.X.', 'XXX']
-const S = ['.XXXX', 'X....', 'X....', '.XXX.', '....X', '....X', 'XXXX.']
 const G = ['.XXX.', 'X...X', 'X....', 'X.XXX', 'X...X', 'X...X', '.XXX.']
-/** Top to bottom: Cinnabar Interface, Cinnabar Sans, Geist (the site's previous typeface). */
+/** Top to bottom: Cinnabar Interface, Geist (the site's previous typeface). */
 const OPTIONS: { font: LiveFont; rows: string[]; label: string }[] = [
   { font: 'interface', rows: I, label: 'Cinnabar Interface (live)' },
-  { font: 'sans', rows: S, label: 'Cinnabar Sans (live)' },
   { font: 'geist', rows: G, label: 'Geist (the previous site font)' },
 ]
 
@@ -44,8 +42,8 @@ function Letter({ rows, active }: { rows: string[]; active: boolean }) {
 }
 
 /**
- * Sets the site's text in Cinnabar Studio's live Cinnabar Interface (I) or Cinnabar Sans (S), or in
- * Geist (G), the site's previous typeface, for comparison (`cinnabarLive.ts`). Each segment picks its font. Drawn like
+ * Sets the site's text in Cinnabar Studio's live Cinnabar Interface (I), or in Geist (G), the site's
+ * previous typeface, for comparison (`cinnabarLive.ts`). Each segment picks its font. Drawn like
  * the theme and prototype switches, and mounted only on a dev server started with
  * VITE_CINNABAR_LIVE, so it never ships. Desktop only.
  */

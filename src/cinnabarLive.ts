@@ -2,23 +2,21 @@
  * Dev only: preview the site in Cinnabar, live from Cinnabar Studio.
  *
  * Start the dev server with VITE_CINNABAR_LIVE=1 (the Studio at http://127.0.0.1:8765) or a Studio
- * URL. The Studio recompiles both Cinnabar families after every edit and announces each version over
- * server-sent events: Cinnabar Interface (the UI face no3y Code ships) and Cinnabar Sans (the same
- * letters set tighter, the site's typeface). Each time, this fetches the chosen family's upright and italic files
- * and registers them under the site's typeface ('Cinnabar Sans'). Faces added through
+ * URL. The Studio recompiles Cinnabar Interface (the site's typeface, and the UI face no3y Code
+ * ships) after every edit and announces each version over server-sent events. Each time, this fetches
+ * the upright and italic files and registers them under the site's typeface ('Cinnabar Interface'). Faces added through
  * document.fonts come after the stylesheet's, so they replace the bundled files with the Studio's
  * latest, with no change to the site's CSS. Without the flag, and in production builds, this does
  * nothing.
  *
- * FontSwitch (components/FontSwitch.tsx) picks Cinnabar Interface, Cinnabar Sans or Geist (the
- * site's previous typeface, still loaded as the fallback), for comparison; the choice is remembered
- * in this browser.
+ * FontSwitch (components/FontSwitch.tsx) picks Cinnabar Interface or Geist (the site's previous
+ * typeface, still loaded as the fallback), for comparison; the choice is remembered in this browser.
  */
-const FAMILY = 'Cinnabar Sans'
+const FAMILY = 'Cinnabar Interface'
 const STORAGE_KEY = 'cinnabar-live:font'
 const STYLES = ['upright', 'italic'] as const
 
-export type LiveFont = 'interface' | 'sans' | 'geist'
+export type LiveFont = 'interface' | 'geist'
 type CinnabarFamily = Exclude<LiveFont, 'geist'>
 
 /** True when this dev server was started with VITE_CINNABAR_LIVE. */
@@ -29,16 +27,16 @@ const studio = !flag || flag === '1' || flag === 'true' ? 'http://127.0.0.1:8765
 
 let current: LiveFont = readStored()
 let latest = 0 // newest version the Studio has announced
-const shown: Record<CinnabarFamily, number> = { interface: 0, sans: 0 }
-const faces: Record<CinnabarFamily, FontFace[]> = { interface: [], sans: [] }
+const shown: Record<CinnabarFamily, number> = { interface: 0 }
+const faces: Record<CinnabarFamily, FontFace[]> = { interface: [] }
 const listeners = new Set<() => void>()
 
 function readStored(): LiveFont {
   try {
     const v = localStorage.getItem(STORAGE_KEY)
-    return v === 'interface' || v === 'geist' ? v : 'sans'
+    return v === 'geist' ? v : 'interface'
   } catch {
-    return 'sans'
+    return 'interface'
   }
 }
 
@@ -47,7 +45,7 @@ let geistStyle: HTMLStyleElement | null = null
 
 /** Only the chosen family's faces are in document.fonts; for Geist, none are, and the text is set in it. */
 function applyFaces(): void {
-  for (const family of ['interface', 'sans'] as const) {
+  for (const family of ['interface'] as const) {
     for (const face of faces[family]) {
       if (family === current) document.fonts.add(face)
       else document.fonts.delete(face)
