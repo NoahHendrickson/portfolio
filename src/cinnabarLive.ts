@@ -4,8 +4,8 @@
  * Start the dev server with VITE_CINNABAR_LIVE=1 (the Studio at http://127.0.0.1:8765) or a Studio
  * URL. The Studio recompiles both Cinnabar families after every edit and announces each version over
  * server-sent events: Cinnabar Interface (the UI face no3y Code ships) and Cinnabar Sans (the same
- * letters with thicker strokes). Each time, this fetches the chosen family's upright and italic files
- * and registers them under the site's typeface ('Cinnabar Interface'). Faces added through
+ * letters set tighter, the site's typeface). Each time, this fetches the chosen family's upright and italic files
+ * and registers them under the site's typeface ('Cinnabar Sans'). Faces added through
  * document.fonts come after the stylesheet's, so they replace the bundled files with the Studio's
  * latest, with no change to the site's CSS. Without the flag, and in production builds, this does
  * nothing.
@@ -14,7 +14,7 @@
  * site's previous typeface, still loaded as the fallback), for comparison; the choice is remembered
  * in this browser.
  */
-const FAMILY = 'Cinnabar Interface'
+const FAMILY = 'Cinnabar Sans'
 const STORAGE_KEY = 'cinnabar-live:font'
 const STYLES = ['upright', 'italic'] as const
 

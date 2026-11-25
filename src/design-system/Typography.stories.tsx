@@ -40,7 +40,7 @@ export const Typography: StoryObj = {
   render: () => (
     <Page
       title="Typography"
-      lede="Cinnabar Interface (Geist Variable behind it as the fallback), set globally on body. Display/XL is fluid because it drives the hero; every other step is fixed."
+      lede="Cinnabar Sans (Geist Variable behind it as the fallback), set globally on body. Display/XL is fluid because it drives the hero; every other step is fixed."
     >
       <Section title="The ramp">
         <div style={{ display: 'flex', flexDirection: 'column', gap: space.xl }}>
