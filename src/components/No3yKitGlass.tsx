@@ -1,0 +1,198 @@
+import { useMemo, useRef, useState, type CSSProperties, type HTMLAttributes, type ReactNode } from 'react'
+import { KIT_LIVE_COMPOSER, KIT_LIVE_LIST_CLASS, KIT_LIVE_PETALS, KIT_LIVE_PICKER, KIT_LIVE_THREADS, type KitLiveItem } from '../data/no3yKitLive'
+import './kitLive.css'
+
+/*
+  The kit grid's live pieces (Nov 26 2026): the new agent composer, the Petals grid and the sidebar's
+  compact thread cards, each exact to the app. Their markup and every element's computed style are
+  read off the running app (the mock studio's `kit-live` scene, Flat Glass, custom 25984b41b7) at rest,
+  hovered, open and focused, and rebuilt as `kitLive.css` and `data/no3yKitLive.ts` by
+  `~/.t3-fork/scratch/no3y-capture/design-system/kit-live-dump/` (dump-sidebar, fixup, dump-controls,
+  blobs, build). Re-dump and rebuild rather than hand-edit. The type is the app's Cinnabar Sans.
+  Only the glass behind the Petals and the threads is the page's (`SidebarGlass`): macOS draws the
+  sidebar's material, and a browser can't capture it.
+*/
+
+/**
+ * The new agent composer, exact: the app's own form. Its editor takes typing (the placeholder goes
+ * once there's text); Enter, the buttons and the chips do nothing, and nothing submits. Its glass is
+ * the page's (`[data-kit-composer]` in index.css): macOS draws it in the app, so the DOM has none.
+ */
+export function KitGlassComposer() {
+  const ref = useRef<HTMLDivElement>(null)
+  return (
+    <div
+      ref={ref}
+      data-kit-composer=""
+      style={{ maxWidth: '100%', textAlign: 'left' }}
+      onSubmit={(event) => event.preventDefault()}
+      onClick={(event) => {
+        if ((event.target as Element).closest('a, button')) event.preventDefault()
+      }}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' && (event.target as Element).matches('[contenteditable]')) event.preventDefault()
+      }}
+      onInput={() => {
+        const root = ref.current?.querySelector('[data-kl]')
+        root?.toggleAttribute('data-typed', Boolean(root.querySelector('[contenteditable]')?.textContent))
+      }}
+      dangerouslySetInnerHTML={{ __html: KIT_LIVE_COMPOSER }}
+    />
+  )
+}
+
+/*
+ * The Petals panel in the sidebar's Flat Glass style, live (Nov 26 2026). Read off the app's real
+ * sidebar (a native capture, 1x): a flat dark core, rgb(42 35 37); along each outer edge it lifts
+ * 20 to 30 levels, tinted by what lies beyond that edge (purple under a purple top, warm along a
+ * warm foot), fading out over about 100px; and a 1px rim some 20 levels brighter. The real material
+ * takes that colour from the desktop picture, so it can't be captured over this wallpaper; here the
+ * wallpaper behind the panel is blurred and saturated, and the dark core lies over it at 95% in the
+ * middle easing to about 75% at the edges (`SIDEBAR_CORE_MASK`, four edge fades multiplied), so each
+ * edge glows in the colour of the wallpaper on that side. Tried first the same day: two flat
+ * backdrop-blur tints, the real sidebar material (nearly solid here) and the app's real card glass
+ * (`petal-card-capture.mjs`, even all over); the user wanted the sidebar's edge glow.
+ */
+const SIDEBAR_BACKDROP = 'blur(30px) saturate(1.6)'
+const SIDEBAR_CORE = 'rgba(42, 35, 37, 0.95)'
+const edgeFade = (to: string) =>
+  `linear-gradient(${to}, rgb(0 0 0 / 0.78), rgb(0 0 0 / 0.84) 12px, rgb(0 0 0 / 0.905) 30px, rgb(0 0 0 / 0.96) 60px, #000 100px)`
+const SIDEBAR_CORE_MASK = ['to right', 'to left', 'to bottom', 'to top'].map(edgeFade).join(', ')
+
+/**
+ * A surface in the Flat Glass sidebar's style (above): put it over any picture and its edges glow
+ * in that picture's colours. Reuse this for any piece that should read as the sidebar's glass
+ * rather than tuning a new blur; `style` sets its size, padding, layout and corners.
+ */
+export function SidebarGlass({ children, style, ...rest }: { children?: ReactNode; style?: CSSProperties } & Omit<HTMLAttributes<HTMLDivElement>, 'style'>) {
+  return (
+    <div
+      {...rest}
+      style={{
+        position: 'relative',
+        isolation: 'isolate',
+        borderRadius: 16,
+        backdropFilter: SIDEBAR_BACKDROP,
+        WebkitBackdropFilter: SIDEBAR_BACKDROP,
+        // The rim: a 1px edge about 20 levels over the core, as the sidebar's.
+        boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.1)',
+        ...style,
+      }}
+    >
+      <span
+        aria-hidden
+        style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: -1,
+          borderRadius: 'inherit',
+          background: SIDEBAR_CORE,
+          maskImage: SIDEBAR_CORE_MASK,
+          WebkitMaskImage: SIDEBAR_CORE_MASK,
+          maskComposite: 'intersect',
+          WebkitMaskComposite: 'source-in',
+          pointerEvents: 'none',
+        }}
+      />
+      {children}
+    </div>
+  )
+}
+
+/**
+ * A list of the app's own items, exact: each item's markup and every element's computed style read off
+ * the running app (`kitLive.css`, `data/no3yKitLive.ts`, generated by the kit-live-dump scripts), its
+ * hover and open states as the app draws them. A click opens an item (the app would navigate); links
+ * and the cards' own buttons do nothing.
+ */
+function KitLiveList({ items, listClass, initial, label }: { items: readonly KitLiveItem[]; listClass: string; initial: number; label: string }) {
+  const [active, setActive] = useState(initial)
+  const html = useMemo(
+    () =>
+      items
+        .map((item, i) => {
+          if (i !== active) return item.html
+          return (item.activeHtml ?? item.html).replace(/^<(\w+) /, '<$1 data-active="" ')
+        })
+        .join(''),
+    [items, active],
+  )
+  const open = (target: EventTarget) => {
+    const ns = (target as Element).closest('[data-kl]')?.getAttribute('data-kl')
+    if (ns) setActive(Number.parseInt(ns.slice(1), 10))
+  }
+  return (
+    <ul
+      aria-label={label}
+      className={listClass}
+      style={{ margin: 0, padding: 0, textAlign: 'left' }}
+      onClick={(event) => {
+        if ((event.target as Element).closest('a, button')) event.preventDefault()
+        else open(event.target)
+      }}
+      onKeyDown={(event) => {
+        if ((event.key === 'Enter' || event.key === ' ') && (event.target as Element).matches('[role=button]')) {
+          event.preventDefault()
+          open(event.target)
+        }
+      }}
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  )
+}
+
+/** The sidebar's inset round its lists: the app's lists are 254 wide in its 270 sidebar. */
+const SIDEBAR_INSET = '16px 8px'
+
+/** The Petals' glass runs much larger than the sidebar's inset (the user's ask, Nov 26 2026), so the
+    grid sits in a roomy panel whose edges glow well clear of the tiles; tighter at the sides since the
+    tiles widened (`[data-kit-petals]` in index.css, Nov 27 2026). */
+const PETALS_INSET = '64px 32px'
+
+/**
+ * The Petals grid, exact (Nov 26 2026): the app's own tiles (Flake hunter, Release scout, Issue triage,
+ * Dependabot), read off it in Flat Glass, on the sidebar-style glass (above).
+ */
+export function KitGlassPetals() {
+  return (
+    <SidebarGlass data-kit-petals="" style={{ padding: PETALS_INSET }}>
+      <KitLiveList items={KIT_LIVE_PETALS} listClass={KIT_LIVE_LIST_CLASS.petal} initial={-1} label="Petals" />
+    </SidebarGlass>
+  )
+}
+
+/**
+ * The sidebar's compact thread cards, exact (Nov 26 2026): the app's own cards, one thread per project,
+ * the checkout run open as the app had it, on the sidebar-style glass (above).
+ */
+export function KitGlassThreads() {
+  const open = KIT_LIVE_THREADS.findIndex((item) => item.label.startsWith('Migrate checkout'))
+  return (
+    <SidebarGlass style={{ padding: SIDEBAR_INSET }}>
+      <KitLiveList items={KIT_LIVE_THREADS} listClass={KIT_LIVE_LIST_CLASS.thread} initial={open} label="Threads" />
+    </SidebarGlass>
+  )
+}
+
+/**
+ * The new agent composer's project selector, exact (Nov 26 2026): the app's own popup (search, sort,
+ * the projects with their pins, Add a project), its rows hovered as the app draws them. The app leaves
+ * the popup's fill to a native glass card, so it sits on the sidebar-style glass (above) at its own
+ * 12 corners. Nothing is picked; the search field takes typing but doesn't filter. Its Add a project
+ * row is adjusted on the page only (`[data-kit-picker]` in index.css): taller, more space after the
+ * icon, the add-folder icon larger.
+ */
+export function KitGlassPicker() {
+  return (
+    <SidebarGlass style={{ borderRadius: 12 }}>
+      <div
+        data-kit-picker=""
+        style={{ textAlign: 'left' }}
+        onClick={(event) => {
+          if ((event.target as Element).closest('a, button')) event.preventDefault()
+        }}
+        dangerouslySetInnerHTML={{ __html: KIT_LIVE_PICKER }}
+      />
+    </SidebarGlass>
+  )
+}

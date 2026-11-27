@@ -29,6 +29,7 @@ import ProjectLanding from './components/ProjectLanding'
 import ProjectStory from './components/ProjectStory'
 import ThinkingStates from './components/ThinkingStates'
 import BrandGuidelines from './components/BrandGuidelines'
+import CinnabarSans from './components/CinnabarSans'
 import { projects } from './data/projects'
 import { useHomePrototype } from './hooks/useHomePrototype'
 import { useHomeScrollMemory } from './hooks/useHomeScrollMemory'
@@ -350,6 +351,11 @@ export default function App() {
   // The brand guidelines, laid out as interlocking surfaces; no `projects` entry either.
   if (route === '/work/noey-brand') {
     return <BrandGuidelines />
+  }
+
+  // The typeface and its Studio, on the curved cards; no `projects` entry.
+  if (route === '/work/cinnabar-sans') {
+    return <CinnabarSans />
   }
 
   // Routes are pathnames like '/work/no3y-code'.

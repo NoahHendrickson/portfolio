@@ -120,9 +120,11 @@ export const KIT_STATS = [
 ] as const
 
 export const STORYBOOK_SHOT = {
-  src: `${DS}/storybook-subagent.webp`,
-  alt: 'Storybook open on Fork / Subagent card / Statuses: the fork’s stories in the sidebar, the card in every status in the canvas, and its props in the Controls panel',
-  aspect: '2880 / 1766',
+  // Nov 26 2026: Petal digest › Pull request states, off custom a4881c2dce (the controls panel hidden). It was
+  // Composer cards › Stacked (`storybook-composer-cards.webp`) until then.
+  src: `${DS}/storybook-petal-digest.webp`,
+  alt: 'Storybook open on Fork / Petal digest / Pull request states in Flat Glass: the fork’s stories in the sidebar, and in the canvas a Petal’s ask for each pull request state, open (rework it or reply), draft (mark it ready), merged (delete the branch and worktree) and closed (open it again)',
+  aspect: '2880 / 1800',
 }
 
 export const FIGMA_SUBAGENT = {
@@ -132,12 +134,13 @@ export const FIGMA_SUBAGENT = {
 }
 
 /** The Code Connect template behind the Subagent card (apps/fork-storybook/code-connect). */
-export const CODE_CONNECT_SNIPPET = `import { ForkSubagentGroup } from "~/custom/ForkSubagentGroup";
+/** What Dev Mode shows for the kit's PR status chip (Code Connect's StatusChip.figma.ts). */
+export const CODE_CONNECT_SNIPPET = `import { ComposerPullRequestChip } from "~/custom/ComposerPullRequestChip";
 
-<ForkSubagentGroup
-  row={row}
-  environmentId={environmentId}
-  onOpenThread={onOpenThread}
+<ComposerPullRequestChip
+  threadRef={threadRef}
+  branch={branch}
+  cwd={cwd}
 />`
 
 /** One of the kit's component frames, whole, as it sits on its page in Figma (Dark Neutral). */

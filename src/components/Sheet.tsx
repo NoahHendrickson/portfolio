@@ -95,9 +95,12 @@ export function SheetIntro({
   inset,
   bodySize = '16px',
   iconSize = 36,
+  lockup,
   children,
   after,
 }: {
+  /** A logo lockup in the title's place; the title stays as a heading only screen readers get. */
+  lockup?: { light: string; dark: string; aspect: number }
   /** The side padding, where it isn't the top and bottom's. */
   inset?: number
   /** The helper and description's size. */
@@ -125,12 +128,30 @@ export function SheetIntro({
       }}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: space.md }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: space.md }}>
-          {icon && <img src={icon} alt="" width={iconSize} height={iconSize} style={{ display: 'block', flexShrink: 0 }} />}
-          <h1 style={{ margin: 0, fontSize: '28px', fontWeight: 500, lineHeight: LEADING, textWrap: 'balance' }}>
-            {title}
-          </h1>
-        </div>
+        {lockup ? (
+          <div style={{ paddingBottom: space.sm }}>
+            <h1 className="sr-only">{title}</h1>
+            {(['light', 'dark'] as const).map((tone) => (
+              <img
+                key={tone}
+                className={`sheet-lockup-${tone}`}
+                src={lockup[tone]}
+                alt=""
+                width={Math.round((isMobile ? 44 : 64) * lockup.aspect)}
+                height={isMobile ? 44 : 64}
+                fetchPriority="high"
+                style={{ height: isMobile ? 44 : 64, width: 'auto', maxWidth: '100%' }}
+              />
+            ))}
+          </div>
+        ) : (
+          <div style={{ display: 'flex', alignItems: 'center', gap: space.md }}>
+            {icon && <img src={icon} alt="" width={iconSize} height={iconSize} style={{ display: 'block', flexShrink: 0 }} />}
+            <h1 style={{ margin: 0, fontSize: '28px', fontWeight: 500, lineHeight: LEADING, textWrap: 'balance' }}>
+              {title}
+            </h1>
+          </div>
+        )}
         {/* The body copy's 16, like the description (Nov 4 2026; the frame's 20 read too big). */}
         {entries.length > 0 && (
           <p style={{ margin: 0, fontSize: bodySize, lineHeight: LEADING, color: TEXT_SOFT }}>

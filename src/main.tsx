@@ -8,8 +8,11 @@ import ThemeToggle from './components/ThemeToggle'
 import PrototypeToggle from './components/PrototypeToggle'
 import { ICON_DEFAULTS } from './design-system/icons'
 import { redirectHashRoute } from './navigation'
+import { startCinnabarLive } from './cinnabarLive'
+import FontSwitch from './components/FontSwitch'
 
 redirectHashRoute()
+startCinnabarLive()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -19,6 +22,9 @@ createRoot(document.getElementById('root')!).render(
       <ThemeToggle />
       {/* Hi's A / B prototype switch, on the dev server only. */}
       {import.meta.env.DEV && <PrototypeToggle />}
+      {/* Cinnabar Interface / Geist over the A / B switch, on the dev server only (live from the Studio
+          when it was started with VITE_CINNABAR_LIVE). */}
+      {import.meta.env.DEV && <FontSwitch />}
     </IconContext.Provider>
     <Analytics />
   </StrictMode>,

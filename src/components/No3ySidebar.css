@@ -38,92 +38,8 @@
   box-shadow: inset 0 0 0 2px var(--n3sb-ring);
 }
 
-/* The open thread as a pane of glass (the fork's theme.custom.glass-surfaces.css,
-   Figma t3-fork 532:6527). Its fill rides the card's inline style; its shadow
-   lives here rather than inline, so the focus rule below can lay the ring over
-   it — an inline shadow would outrank it and leave the open card with no
-   visible keyboard focus. The shadow is a dark 1px halo, a tight sheen inside
-   the top and bottom runs and two soft inner glows. */
-[data-n3sb-skin='glass'] .n3sb-card[data-active] {
-  box-shadow:
-    0 0 2px 1px rgb(0 0 0 / 25%),
-    inset 0 2px 3px -2px rgb(255 255 255 / 6%),
-    inset 0 -2px 3px -2px rgb(255 255 255 / 4%),
-    inset 0 5px 14px rgb(255 255 255 / 4%),
-    inset 0 -5px 14px rgb(255 255 255 / 4%);
-}
-
-/* Focused while open: the same ring every row takes, first in the list so it
-   draws over the glass, as the app keeps Tailwind's ring ahead of its glass. */
-[data-n3sb-skin='glass'] .n3sb-card[data-active]:focus-visible {
-  box-shadow:
-    inset 0 0 0 2px rgb(255 255 255 / 30%),
-    0 0 2px 1px rgb(0 0 0 / 25%),
-    inset 0 2px 3px -2px rgb(255 255 255 / 6%),
-    inset 0 -2px 3px -2px rgb(255 255 255 / 4%),
-    inset 0 5px 14px rgb(255 255 255 / 4%),
-    inset 0 -5px 14px rgb(255 255 255 / 4%);
-}
-
-/* The rest needs pseudo-elements. The glint: two inset hairlines nudged 1px
-   in, each a crescent that thins to nothing round the corners. It sits over
-   the reflection band, which would otherwise blur it away. */
-[data-n3sb-skin='glass'] .n3sb-card[data-active]::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 12;
-  border-radius: inherit;
-  box-shadow:
-    inset 0 1px 1px -0.5px rgb(255 255 255 / 34%),
-    inset 0 -1px 1px -0.5px rgb(255 255 255 / 16%);
-  pointer-events: none;
-}
-
-/* The reflection band: it blurs and saturates the card's own contents, so the
-   project icon and status mark tint the glass near them. Masked to the top and
-   bottom 4px, short of the content's padding, so no text is under the blur.
-   Above the content's z-10 layer, or its backdrop would hold only the fill. */
-[data-n3sb-skin='glass'] .n3sb-card[data-active]::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 11;
-  border-radius: inherit;
-  -webkit-backdrop-filter: blur(12px) saturate(6) brightness(1.5);
-  backdrop-filter: blur(12px) saturate(6) brightness(1.5);
-  mask: linear-gradient(rgb(0 0 0 / 40%), #0000 4px calc(100% - 4px), rgb(0 0 0 / 30%));
-  pointer-events: none;
-}
-
-/* The dark edge, the glint's complement: darkest at the middle of each end and
-   easing out toward the top and bottom. The card clips past its edge and both
-   its pseudo-elements are taken, so its li draws it, 1px proud of the card. */
-[data-n3sb-skin='glass'] li:has(> .n3sb-card[data-active])::before {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  padding: 1px;
-  border-radius: 21px;
-  background: linear-gradient(
-    to bottom,
-    rgb(0 0 0 / 0%),
-    rgb(0 0 0 / 18%) 12%,
-    rgb(0 0 0 / 32%) 30%,
-    rgb(0 0 0 / 35%) 50%,
-    rgb(0 0 0 / 32%) 70%,
-    rgb(0 0 0 / 18%) 88%,
-    rgb(0 0 0 / 0%)
-  );
-  mask:
-    linear-gradient(#000 0 0) content-box exclude,
-    linear-gradient(#000 0 0);
-  pointer-events: none;
-}
-
-[data-n3sb-skin='glass'] li:has(> .n3sb-card[data-active][data-compact])::before {
-  border-radius: 13px;
-}
+/* Flat Glass's open card is a plain white 10% (Nov 25 2026): the 3D skin's pane of glass (its halo,
+   glint, reflection band and dark edge) went with the 3D look. */
 
 /* Inlet's open card runs on into the chat panel: its li draws the bridge, 8px past the card to
    the sidebar's edge, with the panel's concave 9px corners above and below (the app's own
@@ -198,6 +114,18 @@
   visibility: hidden;
 }
 
+/* A header whose gear has its menu open keeps its actions up, as the app pins them while the
+   pointer is on the popup. */
+.n3sb-section-actions[data-held] {
+  opacity: 1;
+}
+
+/* The gear menu's project search (Nov 25 2026): its placeholder in the menu's muted ink. */
+.n3sb-search::placeholder {
+  color: var(--n3sb-placeholder);
+  opacity: 1;
+}
+
 @media (pointer: coarse) {
   .n3sb-section-actions {
     opacity: 1;
@@ -261,6 +189,15 @@
   }
 
   .n3sb-menu-item:hover {
+    background-color: var(--n3sb-menu-hover) !important;
+  }
+
+  /* A Petals layout option lights its sketch and label as it's pointed at. */
+  .n3sb-layout-option:hover {
+    color: var(--n3sb-fg) !important;
+  }
+
+  .n3sb-segment[aria-checked='false']:hover {
     background-color: var(--n3sb-menu-hover) !important;
   }
 }

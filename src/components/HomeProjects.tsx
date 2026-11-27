@@ -182,6 +182,8 @@ const TUNES: Record<string, Tune> = {
   '/work/how-to-pc': { ring: ['#00a2a2', '#de1440'], shape: '1 / 1', fit: 'inset', bg: '#00a2a2', width: 110, anchor: 'center' },
   // Drawn live (`LIVE_ART`), so `fit` only sizes the box. The ring is the chips' own green and blue.
   '/work/thinking-states': { ring: ['#4ade80', '#60a5fa', '#f472b6'], shape: '3 / 2', fit: 'cover' },
+  // The g, drawn for the card at its own 3 / 2. The ring is the red and the cream.
+  '/work/cinnabar-sans': { ring: ['#e34234', '#f5efe0'], shape: '3 / 2', fit: 'cover' },
   // Made for the card at its own 3 / 2, so it fills it whole. The ring is the leaf colours.
   '/work/noey-brand': {
     ring: ['#26b846', '#fcb01a', '#f95b1c', '#44aaf8'],
@@ -230,6 +232,8 @@ const PLACEMENT: [string[], string[]] = [
     '/work/invisible/onboarding',
     '/work/stat-builder',
     '/work/thinking-states',
+    // Cinnabar Sans (Nov 25 2026) here: at 3 / 2 the right column ends closest to the left.
+    '/work/cinnabar-sans',
     '/work/invisible/synapse',
     '/work/pixel-art',
     '/work/nacho-box',

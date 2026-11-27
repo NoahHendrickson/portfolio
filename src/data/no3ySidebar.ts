@@ -2,14 +2,17 @@
  * The threads no3y Code's live sidebar replica draws on the no3y Code page.
  *
  * Read off the fork's own showcase seed (`scripts/web-showcase-seed.ts` on the
- * `custom` branch) and the sidebar it renders, so the replica shows the same
- * five projects and fourteen threads the baked captures did — titles, branches,
+ * `custom` branch) and the sidebar it renders, so the replica shows the
+ * captures' projects and threads — titles, branches,
  * pull requests, models and statuses as the running app paints them. Two
  * things are the app's rather than the seed's: #186 reads as merged (the real
  * PR merged; the seed says open) and OpenAPI spec drift check has settled into
  * the Settled shelf, because its merged PR settles it. Order is the app's
  * activity order (most recent first), which every grouping keeps within its
- * groups.
+ * groups. Since Nov 25 2026 it's eight of the seed's fourteen, at the user's ask: two that need
+ * input, two completed, three working and one idle. The failed run (its error notice), the
+ * approval, the usage limit, the woke and waiting threads and one idle were dropped, and the
+ * Snoozed shelf with them.
  *
  * Nothing here is thread *content*: the page only shows the sidebar, so a
  * thread is the facts its card, its hover card and the groupings read.
@@ -167,25 +170,6 @@ export const SIDEBAR_THREADS: SidebarThread[] = [
     pr: { number: 412, state: 'open', title: 'Migrate checkout to server actions' },
   },
   {
-    id: 'biometric-crash',
-    title: 'Crash on iOS 27 biometric prompt',
-    project: 'pocketbook',
-    branch: 'fix/biometric-crash',
-    status: 'approval',
-    model: 'Fable 5.1',
-    provider: 'claude',
-  },
-  {
-    id: 'invoice-backfill',
-    title: 'Backfill job for legacy invoices',
-    project: 'orbit-api',
-    branch: 'feat/invoice-backfill',
-    status: 'failed',
-    model: 'GPT-5.6-Sol',
-    provider: 'openai',
-    notice: { tone: 'error', text: 'The agent process exited unexpectedly (exit code 1).' },
-  },
-  {
     id: 'pricing-dark-mode',
     title: 'Dark mode for the pricing page',
     project: 'lumen',
@@ -206,16 +190,6 @@ export const SIDEBAR_THREADS: SidebarThread[] = [
     workingFor: 42,
   },
   {
-    id: 'bundle-audit',
-    title: 'Audit bundle size regressions',
-    project: 'lumen',
-    branch: 'chore/bundle-audit',
-    status: 'waiting',
-    model: 'Opus 5.5',
-    provider: 'claude',
-    pr: { number: 401, state: 'draft', title: 'Trim the marketing bundle' },
-  },
-  {
     id: 'offline-sync',
     title: 'Offline sync conflict resolution',
     project: 'pocketbook',
@@ -224,34 +198,6 @@ export const SIDEBAR_THREADS: SidebarThread[] = [
     model: 'Opus 5.5',
     provider: 'claude',
     workingFor: 73,
-  },
-  {
-    id: 'dependency-bump',
-    title: 'Nightly dependency bump',
-    project: 'orbit-api',
-    branch: 'chore/deps',
-    status: 'limited',
-    model: 'Fable 5.1',
-    provider: 'claude',
-    notice: { tone: 'warning', text: 'You have hit your usage limit for this session. It resets at 6:00 PM.' },
-  },
-  {
-    id: 'csp-headers',
-    title: 'Tighten CSP headers',
-    project: 'lumen',
-    branch: 'main',
-    status: 'idle',
-    model: 'GPT-6-Astra',
-    provider: 'openai',
-  },
-  {
-    id: 'swipe-haptics',
-    title: 'Haptics on transaction swipe',
-    project: 'pocketbook',
-    branch: 'feat/swipe-haptics',
-    status: 'woke',
-    model: 'GPT-6-Astra',
-    provider: 'openai',
   },
   {
     id: 'expo-sdk',
@@ -264,19 +210,24 @@ export const SIDEBAR_THREADS: SidebarThread[] = [
   },
 ]
 
-/** The collapsed shelves under the list, with the counts the app shows. */
-export const SIDEBAR_SHELVES = { snoozed: 2, settled: 5 }
+/** The collapsed shelf under the list, with the count the app shows (no Snoozed shelf since Nov 25 2026). */
+export const SIDEBAR_SHELVES = { settled: 5 }
 
 /** The machine every thread runs on, as the hover card names it. */
 export const SIDEBAR_MACHINE = 'noey’s MacBook Pro (2)'
 
 export type SidebarGrouping = 'none' | 'project' | 'status'
 
-/** One of the page's controls under the live sidebar: a grouping (a radio) or compact cards (a toggle). */
+/** The Petals as cards in a list, or as mascot tiles in a grid (the Petals row's View options). */
+export type SidebarPetalLayout = 'list' | 'grid'
+
+/** One of the page's controls under the live sidebar: a grouping or a Petals layout (radios), or compact
+    cards (a toggle). */
 export type SidebarPlaygroundOption = {
   label: string
   caption: string
   grouping?: SidebarGrouping
+  petals?: SidebarPetalLayout
   compact?: true
 }
 

@@ -499,7 +499,7 @@ function ThreePlaces() {
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 1fr) minmax(0, 1fr)', gap: space.lg }}>
         <div style={step}>
           {label('2 · Code Connect')}
-          <CodeBlock title="SubagentCard.figma.ts" code={CODE_CONNECT_SNIPPET} />
+          <CodeBlock title="StatusChip.figma.ts" code={CODE_CONNECT_SNIPPET} />
         </div>
         <div style={step}>
           {label('Variables → CSS')}

@@ -447,6 +447,9 @@ export type Landing = {
    */
   sheet?: {
     icon: string
+    /** A logo lockup that takes the title's place (the title stays as a hidden heading): one file
+        for the light page, one for the dark, at the lockup's own `aspect`. */
+    lockup?: { light: string; dark: string; aspect: number }
     facts: { heading: string; items: string[] }[]
   }
   /**
@@ -931,6 +934,9 @@ export const projects: Record<string, Project> = {
       sheet: {
         // The app icon's leaves without its green tile (`app-icon.svg` keeps it).
         icon: '/work/no3y-code/app-mark.svg',
+        // Nov 26 2026: the lockup from the no3y code Figma file (1qVCaK2XuosbVJtYqa3n0n, 65:256, "Lockup · on
+        // light"): the noey pixel wordmark, the leaf mark, then code, its letters in each theme's text color.
+        lockup: { light: '/work/no3y-code/lockup-light.svg', dark: '/work/no3y-code/lockup-dark.svg', aspect: 964 / 180 },
         facts: [
           {
             heading: 'Tools',
@@ -953,34 +959,39 @@ export const projects: Record<string, Project> = {
       // Captures of the desktop app on the Glass theme, baked over the fluted
       // wallpaper.
       showcase: {
-        // The hero (Nov 15 2026): the new agent screen in Glass and in Inlet, captured from the
-        // same seeded state and placed identically on the fluted wallpaper the Glass clips below use
-        // (two Figma wallpapers were tried first), split by a divider the visitor drags
-        // (`CompareSlider`). It replaced the focus-mode opener clip; scripts in
-        // ~/.t3-fork/scratch/no3y-capture/hero/. Basic (Neutral Dark, the fork's default theme)
-        // joined it Nov 16 2026, all three recaptured off custom at 7f1fe1fc9e, on two dividers.
+        // The theme slider (Nov 15 2026; rebuilt Nov 24 2026): the new agent screen in Basic, Flat
+        // Glass and Inlet Black, split by two dividers the visitor drags (`CompareSlider`). Prototype
+        // B shows it in the design-system chapter; the other layout opens on it. Since Nov 24 the
+        // Flat Glass layer is the story hero itself (hero-flat-solo, off custom 0456ab91b4 in Cinnabar Sans), and
+        // Basic (Darker Neutral) and Inlet Black were retaken to match it, off custom d01b458341: the
+        // same seed in the user's own names, no project picked so "Start something new" shows, the
+        // same typed prompt, the Petals grid, Inter 15 / sidebar 14 (inlet/takes/hero-theme-capture.mjs),
+        // each cut to the Flat Glass window's own silhouette and placed in its exact frame on the
+        // mirrored Jolly Petal (hero/hero-theme-solo.mjs), in ~/.t3-fork/scratch/no3y-capture/. The
+        // newer build words the last launchpad suggestion differently and has no Drafts row. Before:
+        // all three off 7f1fe1fc9e on the fluted wallpaper (hero-basic / -glass / -inlet).
         compare: {
           layers: [
             {
               theme: 'basic',
-              src: '/work/no3y-code/hero-basic.webp',
-              srcSet: '/work/no3y-code/hero-basic-1280.webp 1280w, /work/no3y-code/hero-basic-1920.webp 1920w, /work/no3y-code/hero-basic.webp 2560w',
+              src: '/work/no3y-code/hero-compare-basic.webp',
+              srcSet: '/work/no3y-code/hero-compare-basic-1280.webp 1280w, /work/no3y-code/hero-compare-basic-1920.webp 1920w, /work/no3y-code/hero-compare-basic.webp 2560w, /work/no3y-code/hero-compare-basic-3840.webp 3840w',
               label: 'Basic',
             },
             {
               theme: 'glass',
-              src: '/work/no3y-code/hero-glass.webp',
-              srcSet: '/work/no3y-code/hero-glass-1280.webp 1280w, /work/no3y-code/hero-glass-1920.webp 1920w, /work/no3y-code/hero-glass.webp 2560w',
-              label: 'Glass',
+              src: '/work/no3y-code/hero-flat-solo.webp',
+              srcSet: '/work/no3y-code/hero-flat-solo-1280.webp 1280w, /work/no3y-code/hero-flat-solo-1920.webp 1920w, /work/no3y-code/hero-flat-solo.webp 2560w, /work/no3y-code/hero-flat-solo-3840.webp 3840w',
+              label: 'Flat Glass',
             },
             {
               theme: 'inlet',
-              src: '/work/no3y-code/hero-inlet.webp',
-              srcSet: '/work/no3y-code/hero-inlet-1280.webp 1280w, /work/no3y-code/hero-inlet-1920.webp 1920w, /work/no3y-code/hero-inlet.webp 2560w',
+              src: '/work/no3y-code/hero-compare-inlet.webp',
+              srcSet: '/work/no3y-code/hero-compare-inlet-1280.webp 1280w, /work/no3y-code/hero-compare-inlet-1920.webp 1920w, /work/no3y-code/hero-compare-inlet.webp 2560w, /work/no3y-code/hero-compare-inlet-3840.webp 3840w',
               label: 'Inlet',
             },
           ],
-          alt: 'The new agent screen in no3y Code, split three ways: the Basic theme on the left, Glass in the middle and Inlet Black on the right, with dividers to drag between them',
+          alt: 'The new agent screen in no3y Code on the Jolly Petal background, split three ways: Basic in Darker Neutral on the left, Flat Glass in the middle and Inlet Black on the right, each with the same typed prompt, project picker and "Start something new" suggestions, with dividers to drag between them',
           aspect: '16 / 9',
         },
         // The new-agent still that used to stand under the clip was dropped
@@ -1008,9 +1019,12 @@ export const projects: Record<string, Project> = {
       sections: [
         // Petals, the fork's bots (Nov 15 2026; the page's second section, right under
         // the opener, since Nov 16 2026): a faked run of the dev app (no
-        // model was prompted). Glass here, on the fluted wallpaper like the other
-        // Glass clips; the switch swaps in the Inlet take on the Cool fade
-        // backdrop (`no3yInlet.ts`). Takes: inlet/takes/bot-return.mjs (THEME=glass).
+        // model was prompted). Flat Glass here since Nov 23 2026, re-recorded Nov 24 2026 off custom 3bb4547bd1 in Inter (Interface 15px, Sidebar font size 14px), like the
+        // hero: the take is frame-stepped over CDP as before, over a native capture of the window's
+        // macOS sidebar glass taken once in the thread view (inlet/takes/flat-layer.mjs), on the Jolly
+        // Petal piece; it was Full Glass before. (The page's theme switch, which swapped in an Inlet take on the Cool
+        // fade backdrop, was removed Nov 26 2026.) Takes: inlet/takes/bot-return.mjs (THEME=glass FLAT=1), rendered
+        // by render-fast.mjs with macOS 27's lights (LIGHT_X=27.75,50.75,73.75 LIGHT_R=7 LIGHT_Y=21.75).
         {
           kind: 'feature',
           gap: 80,
@@ -1026,9 +1040,12 @@ export const projects: Record<string, Project> = {
           video: {
             src: '/work/no3y-code/petals.mp4',
             // 10-bit HEVC first where it plays (Nov 20 2026): 8-bit H.264 bands the dark glass's gradients.
+            // Re-recorded Nov 27 2026 off custom 502f874767 (#545: the digest pages through the work threads'
+            // questions as question cards) by inlet/takes/petal-questions.mjs (batches/petals-questions.sh),
+            // the Petals as grid tiles; the Nov 24 take (bot-return.mjs) is kept in inlet/out/petals-replaced-nov27/.
             hevc: '/work/no3y-code/petals-hevc.mp4',
             poster: '/work/no3y-code/petals-poster.jpg',
-            alt: 'Petals in no3y Code on the Glass theme: the UX feedback bot finishes and its card turns blue, its report says the shipping step is ready for review, and above its composer it asks two things; after a dev server link comes back, Merge on the first ask merges the pull request, which turns purple, and First error answers the second, leaving the digest all quiet, the window on the Jolly Petal piece',
+            alt: 'Petals in no3y Code on the Flat Glass theme: the UX feedback bot finishes in the Petals grid and its report says there are two things for you, a question from its guest checkout thread and a PR ready for the promo code field; above its composer the digest leads with a question from its guest checkout thread, where Continue as guest goes on the sign-in step, answered Above sign-in; then the digest asks to open a PR for the promo code field, and Open PR opens #437, leaving the digest all quiet, the window on the Jolly Petal piece',
             aspect: '16 / 9',
           },
         },
@@ -1066,13 +1083,24 @@ export const projects: Record<string, Project> = {
             },
             {
               label: 'By status',
-              caption: 'Pinned, Needs input, Completed and Working, each with a count.',
+              caption: 'Needs input, Completed, Working and Idle, each under its own header.',
               grouping: 'status',
             },
             {
               label: 'Compact cards',
               caption: 'One line per thread. Hover a card for its project, branch, and model.',
               compact: true,
+            },
+            // Nov 25 2026: the Petals row's own View options, List or Grid (the gear beside Petals sets it too).
+            {
+              label: 'Petals as a list',
+              caption: 'Each Petal on its own card, with when it checks in next.',
+              petals: 'list',
+            },
+            {
+              label: 'Petals as a grid',
+              caption: 'Just the mascots and their names, three to a row.',
+              petals: 'grid',
             },
           ],
         },
@@ -1084,9 +1112,13 @@ export const projects: Record<string, Project> = {
           copyWidth: 700,
           stack: true,
           video: {
-            src: '/work/no3y-code/focus-mode.mp4',
-            poster: '/work/no3y-code/focus-mode-poster.jpg',
-            alt: 'Focus mode in no3y Code on the Glass theme: the sidebar collapses into a row of thread tabs, switching tabs moves between working threads in different projects, the tabs filter to one project, and a second thread is dragged onto the first to split the view',
+            // Nov 24 2026: the drag-to-split take on Flat Glass (`inlet/takes/sidebar-split.mjs`, off
+            // custom 0456ab91b4, in Cinnabar Sans). A new name, so Basic and Inlet show it too rather than their older
+            // focus-mode takes, which are keyed on `focus-mode.mp4`.
+            src: '/work/no3y-code/focus-mode-drag.mp4',
+            hevc: '/work/no3y-code/focus-mode-drag-hevc.mp4',
+            poster: '/work/no3y-code/focus-mode-drag-poster.jpg',
+            alt: 'Focus mode in no3y Code on the Flat Glass theme: a lumen thread is dragged from the sidebar onto the open lumen thread to split the view, the sidebar collapses into a row of thread tabs, and the tabs filter to the lumen project',
             aspect: '16 / 9',
           },
         },
@@ -1097,10 +1129,14 @@ export const projects: Record<string, Project> = {
           body: 'When making UI changes I often have multiple ideas at once or one right after another and I don’t want to wait for the previous turn to finish.',
           copyWidth: 700,
           stack: true,
+          // Nov 25 2026: the split-drop feature drop on Flat Glass (`inlet/takes/split-drop.mjs`, off custom
+          // 94a057ca34, in Cinnabar): opens in on the working thread, pulls back, then the header's Split agent
+          // button opens a second agent on the same branch. Its own section in the story layout since then.
           video: {
-            src: '/work/no3y-code/split-agent.mp4',
-            poster: '/work/no3y-code/split-agent-poster.jpg',
-            alt: 'Split agent in no3y Code on the Glass theme: while a thread builds the pricing cards, Split agent opens a second agent beside it on the same branch, a quick follow-up idea is sent there, and the second agent finishes while the first keeps working, the sidebar pairing the two on one row',
+            src: '/work/no3y-code/split-agent-flat.mp4',
+            hevc: '/work/no3y-code/split-agent-flat-hevc.mp4',
+            poster: '/work/no3y-code/split-agent-flat-poster.jpg',
+            alt: 'Split agent in no3y Code on the Flat Glass theme: while a lumen thread builds the pricing cards, the Split agent button in its header opens a second agent beside it on the same branch, "add a save 20% badge to the annual toggle" is sent there, and the second agent finishes while the first keeps working',
             aspect: '16 / 9',
           },
         },
@@ -1165,11 +1201,16 @@ export const projects: Record<string, Project> = {
           body: 'T3 Code already supported automations and scheduled tasks, and I wanted a simple UI to make them: name it, pick the project, write what the agent should do, and choose when it runs and with which model. All on one screen.',
           copyWidth: 700,
           stack: true,
-          shot: {
-            src: '/work/no3y-code/collage/scheduled.webp',
-            alt: 'Creating a scheduled task: a title, the project, agent instructions with worktree and branch, a weekday schedule, and the model',
-            aspect: '1272 / 620',
-            frame: 'plain',
+          // Nov 26 2026: the scheduled-drop feature drop on Flat Glass (`inlet/takes/scheduled-drop.mjs`, off custom
+          // 25984b41b7): New automation, its name and instructions typed, the GitHub PR opened trigger on lumen, then
+          // Create landing on the saved automation (the save is caught before the server, so no GitHub webhook is made).
+          // It replaced the Flat Glass still (scheduled-flat.webp), which Basic and Inlet's swaps are still keyed on.
+          video: {
+            src: '/work/no3y-code/scheduled-drop.mp4',
+            hevc: '/work/no3y-code/scheduled-drop-hevc.mp4',
+            poster: '/work/no3y-code/scheduled-drop-poster.jpg',
+            alt: 'Creating an automation in no3y Code on the Flat Glass theme: New automation, named "Design check on new PRs", with the instructions "check new prs for ui changes, screenshot them and flag anything off from our design tokens", the trigger set to GitHub PR opened on lumen, then Create automation lands on the saved automation',
+            aspect: '16 / 9',
           },
         },
         {
@@ -1183,10 +1224,15 @@ export const projects: Record<string, Project> = {
           ],
           copyWidth: 700,
           stack: true,
+          // Nov 25 2026: re-recorded on Flat Glass off custom 94a057ca34 (inlet/takes/design-mode.mjs, THEME=glass
+          // FLAT=1, the tab row's native glass band stretched to the take's 1600 window), rendered on the Jolly Petal
+          // piece with macOS 27's lights; H.264 CRF 21 and a 10-bit HEVC (CRF 23), lighter than Petals' since it's
+          // mostly flat UI. The Nov 16 3D Glass take was design-mode-glass.mp4.
           video: {
-            src: '/work/no3y-code/design-mode-glass.mp4',
-            poster: '/work/no3y-code/design-mode-glass-poster.jpg',
-            alt: 'Design mode in no3y Code on the Glass theme: design mode turns on over the preview, the Start a scene button gets more padding and the heading is centered in the properties panel, canvas mode previews the page at MacBook 14 inch size, and the changes attach to the composer for the agent',
+            src: '/work/no3y-code/design-mode-flat.mp4',
+            hevc: '/work/no3y-code/design-mode-flat-hevc.mp4',
+            poster: '/work/no3y-code/design-mode-flat-poster.jpg',
+            alt: 'Design mode in no3y Code on the Flat Glass theme: design mode turns on over the preview, the Start a scene button gets more padding and the heading is centered in the properties panel, canvas mode previews the page at MacBook 14 inch size, and the changes attach to the composer for the agent',
             aspect: '16 / 9',
           },
         },

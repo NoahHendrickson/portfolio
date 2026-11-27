@@ -1,158 +1,40 @@
-import { useEffect, useLayoutEffect, useRef, useState, type ComponentProps, type ReactNode, type RefObject } from 'react'
+import { Fragment, useEffect, useRef, useState, type ComponentProps, type ReactNode } from 'react'
 import CompareSlider from './CompareSlider'
 import { CurvedCard, CurvedCopy } from './Curved'
-import { Interlock, Piece } from './Interlock'
 import { color, radius, space, type } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
-import { CURVED_INNER, TEXT_SOFT, curvedInset } from '../sheetStyle'
+import { CURVED_INNER, TEXT_SOFT } from '../sheetStyle'
 import { CODE_CONNECT_SNIPPET, STORYBOOK_SHOT } from '../data/no3yDesignSystem'
+import { KitGlassComposer, KitGlassPetals, KitGlassPicker, KitGlassThreads } from './No3yKitGlass'
 
 /*
-  Prototype B's design-system chapter, on the page's curved cards (Nov 19 2026):
+  Prototype B's design-system chapter, on the page's curved cards (Nov 19 2026, reworked Nov 24):
   1. `Themes & the design system`: a card holding the page's three-theme slider (the new agent
-     screen in Basic, Glass and Inlet), with the story on its tab: the themes, and why one system
-     sits under Figma and the code.
-  2. `The kit, wired to code`: its numbers, then Figma (a carousel of the kit's components running
-     off the page), Code Connect and Storybook as plain rows on the page, a heading and a sentence
-     beside each picture (Nov 19 2026; a chain of curved cards, then a framed bento, before). The
-     kit's frames open full size in a lightbox.
+     screen in Basic, Glass and Inlet), with the story on its tab: the themes, why one system sits
+     under Figma and the code, and how it's wired.
+  2. `The kit, wired to code`: its numbers, then Figma (the kit's components in Flat Glass, cut out
+     and labelled on the Jolly Petal piece), Code Connect, Storybook and the design lint, each a heading
+     and a sentence on a tab over its picture. The Storybook shot opens full size in a lightbox.
 */
 
 const DS = '/work/no3y-code/design-system'
 const MONO = 'ui-monospace, SFMono-Regular, Menlo, monospace'
 
-/** The themes card's copy: the themes, then why one system sits under Figma and the code. */
+/** The themes card's copy (Nov 27 2026, drafted off the two design-system threads, 58d9024b and c03ae54f,
+    after a Gemini 4 Neon review): why the system happened, the themes cut down to the ones kept. */
 const STORY_INTRO = [
-  'no3y Code ships with three themes: Basic in five tones from light to dark, Glass letting the wallpaper show through, and Inlet in six colors. Keeping multiple themes alive used to be a maintenance headache. With agents doing the heavy lifting, it became a playground. I could feed them visual references, build out a component library, and test whole UI directions in real code on the fly instead of leaving them stuck in static mocks.',
-  'I go back and forth between Figma and code a lot, so it was important to have one shared system under both. A change I make in Figma carries over to the code, and a change in the code carries back to Figma.',
+  'no3y Code has four themes. Flat Glass is the default, then Glass 3D, Basic in Light and Darker Neutral, and Inlet in Black and Cream. With agents, trying a new look in real code was cheap, so for a while I had 11 Basic tones and 6 Inlet colors.',
+  'That got messy fast. Agents shipped one-off buttons, mismatched corners and raw hex colors, and screens that looked fine in one theme broke in another. I cut the themes down to the ones I actually use and built one design system across Figma and code.',
 ]
 
-const PROOF_STATS = [
-  { value: '170', label: 'Basic color variables' },
-  { value: '8', label: 'tone modes + Glass & Inlet' },
-  { value: '272', label: 'icons synced from code' },
-  { value: '326', label: 'live Storybook stories' },
-] as const
-
-type CuratedFrame = {
-  id: string
-  label: string
-  caption: string
-  src: string
-  width: number
-  height: number
-  /** The component in a 680 square of the kit's fill (`kit-squares.mjs`, 2x): its title and a few
-      of its variants, at a size that reads in the carousel. Inspect opens the full frame. */
-  square: string
-  alt: string
-}
-
-const CURATED_FRAMES: CuratedFrame[] = [
-  {
-    id: 'thread-card',
-    label: 'Thread card',
-    caption: '60 variants: 10 statuses × default, hover, selected, and compact cards in one Figma matrix.',
-    src: `${DS}/frame-thread-card.webp`,
-    width: 1870,
-    height: 1738,
-    square: `${DS}/square-thread-card.webp`,
-    alt: 'The Thread card Figma component matrix showing 10 statuses across default, hover, selected, and compact states',
-  },
-  {
-    id: 'petal-card',
-    label: 'Petal card',
-    caption: 'A Petal in the sidebar: its mascot on a tile in its own color, its name and report, in every status.',
-    src: `${DS}/frame-petal-card.webp`,
-    width: 1008,
-    height: 480,
-    square: `${DS}/square-petal-card.webp`,
-    alt: 'The Petal card Figma component frame showing a Petal in each status, default, hover and selected',
-  },
-  {
-    id: 'model-picker',
-    label: 'Model picker & slider',
-    caption: 'Provider rail, searchable models, segmented tiers, and every step of the dithered effort slider.',
-    src: `${DS}/frame-model-picker.webp`,
-    width: 1008,
-    height: 719,
-    square: `${DS}/square-model-picker.webp`,
-    alt: 'The Model picker Figma component frame showing the provider rail, model list, and dithered reasoning effort slider steps',
-  },
-  {
-    id: 'petal-mascots',
-    label: 'Petal mascots',
-    caption: '14 pixel-art leaf shapes × 5 moods, tile-on and tile-off, bound to per-mascot body tokens.',
-    src: `${DS}/frame-petal-mascots.webp`,
-    width: 1008,
-    height: 935,
-    square: `${DS}/square-petal-mascots.webp`,
-    alt: 'The Petal mascots Figma frame displaying 14 pixel-art leaf shapes across 5 moods with and without tinted tiles',
-  },
-  {
-    id: 'thread-status',
-    label: 'Thread status marks',
-    caption: 'Completed, idle, needs attention, failed, plus the Rain and Bead animated working loops.',
-    src: `${DS}/frame-thread-status.webp`,
-    width: 1164,
-    height: 406,
-    square: `${DS}/square-thread-status.webp`,
-    alt: 'The Thread status Figma frame showing completed, idle, needs attention, failed, and the Rain and Bead working states',
-  },
-  {
-    id: 'subagent-card',
-    label: 'Subagent card',
-    caption: '4 lifecycle states, folded and expanded, plus grouped subagent batches for the transcript.',
-    src: `${DS}/frame-subagent-card.webp`,
-    width: 1624,
-    height: 1242,
-    square: `${DS}/square-subagent-card.webp`,
-    alt: 'The Subagent card Figma component frame showing working, done, failed, and stopped states folded and expanded',
-  },
+/** The kit section's intro: how the work was split between me and the agents. */
+const KIT_INTRO = [
+  "I didn't want to hand-draw hundreds of variants, so I split the work. Agents measured the running app and built the kit in Figma. I reviewed the first components and set the rules: fewer button sizes, a 1px focus border, a switch that doesn't look disabled when it's off, and token names a person can read. Then I sent those changes back into the app.",
 ]
 
+/** The Flat Glass stage: every kit export sits on it, and the panes below take it too. */
+const KIT_FILL = '#1d1d1d'
 
-/**
- * The Basic tones the carousel can show (Nov 19 2026): the kit's Basic collection's modes, each
- * frame exported in it and built into squares (`kit-squares.mjs <dir> <out> <tone>`). Dark Neutral
- * is the kit's own and the default; the "Darker" modes are left out as near twins.
- */
-const KIT_TONES = [
-  { id: 'light', label: 'Light' },
-  { id: 'cream', label: 'Cream' },
-  { id: 'dark-warm', label: 'Dark Warm' },
-  { id: 'dark-cool', label: 'Dark Cool' },
-  { id: 'dark-neutral', label: 'Dark Neutral' },
-] as const
-type KitTone = (typeof KIT_TONES)[number]['id']
-/** A frame's square in a tone: Dark Neutral's are the originals, the rest `square-<tone>-<id>`. */
-const squareFor = (frame: CuratedFrame, tone: KitTone) => (tone === 'dark-neutral' ? frame.square : `${DS}/square-${tone}-${frame.id}.webp`)
-
-/** The kit frames' fill (Dark Neutral's background), which the Figma canvas tile takes too. */
-const KIT_FILL = '#2b2b2b'
-
-/** The kit's numbers in one row under its heading, two to a row on a phone. */
-function ProofStats() {
-  const isMobile = useIsMobile()
-  return (
-    <ul
-      style={{
-        margin: 0,
-        padding: 0,
-        listStyle: 'none',
-        display: 'grid',
-        gridTemplateColumns: isMobile ? 'repeat(2, minmax(0, 1fr))' : 'repeat(4, minmax(0, 1fr))',
-        gap: `${space.xl} ${space.lg}`,
-      }}
-    >
-      {PROOF_STATS.map((stat) => (
-        <li key={stat.label} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <span style={{ ...type['heading-l'], color: color.text.primary, fontVariantNumeric: 'tabular-nums' }}>{stat.value}</span>
-          <span style={{ ...type['body-s'], color: TEXT_SOFT }}>{stat.label}</span>
-        </li>
-      ))}
-    </ul>
-  )
-}
 
 type Zoom = { title: string; caption: string; src: string; alt: string }
 
@@ -265,172 +147,153 @@ const InspectTag = () => (
   </span>
 )
 
-/** Where the carousel stands: at either end, and which square leads it. */
-type CarouselState = { start: boolean; end: boolean; index: number }
-
-/** The carousel's squares: 560 across on a laptop and up, 300 on a phone, 8 apart (the bento's gutter). */
-const SQUARE = { desktop: 560, mobile: 300 }
-const SQUARE_GAP = 8
-
 /**
- * The kit's components as a row of squares (`kit-squares.mjs`), each in the kit's own fill,
- * rounded concentric with the surface they sit on, from the band's left edge and snapping square by
- * square (the browser's own scroll and snap); swipe or scroll it, or flip with `CarouselArrows`.
- * A square opens its full Figma frame.
+ * The kit grid, straight from Figma (Nov 26 2026): the board is a Figma file of linked instances of
+ * the Basic UI kit, in Flat Glass (`xGxs2mCahayLskyTiNfk18`, "no3y Code — UI collage", node `3:6730`).
+ * `KIT_ROWS` is that board: its rows in order, each tile's width on the Figma board (a row's tiles
+ * share it as `fr`, so they keep the board's proportions) and what it holds. A picture piece is cut
+ * out of its tile's 3x Figma export at the bounds Figma placed it
+ * (`~/.t3-fork/scratch/no3y-capture/design-system/collage-figma/`: `raw/` the exports,
+ * `pieces.json` the bounds, `export.mjs` the cut), so it sits on the tile's own #1d1d1d. Two tiles
+ * are live instead (`No3yKitGlass`): the composer and the Petals grid, built from the board's
+ * layers in their Flat Glass state over the Jolly Petal piece the board gives their tiles (`wall`,
+ * the part of the piece each tile shows, cropped from the original), so the glass is a real blur.
+ * The tile itself is drawn here with the board's values (the kit's `base/background` fill,
+ * `base/border` hairline, 16 corners, 32 padding, 16 between pieces). On a desktop the whole board
+ * is set at `KIT_SCALE` and capped at `KIT_BOARD_MAX` (so 1555 wide at most, out to the page's breakout;
+ * 0.85 of a 1440 board until Nov 26 2026, when the user wanted it smaller and wider); one column at 1x on
+ * a phone. Change the board in Figma, re-export the tiles into `raw/`, run `export.mjs`, and update
+ * `KIT_ROWS` if a row or piece moved.
  */
-function KitCarousel({
-  trackRef,
-  onEdges,
-  onZoom,
-  inset = 0,
-  tone = 'dark-neutral',
-}: {
-  trackRef: RefObject<HTMLDivElement | null>
-  onEdges: (edges: CarouselState) => void
-  onZoom: (item: Zoom) => void
-  /** Where the first square starts and every square snaps to: the band's visible left edge, plus its inset. */
-  inset?: number
-  tone?: KitTone
-}) {
-  const isMobile = useIsMobile()
-  const size = isMobile ? SQUARE.mobile : SQUARE.desktop
-  // Told only when the square on show or an end changes, never on every scroll event: a re-render
-  // per event re-measured the surface under it and fought the scroll.
-  const last = useRef('')
-  const readEdges = () => {
-    const el = trackRef.current
-    if (!el) return
-    const index = Math.min(CURATED_FRAMES.length - 1, Math.max(0, Math.round(el.scrollLeft / (size + SQUARE_GAP))))
-    const next = { start: el.scrollLeft < 4, end: el.scrollLeft + el.clientWidth > el.scrollWidth - 4, index }
-    const key = `${next.start}${next.end}${next.index}`
-    if (key === last.current) return
-    last.current = key
-    onEdges(next)
-  }
+const KIT_TILE = '#1d1d1d'
+const KIT_BORDER = 'rgba(255, 255, 255, 0.08)'
+const KIT_SCALE = 0.72
+/** The board's widest, in its own pixels: 2160 × 0.72 is the page's 1560 breakout (Nov 26 2026; 1440 before). */
+const KIT_BOARD_MAX = 2160
+const KIT_DIR = `${DS}/kit-figma`
+type KitPiece = { id: string; w: number; alt: string }
+type KitTile = { w: number; pieces?: readonly KitPiece[]; live?: 'composer' | 'petals' | 'threads' | 'picker'; wall?: string; label?: string }
+// Three rows since Nov 26 2026 (five before): the board runs out to the page's 1560 breakout at the same
+// scale, so the tiles are reordered into fewer, wider rows rather than made bigger. A tile's `w` is its
+// share of its row (the rows' totals differ; each row fills the board's width).
+const KIT_ROWS: readonly (readonly KitTile[])[] = [
+  [
+    // The new project selector (custom #533: search, pins and sort), live and read off the app since
+    // Nov 26 2026 (No3yKitGlass), first in the row on its own wallpaper, the user's blue and purple piece.
+    { w: 469.33, live: 'picker', wall: 'wall-picker', label: 'The project selector in Flat Glass, live over the wallpaper' },
+    { w: 469.33, pieces: [{ id: 'view-menu', w: 192, alt: 'The Petals view menu: list or grid, and compact cards' }] },
+    { w: 469.33, pieces: [{ id: 'model-picker', w: 288, alt: 'The model picker: Pinned and provider tabs, model search, and the effort inline on the chosen model' }] },
+    { w: 469.33, pieces: [{ id: 'usage-menu', w: 256, alt: 'The usage limits menu: session and weekly limits per provider with their reset times' }] },
+    // Live since Nov 26 2026, read off the app (No3yKitGlass): the sidebar's compact cards, in place of the
+    // Figma board's three full cards; the wallpaper is the hero's (the Jolly Petal piece, mirrored), zoomed in.
+    { w: 469.33, live: 'threads', wall: 'wall-threads', label: 'Compact thread cards in Flat Glass, live over the wallpaper' },
+  ],
+  [
+    {
+      w: 469.33,
+      pieces: [
+        { id: 'background-popover', w: 320, alt: 'The background work popover: a subagent and a CI watch' },
+        { id: 'dictation', w: 128, alt: 'Dictation while recording, a white capsule with a level meter' },
+      ],
+    },
+    { w: 954.67, live: 'composer', wall: 'wall-composer', label: 'The new agent composer in Flat Glass, live over the wallpaper' },
+    {
+      w: 469.33,
+      pieces: [{ id: 'pills', w: 358, alt: 'Composer pills: pull request chips open, merged and draft, background work, queued and subagents' }],
+    },
+    { w: 469.33, pieces: [{ id: 'launchpad', w: 398, alt: 'Launchpad suggestions to start something new' }] },
+  ],
+  [
+    { w: 840, pieces: [{ id: 'question', w: 640, alt: 'An agent question in place of the composer, with three options and Submit' }] },
+    {
+      w: 820,
+      // Not from the Figma board: a turn rendered in the app itself (Nov 26 2026), the mock studio's
+      // `subagent-turn` scene off custom 25984b41b7, cut to the turn at 3x.
+      pieces: [
+        {
+          id: 'subagent-turn',
+          w: 740,
+          alt: 'A finished turn: it changed PricingToggle.tsx, started an Accessibility review subagent on Opus 5.5 at High, then the review finished and the reply says the badge passed',
+        },
+      ],
+    },
+    { w: 720, live: 'petals', wall: 'wall-petals', label: 'The Petals grid in Flat Glass, live over the wallpaper' },
+  ],
+]
+
+/** One piece, 3x with a 1.5x cut, at its own 1x width (or the tile's, if that's narrower). */
+function KitImg({ piece }: { piece: KitPiece }) {
+  const src = `${KIT_DIR}/${piece.id}.webp`
   return (
-    <div
-      ref={trackRef}
-      onScroll={readEdges}
-      tabIndex={0}
-      aria-label="Components from the Figma kit"
-      style={{
-        display: 'flex',
-        gap: SQUARE_GAP,
-        overflowX: 'auto',
-        overscrollBehaviorX: 'contain',
-        scrollSnapType: 'x mandatory',
-        scrollbarWidth: 'none',
-        boxSizing: 'border-box',
-        paddingLeft: inset,
-        scrollPaddingLeft: inset,
-        // The same at the right end, so the last square can finish the inset off the window's edge.
-        paddingRight: inset,
-      }}
-    >
-      {CURATED_FRAMES.map((frame) => (
-        <button
-          key={frame.id}
-          type="button"
-          onClick={() => onZoom({ title: `${frame.label} · Figma kit`, caption: frame.caption, src: frame.src, alt: frame.alt })}
-          aria-label={`${frame.label}: inspect the whole Figma frame`}
-          style={{
-            position: 'relative',
-            flex: `0 0 ${size}px`,
-            height: size,
-            padding: 0,
-            border: 'none',
-            borderRadius: CURVED_INNER,
-            overflow: 'hidden',
-            background: KIT_FILL,
-            scrollSnapAlign: 'start',
-            cursor: 'zoom-in',
-          }}
-        >
-          <img
-            key={tone}
-            src={squareFor(frame, tone)}
-            alt={frame.alt}
-            width={1360}
-            height={1360}
-            loading="lazy"
-            decoding="async"
-            draggable={false}
-            style={{ display: 'block', width: '100%', height: '100%' }}
-          />
-          <InspectTag />
-        </button>
-      ))}
-    </div>
+    <img
+      src={src}
+      srcSet={`${KIT_DIR}/${piece.id}-half.webp ${Math.round(piece.w * 1.5)}w, ${src} ${piece.w * 3}w`}
+      sizes={`${piece.w}px`}
+      alt={piece.alt}
+      loading="lazy"
+      decoding="async"
+      draggable={false}
+      style={{ display: 'block', width: piece.w, maxWidth: '100%', height: 'auto' }}
+    />
   )
 }
 
-/**
- * Back and forward through the carousel, a square at a time, with a dot per square between them
- * (the one on show a dash, as the digest's pager draws it); a dot jumps to its square.
- */
-function CarouselArrows({ trackRef, state }: { trackRef: RefObject<HTMLDivElement | null>; state: CarouselState }) {
+/** The Figma board: `KIT_ROWS`, each row its tiles at the board's proportions; one column on a phone. */
+function KitBoard() {
   const isMobile = useIsMobile()
-  const pitch = (isMobile ? SQUARE.mobile : SQUARE.desktop) + SQUARE_GAP
-  const behavior = (): ScrollBehavior => (window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth')
-  const step = (dir: 1 | -1) => trackRef.current?.scrollBy({ left: dir * pitch, behavior: behavior() })
-  const go = (index: number) => trackRef.current?.scrollTo({ left: index * pitch, behavior: behavior() })
-  const arrow = (dir: 1 | -1) => {
-    const disabled = dir === 1 ? state.end : state.start
-    return (
-      <button
-        type="button"
-        aria-label={dir === 1 ? 'Next component' : 'Previous component'}
-        disabled={disabled}
-        onClick={() => step(dir)}
-        style={{
-          width: 40,
-          height: 40,
-          borderRadius: radius.full,
-          border: `1px solid ${color.border.default}`,
-          background: 'transparent',
-          color: color.text.primary,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: disabled ? 'default' : 'pointer',
-          opacity: disabled ? 0.35 : 1,
-          transition: 'opacity 150ms ease',
-        }}
-      >
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
-          <path d={dir === 1 ? 'M6 3l5 5-5 5' : 'M10 3L5 8l5 5'} stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </button>
-    )
-  }
+  const gap = isMobile ? 12 : 16
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: space.md }}>
-      {arrow(-1)}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        {CURATED_FRAMES.map((frame, i) => {
-          const on = i === state.index
-          return (
-            <button
-              key={frame.id}
-              type="button"
-              aria-label={`${frame.label}, ${i + 1} of ${CURATED_FRAMES.length}`}
-              aria-current={on ? 'true' : undefined}
-              onClick={() => go(i)}
+    <div
+      role="group"
+      aria-label="no3y Code components from the Figma kit, in Flat Glass"
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap,
+        // `zoom` scales the board as a picture (type, pieces, padding and gaps together); its
+        // KIT_BOARD_MAX cap is in the zoomed board's own pixels.
+        // `width: 100%`: auto side margins alone shrink a flex child to its content, 13px short of the copy's edges.
+        ...(isMobile ? {} : { zoom: KIT_SCALE, width: '100%', maxWidth: KIT_BOARD_MAX, marginInline: 'auto' }),
+      }}
+    >
+      {KIT_ROWS.map((row, r) => (
+        <div
+          key={r}
+          style={{ display: 'grid', gridTemplateColumns: isMobile ? 'minmax(0, 1fr)' : row.map((tile) => `minmax(0, ${tile.w}fr)`).join(' '), gap }}
+        >
+          {row.map((tile, t) => (
+            <div
+              key={t}
+              role={tile.live ? 'group' : undefined}
+              aria-label={tile.label}
               style={{
-                width: on ? 18 : 6,
-                height: 6,
-                padding: 0,
-                border: 'none',
-                borderRadius: radius.full,
-                background: on ? color.text.primary : `color-mix(in srgb, ${color.text.primary} 28%, transparent)`,
-                cursor: 'pointer',
-                transition: 'width 200ms ease, background-color 200ms ease',
+                position: 'relative',
+                // A wallpaper is sized to the whole tile, border included (border-box): sized inside it, the
+                // 1px border strip showed the dark fill along the top and bottom.
+                background: tile.wall ? `${KIT_TILE} url(${KIT_DIR}/${tile.wall}.webp) center / cover no-repeat border-box` : KIT_TILE,
+                border: `1px solid ${KIT_BORDER}`,
+                borderRadius: CURVED_INNER,
+                padding: isMobile ? 20 : 32,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 16,
+                minWidth: 0,
+                overflow: 'hidden',
               }}
-            />
-          )
-        })}
-      </div>
-      {arrow(1)}
+            >
+              {tile.live === 'composer' ? <KitGlassComposer /> : null}
+              {tile.live === 'petals' ? <KitGlassPetals /> : null}
+              {tile.live === 'threads' ? <KitGlassThreads /> : null}
+              {tile.live === 'picker' ? <KitGlassPicker /> : null}
+              {tile.pieces?.map((piece) => (
+                <KitImg key={piece.id} piece={piece} />
+              ))}
+            </div>
+          ))}
+        </div>
+      ))}
     </div>
   )
 }
@@ -438,7 +301,7 @@ function CarouselArrows({ trackRef, state }: { trackRef: RefObject<HTMLDivElemen
 /** Step 2's media: the Code Connect template, on its own fixed dark, filling its cell. */
 function CodeConnectPane() {
   return (
-    <div style={{ background: KIT_FILL, height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ background: KIT_FILL, height: '100%', display: 'flex', flexDirection: 'column', borderRadius: 12, overflow: 'hidden' }}>
       <div
         style={{
           padding: `${space.md} ${space.xl}`,
@@ -451,7 +314,7 @@ function CodeConnectPane() {
           justifyContent: 'space-between',
         }}
       >
-        <span>SubagentCard.figma.ts</span>
+        <span>StatusChip.figma.ts · PR</span>
         <span style={{ color: '#24fe8a' }}>Synced</span>
       </div>
       <pre
@@ -482,14 +345,14 @@ function StorybookPane({ onZoom }: { onZoom: (item: Zoom) => void }) {
       type="button"
       onClick={() =>
         onZoom({
-          title: 'Storybook · Fork / Subagent card',
-          caption: 'Real React components rendered in Basic · Dark Neutral with live Controls.',
+          title: 'Storybook · Fork / Petal digest / Pull request states',
+          caption: 'A Petal’s asks for each pull request state, rendered by the real component in Flat Glass.',
           src: STORYBOOK_SHOT.src,
           alt: STORYBOOK_SHOT.alt,
         })
       }
       aria-label="Inspect Storybook screenshot full size"
-      style={{ position: 'relative', display: 'block', width: '100%', padding: 0, border: 'none', background: '#1b1b1d', cursor: 'zoom-in' }}
+      style={{ position: 'relative', display: 'block', width: '100%', padding: 0, border: 'none', background: '#1b1b1d', cursor: 'zoom-in', borderRadius: 12, overflow: 'hidden' }}
     >
       <img src={STORYBOOK_SHOT.src} alt={STORYBOOK_SHOT.alt} loading="lazy" decoding="async" style={{ display: 'block', width: '100%', height: 'auto', aspectRatio: STORYBOOK_SHOT.aspect }} />
       <InspectTag />
@@ -497,203 +360,262 @@ function StorybookPane({ onZoom }: { onZoom: (item: Zoom) => void }) {
   )
 }
 
-/** Between the kit's rows: apart enough to read as separate steps, close enough to read as one run. */
-const STEP_GAP = { desktop: 72, mobile: 48 }
+/** The design rules (`.fork/DESIGN-RULES.md` in the fork), grouped as the linter reports them. */
+const LINT_GROUPS = [
+  {
+    id: 'A',
+    title: 'Values come from tokens',
+    rules: ['Raw colors', 'Raw radii', 'Off-scale spacing', 'Raw type sizes', 'Arbitrary Tailwind values'],
+  },
+  {
+    id: 'B',
+    title: 'Reuse components',
+    rules: ['Restyled primitives', 'Hand-built menus and dialogs', 'Home-made status marks', 'Icons around the shim', 'Components without a story'],
+  },
+  {
+    id: 'C',
+    title: 'Theme CSS stays clean',
+    rules: ['Geometry on primitives', 'Cancelled paint', 'Tokens a theme leaves undefined', 'Heavy :has()', 'Dead selectors', 'Rules restated per theme'],
+  },
+] as const
 
-/** How far the tone pills sit off the tab and the band: the carousel's gutter. */
-const STEP_INSET_GAP = 8
-/** Each tone pill's corner: the cutout's concave 24 less the 8 the row keeps off it, so the first
-    pill's corner runs concentric with the curve where the tab meets the band. */
-const TONE_RADIUS = 24 - STEP_INSET_GAP
+const LINT_RULE_LINE = '1px solid rgba(255, 255, 255, 0.08)'
+
+/** The lint step's picture: the 16 rules in their three groups, under the check CI runs on every PR,
+    ending on its clean result (the linter blocks CI since custom ~a4881c2dce, and passes there).
+    Nov 26 2026: a CI-run version with sample findings was tried and dropped; the user liked the rules. */
+function DesignLintPane() {
+  return (
+    <div style={{ background: KIT_FILL, color: '#e8e8e8', display: 'flex', flexDirection: 'column', borderRadius: 12, overflow: 'hidden' }}>
+      <div
+        style={{
+          padding: `${space.md} ${space.xl}`,
+          borderBottom: LINT_RULE_LINE,
+          fontFamily: MONO,
+          fontSize: 12,
+          color: '#9a9a9a',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: space.md,
+        }}
+      >
+        <span>design-lint --check</span>
+        <span style={{ color: '#24fe8a', whiteSpace: 'nowrap' }}>Required on every PR</span>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: space.xl, padding: space.xl }}>
+        {LINT_GROUPS.map((group) => (
+          <div key={group.id} style={{ display: 'flex', flexDirection: 'column', gap: space.md, minWidth: 0 }}>
+            <span style={{ ...type['label-m'], color: '#f2f2f2' }}>{group.title}</span>
+            <ol style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {group.rules.map((rule, i) => (
+                <li key={rule} style={{ display: 'flex', gap: space.md, alignItems: 'baseline', fontSize: 14, lineHeight: 1.4, color: 'rgba(255, 255, 255, 0.72)' }}>
+                  <span style={{ fontFamily: MONO, fontSize: 12, color: '#24fe8a', flexShrink: 0, width: 20 }}>
+                    {group.id}
+                    {i + 1}
+                  </span>
+                  {rule}
+                </li>
+              ))}
+            </ol>
+          </div>
+        ))}
+      </div>
+      <div
+        style={{
+          padding: `${space.md} ${space.xl}`,
+          borderTop: LINT_RULE_LINE,
+          fontFamily: MONO,
+          fontSize: 12,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: space.md,
+          flexWrap: 'wrap',
+        }}
+      >
+        <span style={{ color: '#24fe8a' }}>✓ design-lint: clean.</span>
+        <span style={{ color: '#7a7a7a' }}>5 themes</span>
+      </div>
+    </div>
+  )
+}
+
+/** The four parts of the kit, a heading and a sentence each: Figma over the board, the other three under their panes. */
+/* The kit's numbers (read off the kit `kUDQTOR0ndxERlBCqgy3nk` and `apps/fork-storybook` at custom
+   `d01b458341`; recount when they move) sit with the part they count (Nov 26 2026): the user found
+   them floating as a row of six under the heading. */
+type KitStat = { value: string; label: string }
+/** A part's components split in two, the standard building blocks and no3y's own, each a small card (Nov 26 2026). */
+type KitSplit = { value: number; label: string; detail: string }
+// Storybook and Code Connect counted off custom 2d07bf6664 (Nov 26 2026): stories by folder
+// (`stories/components` standard, `stories/fork` no3y's, plus 4 foundations pages and their 14
+// stories), Code Connect mappings by the source each names (`components/ui` standard, the rest no3y's).
+const KIT_PARTS: readonly { heading: string; body: string; stats: readonly KitStat[]; split?: readonly KitSplit[] }[] = [
+  {
+    heading: 'Figma',
+    body: 'Agents read each component\'s styles off Storybook and the running app and built it as a native Figma component. One Theme collection holds all six theme modes, with Flat Glass as the default.',
+    stats: [
+      { value: '227', label: 'theme variables' },
+      { value: '6', label: 'theme modes' },
+      { value: '280', label: 'icons' },
+    ],
+  },
+  {
+    heading: 'Code Connect',
+    body: "Select a component in Figma and you see its real React code, so agents get the right imports when they read my designs. Keeping the two in sync is on purpose simple: agents update Figma when they change a component, and a Monday report lists anything that drifted for me to approve.",
+    stats: [{ value: '94', label: 'components mapped' }],
+    split: [
+      { value: 58, label: 'standard components', detail: 'Button, Select, Menu' },
+      { value: 36, label: 'no3y components', detail: 'Composer, thread cards, Petals' },
+    ],
+  },
+  {
+    heading: 'Storybook',
+    body: "Every story renders the real component with the app's own styles and themes, so Storybook can't drift from what ships.",
+    stats: [{ value: '435', label: 'stories' }],
+    split: [
+      { value: 48, label: 'standard components', detail: 'Button, Input, Menu, Dialog' },
+      { value: 44, label: 'no3y components', detail: 'Composer pills, Petals, model picker' },
+    ],
+  },
+  {
+    heading: 'Design lint',
+    body: 'The kit alone didn\'t stop drift, because the fork had the design lint turned off. Instead of freezing the old violations, I had agents fix all of them, checked every story before and after so nothing changed by accident, and made the lint block CI across the five main themes.',
+    stats: [{ value: '16', label: 'rules' }],
+  },
+]
+
+/** Out of the text column to the brand and Cinnabars pages' width, 48 clear of the window either side. */
+function WideBoard({ children }: { children: ReactNode }) {
+  const isMobile = useIsMobile()
+  if (isMobile) return <>{children}</>
+  const width = 'max(100%, min(1560px, calc(100vw - 96px)))'
+  return <div style={{ width, marginLeft: `calc((100% - ${width}) / 2)` }}>{children}</div>
+}
 
 /**
- * The Basic tone pills, tucked into the corner of the cutout beside the Figma tab, 8 off the tab
- * and 8 above the band, rounded to stay concentric with the curve between them; the picked one
- * filled. Picking one swaps every square in the carousel to that tone.
+ * `The kit, wired to code` (Nov 19 2026; one section since Nov 24): a heading with the kit's
+ * numbers, the components on one board (`KitBoard`) with the Figma copy under it, then (Nov 26 2026)
+ * Storybook, Code Connect and the design lint as a row of three off the board, each pane over its own
+ * copy. Until then all four parts' copy was one row over a board that held the three panes too. The
+ * rows before that, each part a tab over its own picture, are kept in
+ * ~/.t3-fork/scratch/no3y-capture/design-system/No3yDesignSystemStory.before-board.tsx.
  */
-function TonePills({ value, onChange }: { value: KitTone; onChange: (tone: KitTone) => void }) {
+function KitSection({ onZoom }: { onZoom: (item: Zoom) => void }) {
+  const isMobile = useIsMobile()
+  const part = (heading: string) => KIT_PARTS.find((p) => p.heading === heading)!
+  // Each pane with its own part (until Nov 26 2026 the parts were unpacked in the wrong order, so
+  // Storybook's picture carried Code Connect's caption and the reverse).
+  const panes = [
+    { part: part('Storybook'), pane: <StorybookPane onZoom={onZoom} /> },
+    { part: part('Code Connect'), pane: <CodeConnectPane /> },
+    { part: part('Design lint'), pane: <DesignLintPane /> },
+  ]
+  // The Figma copy keeps to the board's own width (zoomed to KIT_SCALE, up to the page's 1560 breakout), so
+  // they share edges. The row of panes keeps the width it had at the board's old 0.85 (1224), since
+  // its tiles of counts would wrap any narrower; it is centred on the same line.
+  const kitWidth = { width: '100%', maxWidth: KIT_BOARD_MAX * KIT_SCALE, marginInline: 'auto' } as const
+  const paneWidth = { width: '100%', maxWidth: 1224, marginInline: 'auto' } as const
   return (
-    <div role="radiogroup" aria-label="Basic tone" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: STEP_INSET_GAP }}>
-      {KIT_TONES.map((tone) => {
-        const on = tone.id === value
-        return (
-          <button
-            key={tone.id}
-            type="button"
-            role="radio"
-            aria-checked={on}
-            onClick={() => onChange(tone.id)}
+    <section style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? 32 : 48 }}>
+      <CurvedCopy heading="The kit, wired to code" body={KIT_INTRO} />
+      <WideBoard>
+        <div style={{ ...kitWidth, display: 'flex', flexDirection: 'column', gap: space.xl }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: space.sm }}>
+            <PartHeader part={part('Figma')} />
+            <PartBody part={part('Figma')} />
+          </div>
+          <KitBoard />
+        </div>
+      </WideBoard>
+      <WideBoard>
+        {isMobile ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 40 }}>
+            {panes.map(({ part: p, pane }) => (
+              <div key={p.heading} style={{ display: 'flex', flexDirection: 'column', gap: space.sm, minWidth: 0 }}>
+                <PartCards part={p} />
+                <div style={{ marginTop: space.md }}>{pane}</div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          // One grid, two rows: each part's cards (stretched so the three end level), then the panes on one line.
+          <div
             style={{
-              height: 48,
-              padding: `0 ${space.xl}`,
-              borderRadius: TONE_RADIUS,
-              border: `1px solid ${on ? 'transparent' : 'color-mix(in srgb, var(--color-text-primary) 18%, transparent)'}`,
-              background: on ? color.text.primary : 'transparent',
-              color: on ? color.bg.primary : color.text.secondary,
-              ...type['label-m'],
-              fontSize: 15,
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
-              transition: 'background-color 150ms ease, color 150ms ease',
+              ...paneWidth,
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+              gridTemplateRows: 'auto 1fr',
+              columnGap: space['2xl'],
             }}
           >
-            {tone.label}
-          </button>
-        )
-      })}
-    </div>
-  )
-}
-
-/** The picture's inset on its surface, as the curved cards hold their media. */
-const STEP_INSET = 8
-/** The widest a step's tab runs: its heading and one sentence. */
-const TAB_MAX = 440
-/** How far a wide band runs past each window edge, so its rounded ends are off screen. */
-const EDGE_OVERHANG = 48
-/** Fixed, so the surface's trace isn't redone on every render (`Interlock` measures on `areas`). */
-const STEP_AREAS = { mobile: ['tab', 'pic'], desktop: ['. tab .', 'pic pic pic'] }
-const STEP_AREAS_ASIDE = { mobile: ['tab', 'aside', 'pic'], desktop: ['. tab aside', 'pic pic pic'] }
-
-/**
- * One step of the kit as one surface, like the page's curved cards with the tab on top: the
- * heading and a sentence on a tab above the picture, joined to it and turning concave where it
- * meets the picture's top edge (`Interlock`). `wide` runs the picture's surface edge to edge across
- * the window, the tab kept on the column's left edge (so it turns concave on both sides) and the
- * picture told how far the window's edge is into the band, so its content starts the same inset off
- * the visible edge as off the band's foot. `below` sits under the picture on the page, centred.
- */
-function KitStep({
-  heading,
-  body,
-  wide = false,
-  below,
-  aside,
-  children,
-}: {
-  heading: string
-  body: string
-  wide?: boolean
-  below?: ReactNode
-  /** On the page in the cutout right of the tab, sitting on the picture's top edge (the tone pills). */
-  aside?: ReactNode
-  /** The picture; for `wide`, a function given how far into the band the window's edge is, so its
-      content can start the inset off the visible edge. */
-  children: ReactNode | ((columnInset: number) => ReactNode)
-}) {
-  const isMobile = useIsMobile()
-  const boxRef = useRef<HTMLDivElement>(null)
-  // Where the column sits in the window, to run the band edge to edge and seat the tab on the column.
-  const [box, setBox] = useState({ column: 0, left: 0, view: 0 })
-  useLayoutEffect(() => {
-    const el = boxRef.current
-    if (!el) return
-    const measure = () => {
-      // Layout offsets, not getBoundingClientRect: the chapter springs in on a transform
-      // (`Reveal`), and measuring mid-spring read the column scaled down, so the band was
-      // placed too far left and its first square met the window's edge.
-      let left = 0
-      for (let node: HTMLElement | null = el; node; node = node.offsetParent as HTMLElement | null) left += node.offsetLeft
-      const next = { column: el.offsetWidth, left, view: document.documentElement.clientWidth }
-      setBox((prev) => (prev.column === next.column && prev.left === next.left && prev.view === next.view ? prev : next))
-    }
-    measure()
-    const observer = new ResizeObserver(measure)
-    observer.observe(el)
-    window.addEventListener('resize', measure)
-    return () => {
-      observer.disconnect()
-      window.removeEventListener('resize', measure)
-    }
-  }, [])
-  // A wide band runs from past the window's left edge to past its right (its rounded ends off
-  // screen, so the dark reads end to end); `offset` is where the column starts inside it.
-  const runOff = wide && !isMobile
-  const offset = runOff ? box.left + EDGE_OVERHANG : 0
-  const band = runOff ? box.view + EDGE_OVERHANG * 2 : box.column
-  const tab = Math.round(Math.min(TAB_MAX, box.column * 0.5))
-  return (
-    <div ref={boxRef} style={{ display: 'flex', flexDirection: 'column', gap: space.lg }}>
-      <div style={{ width: band || '100%', marginLeft: -offset }}>
-        <Interlock
-          areas={aside ? (isMobile ? STEP_AREAS_ASIDE.mobile : STEP_AREAS_ASIDE.desktop) : isMobile ? STEP_AREAS.mobile : STEP_AREAS.desktop}
-          columns={isMobile ? 'minmax(0, 1fr)' : `${offset}px ${tab}px minmax(0, 1fr)`}
-          gap={0}
-        >
-          <Piece area="tab" pad={curvedInset(isMobile)} style={{ display: 'flex', flexDirection: 'column', gap: space.md }}>
-            <CurvedCopy heading={heading} body={body} />
-          </Piece>
-          {aside && (
-            // Off the surface: the page in the cutout, its pills sitting just above the band.
-            <Piece
-              area="aside"
-              off
-              style={{
-                display: 'flex',
-                alignItems: 'flex-end',
-                padding: isMobile ? `${space.lg} 0` : `0 0 ${STEP_INSET_GAP}px ${STEP_INSET_GAP}px`,
-              }}
-            >
-              {aside}
-            </Piece>
-          )}
-          <Piece area="pic" pad={STEP_INSET}>
-            {/* The band runs EDGE_OVERHANG past the window, so content starting that far in sits the
-                inset (8) off the window's edge, the same as off the band's foot. */}
-            {typeof children === 'function' ? children(runOff ? EDGE_OVERHANG : 0) : children}
-          </Piece>
-        </Interlock>
-      </div>
-      {below && <div style={{ display: 'flex', justifyContent: 'center' }}>{below}</div>}
-    </div>
-  )
-}
-
-/**
- * `The kit, wired to code` (Nov 19 2026): a heading with the kit's numbers under it, then Figma,
- * Code Connect and Storybook as plain rows on the page, each a heading and a sentence beside its
- * picture. Figma's picture is the components' carousel, running off the window's right edge with
- * its arrows and dots under it. (The bento it replaced is kept in
- * ~/.t3-fork/scratch/no3y-capture/design-system/No3yDesignSystemStory.kit-bento.tsx.)
- */
-function KitSteps({ onZoom }: { onZoom: (item: Zoom) => void }) {
-  const isMobile = useIsMobile()
-  const trackRef = useRef<HTMLDivElement>(null)
-  const [carousel, setCarousel] = useState<CarouselState>({ start: true, end: false, index: 0 })
-  const [tone, setTone] = useState<KitTone>('dark-neutral')
-  return (
-    <section style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? STEP_GAP.mobile : STEP_GAP.desktop }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: space['2xl'] }}>
-        <CurvedCopy heading="The kit, wired to code" />
-        <ProofStats />
-      </div>
-      <KitStep
-        heading="Figma"
-        body="I mirrored every CSS token into multi-mode Figma variables and rebuilt the components to the pixel of the running app."
-        wide
-        aside={<TonePills value={tone} onChange={setTone} />}
-        below={<CarouselArrows trackRef={trackRef} state={carousel} />}
-      >
-        {(inset) => <KitCarousel trackRef={trackRef} onEdges={setCarousel} onZoom={onZoom} inset={inset} tone={tone} />}
-      </KitStep>
-      <KitStep heading="Code Connect" body="Selecting a component in Figma's Dev Mode shows the real React call behind it.">
-        <div style={{ borderRadius: CURVED_INNER, overflow: 'hidden' }}>
-          <CodeConnectPane />
-        </div>
-      </KitStep>
-      <KitStep heading="Storybook" body="326 stories render the real React components in every theme.">
-        <div style={{ borderRadius: CURVED_INNER, overflow: 'hidden' }}>
-          <StorybookPane onZoom={onZoom} />
-        </div>
-      </KitStep>
+            {panes.map(({ part: p, pane }, i) => (
+              <Fragment key={p.heading}>
+                <div style={{ gridColumn: i + 1, gridRow: 1, minWidth: 0 }}>
+                  <PartCards part={p} />
+                </div>
+                <div style={{ gridColumn: i + 1, gridRow: 2, paddingTop: space.xl, minWidth: 0, alignSelf: 'start' }}>{pane}</div>
+              </Fragment>
+            ))}
+          </div>
+        )}
+      </WideBoard>
     </section>
+  )
+}
+
+/** A part's heading with its numbers on the same line: the figure large, its label small. */
+function PartHeader({ part }: { part: (typeof KIT_PARTS)[number] }) {
+  return (
+    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', justifyContent: 'space-between', columnGap: space.xl, rowGap: space.xs }}>
+      <span style={{ ...type['label-m'], fontSize: 16, color: color.text.primary }}>{part.heading}</span>
+      <span style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', columnGap: space.xl, rowGap: space.xs }}>
+        {part.stats.map((stat) => (
+          <span key={stat.label} style={{ display: 'inline-flex', alignItems: 'baseline', gap: 6 }}>
+            <span style={{ ...type['heading-m'], color: color.text.primary, fontVariantNumeric: 'tabular-nums' }}>{stat.value}</span>
+            <span style={{ ...type['body-s'], fontSize: 13, color: TEXT_SOFT }}>{stat.label}</span>
+          </span>
+        ))}
+      </span>
+    </div>
+  )
+}
+
+/** A part's sentence (Figma's, over the board). */
+function PartBody({ part }: { part: (typeof KIT_PARTS)[number] }) {
+  return <p style={{ ...type['body-s'], margin: 0, fontSize: 14, lineHeight: 1.5, color: TEXT_SOFT, maxWidth: 560 }}>{part.body}</p>
+}
+
+/** The tile look the part cards share: the page's light tint, rounded, padded. */
+const PART_TILE = { padding: space.lg, borderRadius: radius.lg, background: 'var(--color-bg-tint)' } as const
+
+/**
+ * A pane's part as tiles (Nov 26 2026): its heading, numbers and sentence in one tile across the
+ * top, and where it splits its count, a tile per side under it (the count on top, what it is under
+ * it). The tiles fill their grid cell's height, so the three parts' tiles end level.
+ */
+function PartCards({ part }: { part: (typeof KIT_PARTS)[number] }) {
+  return (
+    <div style={{ height: '100%', display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gridTemplateRows: part.split ? '1fr auto' : '1fr', gap: space.sm }}>
+      <div style={{ ...PART_TILE, gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', gap: space.sm }}>
+        <PartHeader part={part} />
+        <p style={{ ...type['body-s'], margin: 0, fontSize: 14, lineHeight: 1.5, color: TEXT_SOFT }}>{part.body}</p>
+      </div>
+      {part.split?.map((side) => (
+        <div key={side.label} style={{ ...PART_TILE, display: 'flex', flexDirection: 'column', gap: space.xs }}>
+          <span style={{ ...type['heading-m'], color: color.text.primary, fontVariantNumeric: 'tabular-nums' }}>{side.value}</span>
+          <span style={{ ...type['label-m'], color: color.text.primary }}>{side.label}</span>
+          <span style={{ ...type['body-s'], fontSize: 13, lineHeight: 1.45, color: TEXT_SOFT }}>{side.detail}</span>
+        </div>
+      ))}
+    </div>
   )
 }
 
 /**
  * The design-system chapter. The opening curved card holds the three-theme slider with the story on
- * its tab; then the kit's heading and numbers, and Figma, Code Connect and Storybook as plain rows
- * (`KitSteps`).
+ * its tab; then the kit's heading, numbers and four parts over one board (`KitSection`).
  */
 export default function No3yDesignSystemStory({ compare }: { compare?: ComponentProps<typeof CompareSlider> }) {
   const isMobile = useIsMobile()
@@ -708,7 +630,7 @@ export default function No3yDesignSystemStory({ compare }: { compare?: Component
         copy={<CurvedCopy heading="Themes & the design system" body={STORY_INTRO} />}
       />
 
-      <KitSteps onZoom={setZoom} />
+      <KitSection onZoom={setZoom} />
 
       <Lightbox item={zoom} onClose={() => setZoom(null)} />
     </div>

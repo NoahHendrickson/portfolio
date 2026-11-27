@@ -212,6 +212,23 @@ const brand: WorkCard = {
   },
 }
 
+/**
+ * Cinnabar Sans (`/work/cinnabar-sans`, Nov 25 2026): a hand-built page with no
+ * `projects` entry. The card is the font's own lowercase g at Medium, cream on
+ * cinnabar red, drawn from the variable font's outline (fontTools) rather than
+ * set as text, so it is the real shape at any size.
+ */
+const cinnabar: WorkCard = {
+  href: '/work/cinnabar-sans',
+  tags: ['Type design', 'Tool building'],
+  title: 'Cinnabar Sans',
+  subtitle: 'My typeface, and the tool I built to edit it',
+  art: {
+    src: '/work/cinnabar/card.svg',
+    alt: 'Cinnabar Sans: a large lowercase g at Medium, cream on cinnabar red',
+  },
+}
+
 const nachoBox: WorkCard = {
   href: '/work/nacho-box',
   tags: ['Packaging', 'Print'],
@@ -259,7 +276,7 @@ export type WorkFilter = 'all' | 'fun' | 'career' | 'graphic'
 
 const SECTIONS: { id: Exclude<WorkFilter, 'all'>; label: string; cards: WorkCard[] }[] = [
   { id: 'career', label: 'Case studies', cards: [onboarding, synapse, apply] },
-  { id: 'fun', label: 'Personal projects', cards: [crisp, no3y, statBuilder, thinkingStates] },
+  { id: 'fun', label: 'Personal projects', cards: [crisp, no3y, statBuilder, thinkingStates, cinnabar] },
   { id: 'graphic', label: 'Graphic design', cards: [brand, pixelArt, nachoBox, howToPc] },
 ]
 

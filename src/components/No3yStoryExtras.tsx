@@ -1,10 +1,11 @@
-import { useState, useSyncExternalStore, type CSSProperties, type ReactNode } from 'react'
+import { useSyncExternalStore, type CSSProperties, type ReactNode } from 'react'
 import { CurvedCopy } from './Curved'
 import { Interlock, Piece } from './Interlock'
-import { color, radius, space, type } from '../design-system/tokens'
+import { color, space, type } from '../design-system/tokens'
 import { useIsMobile } from '../hooks/useIsMobile'
 import { CURVED_INNER, LEADING, TEXT_SOFT, curvedInset } from '../sheetStyle'
-import type { Prose } from '../data/projects'
+import type { LandingVideo, Prose } from '../data/projects'
+import { SheetClip } from './Sheet'
 import { getTheme, subscribeToTheme } from '../theme'
 
 export type WorkflowFeature = {
@@ -22,11 +23,11 @@ export type ComposerStateItem = {
   label: string
   caption: string
   media: ReactNode
+  /** Spans two rows of the grid (desktop), for a tall shot with two short ones stacked beside it. */
+  tall?: boolean
 }
 
 /** The bento's gutter and corners, as on the Cinnabars page: every corner 24, every notch 32. */
-/** How far (in 24ths of the column) the composer card's two pieces sit off each other. */
-const COMPOSER_SHIFT = 3
 const BENTO_GAP = 8
 const BENTO_RADIUS = 24
 /** The frame: the dark page's ink-black on the cream page, a lighter charcoal on the dark page so the box still stands off it. */
@@ -123,171 +124,137 @@ export function ParallelWorkflowCard({ features }: { features: WorkflowFeature[]
   )
 }
 
-function RadioDot({ on }: { on: boolean }) {
-  return (
-    <span
-      aria-hidden
-      style={{
-        flex: '0 0 14px',
-        width: 14,
-        height: 14,
-        borderRadius: '50%',
-        border: `1.5px solid ${on ? color.text.primary : color.border.default}`,
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginTop: 3,
-        transition: 'border-color 150ms ease',
-      }}
-    >
-      <span
-        style={{
-          width: 6,
-          height: 6,
-          borderRadius: '50%',
-          background: color.text.primary,
-          opacity: on ? 1 : 0,
-          transform: on ? 'scale(1)' : 'scale(0.5)',
-          transition: 'opacity 150ms ease, transform 150ms ease',
-        }}
-      />
-    </span>
-  )
-}
+/** The app's own panel colour, read off the close-ups, so a shorter shot's box fills in unseen. */
+const COMPOSER_PANEL = '#1d1d1d'
 
 /**
- * Prototype B's rethink of the 6-tile micro-UX collage: focuses on the composer — the one bar
- * you touch every minute — with a locked 680:380 stage that cross-fades cleanly across its four
- * interactive popover/prompt states, with local dictation under it, the two offset on one surface.
+ * "Inside the composer" (Nov 24 2026): the composer close-ups as a plain grid, two to a row (one on
+ * a phone), each shot in a rounded box of the app's panel colour with its label and caption under
+ * it. A row's boxes match heights, the shorter shot sitting on the box's floor so the composers in
+ * a row line up. It replaced a cross-fading stage with a list of states beside it.
  */
-export function ComposerShowcase({
-  states,
-  dictation,
-}: {
-  states: ComposerStateItem[]
-  dictation?: { media: ReactNode; caption: string }
-}) {
+export function ComposerShowcase({ states }: { states: ComposerStateItem[] }) {
   const isMobile = useIsMobile()
-  const [activeId, setActiveId] = useState(states[0]?.id ?? '')
-  const current = states.find((item) => item.id === activeId) ?? states[0]
-  if (!current) return null
-
-  const stage = (
-    <div
-      style={{
-        display: 'grid',
-        borderRadius: CURVED_INNER,
-        overflow: 'hidden',
-      }}
-    >
-      {states.map((item) => {
-        const on = item.id === current.id
-        return (
-          <div
-            key={item.id}
-            aria-hidden={!on}
-            style={{
-              gridArea: '1 / 1',
-              opacity: on ? 1 : 0,
-              pointerEvents: on ? 'auto' : 'none',
-              transition: 'opacity 180ms ease',
-            }}
-          >
-            {item.media}
-          </div>
-        )
-      })}
-    </div>
-  )
-
-  const controls = (
-    <div role="tablist" aria-label="Composer states" style={{ display: 'flex', flexDirection: 'column', gap: space.sm }}>
-      {states.map((item) => {
-        const on = item.id === current.id
-        return (
-          <button
-            key={item.id}
-            type="button"
-            role="tab"
-            aria-selected={on}
-            onClick={() => setActiveId(item.id)}
-            style={{
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: space.md,
-              padding: `${space.md} ${space.lg}`,
-              borderRadius: radius.lg,
-              border: `1px solid ${on ? color.border.default : 'transparent'}`,
-              background: on ? 'color-mix(in srgb, var(--color-text-primary) 7%, transparent)' : 'transparent',
-              textAlign: 'left',
-              cursor: 'pointer',
-              font: 'inherit',
-              transition: 'background-color 150ms ease, border-color 150ms ease',
-            }}
-          >
-            <RadioDot on={on} />
-            <span style={{ display: 'flex', flexDirection: 'column', gap: 3, minWidth: 0 }}>
-              <span
-                style={{
-                  ...type['label-m'],
-                  color: on ? color.text.primary : color.text.secondary,
-                  lineHeight: LEADING,
-                }}
-              >
-                {item.label}
-              </span>
-              <span
-                style={{
-                  ...type['body-s'],
-                  color: TEXT_SOFT,
-                  opacity: on ? 1 : 0.78,
-                  lineHeight: LEADING,
-                }}
-              >
-                {item.caption}
-              </span>
-            </span>
-          </button>
-        )
-      })}
-    </div>
-  )
-
-  const pad = curvedInset(isMobile)
-  // Two pieces of one surface (Nov 19 2026): the composer's states nudged right, dictation nudged
-  // left, overlapping in the middle, so the surface steps between them on concave curves.
-  const span = (name: string, n: number) => Array(n).fill(name).join(' ')
-  const areas = isMobile
-    ? ['top', ...(dictation ? ['dict'] : [])]
-    : [`${span('.', COMPOSER_SHIFT)} ${span('top', 24 - COMPOSER_SHIFT)}`, ...(dictation ? [`${span('dict', 24 - COMPOSER_SHIFT)} ${span('.', COMPOSER_SHIFT)}`] : [])]
+  if (states.length === 0) return null
   return (
-    <Interlock areas={areas} columns={isMobile ? 'minmax(0, 1fr)' : 'repeat(24, minmax(0, 1fr))'}>
-      <Piece area="top" pad={pad} style={{ display: 'flex', flexDirection: 'column', gap: space['2xl'] }}>
+    <Interlock areas={['top']} columns="minmax(0, 1fr)">
+      <Piece area="top" pad={curvedInset(isMobile)} style={{ display: 'flex', flexDirection: 'column', gap: space['2xl'] }}>
         <CurvedCopy
           heading="Inside the composer"
-          body="Most of your day in an agent app happens inside one bar, so I sweated the micro-interactions around it: checking limits, picking models, queuing follow-ups, answering clarifying questions inline, and dictating locally."
+          body="Most of your day in an agent app happens inside one bar, so I sweated the micro-interactions around it: keeping an eye on background work, subagents and pull requests, picking models, checking usage limits, queuing follow-ups, answering clarifying questions inline, and dictating locally."
         />
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: isMobile ? 'minmax(0, 1fr)' : 'minmax(0, 1.55fr) minmax(0, 1fr)',
-            gap: isMobile ? space.lg : space['2xl'],
-            alignItems: 'center',
+            gridTemplateColumns: isMobile ? 'minmax(0, 1fr)' : 'repeat(2, minmax(0, 1fr))',
+            gap: isMobile ? space.xl : `${space['2xl']} ${space.lg}`,
           }}
         >
-          {stage}
-          {controls}
+          {states.map((item) => (
+            <figure
+              key={item.id}
+              style={{ margin: 0, minWidth: 0, display: 'flex', flexDirection: 'column', gap: space.md, gridRow: item.tall && !isMobile ? 'span 2' : undefined }}
+            >
+              <div
+                style={{
+                  flex: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'flex-end',
+                  background: COMPOSER_PANEL,
+                  borderRadius: CURVED_INNER,
+                  overflow: 'hidden',
+                }}
+              >
+                {item.media}
+              </div>
+              <figcaption style={{ display: 'flex', flexDirection: 'column', gap: 3, padding: `0 ${space.xs}` }}>
+                <span style={{ ...type['label-m'], color: color.text.primary, lineHeight: LEADING }}>{item.label}</span>
+                <span style={{ ...type['body-s'], color: TEXT_SOFT, lineHeight: LEADING }}>{item.caption}</span>
+              </figcaption>
+            </figure>
+          ))}
         </div>
       </Piece>
-      {dictation && (
-        <Piece area="dict" pad={pad} style={{ display: 'flex', flexDirection: 'column', gap: space.md }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', justifyContent: 'space-between', gap: space.sm }}>
-            <span style={{ ...type['label-m'], color: color.text.primary }}>Local dictation</span>
-            <span style={{ ...type['body-s'], color: TEXT_SOFT }}>{dictation.caption}</span>
-          </div>
-          <div style={{ borderRadius: CURVED_INNER, overflow: 'hidden' }}>{dictation.media}</div>
-        </Piece>
-      )}
+    </Interlock>
+  )
+}
+
+export type PhoneScreen = {
+  id: string
+  label: string
+  caption: string
+  /** A full iPhone screenshot (1206 × 2622 at 3x), with a half-width cut beside it. */
+  src: string
+  srcHalf: string
+  alt: string
+  /** A screen recording in place of the still (the still's `src` is then unused). */
+  video?: LandingVideo
+}
+
+/** The iPhone 18 Pro's screen: 402 × 874 points, its corners about 55 points round. */
+const PHONE_ASPECT = '1206 / 2622'
+const PHONE_CORNER = '13.7% / 6.3%'
+
+/**
+ * "On your phone" (Nov 26 2026): the iPhone app's thread screen and its model picker, captured off
+ * a simulator build of the capture checkout paired to the offline mock studio (scene `ios-thread`),
+ * screens side by side (one at a time on a phone), each cut to the screen's own corners with its
+ * label and caption under it, like the composer grid. A screen can be a recording (the model picker
+ * since the same day, in place of its two stills).
+ */
+export function PhoneShowcase({ screens }: { screens: PhoneScreen[] }) {
+  const isMobile = useIsMobile()
+  if (screens.length === 0) return null
+  return (
+    <Interlock areas={['top']} columns="minmax(0, 1fr)">
+      <Piece area="top" pad={curvedInset(isMobile)} style={{ display: 'flex', flexDirection: 'column', gap: space['2xl'] }}>
+        <CurvedCopy
+          heading="On your phone"
+          body="The iPhone app carries the same threads. The pills over the composer show the pull request and the subagents at a glance, follow-ups queue while the agent works, and the model and its reasoning are one sheet away."
+        />
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: isMobile ? 'minmax(0, 1fr)' : `repeat(${screens.length}, minmax(0, 1fr))`,
+            gap: space['2xl'],
+            justifyItems: 'center',
+          }}
+        >
+          {screens.map((screen) => (
+            <figure key={screen.id} style={{ margin: 0, width: '100%', maxWidth: 340, display: 'flex', flexDirection: 'column', gap: space.md }}>
+              <div
+                style={{
+                  width: '100%',
+                  aspectRatio: PHONE_ASPECT,
+                  borderRadius: PHONE_CORNER,
+                  overflow: 'hidden',
+                  boxShadow: '0 0 0 1px rgb(255 255 255 / 0.08), 0 18px 40px -16px rgb(0 0 0 / 0.45)',
+                  background: COMPOSER_PANEL,
+                }}
+              >
+                {screen.video ? (
+                  <SheetClip video={screen.video} />
+                ) : (
+                  <img
+                    src={screen.src}
+                    srcSet={`${screen.srcHalf} 603w, ${screen.src} 1206w`}
+                    sizes="auto, (max-width: 700px) 90vw, 340px"
+                    alt={screen.alt}
+                    loading="lazy"
+                    decoding="async"
+                    style={{ display: 'block', width: '100%', height: '100%' }}
+                  />
+                )}
+              </div>
+              <figcaption style={{ display: 'flex', flexDirection: 'column', gap: 3, padding: `0 ${space.xs}` }}>
+                <span style={{ ...type['label-m'], color: color.text.primary, lineHeight: LEADING }}>{screen.label}</span>
+                <span style={{ ...type['body-s'], color: TEXT_SOFT, lineHeight: LEADING }}>{screen.caption}</span>
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      </Piece>
     </Interlock>
   )
 }
